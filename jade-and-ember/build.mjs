@@ -23,16 +23,21 @@ const seal = `<span class="seal" lang="zh-Hans" aria-hidden="true"><span>${esc(c
 const heat = (n) => (n ? `<span class="heat" role="img" aria-label="Heat ${n} of 3">${[1, 2, 3].map((i) => `<i class="${i <= n ? 'on' : ''}"></i>`).join('')}</span>` : '');
 const nav = c.nav.map((n) => `<li><a href="${esc(n.href)}">${esc(n.label)}</a></li>`).join('');
 
-const sig = c.signature.items.map((d, i) => `
-      <article class="dish dish-${i + 1}">
-        <figure class="dish-fig"><img src="${esc(d.image)}" alt="${esc(d.alt)}" width="1200" height="800" loading="lazy" decoding="async"></figure>
-        <div class="dish-body">
-          <p class="dish-no" aria-hidden="true">0${i + 1}</p>
+const sig = c.signature.items.map((d, i) => {
+  const fig = `<figure class="dish-fig"><img src="${esc(d.image)}" alt="${esc(d.alt)}" width="1200" height="800" loading="lazy" decoding="async" style="--pos:${esc(d.focus || '50% 50%')}"></figure>`;
+  const text = `<div class="wrap dish-text">
           <h3>${esc(d.name)}</h3>
-          <p>${esc(d.text)}</p>
+          <p class="dish-desc">${esc(d.text)}</p>
           <p class="dish-meta"><span class="price">${money(d.price)}</span>${heat(d.heat)}<span class="tag">${esc(d.tag)}</span></p>
-        </div>
-      </article>`).join('');
+        </div>`;
+  // The second plate puts its text above the frame so the three do not repeat the same picture-then-caption rhythm.
+  return `
+      <article class="dish dish-${i + 1}">
+        ${i === 1 ? `${text}
+        ${fig}` : `${fig}
+        ${text}`}
+      </article>`;
+}).join('');
 
 const cats = c.menu.categories;
 const tabs = cats.map((k) => `<li><a class="tab" id="tab-${esc(k.id)}" href="#cat-${esc(k.id)}">${esc(k.name)}</a></li>`).join('');
@@ -60,8 +65,8 @@ ${c.meta.robots ? `<meta name="robots" content="${esc(c.meta.robots)}">` : ''}
 <meta property="og:description" content="${esc(c.meta.description)}">
 <meta property="og:type" content="website">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' fill='%230f1110'/%3E%3Ccircle cx='16' cy='16' r='7' fill='none' stroke='%237fb9a2' stroke-width='2.5'/%3E%3Ccircle cx='16' cy='16' r='2.6' fill='%23e2803a'/%3E%3C/svg%3E">
-<link rel="preload" as="font" type="font/woff2" href="fonts/instrument-serif-latin-400-normal.woff2" crossorigin>
-<link rel="preload" as="font" type="font/woff2" href="fonts/hanken-grotesk-latin-400-normal.woff2" crossorigin>
+<link rel="preload" as="font" type="font/woff2" href="fonts/young-serif-latin-400-normal.woff2" crossorigin>
+<link rel="preload" as="font" type="font/woff2" href="fonts/karla-latin-400-normal.woff2" crossorigin>
 <link rel="preload" as="image" href="${esc(h.image.mobile)}" media="(max-aspect-ratio: 1/1) and (max-width: 959px)" fetchpriority="high">
 <link rel="preload" as="image" href="${esc(h.image.desktop)}" media="(min-aspect-ratio: 1.0001/1), (min-width: 960px)" fetchpriority="high">
 <link rel="stylesheet" href="styles.css">
@@ -75,7 +80,7 @@ ${c.meta.robots ? `<meta name="robots" content="${esc(c.meta.robots)}">` : ''}
     <a class="brand" href="#top">${seal}<span class="brand-name">${esc(c.brand.name)}</span></a>
     <button class="nav-toggle" type="button" aria-expanded="false" aria-controls="site-nav"><span>Menu</span></button>
     <nav class="site-nav" id="site-nav" aria-label="Primary"><ul>${nav}<li class="nav-order"><a href="${orderHref}"${orderAttrs}>${orderLabel}</a></li></ul></nav>
-    ${orderLink('btn-ember btn-sm top-cta')}
+    ${orderLink('btn-sm top-cta')}
   </div>
 </header>
 
@@ -92,34 +97,33 @@ ${c.meta.robots ? `<meta name="robots" content="${esc(c.meta.robots)}">` : ''}
       <p class="eyebrow">${esc(h.eyebrow)}</p>
       <h1 id="hero-title">${h.headline.map((l) => `<span>${esc(l)}</span>`).join(' ')}</h1>
       <p class="hero-text">${esc(h.text)}</p>
-      <p class="hero-actions"><a class="btn btn-ember" href="${esc(h.primaryCta.href)}">${esc(h.primaryCta.label)}</a> ${orderLink('btn-line hero-order')}</p>
+      <p class="hero-actions"><a class="btn btn-ember" href="${esc(h.primaryCta.href)}">${esc(h.primaryCta.label)}</a> ${orderLink('hero-order')}</p>
     </div>
     <p class="hero-caption"><span class="vh">Pictured: </span>${esc(h.caption)}<span class="vh">. AI-generated concept image and video.</span></p>
     <button class="pause" type="button" aria-pressed="false" hidden><span class="pause-ico" aria-hidden="true"></span><span class="pause-txt">Pause motion</span></button>
   </section>
 
-  <section class="intro" aria-labelledby="intro-title">
-    <div class="wrap intro-grid">
-      <p class="label">${esc(c.intro.label)}</p>
-      <h2 id="intro-title" class="intro-line">${esc(c.intro.text)}</h2>
-      <p class="intro-body">${esc(c.intro.body)}</p>
-      <ol class="elements">${c.intro.items.map((it, i) => `
-        <li><span class="el-no" aria-hidden="true">0${i + 1}</span><h3>${esc(it.name)}</h3><p>${esc(it.text)}</p></li>`).join('')}
+  <section class="process" aria-labelledby="process-title">
+    <div class="wrap process-grid">
+      <h2 id="process-title" class="process-line">${esc(c.intro.text)}</h2>
+      <p class="process-body">${esc(c.intro.body)}</p>
+      <ol class="steps">${c.intro.items.map((it, i) => `
+        <li><h3><span class="step-no" aria-hidden="true">${i + 1}</span>${esc(it.name)}</h3><p>${esc(it.text)}</p></li>`).join('')}
       </ol>
     </div>
   </section>
 
   <section class="signature" id="signature" aria-labelledby="sig-title">
     <div class="wrap">
-      <header class="sec-head"><p class="label">${esc(c.signature.label)}</p><h2 id="sig-title">${esc(c.signature.heading)}</h2></header>
-      <div class="dishes">${sig}
-      </div>
+      <header class="sec-head"><h2 id="sig-title">${esc(c.signature.heading)}</h2></header>
+    </div>
+    <div class="dishes">${sig}
     </div>
   </section>
 
   <section class="menu" id="menu" aria-labelledby="menu-title">
     <div class="wrap menu-grid">
-      <header class="sec-head"><p class="label">${esc(c.menu.label)}</p><h2 id="menu-title">${esc(c.menu.heading)}</h2></header>
+      <header class="sec-head"><h2 id="menu-title">${esc(c.menu.heading)}</h2></header>
       <div class="menu-main">
         <div class="menu-bar">
           <ul class="tabs" aria-label="Menu categories">${tabs}</ul>
@@ -134,20 +138,20 @@ ${c.meta.robots ? `<meta name="robots" content="${esc(c.meta.robots)}">` : ''}
   </section>
 
   <section class="story" id="story" aria-labelledby="story-title">
-    <div class="wrap story-grid">
-      <p class="label">${esc(c.story.label)}</p>
-      <h2 id="story-title" class="pull">${esc(c.story.pull)}</h2>
-      <div class="story-text">${c.story.paragraphs.map((p, i) => `<p${i === c.story.paragraphs.length - 1 ? ' class="story-coda"' : ''}>${esc(p)}</p>`).join('')}</div>
-      <figure class="story-fig">
-        <img src="${esc(c.story.image.src)}" alt="${esc(c.story.image.alt)}" width="${c.story.image.width}" height="${c.story.image.height}" loading="lazy" decoding="async">
-        <figcaption>${esc(c.story.caption)}</figcaption>
-      </figure>
+    <div class="wrap story-head"><h2 id="story-title" class="pull">${esc(c.story.pull)}</h2></div>
+    <figure class="story-fig">
+      <img src="${esc(c.story.image.src)}" alt="${esc(c.story.image.alt)}" width="${c.story.image.width}" height="${c.story.image.height}" loading="lazy" decoding="async">
+      <figcaption class="wrap">${esc(c.story.caption)}</figcaption>
+    </figure>
+    <div class="wrap story-body">
+      <div class="story-text">${c.story.paragraphs.slice(0, -1).map((p) => `<p>${esc(p)}</p>`).join('')}</div>
+      <p class="story-coda">${esc(c.story.paragraphs[c.story.paragraphs.length - 1])}</p>
     </div>
   </section>
 
   <section class="visit" id="visit" aria-labelledby="visit-title">
     <div class="wrap visit-grid">
-      <header class="sec-head"><p class="label">${esc(c.visit.label)}</p><h2 id="visit-title">${esc(c.visit.heading)}</h2></header>
+      <header class="sec-head"><h2 id="visit-title">${esc(c.visit.heading)}</h2></header>
       <div class="visit-where">
         <p class="sample-flag">${esc(c.visit.fictionalNote)}</p>
         <address>${c.visit.address.map(esc).join('<br>')}<br><span class="phone">${esc(c.visit.phone.display)}</span> <span class="sample-inline">(sample number)</span></address>
@@ -160,13 +164,12 @@ ${c.meta.robots ? `<meta name="robots" content="${esc(c.meta.robots)}">` : ''}
   <section class="order" id="order" aria-labelledby="order-title">
     <div class="wrap order-grid">
       <div>
-        <p class="label">${esc(c.order.label)}</p>
         <h2 id="order-title">${esc(c.order.heading)}</h2>
         <p class="order-text">${esc(c.order.text)}</p>
-        <p class="order-actions">${live ? orderLink('btn-ember') : `<span class="btn btn-ember btn-off">${esc(ordering.label)} — example only</span>`}</p>
+        <p class="order-actions">${live ? orderLink('btn-ember') : `<span class="btn btn-off">${esc(ordering.label)} (example)</span>`}</p>
       </div>
       <div class="order-note"${live ? ' hidden' : ''}>
-        <p class="note-title">Nonfunctional example</p>
+        <p class="note-title">For restaurant owners</p>
         <p>${esc(ordering.demoNote)}</p>
         <p>${esc(ordering.platformNote)}</p>
       </div>
@@ -178,7 +181,7 @@ ${c.meta.robots ? `<meta name="robots" content="${esc(c.meta.robots)}">` : ''}
   <div class="wrap foot-grid">
     <p class="foot-brand">${seal}<span>${esc(c.brand.name)}</span> <span class="foot-desc">${esc(c.brand.descriptor)}</span></p>
     <p class="foot-disc">${esc(c.disclosure.footer)}</p>
-    <p class="foot-meta"><a href="${esc(c.disclosure.backHref)}">${esc(c.disclosure.backLabel)}</a> · <a href="${esc(c.footer.builtByHref)}">${esc(c.footer.builtBy)}</a><br>${esc(c.footer.stamp)}</p>
+    <p class="foot-meta"><a href="${esc(c.disclosure.backHref)}">${esc(c.disclosure.backLabel)}</a><a href="${esc(c.footer.builtByHref)}">${esc(c.footer.builtBy)}</a><span>${esc(c.footer.stamp)}</span></p>
   </div>
 </footer>
 <script src="site.js" defer></script>

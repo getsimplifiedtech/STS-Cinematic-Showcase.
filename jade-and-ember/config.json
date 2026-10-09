@@ -2,7 +2,7 @@
   "lang": "en",
   "brand": {
     "name": "Jade & Ember",
-    "descriptor": "Modern Chinese Kitchen",
+    "descriptor": "Modern Chinese kitchen",
     "seal": [
       "玉",
       "火"
@@ -12,7 +12,7 @@
   "meta": {
     "title": "Jade & Ember — Modern Chinese Kitchen (fictional concept by STS)",
     "description": "Jade & Ember is a fictional modern Chinese kitchen: a cinematic restaurant website concept by Simplified Tech Solutions. Sample menu, hours and address.",
-    "themeColor": "#0f1110",
+    "themeColor": "#12302a",
     "robots": "noindex, nofollow"
   },
   "disclosure": {
@@ -20,7 +20,7 @@
     "footer": "Jade & Ember is a fictional restaurant created by Simplified Tech Solutions as a website design concept. It does not exist. All menu items, prices, the address, the phone number and the opening hours are invented samples. Food imagery and the hero video are AI-generated concept media and do not depict real dishes served by any restaurant.",
     "backLabel": "Back to the STS showcase",
     "backHref": "../",
-    "barShort": "Fictional restaurant · STS design concept.",
+    "barShort": "Fictional restaurant. STS design concept.",
     "backShort": "STS showcase"
   },
   "ordering": {
@@ -48,7 +48,7 @@
     }
   ],
   "hero": {
-    "eyebrow": "Modern Chinese Kitchen",
+    "eyebrow": "Modern Chinese kitchen",
     "headline": [
       "The breath",
       "of the wok."
@@ -79,7 +79,6 @@
     }
   },
   "intro": {
-    "label": "Wok hei",
     "text": "Heat is the ingredient.",
     "body": "Wok hei, the breath of the wok, is the smoky, singed sweetness that only comes from food moving fast over a very hot flame. Four things make it, and we cook around all of them.",
     "items": [
@@ -102,8 +101,7 @@
     ]
   },
   "signature": {
-    "label": "Signature",
-    "heading": "Three plates we are known for.",
+    "heading": "Order these first.",
     "items": [
       {
         "id": "mapo",
@@ -113,7 +111,8 @@
         "text": "Silken tofu in red chili oil, fermented bean paste and numbing Sichuan pepper. Served with steamed rice.",
         "price": 18,
         "tag": "Contains soy",
-        "heat": 3
+        "heat": 3,
+        "focus": "50% 58%"
       },
       {
         "id": "charsiu",
@@ -122,7 +121,8 @@
         "name": "Char Siu",
         "text": "Pork shoulder lacquered in maltose and five-spice, roasted until the edges blacken and caramelise.",
         "price": 24,
-        "tag": "Contains pork"
+        "tag": "Contains pork",
+        "focus": "58% 52%"
       },
       {
         "id": "dandan",
@@ -132,12 +132,12 @@
         "text": "Wheat noodles, spiced pork, sesame paste and chili oil, finished with crushed peanut and scallion.",
         "price": 17,
         "tag": "Contains peanuts, sesame",
-        "heat": 2
+        "heat": 2,
+        "focus": "50% 60%"
       }
     ]
   },
   "menu": {
-    "label": "Menu",
     "heading": "Sample menu",
     "note": "Sample menu with invented prices in fictional dollars. Heat: one to three dots, from warm to fierce. Please tell us about allergies when ordering: peanuts, sesame, soy, wheat, shellfish and egg appear throughout.",
     "categories": [
@@ -313,7 +313,6 @@
     ]
   },
   "story": {
-    "label": "Story",
     "pull": "A small kitchen, one very hot wok.",
     "paragraphs": [
       "Jade & Ember began as a question about a single flame: what if a dining room felt like standing beside a wok at full heat, without the noise or the smoke?",
@@ -329,8 +328,7 @@
     }
   },
   "visit": {
-    "label": "Visit",
-    "heading": "Find us. (Sample details.)",
+    "heading": "Find us (sample details)",
     "fictionalNote": "Fictional address, phone number and hours. Please do not travel or call.",
     "address": [
       "88 Example Street",
@@ -365,13 +363,12 @@
     ]
   },
   "order": {
-    "label": "Order",
     "heading": "Dinner, to go.",
     "text": "Choose from the full menu and collect it hot from the pass."
   },
   "footer": {
     "builtBy": "Website concept by Simplified Tech Solutions",
     "builtByHref": "https://getsimplifiedtech.com/",
-    "stamp": "Concept v0.4 — hero loop on desktop widths only (concept footage)"
+    "stamp": "Concept v0.5. Hero loop on desktop widths only (concept footage)."
   }
 }

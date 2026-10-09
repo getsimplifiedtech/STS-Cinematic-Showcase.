@@ -56,6 +56,7 @@ for (const [w, h] of viewports) {
 
   for (const [phase, delay] of phases) {
     if (hasVideo) {
+      await page.waitForFunction(() => Number.isFinite(document.querySelector('.hero-video').duration), null, { timeout: 8000 });
       await page.evaluate(async (f) => {
         const v = document.querySelector('.hero-video');
         v.currentTime = Math.min(v.duration - 0.05, f * v.duration);

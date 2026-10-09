@@ -1,8 +1,46 @@
-# Jade & Ember — QA and critique (concept v0.4, composition refinement)
+# Jade & Ember — QA and critique (concept v0.5, Jade Lacquer direction)
 
 Branch `feature/jade-and-ember-brief`. Dates: 2026-10-09. Tooling: Playwright 1.64 + axe-core 4.13, Lighthouse 12.6.1 (`@lhci/cli` 0.15 for the mobile preset, the Lighthouse CLI for the desktop preset), Chromium 1194 (headless, Linux), ffmpeg 6.1. **Nothing was run on a real device.**
 
 Re-runnable: `npm run test:a11y`, `npm run test:contrast`, `npm run test:lighthouse`, `npm run test:video-tools`, and `python3 tools/video-qa.py media/hero-loop.webm --poster media/hero-wok.webp`.
+
+## What v0.5 changed (Direction B, Jade Lacquer, with Direction A's four-step process)
+**Design authority changed.** The deprecated STS Premium Web Design skill is no longer used. Creative direction follows Anthropic's `frontend-design` skill (`getsimplifiedtech/sts-web-design-framework`, branch `feature/anthropic-frontend-design-standard`, `.claude/skills/frontend-design/SKILL.md`). The brief's pinned palette (charcoal, jade, warm ember, rice) is kept; engineering rules (fallbacks, accessibility, performance, `noindex`, the approved hero footage) are unchanged. Approved by the owner after a written proposal. No media was generated, no credits spent, nothing merged or deployed. This is an STS portfolio demonstration: diners are the simulated end users, restaurant owners are the commercial audience.
+
+| Area | v0.5 |
+|---|---|
+| Palette | The page is a deep jade lacquer `#1E4A3C`, with Pine `#12302A` for the menu, visit and header, Kitchen `#101211` for the hero, disclosure bar and footer, Celadon `#A9D2BE` for quiet accents, Rice `#F1EBDB` for type. **Ember `#F08A3C` is fire only**: the flame, heat dots, the first process node, the seal and the one primary button (See the menu) |
+| Type | Young Serif (display, one weight) and Karla (text, 400 and 600), self-hosted with metric-matched fallbacks (CLS stays 0). Instrument Serif and Hanken Grotesk removed; licences updated. Sentence case throughout; lining proportional numerals in the serif |
+| Photography | Three dishes and the story picture run edge to edge as 2.2:1 frames, no inset, frame, card or fade. Above 1680 px the frame is capped (the sources are 1200 px) and its outer edges soften into the jade. The second plate puts its text above its frame so the three do not repeat the same picture-then-caption rhythm |
+| Removed | All eyebrow labels and gradient dashes (the hero keeps one plain sentence-case descriptor), the 01 to 03 numbering on dishes (not a sequence), caps-tracked buttons, spaced em-dash labels, middle dots, the dashed button, the cream menu section, the v0.4 feathered masks |
+| Kept as information | Heat dots, dotted menu leaders, allergen tags, hours table, the fictional disclosures |
+| Process | "Heat is the ingredient" now has the four wok-hei steps joined by one line and numbered 1 to 4, because they are a real sequence (fire, steam, toss, plate). Horizontal on desktop, two rows on tablets, a vertical line on phones |
+| Copy | "Order these first." replaces "Three plates we are known for."; "Find us (sample details)"; the example-order note is now headed "For restaurant owners"; the example button reads "Order online (example)"; footer lines separated without middle dots |
+| Kept | Hero markup, video logic and every fallback; `site.js` untouched; menu tabs; order and nav behaviour |
+
+**Results after v0.5**
+| Check | Result |
+|---|---|
+| `tests/qa.mjs` (axe at 1440, 820, 390, 320, 844×390, reduced motion; overflow, 24 px targets, video scenarios, tabs, nav, no-JS) | all 24 pass, 0 axe violations |
+| `tests/contrast.mjs` (hero, 374 lines, 14 viewports, video frames at 960 px and up) | 0 below the gate; worst single pixel 5.63:1 |
+| `tests/contrast-sections.mjs` (now **all text below the hero**: disclosure bar, header, every section, footer; 13 viewports from 2560 down to 320 and 844×390) | 1232 text blocks, 0 below the 99 % gate. The worst single pixel (1.40:1) is the header button's celadon border, not text |
+| Lighthouse mobile preset, 3 runs | performance 100, accessibility 100, best practices 100, SEO 63 (intentional `noindex`); LCP 1.7 to 1.9 s, CLS 0, TBT 0 |
+| Lighthouse desktop preset | performance 100, accessibility 100, best practices 100; LCP 0.5 s, CLS 0, TBT 0; 802 KiB total (584 KiB of it the WebM) |
+| Weight | mobile transfer rose from 142 KiB to 174 KiB: three font files are used above the fold (Young Serif 27 KB, Karla 400 and 600 at 13 KB each) against two before |
+
+One test fix: `tests/contrast.mjs` failed once with a non-finite video duration (it seeked before the metadata arrived). It now waits for the duration first; two full re-runs pass. The test, not the page, was at fault, but I did not investigate the original flake further.
+
+**Honest critique against the `frontend-design` skill**
+- *Where it earns its place:* jade is now the ground and not a small accent, the flame hero is still the one memorable thing, ember is rationed, and the numbered process is a real sequence.
+- *Still on the default list:* a dark kitchen hero with an orange accent is the skill's trait #2. The brief pins the palette, so I limited ember to fire and made jade the ground; I have not seen a real viewer's reaction. The hero is still left text over a right-hand image. Young Serif plus a clean grotesque is a considered pairing, not a risky one.
+- *Rhythm:* four full-width 2.2:1 frames (three dishes and the story) share one crop and one grade. The second plate's text-above order and the quote-first story break it only a little. The three dishes are all dark ceramic on grey slate, so they can feel alike.
+- *Resolution:* the 1200 px photographs are shown up to 1680 px wide (1.4× upscaling), softest on large screens. I have not checked this on a real 4K or high-density display. [unverified]
+- *Colour:* the jade ground is judged by computed contrast and screenshots only; real monitors will vary. [unverified]
+- *Not tested:* real devices (Safari/iOS, Android, Firefox), 200 percent zoom, a screen reader, and the MP4 fallback in a browser.
+- *Typography judgement:* Young Serif is heavier and friendlier than the previous display face; whether it fits a "modern" kitchen is a taste call for review.
+
+## Superseded: v0.4 (feathered photography)
+The v0.4 section below describes the previous direction (dark ground, feathered plates, cream menu). It is kept for history; v0.5 replaces it.
 
 ## What v0.4 changed (composition only)
 Brief: the photo presentation read as blocky and early-2000s; make it more immersive, editorial and future-forward without neon or gimmicks. Kept: brand, palette, type, cinematic hero and its video logic and fallbacks, content and section order, `noindex`, performance and accessibility rules. No media was generated or edited, no credits spent, nothing merged or deployed. `styles.css` and the menu markup in `build.mjs` changed; `site.js` did not.

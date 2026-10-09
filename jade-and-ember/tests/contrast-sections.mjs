@@ -1,5 +1,6 @@
-// Text contrast where type sits on or against a photograph below the hero: the dish names and descriptions that
-// overlap the feathered edge of each plate, the story quote and caption. axe cannot compute these, so we measure.
+// Text contrast for everything below the hero (the hero has its own test, tests/contrast.mjs): the disclosure bar, header,
+// every section on its lacquer, pine or kitchen ground, and the footer. axe cannot compute contrast over gradients and
+// images, and reports many pairs as "incomplete", so we measure what is actually painted.
 //
 // All glyphs in the chosen blocks are made transparent, the page is screenshotted, and the pixels behind every text
 // line are compared with the text's computed colour using the WCAG relative-luminance formula. Same gate as
@@ -11,7 +12,7 @@ import { serve } from './serve.mjs';
 const { server, base } = serve();
 const browser = await chromium.launch(process.env.CHROMIUM_PATH ? { executablePath: process.env.CHROMIUM_PATH } : {});
 const viewports = [[2560, 1440], [1920, 1080], [1440, 900], [1280, 720], [1024, 768], [960, 700], [820, 1180], [768, 1024], [430, 932], [390, 844], [360, 740], [320, 640], [844, 390]];
-const roots = ['.dish-body', '.pull', '.story-text', '.story-fig figcaption'];
+const roots = ['.disclosure', '.top', 'main > section:not(.hero)', '.foot'];
 const GATE = 0.99;
 let failures = 0, rows = 0, worst = { ratio: 99, where: '' };
 
@@ -27,7 +28,7 @@ for (const [w, h] of viewports) {
     for (const sel of rootSels) for (const root of document.querySelectorAll(sel)) {
       for (const el of [root, ...root.querySelectorAll('*')]) {
         if (![...el.childNodes].some((c) => c.nodeType === 3 && c.textContent.trim())) continue;
-        if (el.closest('.vh')) continue;
+        if (el.closest('.vh') || el.closest('.hero')) continue;
         const cs = getComputedStyle(el);
         if (cs.display === 'none' || cs.visibility === 'hidden') continue;
         el.setAttribute('data-ct', String(n));
@@ -38,7 +39,7 @@ for (const [w, h] of viewports) {
     }
     return out;
   }, roots);
-  await page.addStyleTag({ content: '[data-ct]{color:transparent!important;text-shadow:none!important;text-decoration-color:transparent!important}.top,.disclosure{visibility:hidden!important}' });
+  await page.addStyleTag({ content: '[data-ct]{color:transparent!important;text-shadow:none!important;text-decoration-color:transparent!important}a,a *{text-decoration-color:transparent!important}' });
   await page.waitForTimeout(80);
   const lines = await page.evaluate(() => {
     const out = {};

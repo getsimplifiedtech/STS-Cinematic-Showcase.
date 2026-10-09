@@ -1,7 +1,9 @@
-# Jade & Ember — fictional modern Chinese kitchen (STS concept v0.4)
+# Jade & Ember — fictional modern Chinese kitchen (STS concept v0.5)
 
 Standalone static site. No framework, no runtime dependencies, no external requests, no Lovable. Target path: `/jade-and-ember/`.
-**v0.4:** composition refinement only. Photographs are frameless and feathered into the page (CSS masks, no new media), the three signature plates bleed and overlap differently, the section rhythm is varied, and boxed or ruled elements are removed. Content, hero, video behaviour and fallbacks are unchanged. See `QA.md`.
+**v0.5:** Jade Lacquer direction under the Anthropic `frontend-design` standard: a jade ground with charcoal for the kitchen, ember for fire only, Young Serif and Karla, full-bleed photographs, a numbered four-step wok-hei process, and no decorative labels. Hero, video behaviour and fallbacks are unchanged. See `QA.md`.
+
+**v0.4 (superseded):** composition refinement only. Photographs are frameless and feathered into the page (CSS masks, no new media), the three signature plates bleed and overlap differently, the section rhythm is varied, and boxed or ruled elements are removed. Content, hero, video behaviour and fallbacks are unchanged. See `QA.md`.
 
 **v0.3:** the hero plays one short cinematic loop (concept footage) over the still, on desktop widths (960 px and up) where the visitor allows it. The still stays the poster and the fallback.
 
@@ -34,7 +36,7 @@ No cart, payment or POS code exists.
 - **Visual thesis:** a modern Chinese kitchen shown through the wok's fire and steam, in a quiet, precise voice, restrained everywhere else.
 - **Axes:** warm-on-dark, sparse, hard contrast, quiet, tactile (carbon steel, slate, glazed ceramic), editorial.
 - **Brand specifics:** wok hei ("breath of the wok") is the one idea, and the name is the palette: jade (celadon bowls, the cool shadows) and ember (the flame, actions) meet in one recurring gradient dash on every section label, caption and the first rule of the wok-hei index. The wok-hei index (fire, steam, texture, the plate) is the brief's own four words. Dishes carry a three-dot heat scale (text-labelled, not colour-only). Mapo tofu is served in the celadon bowl. Banned moves: cards with icons, pill badges, gradient text, glass, fade-up on everything.
-- **Restraint budget:** one accent (ember, used for actions and flame only), jade as quiet label colour, rice for text and the single light section (the menu, like a printed card). Two families (Instrument Serif, Hanken Grotesk) plus a two-glyph seal font (玉 火, 1 KB). One image grade. One primary motion at a time (the hero loop, or the 38 s push on the still when the loop cannot play).
+- **Restraint budget:** one accent (ember, used for actions and flame only), jade as quiet label colour, rice for text and the single light section (the menu, like a printed card). Two families (Young Serif, Karla) plus a two-glyph seal font (玉 火, 1 KB). One image grade. One primary motion at a time (the hero loop, or the 38 s push on the still when the loop cannot play).
 - **Rhythm:** hero (dark, slow) → one-line pause → signature (dense, three different compositions) → menu (light, text) → story (sparse) → visit (medium) → order.
 - **Mobile is a separate composition:** a separately generated portrait hero (`hero-wok-m.webp`): headline in the dark upper zone, the flame as the one focal point, one primary action at the foot (the secondary order link becomes a text link), icon-only Pause, a one-line disclosure bar; nav collapses; menu tabs wrap; landscape phones get a split layout and a non-sticky header.
 

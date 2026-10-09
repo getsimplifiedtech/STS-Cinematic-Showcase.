@@ -1,5 +1,5 @@
-===== instrument-serif (SIL Open Font License 1.1) =====
-Copyright 2022 The Instrument Serif Project Authors (https://github.com/Instrument/instrument-serif) InstrumentSerif-Italic.ttf: Copyright 2022 The Instrument Serif Project Authors (https://github.com/Instrument/instrument-serif)
+===== young-serif (SIL Open Font License 1.1) =====
+Copyright 2023 The Young Serif Project Authors (https://github.com/noirblancrouge/YoungSerif)
 
 This Font Software is licensed under the SIL Open Font License, Version 1.1.
 This license is copied below, and is also available with a FAQ at:
@@ -93,8 +93,8 @@ DAMAGES, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
 FROM, OUT OF THE USE OR INABILITY TO USE THE FONT SOFTWARE OR FROM
 OTHER DEALINGS IN THE FONT SOFTWARE.
 
-===== hanken-grotesk (SIL Open Font License 1.1) =====
-Copyright 2021 The Hanken Grotesk Project Authors (https://github.com/marcologous/hanken-grotesk) HankenGrotesk-Italic[wght].ttf: Copyright 2021 The Hanken Grotesk Project Authors (https://github.com/marcologous/hanken-grotesk)
+===== karla (SIL Open Font License 1.1) =====
+Copyright 2019 The Karla Project Authors (https://github.com/googlefonts/karla) Karla-Italic[wght].ttf: Copyright 2019 The Karla Project Authors (https://github.com/googlefonts/karla)
 
 This Font Software is licensed under the SIL Open Font License, Version 1.1.
 This license is copied below, and is also available with a FAQ at:
