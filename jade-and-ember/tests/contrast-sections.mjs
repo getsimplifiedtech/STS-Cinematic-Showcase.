@@ -1,4 +1,4 @@
-// Text contrast for everything below the hero (the hero has its own test, tests/contrast.mjs): the disclosure bar, header,
+// Text contrast for every page, everything below the hero (the hero has its own test, tests/contrast.mjs): the disclosure bar, header,
 // every section on its lacquer, pine or kitchen ground, and the footer. axe cannot compute contrast over gradients and
 // images, and reports many pairs as "incomplete", so we measure what is actually painted.
 //
@@ -6,20 +6,22 @@
 // line are compared with the text's computed colour using the WCAG relative-luminance formula. Same gate as
 // tests/contrast.mjs: at least 99% of sampled pixels at 4.5:1 (3:1 for large text).
 // Run: npm run test:contrast-sections   (set CHROMIUM_PATH to use an installed Chromium; VERBOSE=1 lists every line)
+import { readFileSync } from 'node:fs';
 import { chromium } from 'playwright';
 import { serve } from './serve.mjs';
 
 const { server, base } = serve();
 const browser = await chromium.launch(process.env.CHROMIUM_PATH ? { executablePath: process.env.CHROMIUM_PATH } : {});
 const viewports = [[2560, 1440], [1920, 1080], [1440, 900], [1280, 720], [1024, 768], [960, 700], [820, 1180], [768, 1024], [430, 932], [390, 844], [360, 740], [320, 640], [844, 390]];
-const roots = ['.disclosure', '.top', 'main > section:not(.hero)', '.foot'];
+const pages = JSON.parse(readFileSync(new URL('../config/site.json', import.meta.url), 'utf8')).pages;
+const roots = ['.disclosure', '.top', 'main > :not(.hero)', '.foot'];
 const GATE = 0.99;
 let failures = 0, rows = 0, worst = { ratio: 99, where: '' };
 
-for (const [w, h] of viewports) {
+for (const pg of pages) for (const [w, h] of viewports) {
   const ctx = await browser.newContext({ viewport: { width: w, height: h }, isMobile: w < 900, hasTouch: w < 900, reducedMotion: 'reduce' });
   const page = await ctx.newPage();
-  await page.goto(base);
+  await page.goto(base + (pg.file === 'index.html' ? '' : pg.file));
   await page.evaluate(async () => { const im = [...document.images]; im.forEach((i) => { i.loading = 'eager'; }); await Promise.all(im.map((i) => i.decode().catch(() => {}))); });
   await page.waitForTimeout(300);
   const meta = await page.evaluate((rootSels) => {
@@ -84,7 +86,7 @@ for (const [w, h] of viewports) {
     const need = m.fs >= 24 || (m.fs >= 18.66 && m.fw >= 700) ? 3 : 4.5;
     const pass = ratios.filter((r) => r >= need).length / ratios.length;
     const ok = pass >= GATE;
-    const where = `${w}x${h} ${m.label}`;
+    const where = `${pg.file} ${w}x${h} ${m.label}`;
     rows++;
     if (!ok) failures++;
     if (ratios[0] < worst.ratio) worst = { ratio: ratios[0], where };
@@ -92,6 +94,6 @@ for (const [w, h] of viewports) {
   }
   await ctx.close();
 }
-console.log(`\n${rows} text blocks measured over ${viewports.length} viewports; ${failures} below the ${GATE * 100}% gate. Worst single pixel: ${worst.ratio.toFixed(2)}:1 (${worst.where}).`);
+console.log(`\n${rows} text blocks measured over ${pages.length} pages and ${viewports.length} viewports; ${failures} below the ${GATE * 100}% gate. Worst single pixel: ${worst.ratio.toFixed(2)}:1 (${worst.where}).`);
 await browser.close(); server.close();
 process.exit(failures ? 1 : 0);

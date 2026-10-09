@@ -1,8 +1,47 @@
-# Jade & Ember — QA and critique (concept v0.5, Jade Lacquer direction)
+# Jade & Ember — QA and critique (concept v0.6, Gate 1: shared build, Home, Menu)
 
 Branch `feature/jade-and-ember-brief`. Dates: 2026-10-09. Tooling: Playwright 1.64 + axe-core 4.13, Lighthouse 12.6.1 (`@lhci/cli` 0.15 for the mobile preset, the Lighthouse CLI for the desktop preset), Chromium 1194 (headless, Linux), ffmpeg 6.1. **Nothing was run on a real device.**
 
 Re-runnable: `npm run test:a11y`, `npm run test:contrast`, `npm run test:lighthouse`, `npm run test:video-tools`, and `python3 tools/video-qa.py media/hero-loop.webm --poster media/hero-wok.webp`.
+
+## What v0.6 (Gate 1) changed
+Scope approved: shared configuration and components, **Home** and **Menu** only. The Jade Lacquer design (v0.5) is unchanged and the hero (markup, `hero.js`, video logic, fallbacks) is moved, not edited. Design authority: Anthropic's `frontend-design` skill. No media was generated, no credits spent, nothing merged or deployed. Plan: `docs/JADE_AND_EMBER_FIVE_PAGE_ARCHITECTURE.md` (approved at `d717896`).
+
+| Area | Gate 1 |
+|---|---|
+| Configuration | `config.json` replaced by `config/client.json`, `menu.json`, `copy.json`, `site.json`. Business facts once; the three Home dishes are the menu items that carry a `signature` block, so a price can no longer differ between pages. `flags.demo` controls every STS demonstration element. A validator fails the build on bad config (missing fields, non-https order URL, duplicate ids or titles, missing media, missing alt text, price or heat out of range, sample copy in a client build) |
+| Build | `build.mjs` plus `src/lib`, `src/components` (document, frame, dish, steps, hours, menu-category, cta-band) and `src/pages` (home, menu, pending). One standalone HTML file per page in the registry |
+| Home (`index.html`) | The v0.5 hero and process unchanged, the three dishes, then **a link to the full menu, a story teaser, a visit strip (address and compact hours) and an order band**. The long menu, story, hours table and order note no longer sit on Home |
+| Menu (`menu.html`) | `h1` and a heat legend with the allergen note, one reused flame band (`hero-wok.webp`, already cached from Home, decorative), **sticky jump links**, then all five categories (heading left, list right; the heading stays in view on wide screens). No tabs, nothing hidden. "House favourite" marks the three dishes shown on Home. A print stylesheet gives a plain black-on-white two-column menu |
+| Navigation | Home, Menu, Our story, Visit us in the nav, **Order online** as the button at the right (and last in the phone menu); identical on every page with `aria-current="page"`; footer carries the same five links. The header button goes to the Order page |
+| Pages not built yet | Our story, Visit us and Order online are **plain holding pages** (real header and footer, one heading, a sentence saying they are built in Gate 2, a link back) so that no navigation link is dead. They are not designed pages and are noindex like the rest |
+| Scripts | `site.js` (nav, all pages, 1.1 KB), `hero.js` (Home only, the old hero code verbatim, 5.8 KB), `menu.js` (Menu only, marks the current jump link, 1 KB). The old tab script is gone |
+| Content fixes | Menu allergen tags now match the Home dishes (Mapo Tofu "Contains soy", Dan Dan Noodles "Contains peanuts, sesame", which the old list omitted in part). Tags are joined with a comma, not a middle dot. The menu note is split into the allergen sentence (always shown) and the invented-prices sentence (demo only) |
+
+## Results after Gate 1
+| Check | Result |
+|---|---|
+| `tests/site.mjs` (new): five files; unique titles and descriptions; one `h1` per page; heading order; landmarks; ids; nav identical and one current page on every page; footer matches; every internal link and fragment resolves; robots matches config; no external requests or errors; hero video and scripts only where they belong; address, phone, hours and prices come from config | all 6 groups pass |
+| `tests/qa.mjs`: axe (WCAG 2.0/2.1/2.2 A and AA, best practice) on **all five pages** at 1440, 820, 390, 320, 844×390 and reduced motion, with overflow, duplicate ids, alt text, 24 px targets, external requests | all pass, 0 violations |
+| `tests/qa.mjs` behaviour: Home hero video, Pause, off-screen pause, mobile nav and hero chrome, reduced motion, no JavaScript, 14 video scenarios | all pass (49 checks in the run) |
+| `tests/qa.mjs`: **Menu** (five categories visible, no tab roles, sticky jump links sit under the header, every jumped-to heading clear of the sticky bars, current link marked, keyboard order, print layout hides header, band, jump links and order band, white ground, two columns, prints in 1 to 3 pages) | pass |
+| `tests/contrast.mjs` (hero, 374 lines) | 0 below the gate; worst single pixel 5.63:1 |
+| `tests/contrast-sections.mjs` now over **five pages × 13 viewports** | 3422 text blocks, 0 below the 99 % gate |
+| Lighthouse mobile preset, 3 runs per page | all five: accessibility 100, best practices 100, CLS 0, TBT 0; performance 99 to 100; LCP 1.7 to 1.9 s on Home and Menu, 1.4 s on the holding pages; SEO 63 (Home, Menu) and 60 (holding pages), because every page is noindex |
+| Lighthouse desktop preset | Home and Menu: performance 100, accessibility 100, best practices 100, LCP 0.4 s, CLS 0 |
+| Weight against the architecture budgets (mobile transfer, no video) | Home 173 KiB (budget 190), Menu 128 KiB (budget 130, **tight**), holding pages 65 KiB. Home desktop 793 KiB including the 584 KiB WebM |
+
+## Honest critique after Gate 1 (frontend-design standard)
+- **Home is now a tour, and it reads quieter.** After the dish frames come three type-only bands (story teaser, visit strip, order band) that each use a heading, a short block and one link. Their tones alternate (pine, lacquer, pine) and the story teaser is indented, but the repeated heading-plus-text pattern is the most "template" part of the page. The links are small text links and may under-sell the next step; the order band's ember button is the only strong action below the dishes.
+- **Menu works as information; it is not an immersive page.** One photograph (the reused flame band), then lists. That suits a menu, and the sticky headings and jump links help, but nothing on the page is as memorable as the hero. Whether the band reads as relevant or as a stock banner needs your eye.
+- **The Menu sits at its weight budget (128 of 130 KiB)** because the band is a 61 KB poster crop. Any further image on that page would break the budget.
+- **Holding pages are plainly unfinished** by design; the preview shows them as such.
+- **Menu list layout:** at 1024 to 1279 px the list is a single column and long; on a phone the jump bar scrolls sideways (links stay focusable); the "House favourite" line adds a row to three items.
+- **Unverified:** real devices (Safari/iOS sticky behaviour and the sideways jump bar, Android, Firefox), the printed menu on paper or in other browsers, 200 percent zoom, a screen reader, and the MP4 fallback in a browser.
+- **Changes from the approved plan:** holding pages added so the navigation has no dead links; the allergen tags and the middle-dot separator fixed as part of the menu migration; the footer now carries the five-link navigation; a visually hidden "(example, not functional)" suffix is no longer needed in the header because its button goes to a real page.
+
+## Superseded: v0.5 (single page)
+The sections below describe earlier single-page versions. They are kept for history.
 
 ## What v0.5 changed (Direction B, Jade Lacquer, with Direction A's four-step process)
 **Design authority changed.** The deprecated STS Premium Web Design skill is no longer used. Creative direction follows Anthropic's `frontend-design` skill (`getsimplifiedtech/sts-web-design-framework`, branch `feature/anthropic-frontend-design-standard`, `.claude/skills/frontend-design/SKILL.md`). The brief's pinned palette (charcoal, jade, warm ember, rice) is kept; engineering rules (fallbacks, accessibility, performance, `noindex`, the approved hero footage) are unchanged. Approved by the owner after a written proposal. No media was generated, no credits spent, nothing merged or deployed. This is an STS portfolio demonstration: diners are the simulated end users, restaurant owners are the commercial audience.

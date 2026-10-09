@@ -1,0 +1,65 @@
+{
+  "brand": {
+    "name": "Jade & Ember",
+    "descriptor": "Modern Chinese kitchen",
+    "seal": [
+      "玉",
+      "火"
+    ],
+    "sealLabel": "Jade and fire"
+  },
+  "contact": {
+    "phone": {
+      "display": "(555) 010-0188",
+      "href": "tel:+15550100188"
+    },
+    "email": null
+  },
+  "address": {
+    "lines": [
+      "88 Example Street",
+      "Sampletown, ST 00000",
+      "Fictionland"
+    ],
+    "mapUrl": null
+  },
+  "hours": {
+    "timezone": "America/New_York",
+    "rows": [
+      {
+        "days": "Monday",
+        "time": "Closed"
+      },
+      {
+        "days": "Tuesday – Thursday",
+        "time": "5:00 pm – 9:30 pm"
+      },
+      {
+        "days": "Friday – Saturday",
+        "time": "5:00 pm – 11:00 pm"
+      },
+      {
+        "days": "Sunday",
+        "time": "4:30 pm – 9:00 pm"
+      }
+    ]
+  },
+  "ordering": {
+    "url": null,
+    "label": "Order online",
+    "platformName": "the restaurant's ordering page",
+    "headerCta": "page",
+    "pickupNote": null
+  },
+  "seo": {
+    "baseUrl": null,
+    "titleTemplate": "{page} | {brand}",
+    "noindex": true,
+    "structuredData": false,
+    "themeColor": "#12302a"
+  },
+  "flags": {
+    "demo": true,
+    "heroVideo": true
+  }
+}

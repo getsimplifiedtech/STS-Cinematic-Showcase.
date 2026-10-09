@@ -1,0 +1,153 @@
+{
+  "home": {
+    "meta": {
+      "title": "Modern Chinese kitchen",
+      "description": "Jade & Ember is a fictional modern Chinese kitchen: a cinematic restaurant website concept by Simplified Tech Solutions. Sample menu, hours and address."
+    },
+    "hero": {
+      "eyebrow": "Modern Chinese kitchen",
+      "headline": [
+        "The breath",
+        "of the wok."
+      ],
+      "text": "Carbon steel, a flame at full height, and a kitchen that cooks to the second. Tuesday to Sunday, from five.",
+      "primaryCta": {
+        "label": "See the menu",
+        "page": "menu"
+      },
+      "caption": "Wok-seared beef, broccoli, red chili",
+      "image": {
+        "desktop": "media/hero-wok.webp",
+        "mobile": "media/hero-wok-m.webp",
+        "width": 1920,
+        "height": 1080,
+        "mobileWidth": 810,
+        "mobileHeight": 1440,
+        "alt": "A carbon steel wok on a roaring burner: sliced beef, broccoli and red chili in the pan under a tall flare of orange flame, with steam rising into a dark kitchen.",
+        "focusDesktop": "56% 50%",
+        "focusMobile": "50% 62%"
+      },
+      "video": {
+        "webm": "media/hero-loop.webm",
+        "mp4": "media/hero-loop.mp4",
+        "width": 1280,
+        "height": 720,
+        "loopSeconds": 5.04
+      }
+    },
+    "process": {
+      "heading": "Heat is the ingredient.",
+      "body": "Wok hei, the breath of the wok, is the smoky, singed sweetness that only comes from food moving fast over a very hot flame. Four things make it, and we cook around all of them.",
+      "steps": [
+        {
+          "name": "Fire",
+          "text": "A burner kept at full height, so the pan never has time to cool."
+        },
+        {
+          "name": "Steam",
+          "text": "Wine and stock flash at the wall of the wok and lift the aroma into the dish."
+        },
+        {
+          "name": "Texture",
+          "text": "Small cuts, dry ingredients, and a toss that never stops. Crisp stays crisp."
+        },
+        {
+          "name": "The plate",
+          "text": "Out of the wok and onto jade or slate within seconds, while it is still singing."
+        }
+      ]
+    },
+    "signature": {
+      "heading": "Order these first.",
+      "moreLabel": "See the full menu"
+    },
+    "storyTeaser": {
+      "text": "The room is charcoal and slate, lit low, with celadon bowls stacked on the pass. Every dish gets its turn at the fire.",
+      "linkLabel": "Read our story",
+      "sample": false
+    },
+    "visitStrip": {
+      "heading": "Find the kitchen",
+      "linkLabel": "Plan your visit"
+    },
+    "orderBand": {
+      "heading": "Dinner, to go.",
+      "text": "Choose from the full menu and collect it hot from the pass."
+    }
+  },
+  "menu": {
+    "meta": {
+      "title": "Sample menu",
+      "description": "The sample menu at Jade & Ember, a fictional modern Chinese kitchen: small plates, wok dishes, noodles and rice, roast and braise, sweet and tea, with heat levels and allergens."
+    },
+    "h1": "Sample menu",
+    "note": "Please tell us about allergies when ordering: peanuts, sesame, soy, wheat, shellfish and egg appear throughout.",
+    "legend": {
+      "heading": "Heat",
+      "levels": [
+        "warm",
+        "hot",
+        "fierce"
+      ]
+    },
+    "band": {
+      "src": "media/hero-wok.webp",
+      "width": 1920,
+      "height": 1080,
+      "alt": "",
+      "pos": "56% 40%",
+      "decorative": true
+    },
+    "orderBand": {
+      "heading": "Dinner, to go.",
+      "text": "Choose from the menu and collect it hot from the pass."
+    }
+  },
+  "story": {
+    "meta": {
+      "title": "Our story",
+      "description": "The story of Jade & Ember, a fictional modern Chinese kitchen built around one very hot wok."
+    },
+    "h1": "A small kitchen, one very hot wok.",
+    "image": {
+      "src": "media/story-jade-bowls.webp",
+      "width": 1200,
+      "height": 757,
+      "alt": "Three stacked jade-green celadon bowls beside a bowl of steamed white rice on a matte black plate, on a slate board."
+    },
+    "caption": "Celadon rice bowls, stacked on the pass.",
+    "paragraphs": [
+      "Jade & Ember began as a question about a single flame: what if a dining room felt like standing beside a wok at full heat, without the noise or the smoke?",
+      "The room is charcoal and slate, lit low, with celadon bowls stacked on the pass. The kitchen cooks Cantonese and Sichuan dishes with a lighter hand, and the menu stays short so every dish gets its turn at the fire.",
+      "Jade for the bowls, ember for the flame. The name is the whole palette."
+    ]
+  },
+  "visit": {
+    "meta": {
+      "title": "Visit us",
+      "description": "Address, opening hours and how to find Jade & Ember, a fictional modern Chinese kitchen (all details are samples)."
+    },
+    "h1": "Visit us (sample details)",
+    "fictionalNote": "Fictional address, phone number and hours. Please do not travel or call.",
+    "notes": [
+      "Walk-ins are welcome; the wok counter seats eight.",
+      "Takeaway orders are placed through the online-ordering page."
+    ]
+  },
+  "order": {
+    "meta": {
+      "title": "Order online",
+      "description": "How ordering works at Jade & Ember, a fictional modern Chinese kitchen (the ordering button is a nonfunctional example)."
+    },
+    "h1": "Dinner, to go.",
+    "text": "Choose from the full menu and collect it hot from the pass."
+  },
+  "demo": {
+    "ownerNoteTitle": "For restaurant owners",
+    "demoNote": "This is a nonfunctional example. A live Jade & Ember would send this button to its own online-ordering page. In this concept that page is set in config.json (ordering.url) and is currently empty, so nothing can be ordered and no payment is taken.",
+    "platformNote": "Designed for restaurants that already take orders through a MenuSifu page. No MenuSifu integration, embed or partnership has been built or verified here; the button simply links out.",
+    "exampleSuffix": "(example)",
+    "pendingNote": "This page is built in the second implementation gate. The header, footer and navigation are the real shared components.",
+    "menuSample": "Sample menu with invented prices in fictional dollars."
+  }
+}

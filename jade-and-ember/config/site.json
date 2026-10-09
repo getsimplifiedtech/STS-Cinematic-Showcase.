@@ -1,0 +1,50 @@
+{
+  "lang": "en",
+  "pages": [
+    {
+      "id": "home",
+      "file": "index.html",
+      "nav": "Home",
+      "status": "built"
+    },
+    {
+      "id": "menu",
+      "file": "menu.html",
+      "nav": "Menu",
+      "status": "built"
+    },
+    {
+      "id": "story",
+      "file": "our-story.html",
+      "nav": "Our story",
+      "status": "pending"
+    },
+    {
+      "id": "visit",
+      "file": "visit-us.html",
+      "nav": "Visit us",
+      "status": "pending"
+    },
+    {
+      "id": "order",
+      "file": "order-online.html",
+      "nav": "Order online",
+      "status": "pending",
+      "cta": true
+    }
+  ],
+  "demo": {
+    "bar": "Fictional restaurant — a concept design by Simplified Tech Solutions. Menu, prices, address and hours are samples.",
+    "barShort": "Fictional restaurant. STS design concept.",
+    "footer": "Jade & Ember is a fictional restaurant created by Simplified Tech Solutions as a website design concept. It does not exist. All menu items, prices, the address, the phone number and the opening hours are invented samples. Food imagery and the hero video are AI-generated concept media and do not depict real dishes served by any restaurant.",
+    "backLabel": "Back to the STS showcase",
+    "backShort": "STS showcase",
+    "backHref": "../",
+    "titleSuffix": " (fictional concept by STS)",
+    "stamp": "Concept v0.6, Gate 1 of 2 (Home and Menu). Hero loop on desktop widths only (concept footage)."
+  },
+  "credit": {
+    "label": "Website concept by Simplified Tech Solutions",
+    "href": "https://getsimplifiedtech.com/"
+  }
+}

@@ -2,9 +2,11 @@
 // Set CHROMIUM_PATH to use a preinstalled Chromium.
 import { chromium } from 'playwright';
 import AxeBuilder from '@axe-core/playwright';
+import { readFileSync } from 'node:fs';
 import { serve } from './serve.mjs';
 
 const { server, base } = serve();
+const pages = JSON.parse(readFileSync(new URL('../config/site.json', import.meta.url), 'utf8')).pages;   // every page in the registry is tested
 const browser = await chromium.launch(process.env.CHROMIUM_PATH ? { executablePath: process.env.CHROMIUM_PATH } : {});
 
 let failed = 0;
@@ -23,7 +25,8 @@ const cases = [
   ['reduced-motion', { viewport: { width: 1280, height: 720 }, reducedMotion: 'reduce' }],
 ];
 
-for (const [name, opts] of cases) {
+for (const pg of pages) for (const [caseName, opts] of cases) {
+  const name = `${caseName} · ${pg.file}`;
   const ctx = await browser.newContext(opts);
   const page = await ctx.newPage();
   const problems = [];
@@ -31,7 +34,7 @@ for (const [name, opts] of cases) {
   page.on('pageerror', (e) => problems.push(`js error: ${e}`));
   page.on('request', (r) => { if (!r.url().startsWith(base) && !r.url().startsWith('data:')) external.push(r.url()); });
   page.on('response', (r) => { if (r.status() >= 400) problems.push(`HTTP ${r.status()} ${r.url()}`); });
-  await page.goto(base);
+  await page.goto(base + (pg.file === 'index.html' ? '' : pg.file));
   const js = opts.javaScriptEnabled !== false;
   if (js) await page.evaluate(async () => { for (let y = 0; y < document.body.scrollHeight; y += 500) { scrollTo(0, y); await new Promise((r) => setTimeout(r, 40)); } scrollTo(0, 0); });
   await page.waitForTimeout(600);
@@ -60,25 +63,11 @@ for (const [name, opts] of cases) {
   const page = await ctx.newPage();
   const p = [];
   await page.goto(base);
-  // Menu tabs: only one category visible, keyboard arrows move selection
-  const visible = () => page.evaluate(() => [...document.querySelectorAll('.cat')].filter((c) => !c.hidden).map((c) => c.id));
-  let v = await visible();
-  if (v.length !== 1 || v[0] !== 'cat-small') p.push(`initial visible categories: ${v}`);
-  await page.focus('#tab-small');
-  await page.keyboard.press('ArrowRight');
-  v = await visible();
-  if (v[0] !== 'cat-wok') p.push(`ArrowRight did not select 'From the wok' (got ${v})`);
-  await page.keyboard.press('End');
-  v = await visible();
-  if (v[0] !== 'cat-sweet') p.push(`End did not select last tab (got ${v})`);
-  await page.click('#tab-noodle');
-  v = await visible();
-  if (v[0] !== 'cat-noodle') p.push('click on tab did not switch category');
   // Pause control and the cinematic loop (the video is the primary motion on desktop; the CSS push is only a fallback)
   if (!(await page.isVisible('.pause'))) p.push('Pause motion button not visible when motion is allowed');
   await page.waitForSelector('.hero.is-video', { timeout: 10000 }).catch(() => p.push('hero video never started (.hero.is-video missing after 10 s)'));
+  await page.waitForTimeout(800);   // let the 400 ms crossfade finish
   const vs = () => page.evaluate(() => { const v = document.querySelector('.hero-video'); return { paused: v.paused, t: v.currentTime, muted: v.muted, loop: v.loop, controls: v.controls, hidden: v.getAttribute('aria-hidden'), src: [...v.querySelectorAll('source')].map((s) => s.type), op: getComputedStyle(v).opacity, push: getComputedStyle(document.querySelector('.hero-media img')).animationName }; });
-  await page.evaluate(() => scrollTo(0, 0)); await page.waitForTimeout(800);   // the menu-tab clicks above scrolled the hero away, which correctly paused the clip
   let a1 = await vs(); await page.waitForTimeout(700); let a2 = await vs();
   if (a1.paused || a2.t <= a1.t) p.push(`video is not advancing: ${JSON.stringify([a1.t, a2.t, a1.paused])}`);
   if (!a1.muted || !a1.loop || a1.controls || a1.hidden !== 'true') p.push(`video attributes wrong: ${JSON.stringify(a1)}`);
@@ -102,7 +91,42 @@ for (const [name, opts] of cases) {
   if (!heats.length || heats.some((l) => !/^Heat [123] of 3$/.test(l))) p.push(`heat indicators missing or unlabelled: ${heats}`);
   const sig = await page.evaluate(() => document.querySelectorAll('.dish').length);
   if (sig !== 3) p.push(`expected 3 signature dishes, got ${sig}`);
-  report('behaviour: tabs + hero video + Pause + off-screen pause + noindex + heat labels (desktop)', p);
+  report('behaviour: Home hero video + Pause + off-screen pause + noindex + heat labels (desktop)', p);
+  await ctx.close();
+}
+{
+  // Menu page: every category is on the page; the jump links are real anchors, sticky, and never leave a heading hidden under the sticky bars.
+  const ctx = await browser.newContext({ viewport: { width: 1280, height: 800 } });
+  const page = await ctx.newPage();
+  const p = [];
+  await page.goto(base + 'menu.html');
+  await page.waitForTimeout(400);
+  const cats = await page.evaluate(() => [...document.querySelectorAll('.cat')].map((c) => c.id));
+  if (cats.join() !== 'small,wok,noodle,roast,sweet') p.push(`menu categories on the page: ${cats}`);
+  if (await page.evaluate(() => document.querySelector('[role=tab],[role=tablist]'))) p.push('the menu must not use tab roles any more (all categories are visible)');
+  if ((await page.evaluate(() => document.querySelectorAll('.cat[hidden]').length)) !== 0) p.push('no category may be hidden');
+  const stuck = await page.evaluate(async () => { scrollTo({ top: 2200, behavior: 'instant' }); await new Promise((r) => setTimeout(r, 400)); const j = document.querySelector('.jump').getBoundingClientRect(); const t = document.querySelector('.top').getBoundingClientRect(); return { jumpTop: Math.round(j.top), headerBottom: Math.round(t.bottom) }; });
+  if (Math.abs(stuck.jumpTop - stuck.headerBottom) > 2) p.push(`jump links should stick directly under the header: ${JSON.stringify(stuck)}`);
+  for (const id of ['noodle', 'sweet']) {
+    await page.click(`.jump a[href="#${id}"]`);
+    await page.waitForTimeout(900);
+    const r = await page.evaluate((i) => { const h = document.getElementById(i + '-h').getBoundingClientRect(); const j = document.querySelector('.jump').getBoundingClientRect(); return { heading: Math.round(h.top), jumpBottom: Math.round(j.bottom), cur: document.querySelector('.jump a[aria-current]')?.getAttribute('href') }; }, id);
+    if (r.heading < r.jumpBottom) p.push(`"${id}" heading is hidden under the sticky bars: ${JSON.stringify(r)}`);
+    if (r.cur !== '#' + id) p.push(`the jump link for "${id}" should be marked current after jumping, got ${r.cur}`);
+  }
+  // keyboard: the links are reachable in order
+  await page.evaluate(() => { scrollTo(0, 0); document.querySelector('.jump a').focus(); });
+  await page.keyboard.press('Tab');
+  if (!(await page.evaluate(() => document.activeElement.getAttribute('href') === '#wok'))) p.push('Tab should move to the next jump link');
+  // print: no header, band, jump links or order band; light ground
+  await page.emulateMedia({ media: 'print' });
+  const pr = await page.evaluate(() => { const d = (s) => getComputedStyle(document.querySelector(s)).display; return { top: d('.top'), jump: d('.jump'), band: d('.menu-band'), cta: d('.cta-band'), bg: getComputedStyle(document.body).backgroundColor, cols: getComputedStyle(document.querySelector('.items')).columnCount, brand: d('.print-brand') }; });
+  if (pr.top !== 'none' || pr.jump !== 'none' || pr.band !== 'none' || pr.cta !== 'none') p.push(`print should hide header, jump links, band and order band: ${JSON.stringify(pr)}`);
+  if (pr.bg !== 'rgb(255, 255, 255)' || pr.cols !== '2' || pr.brand !== 'block') p.push(`print should be white, two columns, with the brand line: ${JSON.stringify(pr)}`);
+  const pdf = await page.pdf({ format: 'Letter', printBackground: false });
+  const pdfPages = (pdf.toString('latin1').match(/\/Type\s*\/Page[^s]/g) || []).length;
+  if (pdfPages < 1 || pdfPages > 3) p.push(`the printed menu should fit on 1 to 3 pages, got ${pdfPages}`);
+  report('behaviour: Menu page (all categories, sticky jump links, anchors, keyboard, print)', p);
   await ctx.close();
 }
 {
@@ -138,21 +162,25 @@ for (const [name, opts] of cases) {
   await ctx.close();
 }
 {
-  // Simulated no-JS: block site.js and drop the .js class the inline script adds.
+  // Simulated no-JS: block every script and drop the .js class the inline script adds.
   const ctx = await browser.newContext({ viewport: { width: 390, height: 844 }, isMobile: true, hasTouch: true });
   const page = await ctx.newPage();
   const p = [];
-  await page.route('**/site.js', (r) => r.abort());
-  await page.goto(base);
+  await page.route('**/*.js', (r) => r.abort());
+  await page.goto(base + 'menu.html');
   await page.evaluate(() => document.documentElement.classList.remove('js'));
   const n = await page.evaluate(() => [...document.querySelectorAll('.cat')].filter((c) => getComputedStyle(c).display !== 'none').length);
   if (n !== 5) p.push(`without JS expected all 5 menu categories visible, saw ${n}`);
+  const jumps = await page.evaluate(() => [...document.querySelectorAll('.jump a')].filter((a) => document.getElementById(a.getAttribute('href').slice(1))).length);
+  if (jumps !== 5) p.push(`without JS the 5 jump links must be plain anchors to real categories, found ${jumps}`);
+  await page.goto(base);
+  await page.evaluate(() => document.documentElement.classList.remove('js'));
   const navVisible = await page.evaluate(() => [...document.querySelectorAll('.site-nav a')].filter((a) => a.getBoundingClientRect().height > 0).length);
   if (navVisible < 5) p.push(`without JS expected nav links visible on a phone, saw ${navVisible}`);
   if (await page.isVisible('.pause')) p.push('pause button should not show without JS (no JS = no motion control needed? check animation)');
   const anim = await page.evaluate(() => getComputedStyle(document.querySelector('.hero-media img')).animationName);
   if (anim !== 'none') p.push(`without JS the hero push still animates and cannot be paused (animation: ${anim})`);
-  report('behaviour: no-JS fallback (simulated), all categories, nav, no unpausable motion', p);
+  report('behaviour: no-JS fallback (simulated), all menu categories, jump links, nav, no unpausable motion', p);
   await ctx.close();
 }
 
@@ -246,7 +274,7 @@ await scenario('video: resizing across 960px stops and restarts it (and the push
   s = await state(page);
   if (s.anim !== 'none') p.push(`the push must stop again once the clip plays: ${JSON.stringify(s)}`);
 }, 3500);
-await scenario('video: no JS (simulated) = no source, invisible element, no motion', { viewport: { width: 1280, height: 800 } }, (page) => page.route('**/site.js', (r) => r.abort()), async ({ page, p, reqs }) => {
+await scenario('video: no JS (simulated) = no source, invisible element, no motion', { viewport: { width: 1280, height: 800 } }, (page) => page.route('**/*.js', (r) => r.abort()), async ({ page, p, reqs }) => {
   const s = await page.evaluate(() => ({ sources: document.querySelector('.hero-video').querySelectorAll('source').length, src: document.querySelector('.hero-video').getAttribute('src'), op: getComputedStyle(document.querySelector('.hero-video')).opacity, anim: getComputedStyle(document.querySelector('.hero-media img')).animationName }));
   if (reqs.length || s.sources || s.src || s.op !== '0' || s.anim !== 'none') p.push(`without JS expected no video, no motion: ${JSON.stringify([reqs.length, s])}`);
 }, 1500);

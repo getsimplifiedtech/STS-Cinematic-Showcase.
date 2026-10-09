@@ -3,7 +3,11 @@
     "collect": {
       "staticDistDir": ".",
       "url": [
-        "index.html"
+        "index.html",
+        "menu.html",
+        "our-story.html",
+        "visit-us.html",
+        "order-online.html"
       ],
       "numberOfRuns": 3,
       "settings": {

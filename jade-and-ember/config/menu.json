@@ -1,0 +1,229 @@
+{
+  "categories": [
+    {
+      "id": "small",
+      "name": "Small plates",
+      "items": [
+        {
+          "name": "Smashed Cucumber",
+          "text": "Black vinegar, garlic, toasted sesame.",
+          "price": 9,
+          "heat": 0,
+          "tags": [
+            "Vegetarian"
+          ]
+        },
+        {
+          "name": "Pork & Chive Dumplings",
+          "text": "Pan-fried, with ginger vinegar. Six pieces.",
+          "price": 13,
+          "heat": 0,
+          "tags": []
+        },
+        {
+          "name": "Scallion Pancake",
+          "text": "Flaky and blistered, with a dipping soy.",
+          "price": 9,
+          "heat": 0,
+          "tags": [
+            "Vegetarian"
+          ]
+        },
+        {
+          "name": "Salt & Pepper Squid",
+          "text": "Flash-fried, with chili, garlic and spring onion.",
+          "price": 15,
+          "heat": 2,
+          "tags": []
+        },
+        {
+          "name": "Silken Tofu, Century Egg",
+          "text": "Chilled, with soy, pickled ginger and coriander.",
+          "price": 11,
+          "heat": 0,
+          "tags": []
+        }
+      ]
+    },
+    {
+      "id": "wok",
+      "name": "From the wok",
+      "items": [
+        {
+          "name": "Wok-Seared Beef & Broccoli",
+          "text": "Sliced flank, broccoli and red chili over a hard flame.",
+          "price": 26,
+          "heat": 1,
+          "tags": []
+        },
+        {
+          "name": "Kung Pao Chicken",
+          "text": "Dried chili, Sichuan pepper, roasted peanuts, black vinegar.",
+          "price": 22,
+          "heat": 2,
+          "tags": [
+            "Contains peanuts"
+          ]
+        },
+        {
+          "name": "Garlic Prawns",
+          "text": "Shaoxing wine, whole garlic, a little white pepper.",
+          "price": 28,
+          "heat": 0,
+          "tags": [
+            "Contains shellfish"
+          ]
+        },
+        {
+          "name": "Dry-Fried Green Beans",
+          "text": "Blistered, with pickled mustard greens and minced pork.",
+          "price": 16,
+          "heat": 0,
+          "tags": []
+        },
+        {
+          "name": "Morning Glory",
+          "text": "Water spinach, garlic and fermented tofu.",
+          "price": 15,
+          "heat": 0,
+          "tags": [
+            "Vegetarian"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "noodle",
+      "name": "Noodles & rice",
+      "items": [
+        {
+          "name": "Dan Dan Noodles",
+          "text": "Spiced pork, sesame paste, chili oil, peanut.",
+          "price": 17,
+          "heat": 2,
+          "tags": [
+            "Contains peanuts, sesame"
+          ],
+          "signature": {
+            "image": "media/dish-dandan.webp",
+            "alt": "Dan dan noodles in a matte black bowl, topped with spiced pork, crushed peanuts, sesame and scallion, steam rising.",
+            "focus": "50% 60%",
+            "text": "Wheat noodles, spiced pork, sesame paste and chili oil, finished with crushed peanut and scallion.",
+            "order": 3
+          }
+        },
+        {
+          "name": "Beef Chow Fun",
+          "text": "Wide rice noodles, bean sprouts, scallion, soy.",
+          "price": 20,
+          "heat": 0,
+          "tags": []
+        },
+        {
+          "name": "Egg Fried Rice",
+          "text": "Day-old rice, egg, scallion, white pepper.",
+          "price": 12,
+          "heat": 0,
+          "tags": [
+            "Vegetarian"
+          ]
+        },
+        {
+          "name": "Wonton Noodle Soup",
+          "text": "Prawn and pork wontons in a clear pork broth.",
+          "price": 18,
+          "heat": 0,
+          "tags": []
+        }
+      ]
+    },
+    {
+      "id": "roast",
+      "name": "Roast & braise",
+      "items": [
+        {
+          "name": "Char Siu",
+          "text": "Maltose-glazed pork shoulder, roasted until lacquered.",
+          "price": 24,
+          "heat": 0,
+          "tags": [
+            "Contains pork"
+          ],
+          "signature": {
+            "image": "media/dish-charsiu.webp",
+            "alt": "Sliced char siu pork with lacquered, charred edges on a matte black plate beside two stalks of blanched gai lan.",
+            "focus": "58% 52%",
+            "text": "Pork shoulder lacquered in maltose and five-spice, roasted until the edges blacken and caramelise.",
+            "order": 2
+          }
+        },
+        {
+          "name": "Mapo Tofu",
+          "text": "Silken tofu, fermented bean paste, numbing pepper.",
+          "price": 18,
+          "heat": 3,
+          "tags": [
+            "Contains soy"
+          ],
+          "signature": {
+            "image": "media/dish-mapo.webp",
+            "alt": "Mapo tofu in a jade-green celadon bowl: silken tofu in red chili oil with minced beef, Sichuan peppercorns and scallion, steam rising, on a slate board.",
+            "focus": "50% 58%",
+            "text": "Silken tofu in red chili oil, fermented bean paste and numbing Sichuan pepper. Served with steamed rice.",
+            "order": 1
+          }
+        },
+        {
+          "name": "Red-Braised Pork Belly",
+          "text": "Rock sugar, soy and star anise, cooked slowly.",
+          "price": 27,
+          "heat": 0,
+          "tags": []
+        },
+        {
+          "name": "Crisp Duck, Pancakes",
+          "text": "Half a duck with pancakes, cucumber and hoisin.",
+          "price": 38,
+          "heat": 0,
+          "tags": []
+        }
+      ]
+    },
+    {
+      "id": "sweet",
+      "name": "Sweet & tea",
+      "items": [
+        {
+          "name": "Sesame Balls",
+          "text": "Glutinous rice, black sesame filling. Three pieces.",
+          "price": 9,
+          "heat": 0,
+          "tags": [
+            "Contains sesame"
+          ]
+        },
+        {
+          "name": "Mango Pomelo Sago",
+          "text": "Chilled coconut cream, mango, pomelo.",
+          "price": 10,
+          "heat": 0,
+          "tags": []
+        },
+        {
+          "name": "Jasmine Pearl Tea",
+          "text": "Pot for one, hand-tied pearls.",
+          "price": 7,
+          "heat": 0,
+          "tags": []
+        },
+        {
+          "name": "Roasted Barley Tea",
+          "text": "Served hot or iced.",
+          "price": 5,
+          "heat": 0,
+          "tags": []
+        }
+      ]
+    }
+  ]
+}
