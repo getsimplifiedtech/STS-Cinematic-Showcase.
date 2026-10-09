@@ -1,0 +1,140 @@
+{
+  "lang": "en",
+  "brand": {
+    "name": "Jade & Ember",
+    "descriptor": "Modern Chinese Kitchen",
+    "seal": ["玉", "火"],
+    "sealLabel": "Jade and fire"
+  },
+  "meta": {
+    "title": "Jade & Ember — Modern Chinese Kitchen (fictional concept by STS)",
+    "description": "Jade & Ember is a fictional modern Chinese kitchen: a cinematic restaurant website concept by Simplified Tech Solutions. Sample menu, hours and address.",
+    "themeColor": "#0f1110"
+  },
+  "disclosure": {
+    "bar": "Fictional restaurant — a concept design by Simplified Tech Solutions. Menu, prices, address and hours are samples.",
+    "footer": "Jade & Ember is a fictional restaurant created by Simplified Tech Solutions as a website design concept. It does not exist. All menu items, prices, the address, the phone number and the opening hours are invented samples. Food imagery is AI-generated concept art and does not depict real dishes served by any restaurant.",
+    "backLabel": "Back to the STS showcase",
+    "backHref": "../"
+  },
+  "ordering": {
+    "url": null,
+    "label": "Order online",
+    "demoNote": "This is a nonfunctional example. A live Jade & Ember would send this button to its own online-ordering page. In this concept that page is set in config.json (ordering.url) and is currently empty, so nothing can be ordered and no payment is taken.",
+    "platformNote": "Designed for restaurants that already take orders through a MenuSifu page. No MenuSifu integration, embed or partnership has been built or verified here; the button simply links out."
+  },
+  "nav": [
+    { "label": "Signature", "href": "#signature" },
+    { "label": "Menu", "href": "#menu" },
+    { "label": "Story", "href": "#story" },
+    { "label": "Visit", "href": "#visit" }
+  ],
+  "hero": {
+    "eyebrow": "Modern Chinese Kitchen",
+    "headline": ["The breath", "of the wok."],
+    "text": "Carbon steel, a flame that roars, and a kitchen that cooks to the second. Open Tuesday to Sunday.",
+    "primaryCta": { "label": "See the menu", "href": "#menu" },
+    "caption": "Wok-seared beef, broccoli, red chili",
+    "image": {
+      "desktop": "media/hero-wok.webp",
+      "mobile": "media/hero-wok-m.webp",
+      "width": 1536,
+      "height": 864,
+      "mobileWidth": 720,
+      "mobileHeight": 1280,
+      "alt": "A carbon steel wok on a roaring gas flame, tossing sliced beef, broccoli and red chili while steam rises into a dark kitchen.",
+      "focusDesktop": "78% 50%",
+      "focusMobile": "50% 70%"
+    }
+  },
+  "intro": {
+    "label": "Wok hei",
+    "text": "Heat is the ingredient.",
+    "body": "Wok hei is the smoky, singed sweetness that only comes from food moving fast over a very hot flame. We cook every wok dish to order, in small batches, so the heat stays in the dish and not in the waiting."
+  },
+  "signature": {
+    "label": "Signature",
+    "heading": "Three plates we are known for.",
+    "items": [
+      { "id": "mapo", "image": "media/dish-mapo.webp", "alt": "Silken tofu cubes in glossy red chili oil with Sichuan peppercorns and scallion, in a dark ceramic bowl.", "name": "Mapo Tofu", "text": "Silken tofu in red chili oil, fermented bean paste and numbing Sichuan pepper. Served with steamed rice.", "price": 18, "tag": "Spicy · Contains soy" },
+      { "id": "charsiu", "image": "media/dish-charsiu.webp", "alt": "Sliced glazed char siu pork with charred edges on a dark plate beside blanched greens.", "name": "Char Siu", "text": "Pork shoulder lacquered in maltose and five-spice, roasted until the edges blacken and caramelise.", "price": 24, "tag": "Contains pork" },
+      { "id": "dandan", "image": "media/dish-dandan.webp", "alt": "Dan dan noodles in a dark bowl, topped with spiced pork, crushed peanuts, chili oil and scallion, lifted with chopsticks.", "name": "Dan Dan Noodles", "text": "Wheat noodles, spiced pork, sesame paste and chili oil, finished with crushed peanut and scallion.", "price": 17, "tag": "Spicy · Contains peanuts, sesame" }
+    ]
+  },
+  "menu": {
+    "label": "Menu",
+    "heading": "Sample menu",
+    "note": "Sample menu with invented prices in fictional dollars. Please tell us about allergies when ordering: peanuts, sesame, soy, wheat, shellfish and egg appear throughout.",
+    "categories": [
+      { "id": "small", "name": "Small plates", "items": [
+        { "name": "Smashed Cucumber", "text": "Black vinegar, garlic, toasted sesame.", "price": 9, "tags": ["Vegetarian"] },
+        { "name": "Pork & Chive Dumplings", "text": "Pan-fried, with ginger vinegar. Six pieces.", "price": 13 },
+        { "name": "Scallion Pancake", "text": "Flaky and blistered, with a dipping soy.", "price": 9, "tags": ["Vegetarian"] },
+        { "name": "Salt & Pepper Squid", "text": "Flash-fried, with chili, garlic and spring onion.", "price": 15, "tags": ["Spicy"] },
+        { "name": "Silken Tofu, Century Egg", "text": "Chilled, with soy, pickled ginger and coriander.", "price": 11 }
+      ]},
+      { "id": "wok", "name": "From the wok", "items": [
+        { "name": "Wok-Seared Beef & Broccoli", "text": "Sliced flank, broccoli and red chili over a hard flame.", "price": 26, "tags": ["Spicy"] },
+        { "name": "Kung Pao Chicken", "text": "Dried chili, Sichuan pepper, roasted peanuts, black vinegar.", "price": 22, "tags": ["Spicy", "Contains peanuts"] },
+        { "name": "Garlic Prawns", "text": "Shaoxing wine, whole garlic, a little white pepper.", "price": 28, "tags": ["Contains shellfish"] },
+        { "name": "Dry-Fried Green Beans", "text": "Blistered, with pickled mustard greens and minced pork.", "price": 16 },
+        { "name": "Morning Glory", "text": "Water spinach, garlic and fermented tofu.", "price": 15, "tags": ["Vegetarian"] }
+      ]},
+      { "id": "noodle", "name": "Noodles & rice", "items": [
+        { "name": "Dan Dan Noodles", "text": "Spiced pork, sesame paste, chili oil, peanut.", "price": 17, "tags": ["Spicy", "Contains peanuts"] },
+        { "name": "Beef Chow Fun", "text": "Wide rice noodles, bean sprouts, scallion, soy.", "price": 20 },
+        { "name": "Egg Fried Rice", "text": "Day-old rice, egg, scallion, white pepper.", "price": 12, "tags": ["Vegetarian"] },
+        { "name": "Wonton Noodle Soup", "text": "Prawn and pork wontons in a clear pork broth.", "price": 18 }
+      ]},
+      { "id": "roast", "name": "Roast & braise", "items": [
+        { "name": "Char Siu", "text": "Maltose-glazed pork shoulder, roasted until lacquered.", "price": 24 },
+        { "name": "Mapo Tofu", "text": "Silken tofu, fermented bean paste, numbing pepper.", "price": 18, "tags": ["Spicy"] },
+        { "name": "Red-Braised Pork Belly", "text": "Rock sugar, soy and star anise, cooked slowly.", "price": 27 },
+        { "name": "Crisp Duck, Pancakes", "text": "Half a duck with pancakes, cucumber and hoisin.", "price": 38 }
+      ]},
+      { "id": "sweet", "name": "Sweet & tea", "items": [
+        { "name": "Sesame Balls", "text": "Glutinous rice, black sesame filling. Three pieces.", "price": 9, "tags": ["Contains sesame"] },
+        { "name": "Mango Pomelo Sago", "text": "Chilled coconut cream, mango, pomelo.", "price": 10 },
+        { "name": "Jasmine Pearl Tea", "text": "Pot for one, hand-tied pearls.", "price": 7 },
+        { "name": "Roasted Barley Tea", "text": "Served hot or iced.", "price": 5 }
+      ]}
+    ]
+  },
+  "story": {
+    "label": "Story",
+    "pull": "A small kitchen, one very hot wok.",
+    "paragraphs": [
+      "Jade & Ember began as an idea about a single flame: what if a dining room felt like standing beside a wok at full heat, without the noise or the smoke?",
+      "The room is charcoal and slate, lit low, with jade-glazed bowls on the pass. The kitchen cooks Cantonese and Sichuan home dishes with a lighter hand, and the menu stays short so every dish gets its turn at the fire."
+    ],
+    "caption": "The wok burner, with the flame at full height.",
+    "image": { "src": "media/ember-strip.webp", "width": 1000, "height": 304, "alt": "Close view of an orange gas flame licking the underside of a blackened carbon steel wok.", "focus": "50% 60%" }
+  },
+  "visit": {
+    "label": "Visit",
+    "heading": "Find us. (Sample details.)",
+    "fictionalNote": "Fictional address, phone number and hours. Please do not travel or call.",
+    "address": ["88 Example Street", "Sampletown, ST 00000", "Fictionland"],
+    "phone": { "display": "(555) 010-0188", "href": "tel:+15550100188" },
+    "hours": [
+      { "days": "Monday", "time": "Closed" },
+      { "days": "Tuesday – Thursday", "time": "5:00 pm – 9:30 pm" },
+      { "days": "Friday – Saturday", "time": "5:00 pm – 11:00 pm" },
+      { "days": "Sunday", "time": "4:30 pm – 9:00 pm" }
+    ],
+    "notes": [
+      "Walk-ins are welcome; the wok counter seats eight.",
+      "Takeaway orders are placed through the online-ordering page."
+    ]
+  },
+  "order": {
+    "label": "Order",
+    "heading": "Dinner, to go.",
+    "text": "Choose from the full menu and collect it hot from the pass."
+  },
+  "footer": {
+    "builtBy": "Website concept by Simplified Tech Solutions",
+    "builtByHref": "https://getsimplifiedtech.com/",
+    "stamp": "Concept v0.1 — still-image hero, no video"
+  }
+}

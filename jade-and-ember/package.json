@@ -1,0 +1,17 @@
+{
+  "name": "jade-and-ember",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Jade & Ember — fictional modern Chinese kitchen website concept by STS. Static; no runtime dependencies.",
+  "scripts": {
+    "build": "node build.mjs",
+    "serve": "python3 -m http.server 8766",
+    "test:a11y": "node tests/qa.mjs",
+    "test:lighthouse": "lhci autorun --config=lighthouserc.json"
+  },
+  "devDependencies": {
+    "@axe-core/playwright": "^4.10.0",
+    "@lhci/cli": "^0.15.0",
+    "playwright": "^1.48.0"
+  }
+}
