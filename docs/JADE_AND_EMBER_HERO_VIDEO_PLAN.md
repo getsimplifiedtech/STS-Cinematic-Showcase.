@@ -216,7 +216,7 @@ Page-weight budget: video is **not** in the LCP path and is not preloaded. Curre
 | Autoplay blocked (for example iOS Low Power Mode) | Poster stays. No play-button UI is shown over the hero. **[unverified on a real device]** |
 | Tab hidden or hero off screen | Video paused, then resumed on return. |
 | No JS | Poster only (the page is complete without JS). |
-| Phone portrait | Poster only (v0.2 composition) unless Gate B is approved. Data cost and battery are the reasons. |
+| Viewport under 960 px wide (phones in either orientation, small tablets) | Poster with the v0.2 slow push and Pause. Decision after the v0.3 review: the clip is for widths of 960 px and above only. |
 | Data-saving or very small viewports | Same as portrait. |
 
 WCAG: the clip loops past 5 s beside content, so the visible Pause control stays mandatory. The `<video>` is decorative (`aria-hidden`, no captions needed: no speech, no audio track). Flash rule (2.3.1) is part of the pass criteria.

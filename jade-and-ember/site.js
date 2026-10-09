@@ -72,7 +72,7 @@
     const mq = (q) => window.matchMedia(q);
     const listen = (m, f) => (m.addEventListener ? m.addEventListener('change', f) : m.addListener(f));
     const reduce = mq('(prefers-reduced-motion: reduce)');
-    const portrait = mq('(max-aspect-ratio: 1/1) and (max-width: 959px)');   // same test as the portrait poster crop: no video there
+    const wide = mq('(min-width: 960px)');   // the clip is for desktop widths only, whatever the device or its orientation
     const conn = navigator.connection || {};
     const stillOnly = () => reduce.matches || conn.saveData === true || /^(slow-2g|2g)$/.test(conn.effectiveType || '');
     const STARTUP_MS = 6000, STALL_MS = 3000;
@@ -99,7 +99,7 @@
     function fail() { state = 'failed'; stopVideo(); render(); }   // clip could not play: poster plus the slow push
     const startVideo = () => {
       queued = false;
-      if (state !== 'idle' || userPaused || !video || stillOnly() || portrait.matches) return;
+      if (state !== 'idle' || userPaused || !video || stillOnly() || !wide.matches) return;
       state = 'loading';
       let bad = 0;
       const add = (src, type) => {
@@ -125,7 +125,7 @@
     function render() {
       if (stillOnly()) { stopVideo(); hero.classList.remove('push-on', 'is-paused'); pause.hidden = true; return; }
       pause.hidden = false;
-      const wantVideo = video && !portrait.matches && state !== 'failed';
+      const wantVideo = video && wide.matches && state !== 'failed';
       if (wantVideo) { hero.classList.remove('push-on'); if (state === 'idle') queueStart(); }
       else { stopVideo(); hero.classList.add('push-on'); }
       hero.classList.toggle('is-paused', userPaused);
@@ -144,7 +144,7 @@
       document.addEventListener('visibilitychange', syncPlayback);
     }
     listen(reduce, () => { if (reduce.matches) state = state === 'failed' ? 'failed' : 'idle'; render(); });
-    listen(portrait, render);
+    listen(wide, render);
     pause.addEventListener('click', () => {
       userPaused = pause.getAttribute('aria-pressed') !== 'true';
       pause.setAttribute('aria-pressed', String(userPaused));

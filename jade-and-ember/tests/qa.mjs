@@ -206,17 +206,46 @@ await scenario('video: autoplay refused = poster + slow push, no broken state', 
   const s = await state(page);
   if (s.cls.includes('is-video') || !s.cls.includes('push-on') || s.anim !== 'push') p.push(`expected the push fallback: ${JSON.stringify(s)}`);
 });
-await scenario('video: phone portrait = never requested, poster + push (v0.2 behaviour)', { viewport: { width: 390, height: 844 }, isMobile: true, hasTouch: true }, null, async ({ page, p, reqs }) => {
+await scenario('video: phone portrait (390x844) = never requested, poster + push + Pause', { viewport: { width: 390, height: 844 }, isMobile: true, hasTouch: true }, null, async ({ page, p, reqs }) => {
   const s = await state(page);
   if (reqs.length) p.push(`hero video requested on a portrait phone: ${reqs.map((r) => r.url)}`);
-  if (s.cls.includes('is-video') || !s.cls.includes('push-on') || !s.pause) p.push(`expected poster + push + Pause: ${JSON.stringify(s)}`);
+  if (s.cls.includes('is-video') || !s.cls.includes('push-on') || s.anim !== 'push' || !s.pause) p.push(`expected poster + push + Pause: ${JSON.stringify(s)}`);
 });
-await scenario('video: landscape phone = plays, Pause works', { viewport: { width: 844, height: 390 }, isMobile: true, hasTouch: true }, null, async ({ page, p }) => {
-  await page.waitForSelector('.hero.is-video', { timeout: 8000 }).catch(() => p.push('video did not start on a landscape phone'));
-  await page.click('.pause').catch(() => p.push('Pause not clickable in landscape'));
+await scenario('video: phone landscape (844x390) = never requested, poster + push + Pause', { viewport: { width: 844, height: 390 }, isMobile: true, hasTouch: true }, null, async ({ page, p, reqs }) => {
+  const s = await state(page);
+  if (reqs.length) p.push(`hero video requested on a landscape phone: ${reqs.map((r) => r.url)}`);
+  if (s.cls.includes('is-video') || !s.cls.includes('push-on') || s.anim !== 'push' || !s.pause) p.push(`expected poster + push + Pause: ${JSON.stringify(s)}`);
+  await page.click('.pause');
+  const ps = await page.evaluate(() => getComputedStyle(document.querySelector('.hero-media img')).animationPlayState);
+  if (ps !== 'paused') p.push(`Pause should pause the push on a landscape phone (${ps})`);
+});
+await scenario('video: tablet portrait (820x1180) = never requested, poster + push', { viewport: { width: 820, height: 1180 } }, null, async ({ page, p, reqs }) => {
+  const s = await state(page);
+  if (reqs.length || s.cls.includes('is-video') || !s.cls.includes('push-on')) p.push(`expected poster + push, no video: ${JSON.stringify([reqs.length, s])}`);
+});
+await scenario('video: 959px wide (landscape) = never requested, poster + push', { viewport: { width: 959, height: 700 } }, null, async ({ page, p, reqs }) => {
+  const s = await state(page);
+  if (reqs.length || s.cls.includes('is-video') || !s.cls.includes('push-on')) p.push(`959px must not load the video: ${JSON.stringify([reqs.length, s])}`);
+});
+await scenario('video: 960px wide = plays, Pause works', { viewport: { width: 960, height: 700 } }, null, async ({ page, p }) => {
+  await page.waitForSelector('.hero.is-video', { timeout: 8000 }).catch(() => p.push('video did not start at 960px'));
+  await page.click('.pause').catch(() => p.push('Pause not clickable at 960px'));
   const paused = await page.evaluate(() => document.querySelector('.hero-video').paused);
-  if (!paused) p.push('Pause did not pause the video in landscape');
+  if (!paused) p.push('Pause did not pause the video at 960px');
 });
+await scenario('video: touch device at desktop width (1280x800) = plays', { viewport: { width: 1280, height: 800 }, isMobile: true, hasTouch: true }, null, async ({ page, p }) => {
+  await page.waitForSelector('.hero.is-video', { timeout: 8000 }).catch(() => p.push('video did not start on a wide touch device (width, not device type, decides)'));
+});
+await scenario('video: resizing across 960px stops and restarts it (and the push takes over)', { viewport: { width: 1280, height: 800 } }, null, async ({ page, p }) => {
+  await page.waitForSelector('.hero.is-video', { timeout: 8000 }).catch(() => p.push('video did not start at 1280px'));
+  await page.setViewportSize({ width: 800, height: 800 }); await page.waitForTimeout(800);
+  let s = await state(page);
+  if (s.cls.includes('is-video') || !s.cls.includes('push-on') || s.src !== 0) p.push(`below 960px the clip should be dropped and the push should run: ${JSON.stringify(s)}`);
+  await page.setViewportSize({ width: 1280, height: 800 });
+  await page.waitForSelector('.hero.is-video', { timeout: 8000 }).catch(() => p.push('video did not restart after resizing back above 960px'));
+  s = await state(page);
+  if (s.anim !== 'none') p.push(`the push must stop again once the clip plays: ${JSON.stringify(s)}`);
+}, 3500);
 await scenario('video: no JS (simulated) = no source, invisible element, no motion', { viewport: { width: 1280, height: 800 } }, (page) => page.route('**/site.js', (r) => r.abort()), async ({ page, p, reqs }) => {
   const s = await page.evaluate(() => ({ sources: document.querySelector('.hero-video').querySelectorAll('source').length, src: document.querySelector('.hero-video').getAttribute('src'), op: getComputedStyle(document.querySelector('.hero-video')).opacity, anim: getComputedStyle(document.querySelector('.hero-media img')).animationName }));
   if (reqs.length || s.sources || s.src || s.op !== '0' || s.anim !== 'none') p.push(`without JS expected no video, no motion: ${JSON.stringify([reqs.length, s])}`);

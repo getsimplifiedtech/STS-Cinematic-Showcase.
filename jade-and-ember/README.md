@@ -1,7 +1,7 @@
-# Jade & Ember — fictional modern Chinese kitchen (STS concept v0.3)
+# Jade & Ember — fictional modern Chinese kitchen (STS concept v0.3.1)
 
 Standalone static site. No framework, no runtime dependencies, no external requests, no Lovable. Target path: `/jade-and-ember/`.
-**v0.3:** the hero plays one short cinematic loop (concept footage) over the still, where the visitor and device allow it. The still stays the poster and the fallback.
+**v0.3:** the hero plays one short cinematic loop (concept footage) over the still, on desktop widths (960 px and up) where the visitor allows it. The still stays the poster and the fallback.
 
 > Jade & Ember does not exist. Menu, prices, address, phone number and hours are invented and labelled as samples on the page.
 > Food images and the hero video are AI-generated concept media (see `media/PROVENANCE.md`) and do not depict dishes served by any restaurant.
@@ -41,11 +41,11 @@ Files: `media/hero-loop.webm` (VP9, 584 KB) and `media/hero-loop.mp4` (H.264, 89
 
 | Visitor or condition | What renders |
 |---|---|
-| Desktop, tablet landscape, landscape phone; motion allowed; normal connection; JS on | The poster paints first (it is the LCP image). After the page `load` event and an idle moment, the clip is requested (WebM first, MP4 second), starts muted and inline, and crossfades in over 400 ms. The CSS push is off while it plays. |
+| Viewport 960 px wide or more (any device, any orientation); motion allowed; normal connection; JS on | The poster paints first (it is the LCP image). After the page `load` event and an idle moment, the clip is requested (WebM first, MP4 second), starts muted and inline, and crossfades in over 400 ms. The CSS push is off while it plays. |
 | Pause motion pressed | The clip pauses; the button becomes Play motion. A user pause is never overridden by the scroll or tab-visibility logic. |
 | Hero scrolled off screen, or tab hidden | The clip pauses and resumes by itself unless the visitor paused it. |
 | `prefers-reduced-motion: reduce`, `Save-Data`, or `2g`/`slow-2g` connection | Never requested. The still only, no Pause button. |
-| Portrait phone or tablet (the portrait crop of the poster) | Never requested. The poster with the slow push and a Pause button (v0.2 behaviour). |
+| Viewport under 960 px wide: phones (portrait or landscape), small tablets, narrow windows | Never requested. The poster with the slow push and a Pause button (v0.2 behaviour). Resizing across 960 px starts or drops the clip live. |
 | Clip fails (network error, no playable source), does not start within 6 s, stalls for 3 s, or autoplay is refused | The clip is dropped and the poster with the slow push and Pause stays. No play button is ever drawn over the hero. |
 | No JS | The still only; the `<video>` has no source and is invisible. |
 

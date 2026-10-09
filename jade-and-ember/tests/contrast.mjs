@@ -32,7 +32,11 @@ for (const [w, h] of viewports) {
   await page.goto(base);
   await page.waitForTimeout(600);
   // Where the page plays the clip (desktop and landscape) measure the video frames; elsewhere the poster with its push.
-  const hasVideo = await page.waitForSelector('.hero.is-video', { timeout: 6000 }).then(() => true, () => false);
+  // The clip is for desktop widths (960px and up); a viewport that should play it but does not is a failure, not a quiet fallback.
+  const expectVideo = w >= 960;
+  const hasVideo = expectVideo ? await page.waitForSelector('.hero.is-video', { timeout: 8000 }).then(() => true, () => false) : false;
+  if (expectVideo && !hasVideo) { failures++; console.log(`FAIL ${w}x${h}: the video did not start`); }
+  if (!expectVideo && (await page.evaluate(() => document.querySelector('.hero').classList.contains('is-video')))) { failures++; console.log(`FAIL ${w}x${h}: the video must not play below 960px`); }
   const mode = hasVideo ? 'video' : 'push';
   if (hasVideo) {
     await page.click('.pause');   // freeze the clip so frames can be set exactly
