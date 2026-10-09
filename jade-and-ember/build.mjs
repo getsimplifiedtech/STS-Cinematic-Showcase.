@@ -118,15 +118,17 @@ ${c.meta.robots ? `<meta name="robots" content="${esc(c.meta.robots)}">` : ''}
   </section>
 
   <section class="menu" id="menu" aria-labelledby="menu-title">
-    <div class="wrap">
+    <div class="wrap menu-grid">
       <header class="sec-head"><p class="label">${esc(c.menu.label)}</p><h2 id="menu-title">${esc(c.menu.heading)}</h2></header>
-      <div class="menu-bar">
-        <ul class="tabs" aria-label="Menu categories">${tabs}</ul>
-        <div class="menu-cta">${orderLink('btn-ink')}</div>
+      <div class="menu-main">
+        <div class="menu-bar">
+          <ul class="tabs" aria-label="Menu categories">${tabs}</ul>
+          <div class="menu-cta">${orderLink('btn-ink')}</div>
+        </div>
+        <div class="cats">${panels}
+        </div>
+        <p class="menu-cta-end">${orderLink('btn-ink')}</p>
       </div>
-      <div class="cats">${panels}
-      </div>
-      <p class="menu-cta-end">${orderLink('btn-ink')}</p>
       <p class="menu-note">${esc(c.menu.note)}</p>
     </div>
   </section>

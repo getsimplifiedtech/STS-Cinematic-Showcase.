@@ -1,8 +1,49 @@
-# Jade & Ember — QA and critique (concept v0.3.1, cinematic hero loop on desktop widths)
+# Jade & Ember — QA and critique (concept v0.4, composition refinement)
 
 Branch `feature/jade-and-ember-brief`. Dates: 2026-10-09. Tooling: Playwright 1.64 + axe-core 4.13, Lighthouse 12.6.1 (`@lhci/cli` 0.15 for the mobile preset, the Lighthouse CLI for the desktop preset), Chromium 1194 (headless, Linux), ffmpeg 6.1. **Nothing was run on a real device.**
 
 Re-runnable: `npm run test:a11y`, `npm run test:contrast`, `npm run test:lighthouse`, `npm run test:video-tools`, and `python3 tools/video-qa.py media/hero-loop.webm --poster media/hero-wok.webp`.
+
+## What v0.4 changed (composition only)
+Brief: the photo presentation read as blocky and early-2000s; make it more immersive, editorial and future-forward without neon or gimmicks. Kept: brand, palette, type, cinematic hero and its video logic and fallbacks, content and section order, `noindex`, performance and accessibility rules. No media was generated or edited, no credits spent, nothing merged or deployed. `styles.css` and the menu markup in `build.mjs` changed; `site.js` did not.
+
+**What looked wrong in v0.3.1 (my critique before changing anything)**
+- Every photograph was a hard-edged rectangle, about half the content width, sitting on a page that is much darker than the photo's own backdrop (source images are mid-grey at their edges, the page is #0f1110). The boxes were visible even on a dark page.
+- Every section opened the same way: label dash, heading, then one block. Image-beside-text appeared three times in a row (signature) and once more (story).
+- Boxed or ruled furniture: ruled four-up index, dashed order note, dashed example button, outlined hero button, a ruled row table for the hours, filled button in the menu bar, hard seams (a rule and a tonal step) before Visit and Order, and a hard cut at the foot of the hero.
+
+**Design thesis:** plates are lit out of the page's own darkness. Type sits in the negative space and steps onto the feathered edge of the light.
+
+| Area | v0.4 |
+|---|---|
+| Photographs | No frame. CSS `mask-image` with eased (smoothstep) feathers on every edge that is not the screen edge. Linear feathers still showed an edge on the bright source backdrops; the eased ramps fixed that. Browsers without mask support get a plain rectangle (degrades, not breaks) |
+| Signature | Three different relationships to the screen edge: plate 1 bleeds off the left and its name steps onto the feathered right edge; plate 2 bleeds off the right with the text hanging low on the left; plate 3 is one wide band, feathered on both sides, with the text sliding up under it. Names are larger, numerals smaller, the rule above the meta line is gone |
+| Rhythm | Intro is type only; its four elements step down the page instead of a ruled row. Signature is image-led and bleeding. Menu is a split (heading and note left, list right). Story overlaps quote and picture and bleeds right. Visit is type only with a serif hours list. Order is a quiet close. The hero now dissolves into the page |
+| De-boxing | Dashed order note and dashed example button, outlined hero button, ruled hours table, filled menu button, section border and tonal step before Visit and Order all removed or softened |
+| Phones | Plates run edge to edge, feathered at the foot, the name rising into the feather; plates 2 and 3 inset on opposite sides. Story picture is drawn up under the quote |
+| Kept | Hero markup and CSS (only a bottom fade and a text-link secondary button were added), `site.js`, tab behaviour, all copy, palette, fonts |
+
+**New test:** `tests/contrast-sections.mjs` (`npm run test:contrast-sections`) measures text that sits on or beside a photograph below the hero. It found a real failure on its first run: the small plate numerals overlapped the photo on tablets and phones (down to 2.6:1). Fixed by reducing the overlap there. Now 260 text blocks over 13 viewports (2560 down to 320, plus 844×390): 0 below the 99% gate, worst single pixel 4.15:1.
+
+**Results after v0.4**
+| Check | Result |
+|---|---|
+| `tests/qa.mjs` (axe at 1440, 820, 390, 320, 844×390, reduced motion; overflow, targets, video scenarios, tabs, nav, no-JS) | all pass, 0 axe violations |
+| `tests/contrast.mjs` (hero, 374 lines) | 0 below gate, unchanged |
+| `tests/contrast-sections.mjs` (new) | 260 blocks, 0 below gate |
+| Lighthouse mobile preset, 3 runs | performance 99 to 100, accessibility 100, best practices 100, SEO 63 (intentional `noindex`); LCP 1.7 to 2.0 s, CLS 0, TBT 0, 142 KiB |
+| Lighthouse desktop preset | performance 100, accessibility 100, best practices 100; LCP 0.5 s, CLS 0, TBT 0; 839 KiB (584 KiB of it the WebM) |
+| Page weight | `styles.css` grew from 24 KB to 31 KB raw (the eased gradient strings); mobile transfer is unchanged at 142 KiB |
+
+**Honest critique after the change (swap, squint, mute)**
+- *Squint:* the page now reads as light pools in the dark with type beside them, where before it read as boxes. The one remaining hard block is the cream menu section, kept on purpose as the "printed menu".
+- *Swap test:* the feathered-plate-on-black treatment is more current than before, but it is a recognised premium-restaurant idiom, not something only Jade & Ember could say. The brand-specific parts are still the jade/ember dash, the flame hero and the copy.
+- *Mute:* unchanged; reduced-motion and Save-Data visitors still get the designed still.
+- *Still template-like:* the label-dash-plus-heading opening is still used on every section (kept as the brand device); section padding is still generous and fairly even; the hero is still a left-text, right-image split.
+- *Image resolution:* the plates are 1200 px sources shown up to 1320 px (desktop cap) and the dish-3 band up to 1560 px, so up to 1.3× upscaling. The feathering and darkness hide it at 1440; I have not judged it on a high-DPI 27 inch or 4K display. [unverified]
+- *Cropping:* the large crops (5:4 and 21:9) trim the plates' sides; Mapo Tofu bleeds close to the left edge. Looks intended in screenshots, but it is a taste call.
+- *Menu split:* the left column is empty for much of its height on desktop, and the tab panels change the list height. Acceptable, not elegant.
+- *Not checked:* real devices (Safari/iOS mask rendering, `mask-composite` in older Safari, Firefox), scroll feel, 200 percent zoom, a screen reader. [unverified]
 
 ## What v0.3.1 changed
 The hero clip now plays **only at viewport widths of 960 px and above**, whatever the device or its orientation (decision after the v0.3 review). Below 960 px, including phones in landscape, small tablets and narrow windows, the poster with the slow push and the Pause button stays (v0.2 behaviour). `site.js` uses one `(min-width: 960px)` test, which also starts or drops the clip live when a window is resized across 960 px. The existing footage, flame speed, encodes, markup and other fallbacks are unchanged. Nothing was generated and no credits were spent.
@@ -60,7 +101,7 @@ The flame sits well to the right of the copy, so the moving footage did not lowe
 `tools/video-qa.py` on `hero-loop.webm` and `hero-loop.mp4` gives the same result as the original in the Gate A report. Frame 0 matches the poster (SSIM 0.975 WebM, 0.970 MP4). In a browser the first video frame and the poster differ by an average of 1.7 levels over the desktop hero window, so the 400 ms crossfade is invisible. Two numeric checks still fail, as accepted at Gate A: rigid-region SSIM 0.92 (left handle next to the steam; 0 px of actual movement) and first/last-frame SSIM 0.87 (the flame, which can never match). The loop point is a hard cut about the size of an ordinary frame-to-frame flame change (closing step 1.2× the median).
 
 ## Remaining issues (honest list)
-1. **[unverified] Real devices.** iPhone, Safari (including whether VP9 WebM plays and is chosen, and Low Power Mode blocking autoplay), Android, Firefox, a high-refresh display, and battery or heat during the loop have not been tested. Safari and iOS are the biggest unknown.
+1. **[unverified] Real devices.** Also the new CSS masks on Safari and iOS. iPhone, Safari (including whether VP9 WebM plays and is chosen, and Low Power Mode blocking autoplay), Android, Firefox, a high-refresh display, and battery or heat during the loop have not been tested. Safari and iOS are the biggest unknown.
 2. **The MP4 fallback is untested in a browser.** Playwright's Chromium cannot decode H.264, so only the WebM path ran. The MP4 file is valid (ffprobe, frame-accurate QA); the source order and failure logic are tested. If a browser rejects both sources, the page falls back to poster plus push.
 3. **Playback quality is unproven by me.** I cannot play video here. The flame speed and the loop cut are approved, but I have not watched them in motion.
 4. **720p source.** Soft on large screens; the clip is upscaled about 1.2× in a 1920-wide hero and more on high-DPI displays. No upscaler was used.

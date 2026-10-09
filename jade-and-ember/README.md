@@ -1,6 +1,8 @@
-# Jade & Ember — fictional modern Chinese kitchen (STS concept v0.3.1)
+# Jade & Ember — fictional modern Chinese kitchen (STS concept v0.4)
 
 Standalone static site. No framework, no runtime dependencies, no external requests, no Lovable. Target path: `/jade-and-ember/`.
+**v0.4:** composition refinement only. Photographs are frameless and feathered into the page (CSS masks, no new media), the three signature plates bleed and overlap differently, the section rhythm is varied, and boxed or ruled elements are removed. Content, hero, video behaviour and fallbacks are unchanged. See `QA.md`.
+
 **v0.3:** the hero plays one short cinematic loop (concept footage) over the still, on desktop widths (960 px and up) where the visitor allows it. The still stays the poster and the fallback.
 
 > Jade & Ember does not exist. Menu, prices, address, phone number and hours are invented and labelled as samples on the page.
@@ -11,7 +13,7 @@ Standalone static site. No framework, no runtime dependencies, no external reque
 ```
 open index.html            # or: python3 -m http.server 8766   (from this folder)
 node build.mjs             # rebuilds index.html from config.json (Node 18+, no deps)
-npm i && npm run test:a11y && npm run test:contrast && npm run test:lighthouse   # QA (dev dependencies only)
+npm i && npm run test:a11y && npm run test:contrast && npm run test:contrast-sections && npm run test:lighthouse   # QA (dev dependencies only)
 python3 tools/video-qa.py media/hero-loop.webm --poster media/hero-wok.webp   # numeric checks on the loop (needs ffmpeg, numpy, Pillow)
 npm run test:video-tools   # dry run of that checker on synthetic clips
 ```
