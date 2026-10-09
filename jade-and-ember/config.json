@@ -17,7 +17,7 @@
   },
   "disclosure": {
     "bar": "Fictional restaurant — a concept design by Simplified Tech Solutions. Menu, prices, address and hours are samples.",
-    "footer": "Jade & Ember is a fictional restaurant created by Simplified Tech Solutions as a website design concept. It does not exist. All menu items, prices, the address, the phone number and the opening hours are invented samples. Food imagery is AI-generated concept art and does not depict real dishes served by any restaurant.",
+    "footer": "Jade & Ember is a fictional restaurant created by Simplified Tech Solutions as a website design concept. It does not exist. All menu items, prices, the address, the phone number and the opening hours are invented samples. Food imagery and the hero video are AI-generated concept media and do not depict real dishes served by any restaurant.",
     "backLabel": "Back to the STS showcase",
     "backHref": "../",
     "barShort": "Fictional restaurant · STS design concept.",
@@ -69,6 +69,13 @@
       "alt": "A carbon steel wok on a roaring burner: sliced beef, broccoli and red chili in the pan under a tall flare of orange flame, with steam rising into a dark kitchen.",
       "focusDesktop": "56% 50%",
       "focusMobile": "50% 62%"
+    },
+    "video": {
+      "webm": "media/hero-loop.webm",
+      "mp4": "media/hero-loop.mp4",
+      "width": 1280,
+      "height": 720,
+      "loopSeconds": 5.04
     }
   },
   "intro": {
@@ -365,6 +372,6 @@
   "footer": {
     "builtBy": "Website concept by Simplified Tech Solutions",
     "builtByHref": "https://getsimplifiedtech.com/",
-    "stamp": "Concept v0.2 — still-image hero, no video"
+    "stamp": "Concept v0.3 — cinematic hero loop (concept footage)"
   }
 }

@@ -8,7 +8,8 @@
     "serve": "python3 -m http.server 8766",
     "test:a11y": "node tests/qa.mjs",
     "test:lighthouse": "lhci autorun --config=lighthouserc.json",
-    "test:contrast": "node tests/contrast.mjs"
+    "test:contrast": "node tests/contrast.mjs",
+    "test:video-tools": "python3 tools/video-qa-selftest.py"
   },
   "devDependencies": {
     "@axe-core/playwright": "^4.10.0",

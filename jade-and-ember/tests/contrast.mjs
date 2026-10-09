@@ -1,6 +1,7 @@
 // Hero text contrast over the photograph. axe cannot compute this, so we measure it.
 //
-// For each viewport and for three points in the 38 s hero push (start, middle, end), the hero's text is made
+// For each viewport and for several points in the hero motion (five positions in the video loop where the clip plays,
+// three in the 38 s push where it does not), the hero's text is made
 // transparent (button fills, borders and scrims stay), the hero is screenshotted, and the pixels behind every
 // line of text are compared with the text's computed colour using the WCAG relative-luminance formula.
 //
@@ -8,21 +9,9 @@
 // The worst single pixel is reported too, because film grain and sparks make a strict min-pixel gate meaningless.
 // Run: npm run test:contrast   (set CHROMIUM_PATH to use an installed Chromium; VERBOSE=1 lists every line)
 import { chromium } from 'playwright';
-import { createServer } from 'node:http';
-import { readFile } from 'node:fs/promises';
-import { extname, join, normalize } from 'node:path';
+import { serve } from './serve.mjs';
 
-const root = process.cwd();
-const types = { '.html': 'text/html', '.js': 'text/javascript', '.css': 'text/css', '.webp': 'image/webp', '.woff2': 'font/woff2' };
-const server = createServer(async (req, res) => {
-  try {
-    let p = normalize(decodeURIComponent(req.url.split('?')[0]));
-    if (p.endsWith('/') || p === '.') p = '/index.html';
-    res.writeHead(200, { 'content-type': types[extname(p)] || 'application/octet-stream' });
-    res.end(await readFile(join(root, p)));
-  } catch { res.writeHead(404); res.end('nf'); }
-}).listen(0);
-const base = `http://127.0.0.1:${server.address().port}/`;
+const { server, base } = serve();
 const browser = await chromium.launch(process.env.CHROMIUM_PATH ? { executablePath: process.env.CHROMIUM_PATH } : {});
 
 const viewports = [
@@ -30,9 +19,11 @@ const viewports = [
   [820, 1180], [768, 1024], [430, 932], [414, 896], [390, 844], [360, 740], [320, 640],
   [844, 390], [667, 375],
 ];
-const phases = [['start', '0s'], ['middle', '-19s'], ['end', '-37.9s']];
+const pushPhases = [['start', '0s'], ['middle', '-19s'], ['end', '-37.9s']];
+const videoPhases = [['0%', 0], ['25%', 0.25], ['50%', 0.5], ['75%', 0.75], ['100%', 0.999]];
 const selectors = ['.eyebrow', '#hero-title span:nth-child(1)', '#hero-title span:nth-child(2)', '.hero-text', '.hero-actions a', '.hero-caption', '.pause-txt', '.pause-ico'];
 const GATE = 0.99;
+const modes = { video: 0, push: 0 };
 let failures = 0, rows = 0, worst = { ratio: 99, where: '' }, lowestP1 = { ratio: 99, where: '' };
 
 for (const [w, h] of viewports) {
@@ -40,7 +31,16 @@ for (const [w, h] of viewports) {
   const page = await ctx.newPage();
   await page.goto(base);
   await page.waitForTimeout(600);
-  await page.addStyleTag({ content: '.hero-media img{animation-play-state:paused!important}' });
+  // Where the page plays the clip (desktop and landscape) measure the video frames; elsewhere the poster with its push.
+  const hasVideo = await page.waitForSelector('.hero.is-video', { timeout: 6000 }).then(() => true, () => false);
+  const mode = hasVideo ? 'video' : 'push';
+  if (hasVideo) {
+    await page.click('.pause');   // freeze the clip so frames can be set exactly
+    await page.evaluate(() => { document.querySelector('.hero-video').pause(); });
+  } else {
+    await page.addStyleTag({ content: '.hero-media img{animation-play-state:paused!important}' });
+  }
+  const phases = hasVideo ? videoPhases : pushPhases;
   // intended text colours and sizes, read before the transparent override is applied
   const meta = await page.evaluate((sels) => sels.flatMap((sel) => [...document.querySelectorAll(sel)].map((el, idx) => {
     const cs = getComputedStyle(el);
@@ -51,12 +51,19 @@ for (const [w, h] of viewports) {
   })).filter(Boolean), selectors);
 
   for (const [phase, delay] of phases) {
-    await page.evaluate((d) => {
-      document.querySelectorAll('.hero-media img').forEach((i) => { i.style.animationDelay = d; });
+    if (hasVideo) {
+      await page.evaluate(async (f) => {
+        const v = document.querySelector('.hero-video');
+        v.currentTime = Math.min(v.duration - 0.05, f * v.duration);
+        await new Promise((r) => { v.addEventListener('seeked', r, { once: true }); setTimeout(r, 2000); });
+        await new Promise((r) => requestAnimationFrame(() => requestAnimationFrame(r)));
+      }, delay);
+    } else await page.evaluate((d) => { document.querySelectorAll('.hero-media img').forEach((i) => { i.style.animationDelay = d; }); }, delay);
+    await page.evaluate(() => {
       let st = document.getElementById('ct-hide');
       if (!st) { st = document.createElement('style'); st.id = 'ct-hide'; document.head.appendChild(st); }
       st.textContent = '.top,.disclosure{visibility:hidden!important}.hero [data-ct],.hero .pause-ico{color:transparent!important;text-shadow:none!important}.pause-ico{visibility:hidden}';
-    }, delay);
+    });
     await page.waitForTimeout(80);
     const geo = await page.evaluate(() => {
       const hero = document.querySelector('.hero').getBoundingClientRect();
@@ -106,8 +113,8 @@ for (const [w, h] of viewports) {
       const pass = ratios.filter((r) => r >= need).length / ratios.length;
       const ok = pass >= GATE;
       const p1 = ratios[Math.floor(ratios.length * 0.01)];
-      const where = `${w}x${h} ${phase} ${m.sel}`;
-      rows++;
+      const where = `${w}x${h} ${mode} ${phase} ${m.sel}`;
+      rows++; modes[mode]++;
       if (!ok) failures++;
       if (ratios[0] < worst.ratio) worst = { ratio: ratios[0], where };
       if (p1 < lowestP1.ratio) lowestP1 = { ratio: p1, where };
@@ -116,7 +123,7 @@ for (const [w, h] of viewports) {
   }
   await ctx.close();
 }
-console.log(`\n${rows} text lines measured (${viewports.length} viewports x ${phases.length} push positions); ${failures} below the ${GATE * 100}% gate.`);
+console.log(`\n${rows} text lines measured (${viewports.length} viewports; ${modes.video} in video mode, ${modes.push} in push mode); ${failures} below the ${GATE * 100}% gate.`);
 console.log(`Worst single pixel: ${worst.ratio.toFixed(2)}:1 (${worst.where}). Lowest 1st-percentile: ${lowestP1.ratio.toFixed(2)}:1 (${lowestP1.where}).`);
 await browser.close(); server.close();
 process.exit(failures ? 1 : 0);

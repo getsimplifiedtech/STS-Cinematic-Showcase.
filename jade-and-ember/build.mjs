@@ -86,6 +86,7 @@ ${c.meta.robots ? `<meta name="robots" content="${esc(c.meta.robots)}">` : ''}
         <source media="(max-aspect-ratio: 1/1) and (max-width: 959px)" srcset="${esc(h.image.mobile)}" width="${h.image.mobileWidth}" height="${h.image.mobileHeight}">
         <img src="${esc(h.image.desktop)}" alt="${esc(h.image.alt)}" width="${h.image.width}" height="${h.image.height}" fetchpriority="high" decoding="async" style="--focus-d:${esc(h.image.focusDesktop)};--focus-m:${esc(h.image.focusMobile)}">
       </picture>
+      ${h.video ? `<video class="hero-video" muted loop playsinline preload="none" disablepictureinpicture disableremoteplayback aria-hidden="true" tabindex="-1" width="${+h.video.width}" height="${+h.video.height}" data-webm="${esc(h.video.webm)}" data-mp4="${esc(h.video.mp4)}" style="--focus-d:${esc(h.image.focusDesktop)}"></video>` : ''}
     </div>
     <div class="hero-copy">
       <p class="eyebrow">${esc(h.eyebrow)}</p>
@@ -93,7 +94,7 @@ ${c.meta.robots ? `<meta name="robots" content="${esc(c.meta.robots)}">` : ''}
       <p class="hero-text">${esc(h.text)}</p>
       <p class="hero-actions"><a class="btn btn-ember" href="${esc(h.primaryCta.href)}">${esc(h.primaryCta.label)}</a> ${orderLink('btn-line hero-order')}</p>
     </div>
-    <p class="hero-caption"><span class="vh">Pictured: </span>${esc(h.caption)}<span class="vh">. AI-generated concept image.</span></p>
+    <p class="hero-caption"><span class="vh">Pictured: </span>${esc(h.caption)}<span class="vh">. AI-generated concept image and video.</span></p>
     <button class="pause" type="button" aria-pressed="false" hidden><span class="pause-ico" aria-hidden="true"></span><span class="pause-txt">Pause motion</span></button>
   </section>
 

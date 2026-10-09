@@ -1,6 +1,6 @@
 # Jade & Ember — Cinematic Hero Video Production Plan
 
-**Status:** Gate A technical plan approved for one trial only; step 0 done (`docs/JADE_AND_EMBER_GATE_A_PREFLIGHT.md`); awaiting source-frame approval. **No video has been generated, no media uploaded to a generator, nothing merged, deployed or published.**
+**Status:** Gate A done: one trial run (`docs/JADE_AND_EMBER_GATE_A_RESULT.md`), footage approved, and integrated into the site in v0.3 (`jade-and-ember/QA.md`). Gates B (portrait clip) and C (ingredient toss) were not requested. **No video has been generated, no media uploaded to a generator, nothing merged, deployed or published.**
 **Builds on:** `jade-and-ember/` v0.2 (`2382116`, approved as the working foundation).
 **Standard applied:** STS Premium Web Design v2.0 (Part VI media justification and source-media discipline, Part V motion, Part XI accessibility, performance and real-device QA).
 **Prepared:** 2026-10-09.

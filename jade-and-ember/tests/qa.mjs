@@ -2,22 +2,9 @@
 // Set CHROMIUM_PATH to use a preinstalled Chromium.
 import { chromium } from 'playwright';
 import AxeBuilder from '@axe-core/playwright';
-import { createServer } from 'node:http';
-import { readFile } from 'node:fs/promises';
-import { extname, join, normalize } from 'node:path';
+import { serve } from './serve.mjs';
 
-const root = process.cwd();
-const types = { '.html': 'text/html', '.js': 'text/javascript', '.css': 'text/css', '.json': 'application/json', '.webp': 'image/webp', '.woff2': 'font/woff2' };
-const server = createServer(async (req, res) => {
-  try {
-    let p = normalize(decodeURIComponent(req.url.split('?')[0])).replace(/^(\.\.[/\\])+/, '');
-    if (p.endsWith('/') || p === '.') p = '/index.html';
-    const f = join(root, p);
-    res.writeHead(200, { 'content-type': types[extname(f)] || 'application/octet-stream' });
-    res.end(await readFile(f));
-  } catch { res.writeHead(404); res.end('nf'); }
-}).listen(0);
-const base = `http://127.0.0.1:${server.address().port}/`;
+const { server, base } = serve();
 const browser = await chromium.launch(process.env.CHROMIUM_PATH ? { executablePath: process.env.CHROMIUM_PATH } : {});
 
 let failed = 0;
@@ -87,22 +74,35 @@ for (const [name, opts] of cases) {
   await page.click('#tab-noodle');
   v = await visible();
   if (v[0] !== 'cat-noodle') p.push('click on tab did not switch category');
-  // Pause control
-  const pauseVisible = await page.isVisible('.pause');
-  if (!pauseVisible) p.push('Pause motion button not visible when motion is allowed');
-  const state = () => page.evaluate(() => getComputedStyle(document.querySelector('.hero-media img')).animationPlayState);
-  const run1 = await state();
+  // Pause control and the cinematic loop (the video is the primary motion on desktop; the CSS push is only a fallback)
+  if (!(await page.isVisible('.pause'))) p.push('Pause motion button not visible when motion is allowed');
+  await page.waitForSelector('.hero.is-video', { timeout: 10000 }).catch(() => p.push('hero video never started (.hero.is-video missing after 10 s)'));
+  const vs = () => page.evaluate(() => { const v = document.querySelector('.hero-video'); return { paused: v.paused, t: v.currentTime, muted: v.muted, loop: v.loop, controls: v.controls, hidden: v.getAttribute('aria-hidden'), src: [...v.querySelectorAll('source')].map((s) => s.type), op: getComputedStyle(v).opacity, push: getComputedStyle(document.querySelector('.hero-media img')).animationName }; });
+  await page.evaluate(() => scrollTo(0, 0)); await page.waitForTimeout(800);   // the menu-tab clicks above scrolled the hero away, which correctly paused the clip
+  let a1 = await vs(); await page.waitForTimeout(700); let a2 = await vs();
+  if (a1.paused || a2.t <= a1.t) p.push(`video is not advancing: ${JSON.stringify([a1.t, a2.t, a1.paused])}`);
+  if (!a1.muted || !a1.loop || a1.controls || a1.hidden !== 'true') p.push(`video attributes wrong: ${JSON.stringify(a1)}`);
+  if (a1.src[0] !== 'video/webm; codecs="vp9"' || a1.src[1] !== 'video/mp4') p.push(`source order should be WebM (VP9) then MP4: ${a1.src}`);
+  if (a1.op !== '1') p.push(`video should be faded in (opacity ${a1.op})`);
+  if (a1.push !== 'none') p.push(`CSS push must be off while the video plays (animation: ${a1.push})`);
   await page.click('.pause');
-  const run2 = await state();
-  const pressed = await page.getAttribute('.pause', 'aria-pressed');
-  if (run1 !== 'running' || run2 !== 'paused' || pressed !== 'true') p.push(`pause control: ${run1} -> ${run2}, aria-pressed=${pressed}`);
+  await page.waitForTimeout(200); const b1 = await vs(); await page.waitForTimeout(400); const b2 = await vs();
+  const pressed = await page.getAttribute('.pause', 'aria-pressed'); const label = await page.textContent('.pause-txt');
+  if (!b1.paused || b2.t !== b1.t || pressed !== 'true' || label !== 'Play motion') p.push(`Pause did not pause the video: ${JSON.stringify([b1.paused, b1.t, b2.t, pressed, label])}`);
+  await page.click('.pause'); await page.waitForTimeout(700); const c1 = await vs();
+  if (c1.paused || c1.t <= b2.t) p.push('Play motion did not resume the video');
+  // off-screen pause and resume
+  await page.evaluate(() => scrollTo(0, 3000)); await page.waitForTimeout(600);
+  if (!(await vs()).paused) p.push('video should pause when the hero is off screen');
+  await page.evaluate(() => scrollTo(0, 0)); await page.waitForTimeout(800);
+  if ((await vs()).paused) p.push('video should resume when the hero returns');
   const robots = await page.getAttribute('meta[name=robots]', 'content').catch(() => null);
   if (!robots || !/noindex/.test(robots)) p.push(`expected <meta name="robots" content="noindex…">, got ${robots}`);
   const heats = await page.evaluate(() => [...document.querySelectorAll('.heat')].map((h) => h.getAttribute('aria-label')));
   if (!heats.length || heats.some((l) => !/^Heat [123] of 3$/.test(l))) p.push(`heat indicators missing or unlabelled: ${heats}`);
   const sig = await page.evaluate(() => document.querySelectorAll('.dish').length);
   if (sig !== 3) p.push(`expected 3 signature dishes, got ${sig}`);
-  report('behaviour: tabs + pause control + noindex + heat labels (desktop)', p);
+  report('behaviour: tabs + hero video + Pause + off-screen pause + noindex + heat labels (desktop)', p);
   await ctx.close();
 }
 {
@@ -155,6 +155,72 @@ for (const [name, opts] of cases) {
   report('behaviour: no-JS fallback (simulated), all categories, nav, no unpausable motion', p);
   await ctx.close();
 }
+
+/* Hero video: when it may and may not load, and what happens when it fails */
+const heroReq = (log) => log.filter((r) => /hero-loop/.test(r.url));
+async function scenario(name, opts, init, check, wait = 3500) {
+  const { server: s2, log, base: b2 } = serve();
+  const ctx = await browser.newContext(opts);
+  const page = await ctx.newPage();
+  const p = [];
+  if (init) await init(page, ctx);
+  page.on('pageerror', (e) => p.push(`js error: ${e}`));
+  await page.goto(b2);
+  await page.waitForTimeout(wait);
+  await check({ page, p, reqs: heroReq(log), log });
+  report(name, p);
+  await ctx.close(); s2.close();
+}
+const state = (page) => page.evaluate(() => ({ cls: document.querySelector('.hero').className, anim: getComputedStyle(document.querySelector('.hero-media img')).animationName, src: document.querySelector('.hero-video').querySelectorAll('source').length, pause: !document.querySelector('.pause').hidden }));
+
+await scenario('video: not requested before the page has loaded (poster first)', { viewport: { width: 1280, height: 800 } }, async (page) => {
+  page.__t = {}; page.on('request', (r) => { if (/hero-loop/.test(r.url()) && !page.__t.first) page.__t.first = Date.now(); });
+  page.on('load', () => { page.__t.load = Date.now(); });
+}, async ({ page, p }) => {
+  const t = page.__t;
+  if (!t.first) p.push('video was never requested on desktop'); else if (!t.load || t.first < t.load) p.push(`video requested ${t.load ? t.load - t.first : '?'} ms before the load event`);
+});
+await scenario('video: reduced motion = never requested, still only, no Pause', { viewport: { width: 1280, height: 800 }, reducedMotion: 'reduce' }, null, async ({ page, p, reqs }) => {
+  const s = await state(page);
+  if (reqs.length) p.push(`hero video requested under reduced motion: ${reqs.map((r) => r.url)}`);
+  if (s.cls.includes('is-video') || s.cls.includes('push-on') || s.anim !== 'none' || s.pause) p.push(`expected a still: ${JSON.stringify(s)}`);
+});
+await scenario('video: Save-Data = never requested, still only, no Pause', { viewport: { width: 1280, height: 800 } }, (page) => page.addInitScript(() => Object.defineProperty(navigator, 'connection', { value: { saveData: true, effectiveType: '4g' } })), async ({ page, p, reqs }) => {
+  const s = await state(page);
+  if (reqs.length) p.push(`hero video requested with Save-Data: ${reqs.map((r) => r.url)}`);
+  if (s.cls.includes('is-video') || s.cls.includes('push-on') || s.anim !== 'none' || s.pause) p.push(`expected a still: ${JSON.stringify(s)}`);
+});
+await scenario('video: slow connection (2g) = never requested, still only', { viewport: { width: 1280, height: 800 } }, (page) => page.addInitScript(() => Object.defineProperty(navigator, 'connection', { value: { saveData: false, effectiveType: '2g' } })), async ({ page, p, reqs }) => {
+  const s = await state(page);
+  if (reqs.length) p.push(`hero video requested on 2g: ${reqs.map((r) => r.url)}`);
+  if (s.cls.includes('is-video') || s.cls.includes('push-on') || s.anim !== 'none' || s.pause) p.push(`expected a still: ${JSON.stringify(s)}`);
+});
+await scenario('video: request fails = poster + slow push + working Pause', { viewport: { width: 1280, height: 800 } }, (page) => page.route('**/hero-loop.*', (r) => r.abort()), async ({ page, p }) => {
+  const s = await state(page);
+  if (s.cls.includes('is-video') || !s.cls.includes('push-on') || s.anim !== 'push' || !s.pause) p.push(`expected the push fallback: ${JSON.stringify(s)}`);
+  await page.click('.pause');
+  const ps = await page.evaluate(() => getComputedStyle(document.querySelector('.hero-media img')).animationPlayState);
+  if (ps !== 'paused') p.push(`Pause should pause the push fallback (${ps})`);
+}, 4500);
+await scenario('video: autoplay refused = poster + slow push, no broken state', { viewport: { width: 1280, height: 800 } }, (page) => page.addInitScript(() => { HTMLMediaElement.prototype.play = () => Promise.reject(new DOMException('blocked', 'NotAllowedError')); }), async ({ page, p }) => {
+  const s = await state(page);
+  if (s.cls.includes('is-video') || !s.cls.includes('push-on') || s.anim !== 'push') p.push(`expected the push fallback: ${JSON.stringify(s)}`);
+});
+await scenario('video: phone portrait = never requested, poster + push (v0.2 behaviour)', { viewport: { width: 390, height: 844 }, isMobile: true, hasTouch: true }, null, async ({ page, p, reqs }) => {
+  const s = await state(page);
+  if (reqs.length) p.push(`hero video requested on a portrait phone: ${reqs.map((r) => r.url)}`);
+  if (s.cls.includes('is-video') || !s.cls.includes('push-on') || !s.pause) p.push(`expected poster + push + Pause: ${JSON.stringify(s)}`);
+});
+await scenario('video: landscape phone = plays, Pause works', { viewport: { width: 844, height: 390 }, isMobile: true, hasTouch: true }, null, async ({ page, p }) => {
+  await page.waitForSelector('.hero.is-video', { timeout: 8000 }).catch(() => p.push('video did not start on a landscape phone'));
+  await page.click('.pause').catch(() => p.push('Pause not clickable in landscape'));
+  const paused = await page.evaluate(() => document.querySelector('.hero-video').paused);
+  if (!paused) p.push('Pause did not pause the video in landscape');
+});
+await scenario('video: no JS (simulated) = no source, invisible element, no motion', { viewport: { width: 1280, height: 800 } }, (page) => page.route('**/site.js', (r) => r.abort()), async ({ page, p, reqs }) => {
+  const s = await page.evaluate(() => ({ sources: document.querySelector('.hero-video').querySelectorAll('source').length, src: document.querySelector('.hero-video').getAttribute('src'), op: getComputedStyle(document.querySelector('.hero-video')).opacity, anim: getComputedStyle(document.querySelector('.hero-media img')).animationName }));
+  if (reqs.length || s.sources || s.src || s.op !== '0' || s.anim !== 'none') p.push(`without JS expected no video, no motion: ${JSON.stringify([reqs.length, s])}`);
+}, 1500);
 await browser.close(); server.close();
 console.log(failed ? `\n${failed} check group(s) failed` : '\nAll checks passed');
 process.exit(failed ? 1 : 0);
