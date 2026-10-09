@@ -1,6 +1,6 @@
 # Jade & Ember — Cinematic Hero Video Production Plan
 
-**Status:** Proposal for approval. **No video has been generated, no media uploaded to a generator, nothing merged, deployed or published.**
+**Status:** Gate A technical plan approved for one trial only; step 0 done (`docs/JADE_AND_EMBER_GATE_A_PREFLIGHT.md`); awaiting source-frame approval. **No video has been generated, no media uploaded to a generator, nothing merged, deployed or published.**
 **Builds on:** `jade-and-ember/` v0.2 (`2382116`, approved as the working foundation).
 **Standard applied:** STS Premium Web Design v2.0 (Part VI media justification and source-media discipline, Part V motion, Part XI accessibility, performance and real-device QA).
 **Prepared:** 2026-10-09.
@@ -34,7 +34,7 @@
 
 **Not verified:**
 - Whether any of these models will keep this particular flame, steam and food believable. That can only be learned by generating, which this plan does not do.
-- The QA measurement commands in section 9 have not been run; they will be dry-run on a synthetic clip before any credit is spent (step 0).
+- The QA tool has been dry-run on synthetic clips only (see the pre-flight record); it has never seen real generated footage.
 - Whether iPhone or Safari plays, autoplays or throttles the clip **[unverified]**. Real-device testing is required before the video is called done.
 - Prices can change; every submission is preceded by a fresh `get_cost`.
 
@@ -69,15 +69,7 @@ Conclusion: justified for one hero loop. It is not justified anywhere else on th
 | Control the invented | Remove from the still anything unwanted. Remaining in frame: out-of-focus steel pots (left), steel counter (right and bottom), a stray bowl corner (bottom-left, outside the hero crop on desktop). These are all rigid objects; they are listed as "must not move". No people, hands, vehicles or text are present. |
 | One consistent subject | Yes, one wok scene. |
 
-**Regions for QA (percent of the 1920×1080 frame; to be confirmed on the frame before running):**
-
-| Region | Box | Expected motion |
-|---|---|---|
-| Flame | x 44–68 %, y 8–62 % | high |
-| Steam | x 28–72 %, y 0–55 % | medium, upward |
-| Food in pan | x 31–67 %, y 56–76 % | low (jostle, glints only) |
-| Rigid: pan body, handles, burner | x 21–83 %, y 48–62 % (handles) and x 24–80 %, y 70–100 % | none |
-| Rigid: background pots and walls | x 0–30 % | none |
+**Regions for QA:** see the disjoint, calibrated boxes in `docs/JADE_AND_EMBER_GATE_A_PREFLIGHT.md` section 2 (they replaced the first draft after the dry run).
 
 **Text interplay:** the left 0–32 % of the page is charcoal with copy, and the scrim already holds ≥ 99 % of pixels behind the copy at ≥ 4.5:1. The flame sits at about x 44–68 % of the image, i.e. away from the copy. The contrast test will be re-run on video frames (section 11).
 
@@ -187,14 +179,14 @@ Per Part VI.5 rule 7. Numbers are starting defaults and will be recorded with th
 | The scene is alive | Flame-region luma varies frame to frame (not frozen); steam region changes |
 | No drift | Mean luma excluding the flame region within ±6 % of frame 0; no haze, bloom or veiling |
 | Endpoints match (for loop by construction) | SSIM(first, last) ≥ 0.97 |
-| Seam is invisible when looped | Difference at the cut ≤ 1.5× the median adjacent-frame difference; reviewed by eye on two consecutive loops |
+| Seam is invisible when looped | Difference at the cut ≤ 3.0× the median adjacent-frame difference (calibrated on synthetic clips; was 1.5×); reviewed by eye on two consecutive loops |
 | Photosensitivity | No more than 3 flashes per second (frame-mean luma change < 10 % between consecutive frames); no large-area red flashing |
 | Generated-media defects (Part VI.6) | None of: texture swimming, edge crawl, gibberish text, extra hands, melted detail, sharpness falling off, new objects appearing |
 | Resolution | At least 1280×720 native; no upscaler in the budget |
 
 Review process: first, middle and last frames side by side with the poster; then the clip at full size, twice looped; then the numeric checks. Any single "fail" on rows 2, 3 or the loop rows means the clip is not production footage.
 
-The measurement commands (frame extraction, SSIM, per-frame luma with `signalstats`, region crops) have **not yet been run**; step 0 dry-runs them on a synthetic clip.
+The measurement tool is `jade-and-ember/tools/video-qa.py`. It was dry-run on synthetic clips built from the real poster (`tools/video-qa-selftest.py`); results, calibration changes (4× averaging, step-ratio floor, seam threshold 3.0× instead of 1.5×, alive thresholds) and limits are in `docs/JADE_AND_EMBER_GATE_A_PREFLIGHT.md`. Thresholds are starting defaults until recalibrated on a real clip.
 
 ---
 
