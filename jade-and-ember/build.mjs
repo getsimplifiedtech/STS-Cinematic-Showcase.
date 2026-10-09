@@ -20,16 +20,17 @@ const orderLink = (cls) => `<a class="btn ${cls}" href="${orderHref}"${orderAttr
 const h = c.hero;
 const seal = `<span class="seal" lang="zh-Hans" aria-hidden="true"><span>${esc(c.brand.seal[0])}</span><span>${esc(c.brand.seal[1])}</span></span>`;
 
+const heat = (n) => (n ? `<span class="heat" role="img" aria-label="Heat ${n} of 3">${[1, 2, 3].map((i) => `<i class="${i <= n ? 'on' : ''}"></i>`).join('')}</span>` : '');
 const nav = c.nav.map((n) => `<li><a href="${esc(n.href)}">${esc(n.label)}</a></li>`).join('');
 
 const sig = c.signature.items.map((d, i) => `
       <article class="dish dish-${i + 1}">
-        <figure class="dish-fig"><img src="${esc(d.image)}" alt="${esc(d.alt)}" width="960" height="747" loading="lazy" decoding="async"></figure>
+        <figure class="dish-fig"><img src="${esc(d.image)}" alt="${esc(d.alt)}" width="1200" height="800" loading="lazy" decoding="async"></figure>
         <div class="dish-body">
           <p class="dish-no" aria-hidden="true">0${i + 1}</p>
           <h3>${esc(d.name)}</h3>
           <p>${esc(d.text)}</p>
-          <p class="dish-meta"><span class="price">${money(d.price)}</span><span class="tag">${esc(d.tag)}</span></p>
+          <p class="dish-meta"><span class="price">${money(d.price)}</span>${heat(d.heat)}<span class="tag">${esc(d.tag)}</span></p>
         </div>
       </article>`).join('');
 
@@ -39,7 +40,7 @@ const panels = cats.map((k) => `
         <section class="cat" id="cat-${esc(k.id)}" aria-labelledby="cat-${esc(k.id)}-h">
           <h3 class="cat-title" id="cat-${esc(k.id)}-h">${esc(k.name)}</h3>
           <ul class="items">${k.items.map((it) => `
-            <li class="item"><div class="item-head"><span class="item-name">${esc(it.name)}</span><span class="leader" aria-hidden="true"></span><span class="price">${money(it.price)}</span></div>
+            <li class="item"><div class="item-head"><span class="item-name">${esc(it.name)}</span>${heat(it.heat)}<span class="leader" aria-hidden="true"></span><span class="price">${money(it.price)}</span></div>
               <p class="item-text">${esc(it.text)}${it.tags ? ` <span class="item-tags">${it.tags.map(esc).join(' · ')}</span>` : ''}</p></li>`).join('')}
           </ul>
         </section>`).join('');
@@ -53,6 +54,7 @@ const html = `<!doctype html>
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>${esc(c.meta.title)}</title>
 <meta name="description" content="${esc(c.meta.description)}">
+${c.meta.robots ? `<meta name="robots" content="${esc(c.meta.robots)}">` : ''}
 <meta name="theme-color" content="${esc(c.meta.themeColor)}">
 <meta property="og:title" content="${esc(c.meta.title)}">
 <meta property="og:description" content="${esc(c.meta.description)}">
@@ -67,7 +69,7 @@ const html = `<!doctype html>
 </head>
 <body>
 <a class="skip" href="#main">Skip to content</a>
-<aside class="disclosure" aria-label="Fictional restaurant notice"><p>${esc(c.disclosure.bar)} <a href="${esc(c.disclosure.backHref)}">${esc(c.disclosure.backLabel)}</a></p></aside>
+<aside class="disclosure" aria-label="Fictional restaurant notice"><p><span class="bar-long">${esc(c.disclosure.bar)}</span><span class="bar-short">${esc(c.disclosure.barShort)}</span> <a href="${esc(c.disclosure.backHref)}"><span class="bar-long">${esc(c.disclosure.backLabel)}</span><span class="bar-short">${esc(c.disclosure.backShort)}</span></a></p></aside>
 <header class="top" id="top">
   <div class="top-in">
     <a class="brand" href="#top">${seal}<span class="brand-name">${esc(c.brand.name)}</span></a>
@@ -89,7 +91,7 @@ const html = `<!doctype html>
       <p class="eyebrow">${esc(h.eyebrow)}</p>
       <h1 id="hero-title">${h.headline.map((l) => `<span>${esc(l)}</span>`).join(' ')}</h1>
       <p class="hero-text">${esc(h.text)}</p>
-      <p class="hero-actions"><a class="btn btn-ember" href="${esc(h.primaryCta.href)}">${esc(h.primaryCta.label)}</a> ${orderLink('btn-line')}</p>
+      <p class="hero-actions"><a class="btn btn-ember" href="${esc(h.primaryCta.href)}">${esc(h.primaryCta.label)}</a> ${orderLink('btn-line hero-order')}</p>
     </div>
     <p class="hero-caption"><span class="vh">Pictured: </span>${esc(h.caption)}<span class="vh">. AI-generated concept image.</span></p>
     <button class="pause" type="button" aria-pressed="false" hidden><span class="pause-ico" aria-hidden="true"></span><span class="pause-txt">Pause motion</span></button>
@@ -100,6 +102,9 @@ const html = `<!doctype html>
       <p class="label">${esc(c.intro.label)}</p>
       <h2 id="intro-title" class="intro-line">${esc(c.intro.text)}</h2>
       <p class="intro-body">${esc(c.intro.body)}</p>
+      <ol class="elements">${c.intro.items.map((it, i) => `
+        <li><span class="el-no" aria-hidden="true">0${i + 1}</span><h3>${esc(it.name)}</h3><p>${esc(it.text)}</p></li>`).join('')}
+      </ol>
     </div>
   </section>
 
@@ -120,6 +125,7 @@ const html = `<!doctype html>
       </div>
       <div class="cats">${panels}
       </div>
+      <p class="menu-cta-end">${orderLink('btn-ink')}</p>
       <p class="menu-note">${esc(c.menu.note)}</p>
     </div>
   </section>
@@ -128,12 +134,12 @@ const html = `<!doctype html>
     <div class="wrap story-grid">
       <p class="label">${esc(c.story.label)}</p>
       <h2 id="story-title" class="pull">${esc(c.story.pull)}</h2>
-      <div class="story-text">${c.story.paragraphs.map((p) => `<p>${esc(p)}</p>`).join('')}</div>
+      <div class="story-text">${c.story.paragraphs.map((p, i) => `<p${i === c.story.paragraphs.length - 1 ? ' class="story-coda"' : ''}>${esc(p)}</p>`).join('')}</div>
+      <figure class="story-fig">
+        <img src="${esc(c.story.image.src)}" alt="${esc(c.story.image.alt)}" width="${c.story.image.width}" height="${c.story.image.height}" loading="lazy" decoding="async">
+        <figcaption>${esc(c.story.caption)}</figcaption>
+      </figure>
     </div>
-    <figure class="story-fig">
-      <img src="${esc(c.story.image.src)}" alt="${esc(c.story.image.alt)}" width="${c.story.image.width}" height="${c.story.image.height}" loading="lazy" decoding="async" style="--focus:${esc(c.story.image.focus)}">
-      <figcaption>${esc(c.story.caption)}</figcaption>
-    </figure>
   </section>
 
   <section class="visit" id="visit" aria-labelledby="visit-title">

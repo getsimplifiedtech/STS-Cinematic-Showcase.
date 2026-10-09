@@ -96,7 +96,13 @@ for (const [name, opts] of cases) {
   const run2 = await state();
   const pressed = await page.getAttribute('.pause', 'aria-pressed');
   if (run1 !== 'running' || run2 !== 'paused' || pressed !== 'true') p.push(`pause control: ${run1} -> ${run2}, aria-pressed=${pressed}`);
-  report('behaviour: tabs + pause control (desktop)', p);
+  const robots = await page.getAttribute('meta[name=robots]', 'content').catch(() => null);
+  if (!robots || !/noindex/.test(robots)) p.push(`expected <meta name="robots" content="noindex…">, got ${robots}`);
+  const heats = await page.evaluate(() => [...document.querySelectorAll('.heat')].map((h) => h.getAttribute('aria-label')));
+  if (!heats.length || heats.some((l) => !/^Heat [123] of 3$/.test(l))) p.push(`heat indicators missing or unlabelled: ${heats}`);
+  const sig = await page.evaluate(() => document.querySelectorAll('.dish').length);
+  if (sig !== 3) p.push(`expected 3 signature dishes, got ${sig}`);
+  report('behaviour: tabs + pause control + noindex + heat labels (desktop)', p);
   await ctx.close();
 }
 {
@@ -111,7 +117,13 @@ for (const [name, opts] of cases) {
   if ((await page.getAttribute('.nav-toggle', 'aria-expanded')) !== 'true') p.push('aria-expanded not true when open');
   await page.keyboard.press('Escape');
   if (!(await navHidden())) p.push('Escape did not close mobile nav');
-  report('behaviour: mobile navigation', p);
+  const bar = await page.evaluate(() => ({ long: getComputedStyle(document.querySelector('.bar-long')).display, short: getComputedStyle(document.querySelector('.bar-short')).display }));
+  if (bar.long !== 'none' || bar.short === 'none') p.push(`phone should show the short disclosure only: ${JSON.stringify(bar)}`);
+  const pauseName = await page.evaluate(() => { const b = document.querySelector('.pause'); return b.hidden ? null : b.textContent.trim(); });
+  if (pauseName !== 'Pause motion') p.push(`phone pause button needs the accessible name "Pause motion", got ${pauseName}`);
+  const pw = await page.evaluate(() => Math.round(document.querySelector('.pause').getBoundingClientRect().width));
+  if (pw < 44) p.push(`phone pause button narrower than 44px: ${pw}`);
+  report('behaviour: mobile navigation + mobile hero chrome', p);
   await ctx.close();
 }
 {
