@@ -1,0 +1,57 @@
+[
+  {
+    "check": "format: resolution",
+    "ok": true,
+    "detail": "1280x720"
+  },
+  {
+    "check": "format: duration and fps",
+    "ok": true,
+    "detail": "5.04s @ 24.0fps, 121 frames"
+  },
+  {
+    "check": "format: silent (no audio stream)",
+    "ok": true,
+    "detail": "none"
+  },
+  {
+    "check": "rigid objects stay rigid",
+    "ok": false,
+    "detail": "worst region SSIM 0.920 (handle_left), need >= 0.97"
+  },
+  {
+    "check": "food keeps its look",
+    "ok": true,
+    "detail": "min SSIM 0.856 (need >= 0.85); max/median step 1.38 (need <= 2.0)"
+  },
+  {
+    "check": "flame and steam are alive",
+    "ok": true,
+    "detail": "mean frame-to-frame change flame 28.50, steam 5.65 (need >= 0.25 and >= 0.15)"
+  },
+  {
+    "check": "no luma drift",
+    "ok": true,
+    "detail": "max drift 3.8% of frame 0 (need <= 6%)"
+  },
+  {
+    "check": "endpoints match",
+    "ok": false,
+    "detail": "SSIM(first,last) 0.866 (need >= 0.97)"
+  },
+  {
+    "check": "loop seam is invisible",
+    "ok": true,
+    "detail": "closing step 5.80 vs median step 4.81 = 1.20x (need <= 3.0x)"
+  },
+  {
+    "check": "flash proxy (approximate)",
+    "ok": true,
+    "detail": "0 large opposite luma steps (0.0/s, need <= 3/s)"
+  },
+  {
+    "check": "frame 0 matches the poster",
+    "ok": true,
+    "detail": "SSIM 0.983 (need >= 0.9), worst channel-mean difference 2.4 levels (need <= 6.0)"
+  }
+]
