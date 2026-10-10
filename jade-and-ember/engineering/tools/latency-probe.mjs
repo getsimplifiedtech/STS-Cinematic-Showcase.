@@ -18,6 +18,9 @@ import { serveSite } from '../lib/server.mjs';
 import { projectDir } from '../lib/git.mjs';
 import { rmSync } from 'node:fs';
 import { settleFonts } from '../lib/runtime.mjs';
+import { serve } from '../../tests/serve.mjs';
+import { COLLECT } from '../checks/budgets.mjs';
+import { gzipSync } from 'node:zlib';
 
 const arg = (n, d) => { const i = process.argv.indexOf(n); return i > -1 ? process.argv[i + 1] : d; };
 const REPS = Number(arg('--reps', 3));
@@ -41,10 +44,12 @@ const INIT = () => {
 const med = (a) => { const s = [...a].sort((x, y) => x - y); return s.length ? s[Math.floor(s.length / 2)] : 0; };
 const r1 = (x) => Math.round(x * 10) / 10;
 
-async function once(browser, base, file, cond, how) {
+async function once(browser, base, file, cond, how, opt = {}) {
   const ctx = await browser.newContext({ viewport: { width: 390, height: 844 }, isMobile: true, hasTouch: true, deviceScaleFactor: 1, reducedMotion: 'no-preference' });
   const page = await ctx.newPage();
   await page.addInitScript(INIT);
+  if (opt.collect) await page.addInitScript(COLLECT);
+  if (opt.bodies) page.on('response', async (r) => { try { const b = await r.body(); void gzipSync(b, { level: 9 }).length; } catch { /* aborted */ } });
   const cdp = await ctx.newCDPSession(page);
   if (cond.net) { await cdp.send('Network.enable'); await cdp.send('Network.emulateNetworkConditions', { offline: false, latency: 150, downloadThroughput: (1.6 * 1024 * 1024) / 8, uploadThroughput: (750 * 1024) / 8 }); }
   if (cond.cpu > 1) await cdp.send('Emulation.setCPUThrottlingRate', { rate: cond.cpu });
@@ -65,6 +70,7 @@ async function once(browser, base, file, cond, how) {
     handler: Math.max(0, ...p.events.map((e) => e.handler)),
     toNextFrame: Math.max(0, ...p.frames.map((f) => f.toFrame)),
     duration: Math.max(0, ...click.map((e) => e.duration)),
+    firstOver: p.events.find((e) => e.name === 'pointerover')?.delay ?? 0,
     heartbeatGap: Math.max(0, ...p.gaps), longTasks: p.long, nEvents: p.events.length,
     byEvent: p.events.map((e) => `${e.name}:${Math.round(e.delay)}/${Math.round(e.handler)}/${Math.round(e.duration)}`).join(' '),
   };
@@ -94,5 +100,26 @@ try {
     : worst.worstInputDelay > 100 ? `Largest input delay ${worst.worstInputDelay} ms (${worst.condition}, ${worst.dispatch}); heartbeat gap ${worst.heartbeatGap} ms, handler ${worst.handler} ms: look at the main thread before blaming the browser.`
     : `Largest input delay ${worst.worstInputDelay} ms: the interaction is fast in every condition tried here.`;
   console.log('\n' + verdict);
+  // ISOLATION: the budget check sees ~750 ms on the runner in its `pointerover` event while the plain probe does not. The budget check differs from
+  // the probe in three set-up details; this adds them one at a time (profile: CPU x4 + network, sequence: click then Escape) and reports the
+  // `pointerover` delay, so the cause is found by experiment rather than by guessing.
+  console.log('\nisolation | variant | median pointerover delay | worst pointerover delay | worst any-event delay | median handler (ms)');
+  const budgetProfile = CONDITIONS[3], seq = DISPATCH[3];
+  const sv2 = serve(dir);
+  const iso = [
+    ['baseline probe (own server, no hook, no budget script)', { server: 'own' }],
+    ['+ response-body hook (page.on response, r.body(), gzip)', { server: 'own', bodies: true }],
+    ['+ the tests/serve.mjs server instead', { server: 'tests' }],
+    ['+ the budget check\'s own observer script (COLLECT)', { server: 'own', collect: true }],
+    ['all three together (= the budget check\'s set-up)', { server: 'tests', bodies: true, collect: true }],
+  ];
+  try {
+    for (const [label, opt] of iso) {
+      const runs = [];
+      for (const f of pages) for (let i = 0; i < REPS; i++) { try { runs.push(await once(browser, opt.server === 'tests' ? sv2.base : sv.base, f, budgetProfile, seq, opt)); } catch (e) { runs.push({ error: e.message.slice(0, 60) }); } }
+      const ok = runs.filter((r) => !r.error);
+      console.log(`isolation | ${label} | ${r1(med(ok.map((r) => r.firstOver)))} | ${r1(Math.max(0, ...ok.map((r) => r.firstOver)))} | ${r1(Math.max(0, ...ok.map((r) => r.inputDelay)))} | ${r1(med(ok.map((r) => r.handler)))}${runs.length - ok.length ? ` | ${runs.length - ok.length} failed` : ''}`);
+    }
+  } finally { sv2.server.close(); }
   if (arg('--json', null)) writeFileSync(arg('--json'), JSON.stringify({ browser: version, node: process.version, platform: process.platform, reps: REPS, rows }, null, 2) + '\n');
 } finally { await browser.close(); sv.close(); rmSync(dir, { recursive: true, force: true }); }

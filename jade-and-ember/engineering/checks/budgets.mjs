@@ -53,7 +53,7 @@ export function measureStatic(root) {
 }
 
 // Runtime: in-page collectors are installed before any script runs.
-const COLLECT = () => {
+export const COLLECT = () => {
   window.__m = { lcp: 0, cls: 0, blocking: 0, events: [], delay: [], present: [], total: [], worst: null };
   new PerformanceObserver((l) => { for (const e of l.getEntries()) window.__m.lcp = Math.max(window.__m.lcp, e.startTime); }).observe({ type: 'largest-contentful-paint', buffered: true });
   new PerformanceObserver((l) => { for (const e of l.getEntries()) if (!e.hadRecentInput) window.__m.cls += e.value; }).observe({ type: 'layout-shift', buffered: true });

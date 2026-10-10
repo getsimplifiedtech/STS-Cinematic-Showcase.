@@ -116,7 +116,7 @@ export async function checkHosting() {
     if (client.status !== 0) { problems.push(`the client build failed: ${client.text}`); return { problems, notes }; }
     const a = checkFolder(demo, { client: false, label: 'demonstration' }), b = checkFolder(client.dir, { client: true, label: 'client build' });
     problems.push(...a.problems, ...b.problems);
-    notes.push(`static folder: demonstration ${a.files} files (${a.pages} pages), client build ${b.files} files (${b.pages} pages, with robots.txt and sitemap.xml); no application, function, redirect or vendor file; all under the Pages limits`);
+    notes.push(`static folder: demonstration ${a.files} files (${a.pages} pages), client build ${b.files} files (${b.pages} pages, with robots.txt, sitemap.xml and llms.txt); no application, function, redirect or vendor file; all under the Pages limits`);
     let n = 0;
     for (const [name, root] of [['demonstration', demo], ['client build', client.dir]]) for (const prefix of ['', '/site']) {
       const t = renderHeadersFile(root, policy, { prefix, https: true });
