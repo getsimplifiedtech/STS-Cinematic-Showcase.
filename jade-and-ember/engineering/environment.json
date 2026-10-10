@@ -1,0 +1,79 @@
+{
+  "$comment": "The pinned rendering environment of the regression harness (APR-JE-019 D-9, APR-JE-020). Baseline and candidate are always rendered in the SAME run, in the same browser, so a different browser build still gives a valid comparison; the pins make evidence reproducible and drift visible. Playwright is pinned exactly in package.json and package-lock.json. A browser-build mismatch is reported as a warning, or as a failure with --strict-env.",
+  "node": ">=20",
+  "playwright": "1.64.0",
+  "browsers": {
+    "chromium": {
+      "version": "141.0.7390.37",
+      "note": "Reference build used for the Gate 1 evidence (Chromium via CHROMIUM_PATH, /opt/pw-browsers chromium-1194). Playwright 1.64.0's own bundled Chromium is 156.0.8078.4; a CI run (Gate 3) will pin that build instead. --strict-env fails on any other build."
+    },
+    "firefox": {
+      "version": null,
+      "note": "Not installed in the Gate 1 environment. The harness accepts --browser firefox; pin a version when it is first run."
+    },
+    "webkit": {
+      "version": null,
+      "note": "Not installed in the Gate 1 environment. The harness accepts --browser webkit; pin a version when it is first run."
+    }
+  },
+  "context": {
+    "locale": "en-US",
+    "timezoneId": "UTC",
+    "colorScheme": "light",
+    "reducedMotion": "reduce",
+    "deviceScaleFactor": 1
+  },
+  "launchArgs": [
+    "--force-color-profile=srgb",
+    "--font-render-hinting=none",
+    "--disable-lcd-text"
+  ],
+  "visual": {
+    "$comment": "Tolerances for screenshot comparison within one engine. pixelThreshold is pixelmatch's per-pixel colour distance (0 to 1) with anti-aliased edge pixels ignored. A page passes when the share of differing pixels is within maxDiffRatio AND no 32x32 cell contains more than maxCellPixels differing pixels (so a small local change cannot hide inside a large page). Different engines are never compared with each other.",
+    "pixelThreshold": 0.1,
+    "maxDiffRatio": 0.0005,
+    "cell": 32,
+    "maxCellPixels": 12
+  },
+  "viewports": [
+    {
+      "name": "desktop-2560",
+      "width": 2560,
+      "height": 1440
+    },
+    {
+      "name": "desktop-1440",
+      "width": 1440,
+      "height": 900
+    },
+    {
+      "name": "laptop-1024",
+      "width": 1024,
+      "height": 768
+    },
+    {
+      "name": "tablet-820",
+      "width": 820,
+      "height": 1180
+    },
+    {
+      "name": "mobile-390",
+      "width": 390,
+      "height": 844,
+      "isMobile": true,
+      "hasTouch": true
+    },
+    {
+      "name": "reflow-320",
+      "width": 320,
+      "height": 640
+    },
+    {
+      "name": "phone-landscape-844",
+      "width": 844,
+      "height": 390,
+      "isMobile": true,
+      "hasTouch": true
+    }
+  ]
+}

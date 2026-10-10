@@ -5,6 +5,7 @@ import { writeFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { dirname, join, resolve } from 'node:path';
 import { loadConfig, validate } from './src/lib/config.mjs';
+import { configSchemaErrors } from './engineering/lib/config-schema.mjs';
 import { document } from './src/components/document.mjs';
 import home from './src/pages/home.mjs';
 import menu from './src/pages/menu.mjs';
@@ -16,8 +17,11 @@ const dir = dirname(fileURLToPath(import.meta.url));
 // Optional: node build.mjs --config <folder with the four JSON files> --out <folder to write the pages to> (used by tests/variants.mjs)
 const arg = (name) => { const i = process.argv.indexOf(name); return i > -1 ? resolve(process.argv[i + 1]) : null; };
 const outDir = arg('--out') || dir;
-const cfg = loadConfig(dir, arg('--config') || undefined);
-const errors = validate(cfg);
+const configDir = arg('--config') || join(dir, 'config');
+// 1. every config file against its JSON Schema (structure and types), 2. the cross-file rules. Both lists are reported together.
+const errors = configSchemaErrors(configDir);
+let cfg;
+try { cfg = loadConfig(dir, configDir); errors.push(...validate(cfg)); } catch (e) { if (!errors.length) throw e; }
 if (errors.length) {
   console.error(`Config validation failed (${errors.length}):\n` + errors.map((e) => `  - ${e}`).join('\n'));
   process.exit(1);

@@ -14,8 +14,10 @@ Governance: framework and skill reference `../docs/JADE_AND_EMBER_FRAMEWORK_REFE
 ## Run / rebuild
 ```
 open index.html            # or: python3 serve.py   (http://localhost:8766/, with video Range support)
-node build.mjs             # validates config/, then rebuilds all five pages (Node 18+, no deps)
+node build.mjs             # validates config/ against engineering/schemas/ and the cross-file rules, then rebuilds all five pages (Node 18+, no deps)
 npm i && npm run test:site && npm run test:a11y && npm run test:contrast && npm run test:contrast-sections && npm run test:variants && npm run test:lighthouse
+npm run verify:fast        # v0.9 engineering checks without a browser (baseline, schema, determinism, delivery, authority; Node 20+)
+npm run verify             # all v0.9 Gate 1 checks including the regression harness against the frozen v0.8 baseline (about 4 minutes); see engineering/README.md
 node tests/extracted.mjs [folder]   # opens index.html in a browser (file:// and serve.py, desktop and phone) and clicks through all five pages; point it at an extracted preview ZIP
 python3 tools/video-qa.py media/hero-loop.webm --poster media/hero-wok.webp   # numeric checks on the loop (needs ffmpeg, numpy, Pillow)
 npm run test:video-tools   # dry run of that checker on synthetic clips

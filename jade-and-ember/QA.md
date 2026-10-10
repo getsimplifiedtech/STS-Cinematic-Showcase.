@@ -217,6 +217,19 @@ The flame sits well to the right of the copy, so the moving footage did not lowe
 ## Clip checks on the shipped files
 `tools/video-qa.py` on `hero-loop.webm` and `hero-loop.mp4` gives the same result as the original in the Gate A report. Frame 0 matches the poster (SSIM 0.975 WebM, 0.970 MP4). In a browser the first video frame and the poster differ by an average of 1.7 levels over the desktop hero window, so the 400 ms crossfade is invisible. Two numeric checks still fail, as accepted at Gate A: rigid-region SSIM 0.92 (left handle next to the steam; 0 px of actual movement) and first/last-frame SSIM 0.87 (the flame, which can never match). The loop point is a hard cut about the size of an ordinary frame-to-frame flame change (closing step 1.2× the median).
 
+## v0.9 Gate 1: engineering checks (2026-10-10, owner authorisation `APR-JE-020`)
+Chromium 141.0.7390.37 via `CHROMIUM_PATH`, Playwright 1.64.0, Node 22. Run with `npm run verify` (details: `engineering/README.md`). **Result: 7 of 7 checks pass; the candidate is identical to the frozen v0.8 baseline in every layer.**
+| Check | Result |
+|---|---|
+| `check:baseline` | Branch `baseline/jade-and-ember-v0.8` at `32afde77d29b3a30443c17ad7ea27d7882adcd5d`; trees match; 60/60 source checksums; preview package matches |
+| `check:schema` | 4 schemas valid (Ajv strict); config valid under both validators; 43/43 corpus cases agree; the build refuses broken config and writes nothing |
+| `check:determinism` | Two builds identical; committed pages equal a fresh build; identical under another time zone, locale, cwd, project path, timestamps, `NODE_ENV`; 17 build sources free of clock, random, environment and locale calls |
+| `check:delivery` | 23 delivered files, same as the v0.8 package; 143 references resolve inside the folder; no tooling or module references |
+| `check:authority` | Authority record and framework reference agree; APR-JE-016 to 020 present; 30 mentions of the retired skill, all historical and marked; against a framework checkout: skill and licence SHA-256 match at `d2803c0` |
+| `check:regression` | source 27, text 35, structure 35, styles 35, pixels 39, behaviour 13 comparisons: **0 differences**, no pixel tolerance needed |
+| `check:selftest` | 27 mutation cases (wrong baseline, hand-edited page, random output, forged hash, retired skill as authority, absolute path, module import, one added character, 2 px seal change, one-step colour change, changed Pause label, replaced font, changed config) all caught by the intended layers |
+Existing suites re-run on the same build: `test:a11y`, `test:site`, `test:variants`, `test:extracted`, `test:contrast` pass. **Not covered by Gate 1:** keyboard, reflow, text-spacing and zoom suites, forced colours, budgets, security headers, links, portability, Firefox and WebKit (not installed here), CI, real devices.
+
 ## Remaining issues (honest list)
 1. **[unverified] Real devices.** Also the new CSS masks on Safari and iOS. iPhone, Safari (including whether VP9 WebM plays and is chosen, and Low Power Mode blocking autoplay), Android, Firefox, a high-refresh display, and battery or heat during the loop have not been tested. Safari and iOS are the biggest unknown.
 2. **The MP4 fallback is untested in a browser.** Playwright's Chromium cannot decode H.264, so only the WebM path ran. The MP4 file is valid (ffprobe, frame-accurate QA); the source order and failure logic are tested. If a browser rejects both sources, the page falls back to poster plus push.

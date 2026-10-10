@@ -13,11 +13,26 @@
     "test:contrast-sections": "node tests/contrast-sections.mjs",
     "test:site": "node tests/site.mjs",
     "test:variants": "node tests/variants.mjs",
-    "test:extracted": "node tests/extracted.mjs"
+    "test:extracted": "node tests/extracted.mjs",
+    "verify": "node engineering/verify.mjs",
+    "verify:fast": "node engineering/verify.mjs --fast",
+    "check:baseline": "node engineering/checks/baseline.mjs",
+    "check:schema": "node engineering/checks/schema.mjs",
+    "check:determinism": "node engineering/checks/determinism.mjs",
+    "check:authority": "node engineering/checks/authority.mjs",
+    "check:regression": "node engineering/checks/regression.mjs",
+    "check:selftest": "node engineering/checks/selftest.mjs",
+    "check:delivery": "node engineering/checks/delivery.mjs"
   },
   "devDependencies": {
     "@axe-core/playwright": "^4.10.0",
     "@lhci/cli": "^0.15.0",
-    "playwright": "^1.48.0"
+    "ajv": "8.20.0",
+    "pixelmatch": "8.0.0",
+    "playwright": "1.64.0",
+    "pngjs": "7.0.0"
+  },
+  "engines": {
+    "node": ">=20"
   }
 }

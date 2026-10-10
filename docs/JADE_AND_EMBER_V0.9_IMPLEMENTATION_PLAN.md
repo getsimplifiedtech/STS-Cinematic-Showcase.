@@ -73,6 +73,7 @@ Size: S small, M medium, L large. "Visual" uses the ledger's three levels.
 **Files in this repository expected to change in v0.9** (all non-visual or guarded): `package.json` (scripts, engines, version), `build.mjs`, `src/lib/config.mjs`, `src/components/document.mjs` (hashed URLs, optional metadata), `config/*.json` (schema references; new `engineering.json`), `styles.css` generation (byte-identical), new `engineering/`, new tests, docs. **Not changed:** `media/`, `fonts/`, `hero.js` logic, `site.js`, `menu.js`, page copy, `config/copy.json` text, labels in `config/site.json`, and every rendering rule.
 
 ## 6. Proposed repository layout (v0.9 branch)
+*Gate 1 note: implemented as `jade-and-ember/engineering/` so Node resolves its development dependencies from the project; the contents below are unchanged.*
 ```
 jade-and-ember/         the frozen reference implementation (changes limited as above)
 engineering/            project-agnostic framework code, extractable to the framework repository
@@ -117,7 +118,7 @@ docs/                   plans, approvals, references
 ## 8. Sequencing and gates
 Each gate ends with a report, evidence and a stop for review.
 1. **Gate 0 (done):** baseline freeze, records, this plan.
-2. **Gate 1:** WP1 harness, WP3 schemas, `check:determinism`, `check:authority`. Output byte-identical to v0.8; harness self-tested.
+2. **Gate 1 (implemented 2026-10-10, awaiting owner review, `APR-JE-020`):** WP1 harness, WP3 schemas, `check:determinism`, `check:authority`, plus `check:baseline`, `check:delivery` and a mutation self-test, integrated in `npm run verify`. Output byte-identical to v0.8; harness self-tested. Results: `jade-and-ember/QA.md`, section "v0.9 Gate 1". Deviations from this plan: the framework code lives in `jade-and-ember/engineering/` (not a repository-root `engineering/`) so its dependencies resolve from the project's `node_modules`; the tolerance rules, pinned environment and Firefox/WebKit support are as specified in `engineering/environment.json` but Firefox and WebKit are not installed here, so those runs are pending.
 3. **Gate 2:** remaining WP2 checks and WP4 contracts. A findings report (real defects are listed, not fixed).
 4. **Gate 3:** WP5 and WP6: tokens, hashed assets, adapters, SEO files behind flags, portability, CI.
 5. **Gate 4:** WP7 release controls; a v0.9 release-candidate preview ZIP and manifest.

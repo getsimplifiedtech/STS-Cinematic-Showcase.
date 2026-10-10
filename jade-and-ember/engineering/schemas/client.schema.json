@@ -1,0 +1,236 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "jade-and-ember/config/client.json",
+  "title": "Client facts and switches",
+  "description": "config/client.json: everything that is true of the restaurant and the build switches. Structure and types only; cross-file rules live in src/lib/config.mjs.",
+  "type": "object",
+  "properties": {
+    "brand": {
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string",
+          "minLength": 1
+        },
+        "descriptor": {
+          "type": "string",
+          "minLength": 1
+        },
+        "seal": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          },
+          "minItems": 2,
+          "maxItems": 2
+        },
+        "sealLabel": {
+          "type": "string",
+          "minLength": 1
+        }
+      },
+      "required": [
+        "name",
+        "descriptor",
+        "seal",
+        "sealLabel"
+      ],
+      "additionalProperties": false
+    },
+    "contact": {
+      "type": "object",
+      "properties": {
+        "phone": {
+          "type": "object",
+          "properties": {
+            "display": {
+              "type": "string",
+              "minLength": 1
+            },
+            "href": {
+              "type": "string",
+              "pattern": "^tel:\\+?[0-9]+$"
+            }
+          },
+          "required": [
+            "display",
+            "href"
+          ],
+          "additionalProperties": false
+        },
+        "email": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "pattern": "^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$"
+        }
+      },
+      "required": [
+        "phone",
+        "email"
+      ],
+      "additionalProperties": false
+    },
+    "address": {
+      "type": "object",
+      "properties": {
+        "lines": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          },
+          "minItems": 1
+        },
+        "mapUrl": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "pattern": "^https://[^\\s]+$"
+        }
+      },
+      "required": [
+        "lines",
+        "mapUrl"
+      ],
+      "additionalProperties": false
+    },
+    "hours": {
+      "type": "object",
+      "properties": {
+        "timezone": {
+          "type": "string",
+          "pattern": "^[A-Za-z_]+(/[A-Za-z_+-]+)+$"
+        },
+        "rows": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "days": {
+                "type": "string",
+                "minLength": 1
+              },
+              "time": {
+                "type": "string",
+                "minLength": 1
+              }
+            },
+            "required": [
+              "days",
+              "time"
+            ],
+            "additionalProperties": false
+          },
+          "minItems": 1
+        }
+      },
+      "required": [
+        "timezone",
+        "rows"
+      ],
+      "additionalProperties": false
+    },
+    "ordering": {
+      "type": "object",
+      "properties": {
+        "url": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "pattern": "^https://[^\\s]+$"
+        },
+        "label": {
+          "type": "string",
+          "minLength": 1
+        },
+        "platformName": {
+          "type": "string",
+          "minLength": 1
+        },
+        "headerCta": {
+          "enum": [
+            "page",
+            "direct"
+          ]
+        },
+        "pickupNote": {
+          "type": "string",
+          "minLength": 1
+        }
+      },
+      "required": [
+        "url",
+        "label",
+        "platformName",
+        "headerCta",
+        "pickupNote"
+      ],
+      "additionalProperties": false
+    },
+    "seo": {
+      "type": "object",
+      "properties": {
+        "baseUrl": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "pattern": "^https://[^\\s]+$"
+        },
+        "titleTemplate": {
+          "type": "string",
+          "pattern": "\\{page\\}"
+        },
+        "noindex": {
+          "type": "boolean"
+        },
+        "structuredData": {
+          "type": "boolean"
+        },
+        "themeColor": {
+          "type": "string",
+          "pattern": "^#[0-9a-fA-F]{6}$"
+        }
+      },
+      "required": [
+        "baseUrl",
+        "titleTemplate",
+        "noindex",
+        "structuredData",
+        "themeColor"
+      ],
+      "additionalProperties": false
+    },
+    "flags": {
+      "type": "object",
+      "properties": {
+        "demo": {
+          "type": "boolean"
+        },
+        "heroVideo": {
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "demo",
+        "heroVideo"
+      ],
+      "additionalProperties": false
+    }
+  },
+  "required": [
+    "brand",
+    "contact",
+    "address",
+    "hours",
+    "ordering",
+    "seo",
+    "flags"
+  ],
+  "additionalProperties": false
+}

@@ -1,0 +1,122 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "jade-and-ember/config/site.json",
+  "title": "Site structure",
+  "description": "config/site.json: language, the five-page registry, the demonstration disclosure text and the studio credit.",
+  "type": "object",
+  "properties": {
+    "lang": {
+      "type": "string",
+      "pattern": "^[a-z]{2,3}(-[A-Za-z0-9]+)*$"
+    },
+    "pages": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "enum": [
+              "home",
+              "menu",
+              "story",
+              "visit",
+              "order"
+            ]
+          },
+          "file": {
+            "type": "string",
+            "pattern": "^[a-z0-9-]+\\.html$"
+          },
+          "nav": {
+            "type": "string",
+            "minLength": 1
+          },
+          "cta": {
+            "const": true
+          }
+        },
+        "required": [
+          "id",
+          "file",
+          "nav"
+        ],
+        "additionalProperties": false
+      },
+      "minItems": 5,
+      "maxItems": 5
+    },
+    "demo": {
+      "type": "object",
+      "properties": {
+        "bar": {
+          "type": "string",
+          "description": "Demonstration-only text. It renders only while client.flags.demo is true, so a client build may leave it empty."
+        },
+        "barShort": {
+          "type": "string",
+          "description": "Demonstration-only text. It renders only while client.flags.demo is true, so a client build may leave it empty."
+        },
+        "footer": {
+          "type": "string",
+          "description": "Demonstration-only text. It renders only while client.flags.demo is true, so a client build may leave it empty."
+        },
+        "backLabel": {
+          "type": "string",
+          "description": "Demonstration-only text. It renders only while client.flags.demo is true, so a client build may leave it empty."
+        },
+        "backShort": {
+          "type": "string",
+          "description": "Demonstration-only text. It renders only while client.flags.demo is true, so a client build may leave it empty."
+        },
+        "backHref": {
+          "type": "string",
+          "description": "Demonstration-only text. It renders only while client.flags.demo is true, so a client build may leave it empty."
+        },
+        "titleSuffix": {
+          "type": "string",
+          "description": "Demonstration-only text. It renders only while client.flags.demo is true, so a client build may leave it empty."
+        },
+        "stamp": {
+          "type": "string",
+          "description": "Demonstration-only text. It renders only while client.flags.demo is true, so a client build may leave it empty."
+        }
+      },
+      "required": [
+        "bar",
+        "barShort",
+        "footer",
+        "backLabel",
+        "backShort",
+        "backHref",
+        "titleSuffix",
+        "stamp"
+      ],
+      "additionalProperties": false
+    },
+    "credit": {
+      "type": "object",
+      "properties": {
+        "label": {
+          "type": "string",
+          "minLength": 1
+        },
+        "href": {
+          "type": "string",
+          "pattern": "^https://[^\\s]+$"
+        }
+      },
+      "required": [
+        "label",
+        "href"
+      ],
+      "additionalProperties": false
+    }
+  },
+  "required": [
+    "lang",
+    "pages",
+    "demo",
+    "credit"
+  ],
+  "additionalProperties": false
+}

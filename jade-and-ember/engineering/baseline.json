@@ -1,0 +1,12 @@
+{
+  "$comment": "Machine-readable record of the frozen v0.8 baseline (APR-JE-017, decision D-6). The human-readable record is baselines/jade-and-ember-v0.8/BASELINE.md. Do not edit these values: the baseline never changes.",
+  "version": "0.8",
+  "branch": "baseline/jade-and-ember-v0.8",
+  "commit": "32afde77d29b3a30443c17ad7ea27d7882adcd5d",
+  "repositoryTree": "c5ca5e45ba8ee8c562015d37207f5e8d2a73d933",
+  "projectTree": "833b291d2509f920e225f124e6f1de86b5f0068d",
+  "projectPath": "jade-and-ember",
+  "recordsDir": "baselines/jade-and-ember-v0.8",
+  "sourceTreeChecksums": { "file": "SHA256SUMS.source-tree.txt", "files": 60 },
+  "previewPackage": { "file": "jade-and-ember-v0.8-preview.zip", "sha256": "58aca9e24665a2cae069967101e0767590e81440e5af750d117f1bab63a8c86a", "bytes": 1908749 }
+}

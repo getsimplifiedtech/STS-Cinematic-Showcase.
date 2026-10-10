@@ -1,0 +1,4 @@
+{
+  "$comment": "The ONLY way a built page, shared asset, media file, font or configuration file may differ from the frozen v0.8 baseline. At Gate 1 the list is empty: the candidate must be byte-identical. An entry needs an id, the file it concerns, a reason, the work package that introduces it, `visual: false` (it changes nothing a visitor or assistive technology perceives), and `normalize` rules (regular expressions applied to the CANDIDATE text before it is compared with the baseline). A `visual: true` entry is refused unless it names an owner approval (APR-JE-nnn) that exists in docs/JADE_AND_EMBER_APPROVALS.md. Pixels, text, computed styles and behaviour are compared regardless of this list.",
+  "entries": []
+}

@@ -1,0 +1,103 @@
+{
+  "$comment": "Machine-readable design-authority and framework reference (APR-JE-016). The human-readable record is docs/JADE_AND_EMBER_FRAMEWORK_REFERENCE.md; checks/authority.mjs keeps the two in agreement. Change a value only together with that record and a new approval row.",
+  "creativeAuthority": {
+    "name": "Anthropic Frontend Design",
+    "skill": "frontend-design",
+    "skillPath": ".claude/skills/frontend-design/SKILL.md",
+    "skillSha256": "d91970639e9f5c37682ac7ab60094d35f1c7c1f38d731bd56396563aee10c1d3",
+    "licensePath": ".claude/skills/frontend-design/LICENSE.txt",
+    "licenseSha256": "0d542e0c8804e39aa7f37eb00da5a762149dc682d7829451287e11b938e94594",
+    "license": "Apache-2.0"
+  },
+  "engineeringAuthority": {
+    "name": "STS",
+    "governs": [
+      "architecture",
+      "configuration",
+      "reusable components",
+      "accessibility",
+      "security",
+      "performance",
+      "QA",
+      "portability",
+      "release controls"
+    ]
+  },
+  "framework": {
+    "repository": "getsimplifiedtech/sts-web-design-framework",
+    "branch": "feature/anthropic-frontend-design-standard",
+    "commit": "d2803c02408c27d4489ccddee0a11478621e26dd",
+    "mainCommit": "f05f41f2e9112397d1b1755117e5b6314853a492",
+    "release": null,
+    "modifiedByThisProject": false
+  },
+  "retired": {
+    "name": "STS Premium Web Design",
+    "status": "historical-only",
+    "patterns": [
+      "STS Premium Web Design",
+      "PREMIUM_WEB_DESIGN",
+      "sts-premium-web-design",
+      "premium-web-design-skill"
+    ],
+    "markers": [
+      "retired",
+      "historical",
+      "deprecated",
+      "superseded",
+      "archived",
+      "not applied",
+      "not reintroduced",
+      "must not be combined",
+      "no longer used",
+      "old skill"
+    ],
+    "allowedFiles": [
+      "docs/JADE_AND_EMBER_BUILD_BRIEF.md",
+      "docs/JADE_AND_EMBER_HERO_VIDEO_PLAN.md",
+      "docs/JADE_AND_EMBER_FRAMEWORK_REFERENCE.md",
+      "docs/JADE_AND_EMBER_APPROVALS.md",
+      "docs/JADE_AND_EMBER_FIVE_PAGE_ARCHITECTURE.md",
+      "docs/JADE_AND_EMBER_V0.9_IMPLEMENTATION_PLAN.md",
+      "docs/JADE_AND_EMBER_ENGINEERING_REQUIREMENTS_LEDGER.md",
+      "jade-and-ember/QA.md",
+      "jade-and-ember/engineering/README.md",
+      "jade-and-ember/engineering/authority.json",
+      "jade-and-ember/engineering/checks/authority.mjs",
+      "jade-and-ember/engineering/checks/selftest.mjs"
+    ]
+  },
+  "records": {
+    "frameworkReference": "docs/JADE_AND_EMBER_FRAMEWORK_REFERENCE.md",
+    "approvals": "docs/JADE_AND_EMBER_APPROVALS.md",
+    "requiredApprovals": [
+      "APR-JE-016",
+      "APR-JE-017",
+      "APR-JE-018",
+      "APR-JE-019",
+      "APR-JE-020"
+    ]
+  },
+  "mustState": [
+    {
+      "path": "jade-and-ember/README.md",
+      "text": "frontend-design",
+      "why": "the project README names the active creative authority"
+    },
+    {
+      "path": "docs/JADE_AND_EMBER_FRAMEWORK_REFERENCE.md",
+      "text": "Anthropic Frontend Design governs creative direction",
+      "why": "authority policy (APR-JE-016)"
+    },
+    {
+      "path": "docs/JADE_AND_EMBER_FRAMEWORK_REFERENCE.md",
+      "text": "STS retains authority over architecture",
+      "why": "authority policy (APR-JE-016)"
+    },
+    {
+      "path": "baselines/jade-and-ember-v0.8/BASELINE.md",
+      "text": "baseline/jade-and-ember-v0.8",
+      "why": "the permanent baseline branch is documented (D-6)"
+    }
+  ]
+}
