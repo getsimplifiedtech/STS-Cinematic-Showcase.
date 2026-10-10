@@ -345,7 +345,7 @@ Two informational GitHub Actions jobs run the 14 browser-driven checks in Firefo
 | media, seo, privacy, security, assets, d11 (CSP and D-11), a11y-tree, order, phone, forced-colors, reflow-at-default, regression vs v0.8 | pass | pass | pass |
 | keyboard | pass | pass (F-G5-03 recorded) | pass |
 | portability | pass | pass (F-G5-02 recorded) | pass (F-G5-01 recorded) |
-| reflow (text spacing) | pass | pass | **fail until F-G5-04 is recorded** |
+| reflow (text spacing) | pass | pass | pass (F-G5-04 recorded) |
 
 Genuine engine differences are findings F-G5-01 to F-G5-04 in `engineering/findings.json` (all open for owner decision, no page changed). Firefox cannot honour the `isMobile` context option; it is dropped and printed as `ADAPTED`. Real Safari, iOS, Android and screen-reader evidence is not produced by these jobs and stays a human task.
 

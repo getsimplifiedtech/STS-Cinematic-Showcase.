@@ -48,7 +48,7 @@
       ],
       "severity": "Minor",
       "visual": true,
-      "maxValue": 400,
+      "maxValue": 36,
       "status": "open: awaiting owner decision (Gate 5 Phase 1 finding; no change made)",
       "description": "Opened straight from the folder (file://), WebKit refuses the web-font requests (the page origin is \"null\": 'Origin null is not allowed by Access-Control-Allow-Origin') and does not apply the self-hosted Young Serif and Karla files; the text is drawn in the metric-matched fallback fonts. Over http (domain root, subdirectory, pretty URLs) the same fonts load in WebKit. Chromium and Firefox load them over file://. This is an engine-specific difference in the file:// delivery mode only; the check records it instead of passing it.",
       "proposal": "Recommended: accept and document. The STS delivery path for review is HTTP (Cloudflare Pages), and a folder opened from disk in Safari is a convenience mode. If the file:// preview must look identical in Safari, the fonts would have to be inlined as data: URIs, which changes the CSP font-src and the page weight, so it needs the owner's decision and a new D-11-style review. No change was made.",
