@@ -75,10 +75,10 @@ async function partHours(ctx) {
 }
 
 const CANDIDATES = [
-  { id: 'K1m', css: '@media (min-width:1200px){.hours th{white-space:normal}}', note: 'K1 (let the day label wrap) only at widths of 1200 px and more, where the table is wide enough that it never wraps in the normal state' },
+  { id: 'K1m', css: '@media (min-width:1200px){.hours th{white-space:normal}}', note: 'let the day label wrap, only at widths of 1200 px and more' },
   { id: 'K5', css: '.hours th{white-space:normal;min-width:max-content}', note: 'allow wrapping but never narrower than the label\'s own width' },
-  { id: 'K9', css: '.hours th{width:1px}', note: 'the shrink-to-fit column idiom: the day-label column takes exactly its content width' },
-  { id: 'K10', css: '.hours th{padding-right:0}.hours td{padding-left:var(--s5)}', note: 'move the gap from the label cell to the value cell' },
+  { id: 'K11', css: '@supports (hanging-punctuation:first){.hours th{white-space:normal;min-width:max-content}}', note: 'K5, but only in engines that support hanging-punctuation (Safari/WebKit); every other engine keeps today\'s rule untouched' },
+  { id: 'K12', css: '@supports (-webkit-touch-callout:none){.hours th{white-space:normal;min-width:max-content}}', note: 'K5, but only in iOS WebKit (a different probe, for comparison)' },
 ];
 const WIDTHS = [1440, 1280, 1100, 1024, 820, 600, 390];
 
@@ -195,6 +195,7 @@ async function partStrip(ctx) {
 export async function diagnose() {
   await withSite(async (ctx) => {
     out('engine', { engine: ENGINE, version: ctx.version });
+    { const { page, close } = await ctx.newPage({ viewport: { width: 800, height: 600 } }, 'visit-us.html'); out(`supports.${ENGINE}`, await page.evaluate(() => Object.fromEntries([['hanging-punctuation', 'hanging-punctuation:first'], ['-webkit-touch-callout', '-webkit-touch-callout:none'], ['-apple-pay-button-style', '-apple-pay-button-style:black'], ['text-size-adjust', 'text-size-adjust:100%'], ['-webkit-text-size-adjust', '-webkit-text-size-adjust:100%'], ['white-space:break-spaces', 'white-space:break-spaces']].map(([k, d]) => [k, CSS.supports(d)])))); await close(); }
     const parts = { hours: partHours, experiments: partExperiments, sweep: partSweep, candidates: partCandidates, strip: partStrip };
     for (const [name, fn] of Object.entries(parts)) {
       if (PART !== 'all' && PART !== name) continue;
