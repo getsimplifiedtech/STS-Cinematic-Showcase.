@@ -14,6 +14,7 @@
 // Supported URL conventions: .html file URLs, extension-less file URLs, directory URLs with a trailing slash. Not supported (documented): pretty URLs
 // WITH a trailing slash (/menu/), because the pages use plain relative links.
 // Over file:// Chromium reports a CORS error for the two font preloads (the fonts still load from the stylesheet): known finding F-G3-01.
+import { engineNoise } from '../lib/engine-noise.mjs';
 import { mkdirSync, readFileSync, rmSync, writeFileSync, readdirSync, lstatSync } from 'node:fs';
 import { join } from 'node:path';
 import { pathToFileURL } from 'node:url';
@@ -27,6 +28,8 @@ import { isMain, listFiles, projectDir, tempDir } from '../lib/git.mjs';
 
 const titleOf = (dir, f) => /<title>([^<]*)<\/title>/.exec(readFileSync(join(dir, f), 'utf8'))[1].replace(/&amp;/g, '&');
 const h1Of = (dir, f) => /<h1[^>]*>([\s\S]*?)<\/h1>/.exec(readFileSync(join(dir, f), 'utf8'))[1].replace(/<[^>]+>/g, '').replace(/&amp;/g, '&').replace(/\s+/g, ' ').trim();
+// WebKit refuses a font fetch from a file:// page (origin "null") instead of falling back: the web font is then not loaded at all
+const FILE_CORS_BLOCK = /Origin null is not allowed by Access-Control-Allow-Origin/;
 const FONT_PRELOAD_NOISE = /Access to font|net::ERR_FAILED|Failed to load resource: net::ERR_FAILED|A preload for .* is found, but is not used/;
 
 export function checkPortabilityStatic({ root }) {
@@ -53,7 +56,8 @@ async function walkSite(args) {
 }
 async function walkSiteInner({ browser, dir, label, start, prefixCheck, video = 'expect' }) {
   const problems = [];
-  let fontNoise = 0, loadsSeen = 0;
+  let fontNoise = 0, loadsSeen = 0, fontsFailed = 0, corsBlocked = 0, preloadMedia = 0;
+  const engine = browser.browserType().name();
   const pages = pagesOf(dir);
   const bad = (m) => problems.push(`${label}: ${m}`);
   for (const mobile of [false, true]) {
@@ -61,7 +65,7 @@ async function walkSiteInner({ browser, dir, label, start, prefixCheck, video = 
     ctx.setDefaultTimeout(8000);   // a broken page must fail fast, not stall the walk
     const page = await ctx.newPage();
     const failed = [], errors = [];
-    const handle = (kind, text) => { if (start.startsWith('file:') && FONT_PRELOAD_NOISE.test(text)) fontNoise++; else errors.push(`${kind}: ${text.slice(0, 140)}`); };
+    const handle = (kind, text) => { if (engineNoise(engine, text)) preloadMedia++; else if (start.startsWith('file:') && FONT_PRELOAD_NOISE.test(text)) fontNoise++; else if (start.startsWith('file:') && FILE_CORS_BLOCK.test(text)) corsBlocked++; else errors.push(`${kind}: ${text.slice(0, 140)}`); };
     page.on('load', () => { loadsSeen++; });
     page.on('pageerror', (e) => handle('pageerror', e.message));
     page.on('console', (m) => { if (['error', 'warning'].includes(m.type())) handle(m.type(), m.text()); });
@@ -78,7 +82,7 @@ async function walkSiteInner({ browser, dir, label, start, prefixCheck, video = 
       await settleFonts(page);
       const st = await page.evaluate(() => ({ imgs: [...document.images].filter((i) => !(i.complete && i.naturalWidth > 0)).length, fonts: [...document.fonts].filter((x) => !/Fallback/.test(x.family) && x.status !== 'loaded').length, ids: document.querySelectorAll('#main').length }));
       if (st.imgs) bad(`${tag(f)}: ${st.imgs} image(s) did not load`);
-      if (st.fonts) bad(`${tag(f)}: ${st.fonts} web font(s) did not load`);
+      if (st.fonts) { if (start.startsWith('file:')) fontsFailed += st.fonts; else bad(`${tag(f)}: ${st.fonts} web font(s) did not load`); }   // over file:// this is a recorded, engine-specific finding (see the caller)
       if (st.ids !== 1) bad(`${tag(f)}: the skip-link target #main is missing`);
     };
     await verifyPage('index.html');
@@ -111,7 +115,7 @@ async function walkSiteInner({ browser, dir, label, start, prefixCheck, video = 
     errors.forEach((m) => bad(`${tag('')} ${m}`));
     await ctx.close();
   }
-  return { problems, fontNoise, perLoad: loadsSeen ? Math.ceil(fontNoise / loadsSeen) : 0 };
+  return { problems, fontNoise, fontsFailed, corsBlocked, preloadMedia, preloadPerLoad: loadsSeen ? Math.ceil(preloadMedia / loadsSeen) : 0, perLoad: loadsSeen ? Math.ceil(fontNoise / loadsSeen) : 0 };
 }
 
 export async function checkPortability({ root = null, browserName = 'chromium' } = {}) {
@@ -121,7 +125,7 @@ export async function checkPortability({ root = null, browserName = 'chromium' }
   try {
     const s = checkPortabilityStatic({ root: dir });
     const problems = [...s.problems], notes = [...s.notes];
-    const measured = [];
+    const measured = []; let preloadPerLoad = 0;
     const { browser } = await launchBrowser(browserName);
     try {
       // folder: ZIP, extract to a hostile path, open index.html directly
@@ -132,8 +136,9 @@ export async function checkPortability({ root = null, browserName = 'chromium' }
       const names = unzipTo(zip, hostile);
       if (names.length !== listFiles(dir).length) problems.push(`the ZIP held ${names.length} files, the folder ${listFiles(dir).length}`);
       const f = await walkSite({ browser, dir: hostile, label: 'extracted ZIP over file://', start: pathToFileURL(join(hostile, 'index.html')).href, video: 'expect' });
-      problems.push(...f.problems);
+      problems.push(...f.problems); preloadPerLoad = Math.max(preloadPerLoad, f.preloadPerLoad || 0);
       if (f.fontNoise) measured.push({ key: 'portability:file://:font-preload-cors', detail: `over file:// Chromium logs up to ${f.perLoad} message(s) per page load about the two font preloads (CORS from origin "null"); the fonts load from the stylesheet and nothing changes on screen`, value: f.perLoad });
+      if (f.fontsFailed) measured.push({ key: 'portability:file://:fonts-not-loaded', detail: `over file:// ${browserName} did not load ${f.fontsFailed} web-font declaration(s) across the walk (${f.corsBlocked} refusals "Origin null is not allowed by Access-Control-Allow-Origin"): the text falls back to the metric-matched fallback fonts; over http the same fonts load`, value: f.fontsFailed });
       const scenarios = [
         ['http at the domain root', { prefix: '/' }, (b) => b, null],
         ['http under /clients/acme/jade-and-ember/', { prefix: '/clients/acme/jade-and-ember/' }, (b) => b, 'sub'],
@@ -144,7 +149,7 @@ export async function checkPortability({ root = null, browserName = 'chromium' }
       for (const [label, opt, startOf, sub] of scenarios) {
         const sv = serveSite(dir, opt);
         const r = await walkSite({ browser, dir, label, start: startOf(sv.base), prefixCheck: sub ? sv.base : sv.origin + '/', video: opt.ranges === false ? 'either' : 'expect' });
-        problems.push(...r.problems); sv.close();
+        problems.push(...r.problems); preloadPerLoad = Math.max(preloadPerLoad, r.preloadPerLoad || 0); sv.close();
       }
       // pretty URLs entered directly, query strings and fragments
       const sv = serveSite(dir, { prefix: '/clients/acme/jade-and-ember/', pretty: true });
@@ -163,6 +168,7 @@ export async function checkPortability({ root = null, browserName = 'chromium' }
       await ctx.close(); sv.close();
     } finally { await browser.close(); }
     notes.push('serving conventions walked with real clicks on every page, desktop and phone menu, brand and footer links, Back and Forward: extracted ZIP over file:// (path with spaces, &, em dash, #, brackets), domain root, /clients/acme/jade-and-ember/, the directory URL without a trailing slash (host redirect), extension-less URLs, a server without Range support, query strings and fragments');
+    if (preloadPerLoad) measured.push({ key: 'portability:preload-media-warning', detail: `${browserName} writes ${preloadPerLoad} console warning(s) per load of the Home page, "Preload of .../media/hero-wok*.webp was ignored due to unknown as or type values, or non-matching media attribute": the Home page has one media-qualified hero preload per art direction and only one can match; the one that matches is used`, value: preloadPerLoad });
     const r = reconcile('portability', measured);
     return { problems: [...problems, ...r.problems], notes: [...notes, ...r.notes] };
   } finally { cleanup.forEach((d) => rmSync(d, { recursive: true, force: true })); if (own) rmSync(dir, { recursive: true, force: true }); }

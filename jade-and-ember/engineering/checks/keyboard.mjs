@@ -24,10 +24,15 @@ const mark = (selector) => {
 const active = () => { const e = document.activeElement; if (!e || e === document.body || e === document.documentElement) return { kb: null, body: true }; const r = e.getBoundingClientRect(); return { kb: e.dataset.kb === undefined ? null : Number(e.dataset.kb), name: `${e.tagName.toLowerCase()}${e.id ? '#' + e.id : ''}`, rect: { x: r.x, y: r.y, w: r.width, h: r.height } }; };
 const covered = () => { const e = document.activeElement; const r = e.getBoundingClientRect(); const vx = Math.max(r.left, 0), vy = Math.max(r.top, 0), vr = Math.min(r.right, innerWidth), vb = Math.min(r.bottom, innerHeight); if (vr <= vx || vb <= vy) return 'outside the viewport'; const pts = [[0.5, 0.5], [0.15, 0.5], [0.85, 0.5], [0.5, 0.2], [0.5, 0.8]].map(([a, b]) => [vx + (vr - vx) * a, vy + (vb - vy) * b]); const visible = pts.some(([x, y]) => { const t = document.elementFromPoint(x, y); return t && (t === e || e.contains(t) || t.contains(e) && getComputedStyle(t).pointerEvents !== 'none' && t.tagName !== 'HTML' && t.tagName !== 'BODY' && t.tagName !== 'MAIN'); }); return visible ? null : 'covered by another element'; };
 
+// Firefox, driven without browser chrome, has nothing to hand focus to after the last element of the document: it keeps it there (Chromium and WebKit move
+// to the document). So a repeat press ON THE LAST element, after every element was reached, is the end of the page there, not a trap. A repeat anywhere
+// else is still a trap in every engine.
+const KEEPS_FOCUS_AT_END = new Set(['firefox']);
+
 export async function checkKeyboard({ root = null, browserName = 'chromium', pages: only = null } = {}) {
   const cfg = readJson(join(engDir, 'a11y.json'));
   const measured = [], notes = [];
-  let stops = 0, focusChecks = 0, sized = 0;
+  let stops = 0, focusChecks = 0, sized = 0, endKeptPages = 0;
   await withSite(async ({ pages, newPage, env }) => {
     const rect = (r) => ({ x: Math.max(0, Math.floor(r.x - cfg.keyboard.focusPadding)), y: Math.max(0, Math.floor(r.y - cfg.keyboard.focusPadding)), width: Math.ceil(r.w + cfg.keyboard.focusPadding * 2), height: Math.ceil(r.h + cfg.keyboard.focusPadding * 2) });
     for (const ctxDef of cfg.keyboard.contexts) for (const file of pages) {
@@ -40,7 +45,7 @@ export async function checkKeyboard({ root = null, browserName = 'chromium', pag
 
       // 1 + 2: forward pass in DOM order, with the focus-visible and not-obscured checks at each stop
       const seq = [];
-      let leftDocument = false;
+      let leftDocument = false, endKept = false;
       for (let n = 0; n < els.length + 2; n++) {
         await page.keyboard.press('Tab'); await page.waitForTimeout(40);
         const a = await page.evaluate(active);
@@ -48,7 +53,10 @@ export async function checkKeyboard({ root = null, browserName = 'chromium', pag
         seq.push(a.kb); stops++;
         const who = els[a.kb]?.name || a.name;
         if (a.kb === null) { bad('unlisted-focus', a.name, `focus landed on ${a.name}, which is not a visible interactive element`); continue; }
-        if (n > 0 && seq[n - 1] === a.kb) { bad('trap', who, `focus stuck on ${who}`); break; }
+        if (n > 0 && seq[n - 1] === a.kb) {
+          if (KEEPS_FOCUS_AT_END.has(browserName) && a.kb === els.length - 1 && els.every((e) => seq.includes(e.i))) { seq.pop(); endKept = true; break; }
+          bad('trap', who, `focus stuck on ${who}`); break;
+        }
         const hidden = await page.evaluate(covered);
         if (hidden) bad('obscured', who, `${who} is ${hidden} while focused (2.4.11)`);
         // focus visible: the same region with and without focus must differ
@@ -72,15 +80,17 @@ export async function checkKeyboard({ root = null, browserName = 'chromium', pag
       }
       const expected = els.map((e) => e.i);
       const missing = expected.filter((i) => !seq.includes(i));
+      const listed = seq.filter((v) => v !== null);   // a stop that is not a listed element is already reported as unlisted-focus; it must not also break the order check
       missing.forEach((i) => bad('unreachable', els[i].name, `${els[i].name} cannot be reached with Tab`));
-      if (seq.some((v, k) => k > 0 && v <= seq[k - 1])) bad('order', 'sequence', `Tab order is not DOM order: ${seq.join(',')}`);
+      if (listed.some((v, k) => k > 0 && v <= listed[k - 1])) bad('order', 'sequence', `Tab order is not DOM order: ${seq.join(',')}`);
 
       // 2: Shift+Tab walks back through the same elements
       const back = [];
       for (let n = 0; n < seq.length; n++) { await page.keyboard.press('Shift+Tab'); await page.waitForTimeout(25); const a = await page.evaluate(active); if (a.body) break; back.push(a.kb); }
+      const backListed = back.filter((v) => v !== null);
       // when the forward pass ended by leaving the document, the first Shift+Tab returns to the last element; otherwise it goes to the one before it
-      const want = leftDocument ? [...seq].reverse() : seq.slice(0, -1).reverse();
-      if (back.length < Math.min(want.length, 3) || back.slice(0, want.length).join() !== want.slice(0, back.length).join()) bad('reverse-order', 'sequence', `Shift+Tab does not walk the same order backwards (got ${back.join(',')}, expected ${want.join(',')})`);
+      const want = leftDocument ? [...listed].reverse() : listed.slice(0, -1).reverse();
+      if (backListed.length < Math.min(want.length, 3) || backListed.slice(0, want.length).join() !== want.slice(0, backListed.length).join()) bad('reverse-order', 'sequence', `Shift+Tab does not walk the same order backwards (got ${back.join(',')}, expected ${want.join(',')})`);
 
       // 6: target sizes
       const sizes = await page.evaluate(({ primary }) => [...document.querySelectorAll('[data-kb]')].map((e) => { const r = e.getBoundingClientRect(); const cs = getComputedStyle(e); const inline = cs.display === 'inline' && !!e.closest('p, li, dd, td, address, figcaption'); return { name: `${e.tagName.toLowerCase()}${e.className && typeof e.className === 'string' ? '.' + e.className.trim().split(/\s+/).join('.') : ''} "${(e.innerText || e.getAttribute('aria-label') || '').trim().slice(0, 20)}"`, w: Math.round(r.width * 10) / 10, h: Math.round(r.height * 10) / 10, skip: e.classList.contains('skip'), primary: primary.some((s) => e.matches(s)), inline }; }), { primary: cfg.target.primarySelectors });
@@ -90,6 +100,7 @@ export async function checkKeyboard({ root = null, browserName = 'chromium', pag
         if (!s.inline && (small(s.w, cfg.target.minimum) || small(s.h, cfg.target.minimum))) bad('target-24', s.name, `${s.name} is ${s.w}x${s.h} CSS px, under ${cfg.target.minimum} (2.5.8)`, { value: Math.min(s.w, s.h) });
         if (s.primary && small(Math.min(s.w, s.h), cfg.target.primaryMinimum)) bad('target-44', s.name, `primary action ${s.name} is ${s.w}x${s.h} CSS px, under the STS minimum of ${cfg.target.primaryMinimum}`, { value: Math.min(s.w, s.h) });
       }
+      if (endKept) endKeptPages++;
       await close();
     }
 
@@ -114,6 +125,7 @@ export async function checkKeyboard({ root = null, browserName = 'chromium', pag
     }
   }, { root, browserName, pages: only });
   notes.push(`${stops} Tab stops walked on ${cfg.keyboard.contexts.length} contexts x pages; ${focusChecks} focus indicators compared by pixels; ${sized} target sizes measured`);
+  if (endKeptPages) notes.push(`${browserName} keeps focus on the last element at the end of the document (no browser chrome to receive it) on ${endKeptPages} page/width combinations: read as the end of the page, not a trap; a repeat anywhere else still fails`);
   const r = reconcile('keyboard', measured);
   return { problems: r.problems, notes: [...notes, ...r.notes] };
 }

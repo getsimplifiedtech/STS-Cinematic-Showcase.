@@ -9,6 +9,7 @@ import { mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { takeAdaptations, launchBrowser } from './lib/browser.mjs';
 import { engineChecks, renderMatrix, SCOPE } from './lib/cross-catalogue.mjs';
+import { setEngine } from './lib/findings.mjs';
 import { engDir, projectDir } from './lib/git.mjs';
 import { checkMedia } from './checks/media.mjs';
 import { checkSeo } from './checks/seo.mjs';
@@ -28,6 +29,7 @@ import { checkRegression } from './checks/regression.mjs';
 const arg = (n, d = null) => { const i = process.argv.indexOf(n); return i > -1 ? process.argv[i + 1] : d; };
 const engine = arg('--engine', 'chromium');
 if (!['chromium', 'firefox', 'webkit'].includes(engine)) { console.error('usage: cross-browser.mjs --engine chromium|firefox|webkit'); process.exit(2); }
+setEngine(engine);
 const only = arg('--only') ? arg('--only').split(',') : null;
 const limitMs = Number(arg('--timeout-minutes', 12)) * 60000;
 

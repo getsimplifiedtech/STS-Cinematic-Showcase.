@@ -14,6 +14,7 @@
 //                  (Cloudflare Pages, Vercel with and without cleanUrls, a plain server) with the host's documented behaviour simulated locally
 //   validation     bad configuration fails the build with readable messages: http or localhost base URL, structured data without the business block,
 //                  unparseable hours, a phone number that is not international, demonstration + indexable, structured data + noindex
+import { engineNoise } from '../lib/engine-noise.mjs';
 import { readFileSync, rmSync, readdirSync, existsSync } from 'node:fs';
 import { join } from 'node:path';
 import { assembleCandidate, pagesOf } from '../lib/site.mjs';
@@ -264,13 +265,13 @@ export async function checkSeo({ root = null, browser = true, browserName = 'chr
       const { browser: br } = await launchBrowser(browserName);
       try {
         const ctx = await br.newContext({ viewport: { width: 1280, height: 800 }, reducedMotion: 'reduce' }); const page = await ctx.newPage();
-        const noise = [];
+        const noise = []; let known = 0;
         await page.addInitScript(() => { window.__v = []; window.addEventListener('securitypolicyviolation', (e) => window.__v.push(e.violatedDirective), true); });
-        page.on('console', (m) => { if (['error', 'warning'].includes(m.type())) noise.push(m.text().slice(0, 100)); });
+        page.on('console', (m) => { if (['error', 'warning'].includes(m.type())) { if (engineNoise(browserName, m.text())) known++; else noise.push(m.text().slice(0, 100)); } });
         await page.goto(sv.base); await page.waitForTimeout(800);
         const st = await page.evaluate(() => ({ v: window.__v, ld: JSON.parse(document.querySelector('script[type="application/ld+json"]').textContent)['@type'] }));
         if (st.v.length || noise.length) problems.push(`the client Home page under the CSP: violations ${JSON.stringify(st.v)}, console ${JSON.stringify(noise)}`);
-        else notes.push(`the client Home page loads under the CSP with the JSON-LD block (${st.ld}): 0 violations, 0 console messages`);
+        else notes.push(`the client Home page loads under the CSP with the JSON-LD block (${st.ld}): 0 violations, ${known ? `${known} known ${browserName} console warning(s) about the media-qualified hero preload (F-G5-02), no others` : '0 console messages'}`);
         await ctx.close();
       } finally { await br.close(); sv.close(); }
     }

@@ -7,10 +7,17 @@ import { engDir, readJson } from './git.mjs';
 
 export const loadFindings = () => readJson(join(engDir, 'findings.json')).findings;
 
+// The engine a check is running in (Gate 5). A finding may name the engines it was observed in (`engines`); outside them it is not expected to occur
+// (so it cannot go "stale" in an engine that never showed it) and, if it does occur there, it is NEW and fails until a person records it.
+let ENGINE = 'chromium';
+export const setEngine = (name) => { ENGINE = name; };
+export const currentEngine = () => ENGINE;
+export const appliesHere = (f) => !f.engines || f.engines.includes(ENGINE);
+
 // measured: [{ key, detail, value? }]. A key is stable text such as "keyboard:menu.html:focus-visible:.jump a".
 // known:    entries of findings.json whose `check` equals checkId (default: loaded from the register).
 // Returns { problems, notes }.
-export function reconcile(checkId, measured, known = loadFindings().filter((f) => f.check === checkId)) {
+export function reconcile(checkId, measured, known = loadFindings().filter((f) => f.check === checkId && appliesHere(f))) {
   const problems = [], notes = [];
   const byKey = new Map(known.map((f) => [f.key, f]));
   const seen = new Set();

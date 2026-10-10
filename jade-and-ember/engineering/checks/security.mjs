@@ -9,6 +9,7 @@
 //            computed styles, screenshots); policy probes: an injected inline script, an inline handler, an external script, an unlisted
 //            inline style and an iframe are all BLOCKED; and over file:// the same injected script RUNS (no headers exist there)
 // Over file:// no header applies. See ENG-SECURITY.md for what each delivery mode protects.
+import { engineNoise } from '../lib/engine-noise.mjs';
 import { readFileSync, writeFileSync, rmSync } from 'node:fs';
 import { join, dirname } from 'node:path';
 import { assembleCandidate, pagesOf } from '../lib/site.mjs';
@@ -118,12 +119,12 @@ export async function checkSecurity({ root = null, browser = true, browserName =
     const { browser: br } = await launchBrowser(browserName);
     try {
       const sv = serveSite(dir, { headers: () => headers });
-      let loads = 0;
+      let loads = 0, knownNoise = 0;
       for (const file of pagesOf(dir)) for (const ctxDef of [{ name: 'desktop', viewport: { width: 1440, height: 900 }, reducedMotion: 'no-preference' }, { name: 'phone', viewport: { width: 390, height: 844 }, isMobile: true, hasTouch: true, reducedMotion: 'no-preference' }]) {
         const ctx = await br.newContext(ctxDef); const page = await ctx.newPage();
-        const noise = [], failed = [];
+        const noise = [], failed = []; let known = 0;
         await page.addInitScript(() => { window.__v = []; window.addEventListener('securitypolicyviolation', (e) => window.__v.push(`${e.violatedDirective} ${e.blockedURI}`), true); });
-        page.on('console', (m) => { if (['error', 'warning'].includes(m.type())) noise.push(`${m.type()}: ${m.text().slice(0, 100)}`); });
+        page.on('console', (m) => { if (['error', 'warning'].includes(m.type())) { if (engineNoise(browserName, m.text())) known++; else noise.push(`${m.type()}: ${m.text().slice(0, 100)}`); } });
         page.on('pageerror', (e) => noise.push(`pageerror: ${e.message}`));
         page.on('response', (r) => { if (r.status() >= 400) failed.push(`${r.status()} ${r.url()}`); });
         await page.goto(sv.base + file); await page.waitForTimeout(ctxDef.name === 'desktop' ? 3500 : 1500);
@@ -138,7 +139,7 @@ export async function checkSecurity({ root = null, browser = true, browserName =
         const v = await page.evaluate(() => window.__v);
         const imgs = await page.evaluate(() => [...document.images].filter((i) => !(i.complete && i.naturalWidth > 0)).length);
         const fonts = await page.evaluate(async () => { await document.fonts.ready; return [...document.fonts].filter((f) => !/Fallback/.test(f.family) && f.status === 'error').length; });
-        loads++;
+        loads++; knownNoise += known;
         if (v.length) problems.push(`${file} (${ctxDef.name}) under the headers: CSP violations ${JSON.stringify(v)}`);
         if (noise.length) problems.push(`${file} (${ctxDef.name}) under the headers: console messages ${JSON.stringify(noise)}`);
         if (failed.length) problems.push(`${file} (${ctxDef.name}) under the headers: failed requests ${JSON.stringify(failed)}`);
@@ -146,7 +147,7 @@ export async function checkSecurity({ root = null, browser = true, browserName =
         await ctx.close();
       }
       sv.close();
-      notes.push(`${loads} page loads under the headers (desktop with video and Pause, phone with menu): 0 CSP violations, 0 console messages, 0 failed requests`);
+      notes.push(`${loads} page loads under the headers (desktop with video and Pause, phone with menu): 0 CSP violations, ${knownNoise ? `${knownNoise} known ${browserName} console warning(s) about the media-qualified hero preload (F-G5-02), no others` : '0 console messages'}, 0 failed requests`);
       // 3. probes on a scratch copy
       probeDir = assembleCandidate(projectDir, 'probes');
       const p = await probes({ root: probeDir, policy, browser: br });

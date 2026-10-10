@@ -115,7 +115,7 @@ export const scenarios = [
       out[f] = await page.evaluate(async () => { await Promise.all([...document.fonts].filter((x) => !/Fallback/.test(x.family)).map((x) => x.load().catch(() => {}))); await document.fonts.ready; return { title: document.title, h1: document.querySelector('h1')?.innerText, images: [...document.images].map((i) => [(i.getAttribute('alt') || '').slice(0, 30), i.complete && i.naturalWidth > 0]), fonts: [...document.fonts].filter((x) => !/Fallback/.test(x.family)).map((x) => `${x.family} ${x.weight} ${x.status}`).sort() }; });
       const rootUrl = pathToFileURL(root).href;   // the two folders live in different temp folders: make the traces independent of that
       const norm = (t) => t.split(rootUrl).join('<root>').split(root).join('<root>').replace(/\.[0-9a-f]{8}\.(woff2|webp|webm|mp4|css|js)\b/g, '.$1');   // also makes the trace independent of hashed file names
-      out[f].errors = log.errors.map(norm); out[f].failed = log.failed.map((p) => norm(p));
+      out[f].errors = log.errors.map(norm).sort(); out[f].failed = log.failed.map((p) => norm(p)).sort();   // concurrent failures arrive in no fixed order in every engine: the SET must be equal, the order is not behaviour
     }
     return { out };
   }) },

@@ -7,6 +7,8 @@ import { SCOPE, engineChecks, renderMatrix } from '../lib/cross-catalogue.mjs';
 import { checkD11 } from './d11.mjs';
 import { checkCiFile } from './ci.mjs';
 import { loadPolicy } from '../lib/security.mjs';
+import { reconcile, setEngine } from '../lib/findings.mjs';
+import { engineNoise } from '../lib/engine-noise.mjs';
 import { engDir, isMain, repoRoot } from '../lib/git.mjs';
 
 const verifyIds = () => [...readFileSync(join(engDir, 'verify.mjs'), 'utf8').matchAll(/\['(check:[a-z0-9-]+)'/g)].map((m) => m[1]);
@@ -29,6 +31,9 @@ const cases = [
   ['adaptation: Chromium and WebKit options are left exactly as given', () => { takeAdaptations(); const a = { isMobile: true, hasTouch: true }; const p = []; for (const e of ['chromium', 'webkit']) if (JSON.stringify(adaptContextOptions(e, a)) !== JSON.stringify(a)) p.push(`${e} options were changed`); if (takeAdaptations().length) p.push('an adaptation was reported for an engine that needs none'); return p; }, null],
   ['adaptation: an option that is false or absent is not reported', () => { takeAdaptations(); adaptContextOptions('firefox', { isMobile: false }); adaptContextOptions('firefox', { viewport: { width: 1, height: 1 } }); return takeAdaptations(); }, null],
   ['d11: an engine that ignores the style-attribute hashes is caught', async () => { const p = clone(loadPolicy()); p.csp['style-src-attr'] = ["'unsafe-hashes'"]; return (await checkD11({ policy: p })).problems; }, /does NOT honour|style violation/],
+  ['findings: a finding recorded for one engine is not stale in another, and is NEW if it appears there', () => { const k = [{ id: 'F-T', key: 'k', engines: ['webkit'] }]; setEngine('firefox'); const a = reconcile('x', [], k.filter((f) => !f.engines || f.engines.includes('firefox'))); const mine = (e) => { setEngine(e); return reconcile('x', [{ key: 'k', detail: 'seen' }], k.filter((f) => !f.engines || f.engines.includes(e))); }; const wk = mine('webkit'), ff = mine('firefox'); setEngine('chromium'); return [...a.problems.map((x) => 'stale: ' + x), ...wk.problems.map((x) => 'webkit: ' + x), ...ff.problems.filter((x) => /^k: seen/.test(x)).map(() => 'NEW-IN-OTHER-ENGINE')]; }, /NEW-IN-OTHER-ENGINE/],
+  ['noise: the Firefox hero-preload warning is recognised in Firefox only', () => { const m = 'Preload of http://127.0.0.1:1/media/hero-wok-m.webp was ignored due to unknown \u201cas\u201d or \u201ctype\u201d values, or non-matching \u201cmedia\u201d attribute'; return ['chromium', 'webkit'].filter((e) => engineNoise(e, m)).map((e) => `${e} filtered the message`).concat(engineNoise('firefox', m) ? [] : ['firefox did not recognise it']); }, null],
+  ['noise: any other console message is never filtered', () => ['firefox', 'chromium', 'webkit'].filter((e) => engineNoise(e, 'Preload of http://x/media/other.webp was ignored') || engineNoise(e, 'Refused to apply inline style')).map((e) => `${e} filtered an unrelated message`), null],
   ['ci: a cross-browser job that may fail but is not named informational is refused', () => checkCiFile(wf.replace('cross-browser: Firefox (informational)', 'cross-browser: Firefox'), { docs: false }).problems, /continue-on-error is only allowed/],
   ['ci: a cross-browser job that installs no browser is refused', () => checkCiFile(wf.replace('npx playwright install --with-deps firefox', 'echo no-browser'), { docs: false }).problems, /does not install firefox/],
   ['ci: the Chromium verify job is unchanged and still blocking', () => checkCiFile(wf.replace('        run: npm run verify\n', '        run: echo skipped\n'), { docs: false }).problems, /must run npm run verify/],

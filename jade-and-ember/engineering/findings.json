@@ -22,7 +22,10 @@
       "status": "accepted (APR-JE-023) as a documented limitation: harmless console messages over file://",
       "description": "When index.html is opened straight from the folder (file://), Chromium logs up to 6 console messages per page load about the two <link rel=\"preload\" as=\"font\" crossorigin> tags: the preload fetch is a CORS request from the opaque origin \"null\" and is refused, and the unused-preload warning follows. The fonts themselves load normally from the stylesheet (all four web fonts report loaded, nothing differs on screen, and every functional check passes). Over http and https there is no message. Present since v0.8 (the same messages appear for the frozen baseline). Firefox and Safari behaviour over file:// is untested here.",
       "proposal": "Recommended: accept it. It is console noise in one delivery mode, it hides nothing, and removing the preloads would delay the web fonts on every HTTP visit (a possible visible flash of the metric-matched fallback fonts, which would be a visual change). If the owner wants a silent console over file://, the two preload tags can be emitted only for HTTP builds through a build option (a new build flag, no change to the default pages); that changes the HTML bytes of the HTTP build and needs an allowlist entry and a visual re-check. Not applied.",
-      "ledger": "ENG-102"
+      "ledger": "ENG-102",
+      "engines": [
+        "chromium"
+      ]
     },
     {
       "id": "F-G4-01",
@@ -35,6 +38,51 @@
       "description": "html-validate's tel-non-breaking rule reports 6 messages for the 3 telephone links on the demonstration (Home address block, Visit, Order): 2 messages per link (spaces and the hyphen could break). The same markup is in the frozen v0.8 baseline. The rule is switched off in htmlvalidate.json and counted here so the number cannot grow unnoticed. check:phone measured every phone link at 9 supported mobile widths (320 to 768, portrait and landscape): none wraps onto a second line, none overflows or is clipped or covered, all are pressable.",
       "proposal": "Accepted as is: no visual change. If a future layout makes a number wrap, check:phone records it as information; it fails only on a genuine defect (overflow, clipping, covering, tiny type, a number that does not match its link, an unpressable target).",
       "ledger": "ENG-107"
+    },
+    {
+      "id": "F-G5-01",
+      "check": "portability",
+      "key": "portability:file://:fonts-not-loaded",
+      "engines": [
+        "webkit"
+      ],
+      "severity": "Minor",
+      "visual": true,
+      "maxValue": 400,
+      "status": "open: awaiting owner decision (Gate 5 Phase 1 finding; no change made)",
+      "description": "Opened straight from the folder (file://), WebKit refuses the web-font requests (the page origin is \"null\": 'Origin null is not allowed by Access-Control-Allow-Origin') and does not apply the self-hosted Young Serif and Karla files; the text is drawn in the metric-matched fallback fonts. Over http (domain root, subdirectory, pretty URLs) the same fonts load in WebKit. Chromium and Firefox load them over file://. This is an engine-specific difference in the file:// delivery mode only; the check records it instead of passing it.",
+      "proposal": "Recommended: accept and document. The STS delivery path for review is HTTP (Cloudflare Pages), and a folder opened from disk in Safari is a convenience mode. If the file:// preview must look identical in Safari, the fonts would have to be inlined as data: URIs, which changes the CSP font-src and the page weight, so it needs the owner's decision and a new D-11-style review. No change was made.",
+      "ledger": "ENG-G5-01"
+    },
+    {
+      "id": "F-G5-02",
+      "check": "portability",
+      "key": "portability:preload-media-warning",
+      "engines": [
+        "firefox"
+      ],
+      "severity": "Info",
+      "visual": false,
+      "maxValue": 2,
+      "status": "open: awaiting owner decision (Gate 5 Phase 1 finding; no change made)",
+      "description": "Firefox writes a console warning, \"Preload of .../media/hero-wok(-m).webp was ignored due to unknown as or type values, or non-matching media attribute\", for the one hero preload whose media query does not match the current viewport. The Home page deliberately carries one media-qualified preload per art direction; the one that matches is used. Nothing is wrong on screen. The harness counts the message in every Firefox check that watches the console (security, seo, portability) and does not filter it in any other engine.",
+      "proposal": "Recommended: accept it. It is noise by design in one engine. Removing the non-matching preload would lose the art-directed preload in Chromium and WebKit, which is a performance change, not a fix.",
+      "ledger": "ENG-G5-02"
+    },
+    {
+      "id": "F-G5-03",
+      "check": "keyboard",
+      "key": "keyboard:menu.html@mobile-390:unlisted-focus:ul",
+      "engines": [
+        "firefox"
+      ],
+      "severity": "Info",
+      "visual": false,
+      "maxValue": 1,
+      "status": "open: awaiting owner decision (Gate 5 Phase 1 finding; no change made)",
+      "description": "At 390 px the Menu page's category strip (.jump ul, overflow-x:auto) scrolls. Firefox makes any scrollable container a keyboard focus stop, so Tab lands once on the <ul> before its links. The element is not an interactive control and has no focus ring of its own in the v0.8 design; Chromium (141 locally, 156 in CI) and WebKit do not stop there. The check reports the stop instead of hiding it.",
+      "proposal": "Recommended: accept. This is Firefox's intended access to scrolled content and it adds one extra Tab stop on one page at phone width. A visible focus ring on the strip would be a visual change and needs the owner's approval; no change was made.",
+      "ledger": "ENG-G5-03"
     }
   ]
 }
