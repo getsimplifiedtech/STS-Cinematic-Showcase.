@@ -1,0 +1,116 @@
+# STS engineering requirements ledger: existing requirements mapped to the Jade & Ember v0.8 codebase
+
+**Status:** v0.9 planning input. **Nothing here is implemented.** v0.8 (`32afde7`) is frozen and visually immutable; this ledger only reads it.
+**Method:** adapted from the framework's own Editorial Migration Plan (`architecture/10`, Phase 2 "Rule ledger": inventory and classify before migrating; ambiguous rules are flagged, never guessed). Every row classifies one existing or newly identified requirement.
+**Authority split (owner policy, `APR-JE-016`, `APR-JE-018`):** Anthropic Frontend Design governs creative direction. STS governs engineering, architecture, reusable components, configuration, accessibility, security, performance, QA, portability and release controls. The retired STS Premium Web Design skill is **not** a source of aesthetic rules; where an engineering requirement was originally written inside it, the row says so and carries only the engineering substance.
+
+## Legend
+**Sources** (framework = `getsimplifiedtech/sts-web-design-framework` @ `d2803c0`): `README` = `README.md`; `01`..`15` = `architecture/NN-*.md`; `TPL` = `templates/sts-cinematic-template-v02` (v0.3.1); `RET` = engineering sections of the retired `skills/PREMIUM_WEB_DESIGN.md` (engineering substance only); `AUD` = the 2026-10-10 compliance audit finding; `NEW` = not in the framework, needed for an HTML-first, platform-independent framework.
+
+**Class:** **U** universal engineering requirement, keep. **G** valid in intent but worded for Lovable or the compile pipeline, generalise to platform-neutral. **R** Lovable-specific, retire. **P** pipeline or taxonomy specific (profile, compiler, packages, vocabularies), park: not carried into the HTML-first framework. **A** aesthetic: delegated to Frontend Design, never carried as an STS rule. **N** new requirement.
+
+**Status in v0.8:** Implemented, Partial, Missing, or N/A. **Visual impact of the v0.9 action:** **None** (tests, docs, tooling; output files unchanged), **Guarded** (output files may change, pixels, visible text, assets, fonts and motion must stay identical, proven by the immutability harness WP1), or **Approval** (any realisation would change what a visitor sees or reads; needs separate owner approval first).
+
+## A. Governance and authority
+| ID | Requirement | Source | Class | v0.8 evidence | Status | v0.9 action | Visual |
+|---|---|---|---|---|---|---|---|
+| ENG-001 | Frontend Design governs creative direction; STS governs engineering | owner policy `APR-JE-016` | U | `docs/JADE_AND_EMBER_FRAMEWORK_REFERENCE.md` §4; README line 5 | Implemented (docs) | Keep; machine check that no active file names the retired skill as authority (WP2 `check:authority`) | None |
+| ENG-002 | STS visual packages supply tokens and configurations only; no competing aesthetic rules | owner policy `APR-JE-016` | U | No packages exist; tokens are 31 CSS custom properties in `styles.css` `:root` | Partial | Token contract and extraction (WP5); a check that engineering files contain no aesthetic rule text | Guarded |
+| ENG-003 | Retired skill historical only | audit M-3 | U | Amended brief, hero plan, QA note (`81311f7`) | Implemented (docs) | Add the automated authority check (WP2) | None |
+| ENG-004 | Pin the framework reference; no silent version change | README:30; 14 §Framework Release, §No range resolution | U | `docs/..._FRAMEWORK_REFERENCE.md` (commit and hashes) | Implemented (manual) | Machine-readable `framework.lock.json` plus a consistency check (WP7) | None |
+| ENG-005 | Approvals are separate records bound to the exact state | 15 §Approval record | G | `docs/JADE_AND_EMBER_APPROVALS.md` (bound to commits) | Implemented (manual) | Release gate reads the approvals file (WP7) | None |
+| ENG-006 | Industry informs design but does not determine it; stereotype test | README governing rules; 07 §Stereotype test | A | Followed in the direction proposals | N/A (design process) | Delegated to Frontend Design; no engineering action | None |
+| ENG-007 | Brand is a formal authority; brief-pinned direction wins | README; skill rule | U | Brief palette honoured (`docs/..._BUILD_BRIEF.md` §3) | Implemented | Keep | None |
+| ENG-008 | Engineering core stays free of aesthetic taste ("CORE purity") | 01 §CORE; 10 §Phase 3, §Primary migration risk | U | Tests measure contrast, not taste | Implemented | Add an engineering-purity review step to the v0.9 extraction (WP9) | None |
+
+## B. Architecture and configuration
+| ID | Requirement | Source | Class | v0.8 evidence | Status | v0.9 action | Visual |
+|---|---|---|---|---|---|---|---|
+| ENG-010 | Static-first: complete and readable without JavaScript | TPL README "Standards followed"; RET Part VI §4 | U | `tests/qa.mjs` no-JS scenarios (also `.js`-class gating in `src/components/document.mjs`) | Implemented | Keep; contract test per component (WP4) | None |
+| ENG-011 | Config-driven build; a variation is config plus media | TPL README lines 1 to 12 | U | `config/*.json`, `build.mjs`, `src/` | Implemented | Document as the framework's core contract (WP10) | None |
+| ENG-012 | Typed, machine-validated configuration ("a JSON Schema is the implementation artifact") | 03 §Closed fields, §Validation | G | Hand-written checks in `src/lib/config.mjs` (about 120 lines); no schema files | Partial | JSON Schema for the four config files and a new `engineering.json`; one validator (WP3) | None |
+| ENG-013 | Closed value sets; unknown values fail closed | 02 §ID grammar | G | Enumerations in code (heat 0 to 3, `headerCta`, tags) | Partial | Move enumerations into the schemas (WP3) | None |
+| ENG-014 | Invalid configuration fails the build and writes nothing | 08 §Compile-time QA | G | `tests/variants.mjs` (9 invalid configurations) | Implemented | Keep; extend with schema-driven cases (WP3) | None |
+| ENG-015 | Deterministic build: same inputs, same bytes | 08 §Determinism | U | Verified once by hand (fresh build equals committed pages); no automated test | Partial | `check:determinism` builds twice and compares (WP2) | None |
+| ENG-016 | Provenance for every generated artifact | 01 §QA; 06 §Provenance | G | `media/PROVENANCE.md`; no build manifest | Partial | Build manifest: inputs, hashes, versions (WP7) | None |
+| ENG-017 | Reusable components publish a contract (use, anti-use, accessibility and performance risks, fallbacks, QA hooks) | 04 §Required sections | G | Eight components in `src/components/`; no contracts | Partial | Component contracts as docs plus contract tests; no markup change (WP4) | None |
+| ENG-018 | Tokens are concrete, named and related, never adjectives | 04 §Tokens; 12 | G | `:root` tokens (hex, rem, px); not separable from `styles.css` | Partial | `tokens` source and a generated `:root` block, output byte-identical (WP5) | Guarded |
+| ENG-019 | "Builder-default overrides" to stop Lovable homogenising output | 04 §Builder-default overrides | R | Not applicable: no builder | N/A | Retire the concept; keep only "no framework default leaks into a client build" (covered by ENG-054) | None |
+| ENG-020 | Page inventory, hierarchy and navigation live in config | 03 §Site Architecture | U | `config/site.json` registry drives header, footer and tests | Implemented | Keep | None |
+| ENG-021 | Capability tiers cap pages, experience and motion | 13 | G | Five pages; implicit "standard" tier | Partial | Optional `tier` field with a check (WP3) | None |
+| ENG-022 | Versions and lifecycle are explicit data | 14 §Lifecycle registry | G | `package.json` 0.1.0 vs v0.8 (audit m-1); no `VERSION.json` | Missing | `VERSION.json` as the single source (WP7); the visible footer stamp is a separate decision (D-1) | Approval (stamp text only) |
+| ENG-023 | Compile context-budget partition plan for Lovable passes | 08 §Context budget and partitioning | R | n/a | N/A | Retire | None |
+| ENG-024 | Compile to a deterministic "Lovable-facing rendering" | README lines 6 to 8; 01 §Compiler model; 08 steps 12 and 13 | R | n/a (HTML-first) | N/A | Retire; replaced by "deterministic static render" (ENG-015) | None |
+| ENG-025 | "Lovable never arbitrates conflicts" | README line 28; 01 | G | All conflicts are resolved at build time or fail | Implemented | Restate platform-neutrally: no runtime or host-side arbitration | None |
+| ENG-026 | Compare the build with the specification after each builder pass ("builder drift") | 09 §Builder drift | G | `tests/site.mjs` checks output against config on every run | Implemented | Rename as output-versus-config conformance (WP10) | None |
+| ENG-027 | Offline validation precedes any paid spend; no paid generation without approval | README line 31; 08 §Credit discipline | G | One approved 5-credit generation, recorded; all QA offline | Implemented | Add a media-spend ledger check against `PROVENANCE.md` (WP2) | None |
+| ENG-028 | Design Determination interface (Rae) | 07 | P | n/a | N/A | Park: upstream tool, out of scope for the engineering framework | None |
+| ENG-029 | Design Profile, Design Analysis and Design Brief as typed records | 03; 07; 15 | P | Direction proposals and approvals exist as prose | N/A | Park the schema; keep a plain "design direction record" per project (WP10) | None |
+| ENG-030 | Layer registry, controlled vocabulary of visual systems, compatibility matrix, slot precedence, contribution records | 02; 05; 06; 11; 12 | P / A | Not used; spec-only upstream | N/A | Park. The `visual.*` taxonomy is aesthetic and conflicts with the policy; reuse only the structural ideas (one owner per concern, deterministic merge) | None |
+| ENG-031 | Editorial migration plan | 10 | P | n/a | N/A | Framework-internal; its ledger method is reused here | None |
+
+## C. Accessibility
+| ID | Requirement | Source | Class | v0.8 evidence | Status | v0.9 action | Visual |
+|---|---|---|---|---|---|---|---|
+| ENG-040 | WCAG 2.2 AA automated scan on every page and context | 09 §Tier 1; RET Part XI | U | `tests/qa.mjs:54`, five pages by six contexts, 0 violations | Implemented | Keep | None |
+| ENG-041 | Text contrast verified over images and video at real crops and all breakpoints | RET Part XI | U | `tests/contrast.mjs`, `tests/contrast-sections.mjs` | Implemented | Keep; move thresholds to `engineering.json` (WP3) | None |
+| ENG-042 | Logical focus order, no traps, focus visible and not obscured (2.4.11) | RET Part XI | U | Spot checks (`tests/qa.mjs:119`, Menu jump bar); no full tab-order check | Partial | `check:keyboard`: per-page tab-order snapshot and focus-visible assertions (WP2) | None |
+| ENG-043 | Target size 24 px minimum, 44 px for primary actions (2.5.8) | RET Part XI | U | 24 px asserted; 44 px not asserted | Partial | Assert the 44 px rule for configured primary actions (WP2) | None |
+| ENG-044 | Reflow at 320 px (1.4.10), text spacing (1.4.12), 200 percent zoom (1.4.4) | RET Part VII, Part XI | U | 320 px reflow tested; spacing and zoom not tested | Partial | `check:reflow` injects spacing overrides and zoom and fails on clipping or overlap (WP2). Findings become proposals | None (Approval if a fix is needed) |
+| ENG-045 | Reduced motion honoured; pause control for motion over 5 seconds (2.2.2) | RET Part V §6 | U | `tests/qa.mjs:154,211-221`, `hero.js` | Implemented | Keep | None |
+| ENG-046 | No flashing above three per second (2.3.1) | RET Part XI | U | `tools/video-qa.py` flash proxy on the hero clip only | Partial | Fold into the media check for any video asset (WP2) | None |
+| ENG-047 | Meaningful alt text; decorative media hidden from assistive technology | RET Part XI | U | `tests/site.mjs`; validator requires alt or `decorative` | Implemented | Keep | None |
+| ENG-048 | Reading order equals visual order; no meaning carried by CSS reordering | RET Part VII | U | Dish 2 reordered in the DOM, not in CSS; no automated check | Partial | `check:order` compares DOM order with rendered order for key blocks (WP2) | None |
+| ENG-049 | Screen-reader pass and accessibility-tree review | RET Part XI | U | None (disclosed `QA.md`) | Missing | Automated accessibility-tree snapshot per page (WP2); human screen-reader protocol (WP8) | None |
+| ENG-050 | Forced-colours and high-contrast modes usable | NEW (CSS rule exists) | N | `@media (forced-colors:active)` rule; untested | Partial | `check:forced-colors` renders in forced-colours emulation and checks controls remain perceivable (WP2) | None |
+| ENG-051 | Language, title, landmarks, single `h1`, heading order | 09 §Tier 1 | U | `tests/site.mjs:72` | Implemented | Keep | None |
+| ENG-052 | Real-device matrix with recorded evidence in the repository | RET Part XI | U | None; disclosed `[unverified]` | Missing | Protocol and evidence template (WP8); execution is the owner's or a human tester's | None |
+
+## D. Performance
+| ID | Requirement | Source | Class | v0.8 evidence | Status | v0.9 action | Visual |
+|---|---|---|---|---|---|---|---|
+| ENG-060 | Core Web Vitals targets (LCP at most 2.5 s, INP at most 200 ms, CLS at most 0.1) | RET Part XI | U | Lighthouse lab LCP and CLS (`lighthouserc.json`); INP not measured | Partial | Enforce LCP and CLS as assertions; add an interaction-latency check (WP2) | None |
+| ENG-061 | A per-page media budget set before building | RET Part XI; architecture doc §8 | U | Budgets written in prose, measured by hand | Partial | `config/engineering.json` budgets plus `check:budgets` (WP2, WP3) | None |
+| ENG-062 | Poster first; preload only the LCP asset; reserve space for media | RET Part XI | U | Poster and `<img width height>` in components; no check | Partial | `check:media` asserts dimensions, preload count, lazy loading below the fold (WP2) | None |
+| ENG-063 | Lazy-load below the fold; honour Save-Data and slow connections | RET Part VII | U | `loading="lazy"`; `tests/qa.mjs` Save-Data and 2g scenarios | Implemented | Keep | None |
+| ENG-064 | No third-party requests | TPL README | U | `tests/site.mjs` external-request check | Implemented | Keep | None |
+| ENG-065 | Cache-safe asset URLs (content-hashed, immutable) | NEW | N | Unversioned `styles.css`, `site.js`, `media/*` | Missing | Content-hashed filenames, build-generated (WP5). Output file names change, pixels must not | Guarded |
+
+## E. QA, regression and release
+| ID | Requirement | Source | Class | v0.8 evidence | Status | v0.9 action | Visual |
+|---|---|---|---|---|---|---|---|
+| ENG-070 | Layered QA: core checks, component checks, direction-conformance review | 09 Tiers 1 to 3 | G | Tier 1 largely implemented; no component tier; critique prose in `QA.md` | Partial | Define: core (automated), component (contract tests, WP4), direction review (a recorded Frontend Design critique) | None |
+| ENG-071 | Severity vocabulary and a gate: no production approval with Blockers or unresolved Majors | 09 §Severity | U | `QA.md` is prose | Missing | Structured findings file; the release script refuses a production mark with open Blockers or Majors (WP7) | None |
+| ENG-072 | Desktop approval never implies mobile approval | 09 §Responsive QA | U | Phone, tablet, landscape, 320 and 2560 in every suite | Implemented | Keep | None |
+| ENG-073 | Regression fixtures for build output and failure cases | 09 §Regression | U | `tests/variants.mjs`; no stored golden outputs | Partial | Golden build outputs and the visual baselines (WP1) | None |
+| ENG-074 | Reskin test: different clients must not look like each other | 09 §Reskin Test | A | Not run | N/A | Delegated: a design judgement under Frontend Design. Engineering keeps only "distinct configs build and validate" (done in `tests/variants.mjs`) | None |
+| ENG-075 | Visual specimens before a visual system is Active | 09 §Visual specimens | P / A | n/a | N/A | Park | None |
+| ENG-076 | CI runs build-diff, accessibility and performance checks on every change | TPL `.github/workflows/template-quality.yml` | G | No CI; commands run by hand | Missing | One platform-neutral `npm run verify`; thin CI wrappers (GitHub Actions first) (WP6) | None |
+| ENG-077 | Committed pages equal a fresh build | TPL workflow line 31 | U | True now (verified 2026-10-10); not enforced | Partial | `check:determinism` plus the CI step (WP2, WP6) | None |
+| ENG-078 | The distributable works when extracted and opened from `index.html` | NEW (built in v0.8) | N | `tests/extracted.mjs` | Implemented | Keep; run on every release package (WP7) | None |
+| ENG-079 | Release package carries its commit, hashes and manifest | NEW | N | `START-HERE.txt` names the commit; no manifest | Partial | Reproducible release package with `SHA256SUMS` and `release-manifest.json` (WP7) | None |
+| ENG-080 | Immutable baselines and tags | 14 | G | Baseline recorded (`baselines/`); remote refused the tag push | Partial | Verify-baseline script; request a remote-tag route from the owner (D-6) | None |
+| ENG-081 | No merge, deployment or publication without explicit authorisation | all handoffs; APPROVALS §B | U | Followed | Implemented | The release tooling contains no deploy step and checks the approvals file (WP7) | None |
+| ENG-082 | `noindex` while the demonstration is fictional | `config/client.json` `seo.noindex` | U | Tested (`tests/site.mjs`) | Implemented | Keep | None |
+
+## F. Security and privacy (STS-governed; the framework text is thin here)
+| ID | Requirement | Source | Class | v0.8 evidence | Status | v0.9 action | Visual |
+|---|---|---|---|---|---|---|---|
+| ENG-090 | No external requests; no third-party scripts | TPL README | U | 0 external `src`; 5 outbound `href`s (the STS credit link) | Implemented | Keep | None |
+| ENG-091 | External links open safely (`noopener noreferrer`) | NEW (built in v0.8) | N | `tests/variants.mjs` live-ordering case | Implemented | Keep | None |
+| ENG-092 | No payments, carts or secrets in the site; ordering is link-out only | brief §6; `docs/..._ARCHITECTURE.md` | U | Confirmed | Implemented | Add a repository secrets scan (WP2) | None |
+| ENG-093 | Security headers (content security policy, referrer, frame, content-type options) | NEW | N | None (no host files). Obstacles to a strict policy: 1 inline script per page, 6 inline `style` attributes on two pages | Missing | `security` policy in `engineering.json`; generated host snippets (WP5). A strict policy needs the inline items refactored or hashed | Guarded |
+| ENG-094 | No cookies, storage, analytics or fingerprinting by default | NEW | N | Verified by search: none in `site.js`, `hero.js`, `menu.js` | Implemented | `check:privacy` asserts it (WP2) | None |
+| ENG-095 | Dependency audit and licence check | NEW | N | `package-lock.json` pins; no audit or licence check | Missing | `check:deps` (audit and licence allow-list; needs network) (WP2) | None |
+| ENG-096 | Media rights and provenance stated | AUD m-8 | U | `media/PROVENANCE.md` lacks licence terms | Partial | Provenance schema with a rights field; check every media file has a row (WP2) | None |
+
+## G. SEO, portability and hosting independence
+| ID | Requirement | Source | Class | v0.8 evidence | Status | v0.9 action | Visual |
+|---|---|---|---|---|---|---|---|
+| ENG-100 | Baseline SEO: unique titles and descriptions, canonical, sitemap, robots, structured data for an indexable client build | 09 §Tier 1; AUD M-4; `docs/..._ARCHITECTURE.md` §7 | U | Titles, descriptions, canonical in `src/components/document.mjs`; no sitemap, robots or JSON-LD; `seo.structuredData` is a dead flag | Partial | Implement behind flags, off while `noindex` (WP5). Demo output stays free of sitemap, robots and JSON-LD | None |
+| ENG-101 | A branded 404 page | NEW | N | None | Missing | Proposal only: a new page is a visual addition | Approval |
+| ENG-102 | Works at any base path and with or without pretty URLs | NEW | N | Relative links; never tested under a subpath or a pretty-URL host | Partial | `check:portability` serves the build at `/` and `/jade-and-ember/` and with extension-less URLs (WP6) | None |
+| ENG-103 | Social preview image and icon set | NEW | N | `og:image` absent; inline SVG favicon only | Missing | Proposal only: needs new or reused imagery | Approval |
+| ENG-104 | Runtime and platform support declared and tested (Node, Python, operating systems) | TPL README | U | "Node 18+" in README; no `engines`; `tests/variants.mjs` uses symlinks | Partial | `engines`, a Windows-safe test path, a CI matrix (WP6) | None |
+| ENG-105 | Host-neutral deployment output: `dist/` plus optional per-host adapters | NEW | N | The committed folder is the output; no host files | Missing | `dist/` build and adapters for static hosts (WP5, WP6); no deployment is performed | None |
+| ENG-106 | Cross-browser: Chromium, Firefox, WebKit | 09 §Tier 1 "browser resilience" | U | Chromium only | Missing | Automated Firefox and WebKit runs where browsers are installable (WP8); real devices remain human work | None |
