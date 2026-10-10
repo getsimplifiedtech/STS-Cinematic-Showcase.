@@ -3,7 +3,7 @@
 A five-page static website: **Home, Menu, Our story, Visit us, Order online** (`index.html`, `menu.html`, `our-story.html`, `visit-us.html`, `order-online.html`).
 No framework, no runtime dependencies, no external requests, no Lovable. Target path: `/jade-and-ember/`.
 Design authority: Anthropic's `frontend-design` skill. Approved visual design: v0.5 Jade Lacquer. Architecture: `../docs/JADE_AND_EMBER_FIVE_PAGE_ARCHITECTURE.md`.
-Governance: framework and skill reference `../docs/JADE_AND_EMBER_FRAMEWORK_REFERENCE.md`; approval records `../docs/JADE_AND_EMBER_APPROVALS.md` (v0.8 is **not** recorded as approved).
+Governance: framework and skill reference `../docs/JADE_AND_EMBER_FRAMEWORK_REFERENCE.md`; approval records `../docs/JADE_AND_EMBER_APPROVALS.md` (v0.8 is recorded as the **design baseline**, approved on 2026-10-10, and as **not approved** for public deployment or client production; frozen record: `../baselines/jade-and-ember-v0.8/BASELINE.md`).
 
 **All five pages are built** (Gate 1: shared configuration and components, Home, Menu; Gate 2: Our story, Visit us, Order online). Open `index.html`, or run `python3 serve.py`.
 
