@@ -3,7 +3,7 @@
 **Status:** proposal for review. **Nothing is implemented.** No media is generated, nothing is merged or deployed.
 **Baseline:** v0.5 Jade Lacquer (`0ae79f3`), approved as the visual design.
 **Branch:** `feature/jade-and-ember-brief`. **Date:** 2026-10-09.
-**Design authority:** Anthropic's `frontend-design` skill (`getsimplifiedtech/sts-web-design-framework`, branch `feature/anthropic-frontend-design-standard`). The retired STS Premium Web Design skill is not used. Engineering rules (accessibility, performance, fallbacks, `noindex`, honest QA) come from this project's own brief and `QA.md`.
+**Design authority:** Anthropic's `frontend-design` skill (`getsimplifiedtech/sts-web-design-framework`, branch `feature/anthropic-frontend-design-standard`). The retired STS Premium Web Design skill is not used. The framework commit and skill hashes are pinned in `docs/JADE_AND_EMBER_FRAMEWORK_REFERENCE.md`. Engineering rules (accessibility, performance, fallbacks, `noindex`, honest QA) come from this project's own brief and `QA.md`.
 
 ---
 

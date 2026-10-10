@@ -2,8 +2,10 @@
 
 **Status:** Gate A done: one trial run (`docs/JADE_AND_EMBER_GATE_A_RESULT.md`), footage approved, and integrated into the site in v0.3 (`jade-and-ember/QA.md`). Gates B (portrait clip) and C (ingredient toss) were not requested. **No video has been generated, no media uploaded to a generator, nothing merged, deployed or published.**
 **Builds on:** `jade-and-ember/` v0.2 (`2382116`, approved as the working foundation).
-**Standard applied:** STS Premium Web Design v2.0 (Part VI media justification and source-media discipline, Part V motion, Part XI accessibility, performance and real-device QA).
+**Standard applied (historical):** STS Premium Web Design v2.0, since retired (Part VI media justification and source-media discipline, Part V motion, Part XI accessibility, performance and real-device QA).
 **Prepared:** 2026-10-09.
+
+> **Amendment 1 (2026-10-10): the standard named above is historical only.** The STS Premium Web Design skill cited in this plan ("Part V", "Part VI", "Part XI") was retired by owner decision and is **not an active authority**; Anthropic's Frontend Design skill is the active creative authority for this project (`docs/JADE_AND_EMBER_FRAMEWORK_REFERENCE.md`, `docs/JADE_AND_EMBER_APPROVALS.md` APR-JE-009 and APR-JE-016). This amendment changes no decision in the plan: Gate A was run, reviewed and approved as recorded (`APR-JE-004` to `APR-JE-007`). The plan's **engineering and delivery substance stays in force as this project's own requirements**, independent of the retired skill: source-media discipline and provenance, a still fallback and Pause control, reduced-motion, Save-Data and slow-connection handling, accessibility, performance budgets, real-device testing marked **[unverified]** until performed, media licensing, and no generation or spend without explicit approval. Its aesthetic judgments must not be re-applied or combined with the active skill.
 
 ---
 

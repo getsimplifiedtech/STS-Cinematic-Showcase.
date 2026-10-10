@@ -2,6 +2,8 @@
 
 Branch `feature/jade-and-ember-brief`. Dates: 2026-10-09. Tooling: Playwright 1.64 + axe-core 4.13, Lighthouse 12.6.1 (`@lhci/cli` 0.15 for the mobile preset, the Lighthouse CLI for the desktop preset), Chromium 1194 (headless, Linux), ffmpeg 6.1. **Nothing was run on a real device.**
 
+> **Terminology note (2026-10-10).** The sections for v0.1 to v0.4 below use vocabulary from the **retired STS Premium Web Design skill** (swap, squint and mute tests, "Part" numbers, premium-versus-template language). They are kept as history only and are not current standards. The active creative authority is Anthropic's Frontend Design skill; see `../docs/JADE_AND_EMBER_FRAMEWORK_REFERENCE.md`. Approvals are recorded in `../docs/JADE_AND_EMBER_APPROVALS.md`; nothing in this file approves v0.8, publication or production readiness.
+
 Re-runnable: `npm run test:a11y`, `npm run test:contrast`, `npm run test:lighthouse`, `npm run test:video-tools`, and `python3 tools/video-qa.py media/hero-loop.webm --poster media/hero-wok.webp`.
 
 ## What v0.8 (Gate 2) changed

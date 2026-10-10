@@ -3,10 +3,17 @@
 
 **Project:** Jade & Ember — Modern Chinese Kitchen  
 **Product:** STS Cinematic Ambient Hero (CAH)  
-**Design authority:** STS Premium Web Design v2.0  
+**Design authority:** ~~STS Premium Web Design v2.0~~ **retired, historical only; see Amendment 1 below. Active creative authority: Anthropic Frontend Design.**  
 **Status:** Approved direction for initial development; publication requires review.  
 **Repository:** `getsimplifiedtech/STS-Cinematic-Showcase.`  
 **Target demo path:** `/jade-and-ember/`
+
+> **Amendment 1 (2026-10-10): design authority.** Recorded by owner decision (`docs/JADE_AND_EMBER_APPROVALS.md`, APR-JE-009 and APR-JE-016); this note amends the brief without rewriting it.
+>
+> - The **STS Premium Web Design skill (v2.0) is retired and historical only**: `.claude/skills/sts-premium-web-design/`, `skills/PREMIUM_WEB_DESIGN.md` and the branch `claude/premium-web-design-skill`. Wherever this brief names it (the "Design authority" line, section 2, section 9 "methods from the STS skill", section 11 step 1), that instruction is **superseded**. Its aesthetic rules must not be applied to this project or combined with the active skill.
+> - **Anthropic's Frontend Design skill (`frontend-design`) is the active creative authority**, pinned in `docs/JADE_AND_EMBER_FRAMEWORK_REFERENCE.md` (framework commit and skill hashes). Policy: it governs creative direction; STS retains authority over architecture, engineering, accessibility, security, QA and delivery; STS visual packages may supply reusable implementation tokens and configurations but must not impose competing aesthetic rules.
+> - **Unchanged and still binding:** every engineering, delivery and restriction requirement in this brief (sections 4 to 8, 10 and the non-aesthetic parts of 9), the fictional-content labelling, `noindex`, no Lovable dependency, and the **brief-pinned visual direction** (section 3: "a restrained palette of charcoal, jade, warm ember, and rice tones"), which the active skill treats as the client's own words.
+> - The original text below is kept as the historical record of the brief as issued on 2026-10-09.
 
 ## 1. Objective
 
@@ -17,6 +24,8 @@ The experience must demonstrate a commercially deliverable restaurant website, n
 Create a complete, responsive, standalone website suitable for deployment on Cloudflare Pages.
 
 ## 2. Required design standard
+
+> **[Superseded by Amendment 1: historical only.]** The files named in this section describe the retired design authority. The engineering conventions in the template are still useful as lineage; the aesthetic rules are not applied.
 
 Read the following files from the private GitHub repository `getsimplifiedtech/sts-web-design-framework`, branch `claude/premium-web-design-skill`:
 
@@ -120,7 +129,7 @@ The website must:
 7. Pass applicable automated QA, with limitations explicitly documented.
 8. Be reproducible for another restaurant through controlled content and asset changes.
 
-Use the premium-versus-template distinction, brand swap test, visual thesis, and anchored critique methods from the STS skill. Do not invent a numeric score threshold.
+Use the premium-versus-template distinction, brand swap test, visual thesis, and anchored critique methods from the STS skill. **[Superseded by Amendment 1: historical only. The critique method is now Frontend Design's plan, review-against-defaults and self-critique process.]** Do not invent a numeric score threshold.
 
 ## 10. Restrictions
 
@@ -134,7 +143,7 @@ Use the premium-versus-template distinction, brand swap test, visual thesis, and
 
 ## 11. Delivery sequence
 
-1. Apply STS skill and develop the art direction.
+1. Apply STS skill and develop the art direction. **[Superseded by Amendment 1: apply the Frontend Design skill.]**
 2. Build standalone restaurant pages with the still-image hero.
 3. Validate navigation, mobile layout, accessibility, and performance.
 4. Plan and review the cinematic hero source image and generation parameters; only then seek authorization for video generation.
