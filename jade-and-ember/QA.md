@@ -306,6 +306,23 @@ Chromium 141.0.7390.37, Playwright 1.64.0, Node 22. **`npm run verify`: 32 of 32
 
 **Decisions and restrictions kept.** v0.8 baseline unchanged (`32afde7`); no design or media change; no framework-repository change; no merge, deployment, preview or paid call. v0.8 and v0.9 are still not approved for deployment or client production.
 
+## v0.9 Gate 4: CLOSED (2026-10-10, `APR-JE-025`)
+**Gate 4 and its reconciliation are approved and closed by the owner on the evidence below.** Closure approves engineering work only: it is not a release, rights, search-review or deployment approval, and it does not begin Gate 5.
+
+| Preserved evidence | Result |
+|---|---|
+| Local `npm run verify` | **32 of 32 checks** (about 16.5 minutes of checks); regression against v0.8: 0 differences in source, text, structure, styles, pixels and behaviour |
+| Gate 4 negative tests | **159** (151 detections, 8 "must find nothing" assertions), all behave; Gate 2: 42, Gate 3: 68, Gate 1 mutation tests: all pass |
+| Remote CI, confirmed from the GitHub API | Run 7 `db6439e` success (both jobs); **run 8 `2a52156` success (both jobs): the last verified code commit**; **run 9 `14f09f1` success (both jobs): the documentation commit**. Runs 1 to 3 failed earlier for the reasons recorded in `engineering/CI.md` |
+| Demo vs v0.8 | A fresh build equals the v0.8 commit's five pages byte for byte; no delivered file or configuration differs from `32afde7`; the baseline branch is unchanged |
+| F-G4-01 | **Accepted without visual changes** (`APR-JE-024`); `check:phone` holds the condition: readable, operable, no overflow or clipping at 9 supported mobile widths |
+
+**Open, non-blocking diagnostic: interaction-latency anomaly.** On the CI runner, `check:budgets` reports end-to-end 753 to 792 ms for opening the phone menu (slowest event `pointerover`, handler 2 ms, main thread idle); locally it is 40 to 56 ms and the probe's identical events on the same runner take 0.4 to 5 ms. Ruled out: the page's code, the Escape key, the response-body hook, the test server and the observer script. Cause unproven (state of the `verify` process or contention, the budget check's own driving, or the runner). The handler-time limit remains the enforced budget; end-to-end latency stays reported and not gated. By owner decision no further experiment is run and no threshold is relaxed.
+
+**Production-release blockers preserved (none resolved by this closure):** no release approval; no rights verification (generated media rights unverified); no search review for the generated search artifacts; no real-device, screen-reader or Firefox/WebKit browser-matrix evidence; a client-production release would be blocked by 12 unmet requirements on a clean tree (13 on a dirty one); no stable version (0.9.0-dev); crawler agent names not re-fetched from provider pages; Cloudflare Pages and Vercel behaviour simulated, not verified live; external link reachability not checked; the 11 high development-dependency advisories accepted, none remediated; `og:image` not generated. v0.8 and v0.9 are not approved for public deployment or client production.
+
+**Next milestone.** Gate 5 planning awaits a separate authorisation. It is to cover the remaining cross-browser, real-device, accessibility, external-link and release-readiness requirements without reopening approved Gate 4 engineering.
+
 ## Remaining issues (honest list)
 1. **[unverified] Real devices.** Also the new CSS masks on Safari and iOS. iPhone, Safari (including whether VP9 WebM plays and is chosen, and Low Power Mode blocking autoplay), Android, Firefox, a high-refresh display, and battery or heat during the loop have not been tested. Safari and iOS are the biggest unknown.
 2. **The MP4 fallback is untested in a browser.** Playwright's Chromium cannot decode H.264, so only the WebM path ran. The MP4 file is valid (ffprobe, frame-accurate QA); the source order and failure logic are tested. If a browser rejects both sources, the page falls back to poster plus push.

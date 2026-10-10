@@ -182,3 +182,14 @@ Rows whose status changed because Gate 2 implemented the checks proposed above. 
 | ENG-111 | Implemented (gate); no review exists | `check:release` | 13 single defects added to the gate matrix; a client-production release is blocked until a search review is recorded |
 | ENG-060 | Metric revised, provisional | `check:budgets`, `engineering/CI.md` | Handler time is gated; end-to-end latency is retained and reported; the investigation tool runs on the CI runner |
 
+## Gate 4 closure (2026-10-10, `APR-JE-025`)
+Gate 4 and its reconciliation are approved and closed on the evidence in `jade-and-ember/QA.md` (32/32 local, 159 Gate 4 negative tests, GitHub Actions runs 8 and 9 successful on both jobs). Statuses above stand. Changes of status only:
+
+| ID | Status at closure |
+|---|---|
+| ENG-060 | Handler-time budget accepted provisionally (`APR-JE-024`); the end-to-end latency anomaly is an **open, non-blocking diagnostic** (`APR-JE-025`): no further experiments, no relaxation of thresholds |
+| ENG-107 | F-G4-01 **accepted without visual changes**; `check:phone` holds the condition |
+| ENG-076 | Remote CI confirmed: runs 7, 8 and 9 succeeded; runs 1 to 3 failed earlier (causes in `engineering/CI.md`) |
+| ENG-106 | Cross-browser (Firefox, WebKit): **not done**; Gate 5 |
+| ENG-081 | No release, rights, search-review or deployment approval exists; every production-release blocker stays |
+
