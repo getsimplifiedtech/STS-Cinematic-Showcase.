@@ -9,7 +9,7 @@ import { withSite } from '../lib/runtime.mjs';
 import { engDir, isMain, readJson } from '../lib/git.mjs';
 
 // Runs in the page. Returns everything the check needs; no judgement here.
-const measure = (minOverlap) => {
+export const measure = (minOverlap) => {
   const label = (e) => `${e.tagName.toLowerCase()}${e.id ? '#' + e.id : ''}${e.className && typeof e.className === 'string' ? '.' + e.className.trim().split(/\s+/).slice(0, 2).join('.') : ''}`;
   const out = { overflowX: document.documentElement.scrollWidth - document.documentElement.clientWidth, wide: [], clipped: [], overlaps: [], tight: [] };
   const scrollsX = (e) => { for (let a = e.parentElement; a; a = a.parentElement) { const o = getComputedStyle(a).overflowX; if (o === 'auto' || o === 'scroll' || o === 'hidden' || o === 'clip') return true; } return false; };
@@ -55,7 +55,7 @@ const measure = (minOverlap) => {
   return out;
 };
 
-const spacingCss = (s) => `* { line-height: ${s.lineHeight} !important; letter-spacing: ${s.letterSpacingEm}em !important; word-spacing: ${s.wordSpacingEm}em !important; } p { margin-bottom: ${s.paragraphSpacingEm}em !important; }`;
+export const spacingCss = (s) => `* { line-height: ${s.lineHeight} !important; letter-spacing: ${s.letterSpacingEm}em !important; word-spacing: ${s.wordSpacingEm}em !important; } p { margin-bottom: ${s.paragraphSpacingEm}em !important; }`;
 
 export async function checkReflow({ root = null, browserName = 'chromium', pages: only = null } = {}) {
   const cfg = readJson(join(engDir, 'a11y.json')).reflow;

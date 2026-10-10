@@ -49,7 +49,7 @@
       "severity": "Minor",
       "visual": true,
       "maxValue": 36,
-      "status": "open: awaiting owner decision (Gate 5 Phase 1 finding; no change made)",
+      "status": "accepted (APR-JE-028) as a documented limitation: WebKit refuses web fonts over file://; the production font implementation is not altered for local file restrictions",
       "description": "Opened straight from the folder (file://), WebKit refuses the web-font requests (the page origin is \"null\": 'Origin null is not allowed by Access-Control-Allow-Origin') and does not apply the self-hosted Young Serif and Karla files; the text is drawn in the metric-matched fallback fonts. Over http (domain root, subdirectory, pretty URLs) the same fonts load in WebKit. Chromium and Firefox load them over file://. This is an engine-specific difference in the file:// delivery mode only; the check records it instead of passing it.",
       "proposal": "Recommended: accept and document. The STS delivery path for review is HTTP (Cloudflare Pages), and a folder opened from disk in Safari is a convenience mode. If the file:// preview must look identical in Safari, the fonts would have to be inlined as data: URIs, which changes the CSP font-src and the page weight, so it needs the owner's decision and a new D-11-style review. No change was made.",
       "ledger": "ENG-G5-01"
@@ -64,7 +64,7 @@
       "severity": "Info",
       "visual": false,
       "maxValue": 2,
-      "status": "open: awaiting owner decision (Gate 5 Phase 1 finding; no change made)",
+      "status": "accepted (APR-JE-028): the narrowly scoped Firefox preload-warning classification and its reporting are retained",
       "description": "Firefox writes a console warning, \"Preload of .../media/hero-wok(-m).webp was ignored due to unknown as or type values, or non-matching media attribute\", for the one hero preload whose media query does not match the current viewport. The Home page deliberately carries one media-qualified preload per art direction; the one that matches is used. Nothing is wrong on screen. The harness counts the message in every Firefox check that watches the console (security, seo, portability) and does not filter it in any other engine.",
       "proposal": "Recommended: accept it. It is noise by design in one engine. Removing the non-matching preload would lose the art-directed preload in Chromium and WebKit, which is a performance change, not a fix.",
       "ledger": "ENG-G5-02"
@@ -79,7 +79,7 @@
       "severity": "Info",
       "visual": false,
       "maxValue": 1,
-      "status": "open: awaiting owner decision (Gate 5 Phase 1 finding; no change made)",
+      "status": "accepted with verification (APR-JE-028): the Tab stop's focus indicator, keyboard operation and absence of a focus trap are being confirmed (Gate 5 Phase 1 review investigation)",
       "description": "At 390 px the Menu page's category strip (.jump ul, overflow-x:auto) scrolls. Firefox makes any scrollable container a keyboard focus stop, so Tab lands once on the <ul> before its links. The element is not an interactive control and has no focus ring of its own in the v0.8 design; Chromium (141 locally, 156 in CI) and WebKit do not stop there. The check reports the stop instead of hiding it.",
       "proposal": "Recommended: accept. This is Firefox's intended access to scrolled content and it adds one extra Tab stop on one page at phone width. A visible focus ring on the strip would be a visual change and needs the owner's approval; no change was made.",
       "ledger": "ENG-G5-03"
@@ -93,7 +93,7 @@
       ],
       "severity": "Minor",
       "visual": true,
-      "status": "open: awaiting owner decision (Gate 5 Phase 1 finding; no change made)",
+      "status": "open: investigation required (APR-JE-028); no visual correction may be implemented until the owner approves one",
       "description": "With the WCAG 1.4.12 text-spacing override applied (line height 1.5, letter spacing 0.12 em, word spacing 0.16 em) at 1440 px, WebKit 27.2 lays out the first row of the Visit page opening-hours table so that the glyph rectangles of the day label (th, white-space: nowrap) and the hours (td) overlap by more than the check's tolerance. The same override produces no overlap in Chromium or Firefox, and the unmodified page produces none in WebKit. The cause has not been diagnosed: the harness reports the measured rectangles overlap, and no WebKit screenshot of this state has been inspected yet (WebKit runs only in GitHub Actions; there is no local WebKit).",
       "proposal": "Recommended next step (needs no approval, no page change): capture a WebKit screenshot and the cell rectangles for this state during Phase 2 diagnosis, then decide. If it is a real overlap, the smallest fix is in the table's column sizing (for example letting the th wrap or giving the td a minimum gap), which is a visible-layout change under text-spacing only and needs the owner's approval. The Visit page at default spacing is unaffected.",
       "ledger": "ENG-G5-04"

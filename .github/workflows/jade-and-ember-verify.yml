@@ -120,6 +120,10 @@ jobs:
           sudo apt-get install -y --no-install-recommends ffmpeg
       - name: Cross-browser verification in Firefox
         run: node engineering/cross-browser.mjs --engine firefox
+      - name: Gate 5 diagnostic in Firefox (investigation only, changes nothing)
+        if: always()
+        continue-on-error: true
+        run: node engineering/tools/gate5-diagnose.mjs --engine firefox
 
   # Informational while compatibility is established (Gate 5, Phase 1, owner decision): the browser-driven checks of `npm run verify`, with the same
   # assertions, in WebKit. A failure here is evidence about WebKit, recorded as a finding by a person; it does not fail the run. Nothing is skipped
@@ -154,3 +158,7 @@ jobs:
           sudo apt-get install -y --no-install-recommends ffmpeg
       - name: Cross-browser verification in WebKit
         run: node engineering/cross-browser.mjs --engine webkit
+      - name: Gate 5 diagnostic in WebKit (investigation only, changes nothing)
+        if: always()
+        continue-on-error: true
+        run: node engineering/tools/gate5-diagnose.mjs --engine webkit
