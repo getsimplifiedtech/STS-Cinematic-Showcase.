@@ -1,0 +1,109 @@
+{
+  "$comment": "Performance and page-weight budgets (ledger ENG-060, ENG-061). Limits are the v0.8 measurements plus about 10 percent headroom, rounded; Core Web Vitals limits are the 'good' thresholds. Text is measured gzip-compressed (as a host would serve it), images, fonts and video as stored. `measured` is the recorded v0.8 measurement; a value more than regressionTolerancePercent above it fails even when it is under its limit, so small regressions are caught early. `baselineGrowthPercent` caps the delivered total against the v0.8 baseline commit itself. To change a limit or the recorded values, change this file in a reviewed commit: `node engineering/checks/budgets.mjs --update-measured`. Video is not part of page weight: it is desktop-only, deferred and budgeted by file.",
+  "regressionTolerancePercent": 5,
+  "baselineGrowthPercent": 0.5,
+  "limits": {
+    "page": {
+      "htmlGzip": 4096,
+      "initialGzip": 255000,
+      "fullGzip": 325000,
+      "jsGzip": 3000,
+      "inlineJsBytes": 64,
+      "scripts": 2
+    },
+    "cssGzip": 9000,
+    "maxImageBytes": 68000,
+    "maxWebmBytes": 660000,
+    "maxMp4Bytes": 1005000,
+    "fontFiles": 4,
+    "fontBytes": 60100,
+    "deliveredBytes": 2176000,
+    "requests": 11,
+    "transferBytes": 192000,
+    "webVitals": {
+      "lcpMs": 2500,
+      "cls": 0.1,
+      "blockingMs": 200,
+      "interactionMs": 200
+    }
+  },
+  "measured": {
+    "static": {
+      "pages": {
+        "index.html": {
+          "htmlGzip": 3697,
+          "initialGzip": 232012,
+          "fullGzip": 296496,
+          "jsGzip": 2719
+        },
+        "menu.html": {
+          "htmlGzip": 3349,
+          "initialGzip": 114185,
+          "fullGzip": 128633,
+          "jsGzip": 1140
+        },
+        "our-story.html": {
+          "htmlGzip": 2462,
+          "initialGzip": 75897,
+          "fullGzip": 90345,
+          "jsGzip": 579
+        },
+        "visit-us.html": {
+          "htmlGzip": 2234,
+          "initialGzip": 51045,
+          "fullGzip": 65493,
+          "jsGzip": 579
+        },
+        "order-online.html": {
+          "htmlGzip": 2281,
+          "initialGzip": 51092,
+          "fullGzip": 65540,
+          "jsGzip": 579
+        }
+      },
+      "deliveredBytes": 1977386
+    },
+    "runtime": {
+      "index.html": {
+        "lcpMs": 1016,
+        "cls": 0,
+        "blockingMs": 34,
+        "interactionMs": 32,
+        "requests": 10,
+        "transferBytes": 173982
+      },
+      "menu.html": {
+        "lcpMs": 1052,
+        "cls": 0,
+        "blockingMs": 26,
+        "interactionMs": 24,
+        "requests": 9,
+        "transferBytes": 128633
+      },
+      "our-story.html": {
+        "lcpMs": 924,
+        "cls": 0,
+        "blockingMs": 22,
+        "interactionMs": 24,
+        "requests": 8,
+        "transferBytes": 90345
+      },
+      "visit-us.html": {
+        "lcpMs": 784,
+        "cls": 0,
+        "blockingMs": 0,
+        "interactionMs": 16,
+        "requests": 7,
+        "transferBytes": 65493
+      },
+      "order-online.html": {
+        "lcpMs": 796,
+        "cls": 0,
+        "blockingMs": 17,
+        "interactionMs": 16,
+        "requests": 7,
+        "transferBytes": 65540
+      }
+    }
+  }
+}

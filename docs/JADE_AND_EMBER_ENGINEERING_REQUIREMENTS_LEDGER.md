@@ -114,3 +114,22 @@
 | ENG-104 | Runtime and platform support declared and tested (Node, Python, operating systems) | TPL README | U | "Node 18+" in README; no `engines`; `tests/variants.mjs` uses symlinks | Partial | `engines`, a Windows-safe test path, a CI matrix (WP6) | None |
 | ENG-105 | Host-neutral deployment output: `dist/` plus optional per-host adapters | NEW | N | The committed folder is the output; no host files | Missing | `dist/` build and adapters for static hosts (WP5, WP6); no deployment is performed | None |
 | ENG-106 | Cross-browser: Chromium, Firefox, WebKit | 09 §Tier 1 "browser resilience" | U | Chromium only | Missing | Automated Firefox and WebKit runs where browsers are installable (WP8); real devices remain human work | None |
+
+## Gate 2 update (2026-10-10, `APR-JE-021`)
+Rows whose status changed because Gate 2 implemented the checks proposed above. The v0.8 column above is the baseline analysis and is not edited. "Automated" means a check in `npm run verify`; a human pass is still required where stated.
+
+| ID | New status | Check | Result on v0.8 |
+|---|---|---|---|
+| ENG-042 | Implemented (automated) | `check:keyboard` | 172 Tab stops on 5 pages x 2 widths: DOM order, no trap, reverse order, focus visible by pixel comparison, not obscured, skip link, phone menu. No defect |
+| ENG-043 | Implemented (automated) | `check:keyboard` | 24 px for every control, 44 px for `.btn`, `.top-cta`, `.nav-toggle`, `.pause`. No defect |
+| ENG-044 | Implemented (automated) | `check:reflow` | 320 px, 200% zoom and WCAG text spacing on every page: no sideways scroll, no clipping, no overlap. No defect |
+| ENG-046 | Implemented (automated, proxy) | `check:media` | Flash proxy on both hero clips: 0 reversals per second. Needs ffmpeg; a human look remains for real flicker |
+| ENG-048 | Implemented (automated) | `check:order` | 234 consecutive heading and control pairs: screen order follows DOM order (columns read in turn are accepted) |
+| ENG-049 | Partial | `check:a11y-tree` | Landmarks, headings, names, references on every page. **A human screen-reader pass is still required** (ENG-052, WP8) |
+| ENG-050 | Implemented (automated) | `check:forced-colors` | 683 lines of text and 162 controls in forced-colours emulation. No defect |
+| ENG-060 | Implemented (lab) | `check:budgets` | Throttled 390 px: worst LCP 1.0 s, CLS 0, blocking 57 ms at most, interaction 32 ms. Lab values; real devices remain a release requirement |
+| ENG-061 | Implemented | `check:budgets`, `budgets.json` | Limits plus regression detection against the recorded v0.8 values. Budgets live in `engineering/budgets.json`, not `config/` (the frozen configuration folder is not extended) |
+| ENG-062 | Implemented (automated) | `check:media` | One priority image per page, never lazy; others lazy; every image sized; only fonts and the priority image are preloaded |
+| ENG-070 | Partial | `check:contracts` | Component tier implemented for all 16 shared components and 5 page renderers; the direction-conformance review remains a recorded human critique |
+| ENG-096 | Partial | `check:media` | Every media file has a provenance row; the rights statement is missing: **known finding F-G2-01** (documentation only, needs owner approval because `media/` is frozen) |
+

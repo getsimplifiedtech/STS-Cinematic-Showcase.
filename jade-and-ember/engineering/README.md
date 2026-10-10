@@ -1,11 +1,12 @@
-# Jade & Ember engineering checks (v0.9, Gate 1)
+# Jade & Ember engineering checks (v0.9, Gates 1 and 2)
 
 STS governs engineering and delivery; Anthropic Frontend Design is the creative authority (`../../docs/JADE_AND_EMBER_FRAMEWORK_REFERENCE.md`). Nothing in this folder is shipped: the website is the five HTML pages plus `styles.css`, three scripts, `fonts/` and `media/`, and it works without Node.js. Everything here is development tooling.
 
 ```
-npm run verify          all Gate 1 checks, with a summary (about 4 to 5 minutes: it drives a browser)
-npm run verify:fast     no browser: baseline, schema, determinism, delivery, authority (seconds)
-npm run check:<name>    one check: baseline | schema | determinism | delivery | authority | regression | selftest
+npm run verify          every check below, with a summary (about 9 minutes: it drives a browser and runs the self-tests)
+npm run verify:fast     no browser (seconds): baseline, schema, determinism, delivery, authority, contracts, media and budgets (static parts)
+npm run check:<name>    one check: baseline | schema | determinism | delivery | authority | contracts | media | budgets | keyboard | reflow |
+                        forced-colors | a11y-tree | order | regression | selftest | selftest-gate2
 ```
 `CHROMIUM_PATH` (or `CHROME_PATH`) selects a preinstalled Chromium; otherwise Playwright's own download, then a build under `PLAYWRIGHT_BROWSERS_PATH`, is used. Pass `--framework <dir>` (or set `STS_FRAMEWORK_DIR`) to `check:authority` to also verify the pinned framework commit and skill hashes against a local checkout of the framework (read only).
 
@@ -19,6 +20,31 @@ npm run check:<name>    one check: baseline | schema | determinism | delivery | 
 | `authority` | `authority.json` and the written framework reference agree (commit, hashes, skill path); the approval records exist; the retired STS Premium Web Design skill appears only in allowed historical documents next to a marker such as "retired", and never in code, configuration, styles, pages or tests; optionally the pinned hashes are confirmed against a framework checkout. |
 | `regression` | The working tree, built fresh, against the frozen v0.8 baseline exported from git, in one pinned browser: source bytes, visible text, accessibility tree, computed style and geometry of every element, screenshots, and behaviour scenarios (see below). |
 | `selftest` | Each check fails when it should: it damages a copy of the project or records in realistic ways and requires the right layers to notice. |
+
+## Gate 2 checks (accessibility, performance, media, component contracts)
+| Check | Proves | Thresholds in |
+|---|---|---|
+| `keyboard` | Real key presses on every page at 1440 and 390 px: every visible control reachable once in DOM order, no positive `tabindex`, no trap, Shift+Tab reverses, a focus indicator that changes pixels, focus not hidden behind another element (2.4.11), skip link first and into `<main>`, phone menu by keyboard (open, link order, Escape returns focus), 24 px targets and 44 px primary actions. | `a11y.json` |
+| `reflow` | 320 px reflow, 200 percent zoom (640 CSS px at DPR 2) and WCAG text spacing: no sideways scroll, no clipped text (only what the spacing causes), no text over text, no overlapping controls; scrolling regions must be keyboard-reachable. | `a11y.json` |
+| `forced-colors` | Forced-colours emulation: every line of text has a solid background colour behind it and 4.5:1 (3:1 large) against it, every control paints something, a focus indicator shows for one control of each kind; counts `forced-color-adjust: none` opt-outs for a human look. | `a11y.json` |
+| `a11y-tree` | The accessibility tree: one banner, main and contentinfo in order, labelled and unique navigations, one h1 and no skipped levels, every link, button and image named, same-name links go to the same place, ARIA references resolve, no focusable aria-hidden, the current page marked. | none |
+| `order` | DOM order of headings and controls against screen order (rows left to right; columns read in turn are accepted). | none |
+| `contracts` | `contracts/components.json`: 16 components and helpers and 5 page renderers: interface (exports, parameters), root element and required markup, balanced tags, no scripts or event handlers, declared inline styles only, unique ids, ARIA references, image attributes, safe new-tab links, hostile-input escaping, purity, conditional behaviour (owner note, order target, demo-only text). Pure Node, no browser. | `contracts/` |
+| `media` | Formats by their bytes (WebP, WebM VP9, MP4 H.264, WOFF2), no orphan or missing media, real image sizes against attributes and config, video size, duration and silence read from the files, alt text rules, loading and priority rules, video attributes, provenance rows and rights, a flash proxy (needs ffmpeg), and in the browser: no video and no running animation under reduced motion, Save-Data and 2g, video only at 960 px and wider and only on Home, Pause present and effective. | `findings.json` |
+| `budgets` | Page weight (gzip text, images and fonts as stored), per-file limits, delivered size against the v0.8 baseline (0.5 percent), and under a throttled phone profile (150 ms, 1.6 Mbit/s, CPU x4, median of 3): requests, bytes, LCP, CLS, blocking time, interaction latency. A value over its limit, or more than 5 percent over the recorded v0.8 value, fails. | `budgets.json` |
+| `selftest-gate2` | 41 targeted negative tests: each damages a copy of the site or of the sources in a realistic way and requires the matching check to report it (positive tabindex, removed focus outlines, a covering panel, shrunken buttons, sideways scroll, clipped and overlapping text, invisible forced-colour text and controls, missing alt, skipped heading, removed `<main>`, duplicate landmarks, broken ARIA references, a reversed column, 30 KB of CSS, a 120 KB image, a third script, a blocked main thread, a fake WebP, a file-name alt text, wrong image proportions, autoplay, an orphan media file, `preload=auto`, an endless animation, a synthetic strobe, an unescaped `esc`, a missing alt in a component, an uncontracted component, an extra parameter, a dangling `aria-labelledby`, an owner note in a client build, a missing skip link, an injected event handler, and the findings register itself). | none |
+
+### Known findings
+A check never hides a defect, and a defect in the frozen v0.8 baseline cannot be fixed without a visible change or a change to a frozen file, which needs owner approval. `findings.json` lists such defects (id, key, severity, whether it is visual, the proposed correction, status). A check reports a known finding as a note and **fails on any new finding, on a worse one, and on a register entry that no longer occurs**, so the register can neither hide new defects nor go stale. At the end of Gate 2 the register holds one documentation finding (F-G2-01, no licence terms in `media/PROVENANCE.md`) and no visual defect.
+
+### Manual verification that automation does not replace
+- A screen-reader pass (NVDA with Firefox, VoiceOver with Safari, TalkBack) on all five pages; the accessibility-tree check only proves the structure.
+- Real-device testing: at least one iPhone and one Android phone, one tablet; touch, orientation, real network, video behaviour, the phone menu.
+- Real forced-colours or high-contrast mode on Windows (the check uses the browser's emulation).
+- Zoom to 200 percent and 400 percent in the real browsers; text-only zoom; a keyboard-only walk by a person.
+- A person looking at the hero clip for flicker, texture swimming and the loop seam; the flash check is a proxy.
+- The direction-conformance review against Anthropic Frontend Design (a recorded critique, ledger ENG-070).
+- Lab numbers (LCP, CLS, interaction) are not field data; real-device measurement is a release requirement.
 
 ## The regression harness
 **Immutability rule.** v0.8 is visually immutable (`APR-JE-017`). The candidate must match it; the only permitted differences are entries in `immutability-allowlist.json`, which at Gate 1 is **empty**. An entry must say why, name its work package, state `visual: false`, and give normalising rules that make the candidate equal to the baseline byte for byte; a `visual: true` entry is refused unless it names an owner approval that exists in `docs/JADE_AND_EMBER_APPROVALS.md`. Pixels, text, styles and behaviour are compared whatever the allowlist says.
@@ -37,5 +63,5 @@ npm run check:<name>    one check: baseline | schema | determinism | delivery | 
 ## Other files
 `baseline.json` and `authority.json` are machine-readable records that mirror `../../baselines/jade-and-ember-v0.8/BASELINE.md` and `../../docs/JADE_AND_EMBER_FRAMEWORK_REFERENCE.md`; the checks keep each pair in agreement. `lib/schema.mjs` is the dependency-free validator the build uses, so `node build.mjs` needs only Node; Ajv (development only) cross-checks it. `.reports/` is git-ignored output.
 
-## Not in Gate 1
-Keyboard, reflow, text-spacing and zoom suites, accessibility-tree and forced-colour checks, performance and media budgets, privacy, security-header and dependency checks, HTML validation and links, portability (subpath, pretty URLs, other operating systems), release manifest and approvals, Firefox and WebKit runs (the harness accepts `--browser firefox|webkit`, but those browsers are not installed in the Gate 1 environment), CI, tokens, hashed assets, Content Security Policy, SEO files. See `../../docs/JADE_AND_EMBER_V0.9_IMPLEMENTATION_PLAN.md`.
+## Not yet implemented
+Privacy, security-header and dependency checks, Content Security Policy, HTML validation and links, portability (subpath, pretty URLs, other operating systems), release manifest and approvals, Firefox and WebKit runs (the harness accepts `--browser firefox|webkit`; those browsers are not installed in this environment), CI, tokens, hashed assets, SEO files. All browser checks run in Chromium only. See `../../docs/JADE_AND_EMBER_V0.9_IMPLEMENTATION_PLAN.md`.

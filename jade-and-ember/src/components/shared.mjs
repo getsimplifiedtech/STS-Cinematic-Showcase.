@@ -14,7 +14,7 @@ export function orderTarget(cfg, { direct = false } = {}) {
 // An "Order online" link or button that goes to the Order page (or, per config, the platform).
 export function orderLink(cfg, cls, { direct = false } = {}) {
   const t = orderTarget(cfg, { direct: direct && cfg.client.ordering.headerCta === 'direct' });
-  return `<a class="${cls}" href="${t.href}"${t.attrs}>${esc(cfg.client.ordering.label)}</a>`;
+  return `<a class="${esc(cls)}" href="${t.href}"${t.attrs}>${esc(cfg.client.ordering.label)}</a>`;
 }
 
 export const sealMark = (cfg) => `<span class="seal" lang="zh-Hans" aria-hidden="true"><span>${esc(cfg.client.brand.seal[0])}</span><span>${esc(cfg.client.brand.seal[1])}</span></span>`;
