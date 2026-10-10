@@ -1,4 +1,4 @@
-# Jade & Ember — fictional modern Chinese kitchen (STS concept v0.7, all five pages)
+# Jade & Ember — fictional modern Chinese kitchen (STS concept v0.8, all five pages)
 
 A five-page static website: **Home, Menu, Our story, Visit us, Order online** (`index.html`, `menu.html`, `our-story.html`, `visit-us.html`, `order-online.html`).
 No framework, no runtime dependencies, no external requests, no Lovable. Target path: `/jade-and-ember/`.

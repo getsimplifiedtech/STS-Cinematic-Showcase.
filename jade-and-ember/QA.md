@@ -1,10 +1,12 @@
-# Jade & Ember — QA and critique (concept v0.7, all five pages)
+# Jade & Ember — QA and critique (concept v0.8, all five pages)
 
 Branch `feature/jade-and-ember-brief`. Dates: 2026-10-09. Tooling: Playwright 1.64 + axe-core 4.13, Lighthouse 12.6.1 (`@lhci/cli` 0.15 for the mobile preset, the Lighthouse CLI for the desktop preset), Chromium 1194 (headless, Linux), ffmpeg 6.1. **Nothing was run on a real device.**
 
 Re-runnable: `npm run test:a11y`, `npm run test:contrast`, `npm run test:lighthouse`, `npm run test:video-tools`, and `python3 tools/video-qa.py media/hero-loop.webm --poster media/hero-wok.webp`.
 
-## What v0.7 (Gate 2) changed
+## What v0.8 (Gate 2) changed
+Numbering note: this build was first labelled v0.7 (commit `bf41373`) and delivered as `jade-and-ember-v0.7-preview.zip`; it is renumbered v0.8 so that the preview you review is distinguishable from the v0.7 ZIP already downloaded. The site content is the same apart from the footer label.
+
 Scope approved: **Our story, Visit us and Order online**, completed on the Gate 1 shared configuration and components; Home, Menu and the hero are untouched in design. Design authority: Anthropic's `frontend-design` skill. No media was generated, no credits spent, nothing merged or deployed. Plan: `docs/JADE_AND_EMBER_FIVE_PAGE_ARCHITECTURE.md`.
 
 | Page | What it is |
@@ -23,7 +25,7 @@ Scope approved: **Our story, Visit us and Order online**, completed on the Gate 
 | `tests/contrast.mjs` (hero, 374 lines) | 0 below the gate |
 | `tests/contrast-sections.mjs`, five pages × 13 viewports | 4267 text blocks, 0 below the 99 % gate (includes the huge seal characters on pine) |
 | `tests/variants.mjs` (new) | 9 invalid configurations fail the build and write nothing; a live ordering URL gives a safe `_blank` link on the Order page and goes direct from the header; a **client build** (demo off, indexable, no hero video, live ordering) has no demonstration text, canonical links, no disclosure, no owner note and no "fictional" in any title |
-| `tests/extracted.mjs` (new): **index.html in a folder, clicked through all five pages** | pass on the repository folder **and on the extracted v0.7 preview ZIP** (folder contents; `file://` from index.html on desktop and through the 390 px phone menu; `python3 serve.py` on desktop and phone): every page's `h1`, current-nav marker, images, web fonts, no horizontal overflow, the hero video playing on Home (desktop), the Menu jump link landing clear of the sticky bars, and the brand link back to Home |
+| `tests/extracted.mjs` (new): **index.html in a folder, clicked through all five pages** | pass on the repository folder **and on the extracted v0.8 preview ZIP** (folder contents; `file://` from index.html on desktop and through the 390 px phone menu; `python3 serve.py` on desktop and phone): every page's `h1`, current-nav marker, images, web fonts, no horizontal overflow, the hero video playing on Home (desktop), the Menu jump link landing clear of the sticky bars, and the brand link back to Home |
 | Lighthouse mobile preset, 3 runs per page | all five pages: accessibility 100, best practices 100, CLS 0, TBT 0, performance 99 to 100; LCP 1.4 to 2.0 s. SEO 60 to 63: the only failing audit is "page is crawlable", because every page is noindex |
 | Lighthouse desktop preset | all five pages: performance, accessibility and best practices 100; LCP 0.4 s; CLS 0 |
 | Weight against the architecture budgets (mobile, no video) | Home 174 KiB (190), Menu 129 KiB (130, **tight**), Our story 91 KiB (110), Visit us 67 KiB (80), Order online 67 KiB (80). Home on desktop 799 KiB including the 584 KB WebM |
