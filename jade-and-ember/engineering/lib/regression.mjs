@@ -10,6 +10,7 @@ import { mkdirSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { createRequire } from 'node:module';
 import { serve } from '../../tests/serve.mjs';
+import { serveSite } from './server.mjs';
 import { environment, launchBrowser } from './browser.mjs';
 import { comparePng } from './pixels.mjs';
 import { scenarios } from './scenarios.mjs';
@@ -58,8 +59,9 @@ export const settle = async (page) => {
   });
 };
 
+// candidateHeaders: fn(pathname, type) -> headers; serves the candidate with them (for example the security headers) while the baseline is served plain.
 // subset (self-tests only): { pages: [files], viewports: [names], scenarios: RegExp, states: false } narrows a run so a mutation can be checked in seconds.
-export async function runRegression({ baselineRoot, candidateRoot, browserName = 'chromium', reportDir, strictEnv = false, log = console.log, only = null, subset = {} }) {
+export async function runRegression({ baselineRoot, candidateRoot, browserName = 'chromium', reportDir, strictEnv = false, log = console.log, only = null, subset = {}, candidateHeaders = null }) {
   const env = environment();
   const layers = {};
   const layer = (name) => (layers[name] ??= { problems: [], checked: 0, notes: [] });
@@ -94,7 +96,7 @@ export async function runRegression({ baselineRoot, candidateRoot, browserName =
     envNotes.push(`${browserName} ${version}`);
     const pinned = env.browsers[browserName]?.version;
     if (pinned && pinned !== version) (strictEnv ? envProblems : envNotes).push(`browser build ${version} differs from the pinned ${pinned}`);
-    const sb = serve(baselineRoot), sc = serve(candidateRoot);
+    const sb = serve(baselineRoot), sc = candidateHeaders ? serveSite(candidateRoot, { headers: candidateHeaders }) : serve(candidateRoot);
     const bases = { baseline: sb.base, candidate: sc.base };
     const roots = { baseline: baselineRoot, candidate: candidateRoot };
     try {

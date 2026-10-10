@@ -1,12 +1,16 @@
-# Jade & Ember engineering checks (v0.9, Gates 1 and 2)
+# Jade & Ember engineering checks (v0.9, Gates 1 to 3)
 
 STS governs engineering and delivery; Anthropic Frontend Design is the creative authority (`../../docs/JADE_AND_EMBER_FRAMEWORK_REFERENCE.md`). Nothing in this folder is shipped: the website is the five HTML pages plus `styles.css`, three scripts, `fonts/` and `media/`, and it works without Node.js. Everything here is development tooling.
 
 ```
-npm run verify          every check below, with a summary (about 9 minutes: it drives a browser and runs the self-tests)
-npm run verify:fast     no browser (seconds): baseline, schema, determinism, delivery, authority, contracts, media and budgets (static parts)
-npm run check:<name>    one check: baseline | schema | determinism | delivery | authority | contracts | media | budgets | keyboard | reflow |
-                        forced-colors | a11y-tree | order | regression | selftest | selftest-gate2
+npm run verify          every check below, with a summary (about 15 minutes: it drives a browser and runs the self-tests)
+npm run verify:fast     no browser (seconds): the static parts of every check
+npm run check:<name>    one check: baseline | schema | determinism | delivery | authority | contracts | tokens | secrets | deps | ci | privacy |
+                        security | assets | media | budgets | keyboard | reflow | forced-colors | a11y-tree | order | portability | regression |
+                        selftest | selftest-gate2 | selftest-gate3
+npm run host:files      write _headers, nginx.conf, htaccess for the built site (security headers and CSP); nothing is deployed
+npm run build:hashed    a content-hashed COPY of the site (name.<hash>.ext) for immutable caching; the delivered site keeps its names
+npm run assets:manifest rewrite assets.manifest.json after a reviewed change to a delivered file
 ```
 `CHROMIUM_PATH` (or `CHROME_PATH`) selects a preinstalled Chromium; otherwise Playwright's own download, then a build under `PLAYWRIGHT_BROWSERS_PATH`, is used. Pass `--framework <dir>` (or set `STS_FRAMEWORK_DIR`) to `check:authority` to also verify the pinned framework commit and skill hashes against a local checkout of the framework (read only).
 
@@ -34,8 +38,21 @@ npm run check:<name>    one check: baseline | schema | determinism | delivery | 
 | `budgets` | Page weight (gzip text, images and fonts as stored), per-file limits, delivered size against the v0.8 baseline (0.5 percent), and under a throttled phone profile (150 ms, 1.6 Mbit/s, CPU x4, median of 3): requests, bytes, LCP, CLS, blocking time, interaction latency. A value over its limit, or more than 5 percent over the recorded v0.8 value, fails. | `budgets.json` |
 | `selftest-gate2` | 41 targeted negative tests: each damages a copy of the site or of the sources in a realistic way and requires the matching check to report it (positive tabindex, removed focus outlines, a covering panel, shrunken buttons, sideways scroll, clipped and overlapping text, invisible forced-colour text and controls, missing alt, skipped heading, removed `<main>`, duplicate landmarks, broken ARIA references, a reversed column, 30 KB of CSS, a 120 KB image, a third script, a blocked main thread, a fake WebP, a file-name alt text, wrong image proportions, autoplay, an orphan media file, `preload=auto`, an endless animation, a synthetic strobe, an unescaped `esc`, a missing alt in a component, an uncontracted component, an extra parameter, a dangling `aria-labelledby`, an owner note in a client build, a missing skip link, an injected event handler, and the findings register itself). | none |
 
+## Gate 3 checks (security, portability, integrity, CI)
+| Check | Proves | Policy in |
+|---|---|---|
+| `security` | The headers and a Content Security Policy generated from the pages: `default-src 'none'`, no `unsafe-inline`/`unsafe-eval`/wildcards, the one inline script and six inline style attributes allowed by SHA-256 hash only; the pages contain nothing the policy would have to allow (no handlers, `<style>`, `<base>`, forms, frames); `_headers`, nginx and Apache renderings agree. In the browser: every page under the headers raises no violation and no console message, the hero video plays; the candidate under the headers equals v0.8 served plain (60 comparisons); six probes (injected inline script, inline handler, external script, unlisted style, iframe, external image) are blocked over HTTP, and the same injected script runs over `file://`. See `ENG-SECURITY.md` for HTTP headers versus `file://`. | `security.json` |
+| `privacy` | No cookies, storage, service workers, beacons, `fetch`, geolocation, fingerprinting reads, third-party resources, preconnects or `@import`; outbound links only to allowed hosts and `noopener noreferrer`; in the browser no cookie, no stored data and only same-origin requests on every page, desktop and phone. | `privacy.json` |
+| `deps` | No runtime dependencies; exact pins; lockfile v3 from the npm registry over https with sha512; licence allow-list (unverified licences reported, not assumed); `npm audit` (0 production, 0 critical; the 11 high advisories of the development-only Lighthouse CI tree are recorded). | `dependencies.json` |
+| `secrets` | The working tree and the added lines of every commit scanned for 11 credential patterns; workflows may not read `secrets`. | `secrets-allow.json` |
+| `tokens` | The `:root` design tokens equal the frozen v0.8 snapshot, every `var()` is defined, none unused or new hard-coded colours, the spacing scale grows, 16 contrast pairs meet WCAG. States no aesthetic preference. | `tokens.json` |
+| `assets` | `assets.manifest.json` (size, SHA-256, SRI of every delivered file) equals a fresh build and the v0.8 checksums; the content-hashed copy renames 18 files, rewrites every reference, keeps assets byte-identical and equals v0.8 in the browser. The delivered site keeps its plain names. | `assets.manifest.json` |
+| `portability` | The delivered folder walked with real clicks (desktop, phone menu, brand and footer links, Back and Forward): an extracted ZIP in a path with spaces, `&`, an em dash, `#` and brackets over `file://`; domain root; a subdirectory; the directory URL without a trailing slash; extension-less URLs; a server without Range support; query strings and fragments. Names are plain ASCII, no symlinks, no `<base>`. | none |
+| `ci` | The GitHub Actions workflow is read-only (`contents: read`), every action pinned to a commit SHA, no secrets, deployment, merge, publish, cloud or AI service, `npm ci --ignore-scripts`, timeouts set, documented in `CI.md`. | `CI.md` |
+| `selftest-gate3` | 68 targeted negative tests across the Gate 3 checks (weakened policies, risky pages, privacy leaks, bad dependencies, planted credentials, token changes, tampered assets, portability breakers, ZIP attacks, 17 ways to make the workflow unsafe). | none |
+
 ### Known findings
-A check never hides a defect, and a defect in the frozen v0.8 baseline cannot be fixed without a visible change or a change to a frozen file, which needs owner approval. `findings.json` lists such defects (id, key, severity, whether it is visual, the proposed correction, status). A check reports a known finding as a note and **fails on any new finding, on a worse one, and on a register entry that no longer occurs**, so the register can neither hide new defects nor go stale. At the end of Gate 2 the register holds one documentation finding (F-G2-01, no licence terms in `media/PROVENANCE.md`) and no visual defect.
+A check never hides a defect, and a defect in the frozen v0.8 baseline cannot be fixed without a visible change or a change to a frozen file, which needs owner approval. `findings.json` lists such defects (id, key, severity, whether it is visual, the proposed correction, status). A check reports a known finding as a note and **fails on any new finding, on a worse one, and on a register entry that no longer occurs**, so the register can neither hide new defects nor go stale. At the end of Gate 3 the register holds two non-visual findings: F-G2-01 (no licence terms in `media/PROVENANCE.md`; wording proposed in `docs/JADE_AND_EMBER_MEDIA_RIGHTS_PROPOSAL.md`) and F-G3-01 (over `file://` Chromium logs console messages about the two font preloads; nothing changes on screen). Neither is a visual defect.
 
 ### Manual verification that automation does not replace
 - A screen-reader pass (NVDA with Firefox, VoiceOver with Safari, TalkBack) on all five pages; the accessibility-tree check only proves the structure.
@@ -64,4 +81,6 @@ A check never hides a defect, and a defect in the frozen v0.8 baseline cannot be
 `baseline.json` and `authority.json` are machine-readable records that mirror `../../baselines/jade-and-ember-v0.8/BASELINE.md` and `../../docs/JADE_AND_EMBER_FRAMEWORK_REFERENCE.md`; the checks keep each pair in agreement. `lib/schema.mjs` is the dependency-free validator the build uses, so `node build.mjs` needs only Node; Ajv (development only) cross-checks it. `.reports/` is git-ignored output.
 
 ## Not yet implemented
-Privacy, security-header and dependency checks, Content Security Policy, HTML validation and links, portability (subpath, pretty URLs, other operating systems), release manifest and approvals, Firefox and WebKit runs (the harness accepts `--browser firefox|webkit`; those browsers are not installed in this environment), CI, tokens, hashed assets, SEO files. All browser checks run in Chromium only. See `../../docs/JADE_AND_EMBER_V0.9_IMPLEMENTATION_PLAN.md`.
+HTML validation and link checks, the release manifest, version file and approvals gate, SEO files for production (from client configuration, decision D-7), Firefox and WebKit runs (the harness accepts `--browser firefox|webkit`; those browsers are not installed in this environment), portability of the tooling on Windows and macOS (a CI job reports it, informational, unverified). All browser checks run in Chromium only.
+
+Other documents here: `ENG-SECURITY.md` (security by delivery mode, the CSP, decision D-11), `CI.md` (the workflow and runner requirements). See `../../docs/JADE_AND_EMBER_V0.9_IMPLEMENTATION_PLAN.md`.

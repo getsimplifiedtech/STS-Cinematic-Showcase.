@@ -1,0 +1,12 @@
+{
+  "$comment": "Privacy policy of the delivered site (ledger ENG-094, ENG-090). By default the site stores nothing, sets no cookies, loads nothing from any other origin, runs no analytics and fingerprints no one. The only outbound links are ordinary links the visitor chooses to follow.",
+  "allowedLinkHosts": ["getsimplifiedtech.com"],
+  "clientLinkHostsFromConfig": true,
+  "forbiddenScriptApis": [
+    "document.cookie", "localStorage", "sessionStorage", "indexedDB", "caches.", "serviceWorker", "fetch(", "XMLHttpRequest", "sendBeacon",
+    "WebSocket", "EventSource", "navigator.geolocation", "getUserMedia", "mediaDevices", "eval(", "new Function", "document.write",
+    "importScripts", "postMessage", "Notification", "navigator.userAgent", "navigator.plugins", "navigator.languages", "hardwareConcurrency",
+    "deviceMemory", "getBattery", "toDataURL", "getImageData", "RTCPeerConnection", "window.name"
+  ],
+  "allowedNavigatorReads": ["navigator.connection"]
+}

@@ -1,0 +1,55 @@
+{
+  "$comment": "Dependency policy (ledger ENG-095). The delivered website has NO dependencies of any kind: it is HTML, CSS, three small scripts, fonts, images and video. Everything in package.json is a development tool for building, testing and verifying, never delivered. The policy: no runtime dependencies; every development dependency pinned to an exact version; a committed lockfile with registry sources and sha512 integrity for every package; licences from an allow-list; no known critical vulnerability anywhere, no high vulnerability in a package the verification itself runs, and every other high vulnerability recorded below with a reason. `npm ci --ignore-scripts` installs exactly the lockfile.",
+  "allowedLicenses": [
+    "MIT",
+    "ISC",
+    "Apache-2.0",
+    "BSD-2-Clause",
+    "BSD-3-Clause",
+    "0BSD",
+    "BlueOak-1.0.0",
+    "CC0-1.0",
+    "Unlicense",
+    "Python-2.0",
+    "MPL-2.0"
+  ],
+  "licenseNotes": {
+    "MPL-2.0": "axe-core and @axe-core/playwright: file-level copyleft that applies only if modified files are distributed. They are development tools and are never delivered."
+  },
+  "licenseExceptions": [
+    {
+      "package": "node_modules/parse-cache-control",
+      "reason": "The lockfile records no licence for this package (a transitive dependency of @lhci/cli, used only by npm run test:lighthouse). The licence is UNVERIFIED and is not asserted here; it is never delivered. Verify at the registry before any redistribution of the tooling.",
+      "status": "unverified"
+    }
+  ],
+  "verificationPackages": [
+    "playwright",
+    "playwright-core",
+    "ajv",
+    "pixelmatch",
+    "pngjs",
+    "yaml",
+    "@axe-core/playwright",
+    "axe-core"
+  ],
+  "acceptedAdvisories": {
+    "$comment": "High-severity advisories in the development-only tree of @lhci/cli (Lighthouse CI, used by npm run test:lighthouse; it is not part of npm run verify and is never delivered). They are reported on every run so they are not forgotten. Remove the entry when the dependency is updated or dropped.",
+    "viaRoot": "@lhci/cli",
+    "reviewed": "2026-10-10",
+    "reason": "Transitive dependencies of Lighthouse CI (extract-zip, basic-ftp, puppeteer-core and others). The tooling runs only on a developer machine or CI runner against the project's own static pages. No untrusted archive, FTP server or proxy configuration is processed.",
+    "packages": [
+      "@lhci/cli",
+      "@lhci/utils",
+      "@puppeteer/browsers",
+      "basic-ftp",
+      "extract-zip",
+      "get-uri",
+      "lighthouse",
+      "pac-proxy-agent",
+      "proxy-agent",
+      "puppeteer-core",
+      "tmp"
+    ]
+  }
+}

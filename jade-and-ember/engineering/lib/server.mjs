@@ -1,0 +1,44 @@
+// A configurable static server for the checks (pure Node). Models the ways a real host can serve the site, so the checks can prove the same
+// folder works in each: a path prefix (domain root or a subdirectory), extension-less "pretty" URLs, directory redirects, HTTP Range support
+// or none, and response headers (security headers). tests/serve.mjs stays as it was; this one is for engineering/.
+import { createServer } from 'node:http';
+import { readFile, stat } from 'node:fs/promises';
+import { extname, join, normalize, sep } from 'node:path';
+
+const TYPES = { '.html': 'text/html; charset=utf-8', '.js': 'text/javascript; charset=utf-8', '.css': 'text/css; charset=utf-8', '.json': 'application/json', '.webp': 'image/webp', '.woff2': 'font/woff2', '.webm': 'video/webm', '.mp4': 'video/mp4', '.txt': 'text/plain; charset=utf-8', '.md': 'text/markdown; charset=utf-8' };
+
+// options: prefix ('/' or '/some/dir/'), pretty (map /menu to menu.html), ranges (default true), headers (fn(pathname, type) -> object),
+//          cacheStyle (ignored), notFoundHtml
+export function serveSite(root, { prefix = '/', pretty = false, ranges = true, headers = null } = {}) {
+  const log = [];
+  const pre = prefix.endsWith('/') ? prefix : prefix + '/';
+  const server = createServer(async (req, res) => {
+    const send = (status, h, body) => { res.writeHead(status, h); res.end(body); };
+    try {
+      const url = new URL(req.url, 'http://x');
+      let p = decodeURIComponent(url.pathname);
+      log.push({ url: req.url, method: req.method });
+      // a directory URL without its trailing slash is redirected, as every static host does
+      if (pre !== '/' && p === pre.slice(0, -1)) return send(301, { location: pre + url.search }, '');
+      if (!p.startsWith(pre)) return send(404, { 'content-type': 'text/plain' }, 'not found');
+      let rel = p.slice(pre.length);
+      if (rel === '' || rel.endsWith('/')) rel += 'index.html';
+      let file = normalize(join(root, rel));
+      if (file !== root && !file.startsWith(root + sep)) return send(403, {}, 'forbidden');
+      let st = await stat(file).catch(() => null);
+      if (!st && pretty && !extname(rel)) { file = normalize(join(root, rel + '.html')); st = await stat(file).catch(() => null); }
+      if (!st || st.isDirectory()) return send(404, { 'content-type': 'text/plain', ...(headers ? headers(p, 'text/plain') : {}) }, 'not found');
+      const body = await readFile(file);
+      const type = TYPES[extname(file)] || 'application/octet-stream';
+      const extra = headers ? headers(p, type) : {};
+      const m = ranges ? /^bytes=(\d*)-(\d*)$/.exec(req.headers.range || '') : null;
+      if (m && (m[1] || m[2])) {
+        const start = m[1] ? +m[1] : Math.max(0, body.length - +m[2]);
+        const end = m[1] && m[2] ? Math.min(+m[2], body.length - 1) : body.length - 1;
+        return send(206, { 'content-type': type, 'accept-ranges': 'bytes', 'content-range': `bytes ${start}-${end}/${body.length}`, 'content-length': end - start + 1, ...extra }, body.subarray(start, end + 1));
+      }
+      return send(200, { 'content-type': type, ...(ranges ? { 'accept-ranges': 'bytes' } : {}), 'content-length': body.length, ...extra }, body);
+    } catch { send(500, {}, 'error'); }
+  }).listen(0);
+  return { server, log, base: `http://127.0.0.1:${server.address().port}${pre}`, origin: `http://127.0.0.1:${server.address().port}`, close: () => server.close() };
+}

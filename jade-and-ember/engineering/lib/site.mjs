@@ -1,11 +1,12 @@
 // Assembling the site folders the harness compares, and the byte-level immutability rules (including the allowlist).
-import { cpSync, existsSync, mkdirSync, readFileSync } from 'node:fs';
+import { cpSync, existsSync, mkdirSync, readdirSync, readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { spawnSync } from 'node:child_process';
 import { listFiles, projectDir, readJson, repoRoot, sha256, tempDir, engDir } from './git.mjs';
 
 export const SHARED = ['styles.css', 'site.js', 'hero.js', 'menu.js'];
-export const pagesOf = (root) => readJson(join(root, 'config', 'site.json')).pages.map((p) => p.file);
+// The page files in registry order. A folder without config/ (a hashed copy, an extracted package) falls back to its *.html files, sorted.
+export const pagesOf = (root) => (existsSync(join(root, 'config', 'site.json')) ? readJson(join(root, 'config', 'site.json')).pages.map((p) => p.file) : readdirSync(root).filter((f) => f.endsWith('.html')).sort());
 
 // A complete, runnable site folder for the working tree: freshly built pages (never the committed ones, so stale output cannot hide a
 // change), the shared assets, fonts, media and a copy of config/. This is exactly what a visitor would receive.

@@ -1,7 +1,7 @@
 // npm run verify: the Gate 1 and Gate 2 engineering checks, in order, with one summary. Exit code 0 only when every selected check passes.
 //   node engineering/verify.mjs               everything: static checks, browser checks, regression against v0.8, and the self-tests
 //   node engineering/verify.mjs --fast        no browser (seconds): baseline, schema, determinism, delivery, authority, contracts,
-//                                             media (static part), budgets (static part)
+//                                             tokens, secrets, deps, ci, media, privacy, security, assets and budgets (static parts)
 //   options: --no-selftest  --strict-env  --framework <dir>  --browser chromium|firefox|webkit
 // Planned checks that are NOT implemented yet are listed at the end, so a green run is never read as more than it covers.
 import { mkdirSync, writeFileSync } from 'node:fs';
@@ -20,6 +20,15 @@ import { checkForcedColors } from './checks/forced-colors.mjs';
 import { checkA11yTree } from './checks/a11y-tree.mjs';
 import { checkOrder } from './checks/order.mjs';
 import { checkSelftestGate2 } from './checks/selftest-gate2.mjs';
+import { checkSecurity } from './checks/security.mjs';
+import { checkPrivacy } from './checks/privacy.mjs';
+import { checkDeps } from './checks/deps.mjs';
+import { checkSecrets } from './checks/secrets.mjs';
+import { checkTokens } from './checks/tokens.mjs';
+import { checkAssets } from './checks/assets.mjs';
+import { checkPortability } from './checks/portability.mjs';
+import { checkCi } from './checks/ci.mjs';
+import { checkSelftestGate3 } from './checks/selftest-gate3.mjs';
 import { checkRegression } from './checks/regression.mjs';
 import { checkSelftest } from './checks/selftest.mjs';
 import { engDir } from './lib/git.mjs';
@@ -37,6 +46,13 @@ const checks = [
   ['check:authority', 'design authority and framework reference', () => checkAuthority({ framework: arg('--framework') || process.env.STS_FRAMEWORK_DIR })],
   ['check:contracts', 'component and page-renderer contracts (interface, markup, escaping, purity)', () => checkContracts()],
   ['check:media', fast ? 'media formats, dimensions, alt text, loading, provenance (static part)' : 'media formats, dimensions, alt text, loading, provenance, flashing, reduced motion and Pause', () => checkMedia({ browser: !fast, browserName })],
+  ['check:tokens', 'design tokens: frozen v0.8 values, defined and used, contrast pairs (structure only)', () => checkTokens()],
+  ['check:secrets', 'no credentials in the working tree or the history', () => checkSecrets()],
+  ['check:deps', 'dependency pinning, lockfile integrity, licences, npm audit', () => checkDeps()],
+  ['check:ci', 'the GitHub Actions workflow is read-only and keeps its promises', () => checkCi()],
+  ['check:privacy', fast ? 'no storage, cookies, third parties or fingerprinting (static part)' : 'no storage, cookies, third parties or fingerprinting (static and in the browser)', () => checkPrivacy({ browser: !fast, browserName })],
+  ['check:security', fast ? 'security headers and Content Security Policy (static part)' : 'security headers and CSP: generated, enforced in the browser, probed, and identical to v0.8 under the headers', () => checkSecurity({ browser: !fast, browserName })],
+  ['check:assets', fast ? 'asset manifest and hashed copy (static part)' : 'asset manifest, content-hashed copy equal to v0.8 in the browser', () => checkAssets({ browser: !fast, browserName })],
   ['check:budgets', fast ? 'page-weight budgets and growth against v0.8 (static part)' : 'page-weight budgets, growth against v0.8, Core Web Vitals under throttling', () => checkBudgets({ browser: !fast, browserName })],
   ...(fast ? [] : [
     ['check:keyboard', 'Tab order, focus visibility, skip link, phone menu, target sizes (real key presses)', () => checkKeyboard({ browserName })],
@@ -44,15 +60,17 @@ const checks = [
     ['check:forced-colors', 'text and controls in forced-colours emulation', () => checkForcedColors({ browserName })],
     ['check:a11y-tree', 'landmarks, headings, names, ARIA references in the accessibility tree', () => checkA11yTree({ browserName })],
     ['check:order', 'DOM order against visual reading order', () => checkOrder({ browserName })],
+    ['check:portability', 'the folder works from an extracted ZIP over file://, at a domain root, in a subdirectory, with pretty URLs, without Range', () => checkPortability({ browserName })],
     ['check:regression', 'candidate against the frozen v0.8 baseline (source, text, structure, styles, pixels, behaviour)', () => checkRegression({ browserName, strictEnv: has('--strict-env') })],
     ...(has('--no-selftest') ? [] : [
       ['check:selftest', 'Gate 1 checks fail when they should (mutation tests)', () => checkSelftest()],
       ['check:selftest-gate2', 'Gate 2 checks fail when they should (targeted negative tests)', () => checkSelftestGate2()],
+      ['check:selftest-gate3', 'Gate 3 checks fail when they should (targeted negative tests)', () => checkSelftestGate3()],
     ]),
   ]),
 ];
 
-const NOT_YET = ['security headers and Content Security Policy (decision D-5, planned)', 'privacy, dependency, licence and secrets checks', 'HTML validation and link checks', 'portability (subpath, pretty URLs, other operating systems)', 'release manifest and approvals', 'CI', 'Firefox and WebKit runs (not installed here)', 'a human screen-reader pass and real-device testing (release requirements, never automated here)'];
+const NOT_YET = ['HTML validation and link checks', 'release manifest, version file and approvals gate', 'SEO files (production, from client configuration)', 'Firefox and WebKit runs (not installed here)', 'portability of the tooling on Windows and macOS (a CI job reports it, informational)', 'a human screen-reader pass and real-device testing (release requirements, never automated here)'];
 
 const results = [];
 for (const [id, what, run] of checks) {

@@ -31,15 +31,28 @@
     "check:forced-colors": "node engineering/checks/forced-colors.mjs",
     "check:a11y-tree": "node engineering/checks/a11y-tree.mjs",
     "check:order": "node engineering/checks/order.mjs",
-    "check:selftest-gate2": "node engineering/checks/selftest-gate2.mjs"
+    "check:selftest-gate2": "node engineering/checks/selftest-gate2.mjs",
+    "check:security": "node engineering/checks/security.mjs",
+    "check:privacy": "node engineering/checks/privacy.mjs",
+    "check:deps": "node engineering/checks/deps.mjs",
+    "check:secrets": "node engineering/checks/secrets.mjs",
+    "check:tokens": "node engineering/checks/tokens.mjs",
+    "check:assets": "node engineering/checks/assets.mjs",
+    "check:portability": "node engineering/checks/portability.mjs",
+    "check:ci": "node engineering/checks/ci.mjs",
+    "check:selftest-gate3": "node engineering/checks/selftest-gate3.mjs",
+    "host:files": "node engineering/tools/host-files.mjs",
+    "build:hashed": "node engineering/tools/hashed-build.mjs",
+    "assets:manifest": "node engineering/tools/asset-manifest.mjs --write"
   },
   "devDependencies": {
-    "@axe-core/playwright": "^4.10.0",
-    "@lhci/cli": "^0.15.0",
+    "@axe-core/playwright": "4.13.0",
+    "@lhci/cli": "0.15.1",
     "ajv": "8.20.0",
     "pixelmatch": "8.0.0",
     "playwright": "1.64.0",
-    "pngjs": "7.0.0"
+    "pngjs": "7.0.0",
+    "yaml": "2.9.1"
   },
   "engines": {
     "node": ">=20"

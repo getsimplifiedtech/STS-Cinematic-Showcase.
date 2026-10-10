@@ -133,3 +133,19 @@ Rows whose status changed because Gate 2 implemented the checks proposed above. 
 | ENG-070 | Partial | `check:contracts` | Component tier implemented for all 16 shared components and 5 page renderers; the direction-conformance review remains a recorded human critique |
 | ENG-096 | Partial | `check:media` | Every media file has a provenance row; the rights statement is missing: **known finding F-G2-01** (documentation only, needs owner approval because `media/` is frozen) |
 
+## Gate 3 update (2026-10-10, `APR-JE-022`)
+| ID | New status | Check | Result on v0.8 |
+|---|---|---|---|
+| ENG-002, ENG-018 | Partial: tokens validated; not extracted | `check:tokens` | The 31 `:root` tokens equal a frozen snapshot (`tokens.json`), every `var()` defined, spacing scale grows, 16 contrast pairs meet WCAG, no new hard-coded colours. States no aesthetic rule. Extraction of tokens into a source file with a generated `:root` block was **not** done (not needed to validate; it would change how `styles.css` is produced) |
+| ENG-064, ENG-090 | Implemented (automated) | `check:privacy` | Statically in every script and page, and in the browser: no third-party request on any page |
+| ENG-065 | Partial by decision: hashing implemented as an opt-in copy | `check:assets`, `npm run build:hashed` | The delivered site keeps its plain names and paths. The hashed copy renames 18 files, rewrites every reference and equals v0.8 in the browser. Cache rules never mark plain names immutable |
+| ENG-076 | Implemented | `check:ci`, `.github/workflows/jade-and-ember-verify.yml` | Read-only workflow, pinned actions, `npm ci --ignore-scripts`, no secrets, deployment, merge or AI service. **Not yet run on GitHub** |
+| ENG-077 | Implemented (automated) | `check:determinism` | Enforced in `npm run verify`, and so in CI |
+| ENG-092 | Implemented (automated) | `check:secrets` | Working tree and every commit's added lines: none found |
+| ENG-093 | Implemented (generated, not deployed) | `check:security`, `npm run host:files` | `default-src 'none'` CSP with hashes for the one inline script and six inline style attributes, 8 headers, `_headers`/nginx/Apache outputs. Identical to v0.8 under the headers. Decision D-11 open (reliance on `'unsafe-hashes'` in browsers not tested here) |
+| ENG-094 | Implemented (automated) | `check:privacy` | No cookies, storage, service worker or beacon in 10 browser loads |
+| ENG-095 | Implemented | `check:deps` | 0 production dependencies; 7 exact pins; 341 locked packages with sha512; licences allow-listed (one **unverified**: `parse-cache-control`); audit: 0 critical, 11 high in the development-only Lighthouse CI tree, recorded |
+| ENG-102 | Implemented (automated) | `check:portability` | Extracted ZIP over `file://`, domain root, subdirectory, no-trailing-slash redirect, extension-less URLs, no Range support, queries and fragments: all pass. Known finding F-G3-01 (console noise over `file://`) |
+| ENG-105 | Partial | `npm run host:files` | Host files for Netlify/Cloudflare Pages, nginx, Apache are generated from one policy. A separate `dist/` folder was not created (the delivered folder is unchanged). Nothing is deployed |
+| ENG-096 | Partial | proposal | Media rights wording proposed in `docs/JADE_AND_EMBER_MEDIA_RIGHTS_PROPOSAL.md` (Option A recommended); **not applied**, nothing asserted |
+
