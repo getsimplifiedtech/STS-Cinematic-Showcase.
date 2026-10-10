@@ -325,6 +325,18 @@ Chromium 141.0.7390.37, Playwright 1.64.0, Node 22. **`npm run verify`: 32 of 32
 
 **Next milestone.** Gate 5 is authorised for planning and assessment only (`APR-JE-026`); the plan is `engineering/GATE-5-PLAN.md` and awaits the owner's review. Nothing in it is implemented. It is to cover the remaining cross-browser, real-device, accessibility, external-link and release-readiness requirements without reopening approved Gate 4 engineering.
 
+## v0.9 Gate 5, Phase 0: baseline (2026-10-10, `APR-JE-027`)
+**Approved starting commit: `51c7377`** (the Gate 5 plan, approved by the owner). Frozen v0.8 baseline: branch `baseline/jade-and-ember-v0.8` at `32afde7`, unchanged; the demonstration's five pages are byte-identical to it and no delivered file or configuration differs from it.
+
+| Item | Baseline |
+|---|---|
+| Housekeeping commit `5d1614e` (probe step removed) | Its own run, **run 11, was cancelled**, not passed: the workflow cancels an older run when a newer push arrives and the plan commit was pushed while it ran. It is verified by **run 12**, which carries the same tree and workflow: the `verify` job's steps no longer include the probe step. |
+| Planning commit `51c7377` | **Run 12 (`38086392105`) succeeded on both jobs**, confirmed from the GitHub API: `verify` on Ubuntu 24.04 (all 32 checks; verify step 13 min 45 s) and the informational macOS job. |
+| Gate 4 closure `7980cf4` | Run 10 succeeded on both jobs (preserved from the closure record). |
+| Verification baseline | 32 of 32 checks, 159 Gate 4 negative tests, 0 differences against v0.8 (source, text, structure, styles, pixels, behaviour), local and remote. Chromium only: Firefox and WebKit had never been run. |
+| Findings | **No open finding.** F-G2-01 (media provenance states no licence; accepted as a documentation policy), F-G3-01 (harmless `file://` font-preload console messages; accepted), F-G4-01 (phone numbers may wrap; accepted without visual change on the condition that `check:phone` holds). The interaction-latency anomaly stays an **open, non-blocking diagnostic**, parked until real-device traces exist; the probe step is no longer in the workflow and `engineering/tools/latency-probe.mjs` is preserved. |
+| Production-release blockers | Unchanged: no release approval, rights verification or search review; no real-device, screen-reader or browser-matrix evidence; version 0.9.0-dev; hosting behaviour simulated only; external links unchecked; advisories accepted. |
+
 ## Remaining issues (honest list)
 1. **[unverified] Real devices.** Also the new CSS masks on Safari and iOS. iPhone, Safari (including whether VP9 WebM plays and is chosen, and Low Power Mode blocking autoplay), Android, Firefox, a high-refresh display, and battery or heat during the loop have not been tested. Safari and iOS are the biggest unknown.
 2. **The MP4 fallback is untested in a browser.** Playwright's Chromium cannot decode H.264, so only the WebM path ran. The MP4 file is valid (ffprobe, frame-accurate QA); the source order and failure logic are tested. If a browser rejects both sources, the page falls back to poster plus push.
