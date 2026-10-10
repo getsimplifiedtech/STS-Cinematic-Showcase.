@@ -323,7 +323,7 @@ Chromium 141.0.7390.37, Playwright 1.64.0, Node 22. **`npm run verify`: 32 of 32
 
 **Post-closure housekeeping (owner instruction).** Closure commit `7980cf4`: GitHub Actions run 10 successful on both jobs (confirmed from the API). The temporary latency probe step was then removed from the routine workflow; `engineering/tools/latency-probe.mjs`, the recorded evidence and the findings are preserved, and `check:budgets` remains in `npm run verify` with unchanged limits and handler-time enforcement (details and the result of the housekeeping commit's run: `engineering/CI.md`). No site, design, media, framework, threshold or experiment change; Gate 4 is not reopened.
 
-**Next milestone.** Gate 5 planning awaits a separate authorisation. It is to cover the remaining cross-browser, real-device, accessibility, external-link and release-readiness requirements without reopening approved Gate 4 engineering.
+**Next milestone.** Gate 5 is authorised for planning and assessment only (`APR-JE-026`); the plan is `engineering/GATE-5-PLAN.md` and awaits the owner's review. Nothing in it is implemented. It is to cover the remaining cross-browser, real-device, accessibility, external-link and release-readiness requirements without reopening approved Gate 4 engineering.
 
 ## Remaining issues (honest list)
 1. **[unverified] Real devices.** Also the new CSS masks on Safari and iOS. iPhone, Safari (including whether VP9 WebM plays and is chosen, and Low Power Mode blocking autoplay), Android, Firefox, a high-refresh display, and battery or heat during the loop have not been tested. Safari and iOS are the biggest unknown.
