@@ -54,12 +54,6 @@ jobs:
       - name: Verify (all checks, regression against the frozen v0.8 baseline, self-tests)
         run: npm run verify
 
-      # Investigation, not a gate (it always exits 0): where does an interaction's time go on this runner? Separates input delay, handler time and
-      # next-frame time, and watches the main thread while it happens. Runs even when verify failed, so a budget failure comes with its evidence.
-      - name: Interaction latency probe (investigation, never fails the build)
-        if: always()
-        run: node engineering/tools/latency-probe.mjs --reps 3
-
   # Informational: the fast checks (no browser) on macOS, to show portability problems of the tooling. Never blocks.
   # Windows is not in the matrix: the repository name ends with a dot ("STS-Cinematic-Showcase."), which Windows cannot use as a folder name,
   # so the checkout fails there before any of our code runs (seen in the first run).

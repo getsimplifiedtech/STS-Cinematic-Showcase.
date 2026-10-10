@@ -321,6 +321,8 @@ Chromium 141.0.7390.37, Playwright 1.64.0, Node 22. **`npm run verify`: 32 of 32
 
 **Production-release blockers preserved (none resolved by this closure):** no release approval; no rights verification (generated media rights unverified); no search review for the generated search artifacts; no real-device, screen-reader or Firefox/WebKit browser-matrix evidence; a client-production release would be blocked by 12 unmet requirements on a clean tree (13 on a dirty one); no stable version (0.9.0-dev); crawler agent names not re-fetched from provider pages; Cloudflare Pages and Vercel behaviour simulated, not verified live; external link reachability not checked; the 11 high development-dependency advisories accepted, none remediated; `og:image` not generated. v0.8 and v0.9 are not approved for public deployment or client production.
 
+**Post-closure housekeeping (owner instruction).** Closure commit `7980cf4`: GitHub Actions run 10 successful on both jobs (confirmed from the API). The temporary latency probe step was then removed from the routine workflow; `engineering/tools/latency-probe.mjs`, the recorded evidence and the findings are preserved, and `check:budgets` remains in `npm run verify` with unchanged limits and handler-time enforcement (details and the result of the housekeeping commit's run: `engineering/CI.md`). No site, design, media, framework, threshold or experiment change; Gate 4 is not reopened.
+
 **Next milestone.** Gate 5 planning awaits a separate authorisation. It is to cover the remaining cross-browser, real-device, accessibility, external-link and release-readiness requirements without reopening approved Gate 4 engineering.
 
 ## Remaining issues (honest list)
