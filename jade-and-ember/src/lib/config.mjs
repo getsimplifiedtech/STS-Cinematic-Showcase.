@@ -3,13 +3,14 @@
 import { readFileSync, existsSync } from 'node:fs';
 import { join } from 'node:path';
 
-const read = (dir, name) => JSON.parse(readFileSync(join(dir, 'config', `${name}.json`), 'utf8'));
+const read = (configDir, name) => JSON.parse(readFileSync(join(configDir, `${name}.json`), 'utf8'));
 
-export function loadConfig(dir) {
-  const client = read(dir, 'client');
-  const menu = read(dir, 'menu');
-  const copy = read(dir, 'copy');
-  const site = read(dir, 'site');
+// dir: the project folder (media and fonts are checked there). configDir: where the four JSON files live (default dir/config).
+export function loadConfig(dir, configDir = join(dir, 'config')) {
+  const client = read(configDir, 'client');
+  const menu = read(configDir, 'menu');
+  const copy = read(configDir, 'copy');
+  const site = read(configDir, 'site');
   const pages = site.pages;
   const byId = Object.fromEntries(pages.map((p) => [p.id, p]));
   const ordering = client.ordering;
@@ -19,7 +20,7 @@ export function loadConfig(dir) {
 }
 
 export function validate(cfg) {
-  const { dir, client, menu, copy, site, pages } = cfg;
+  const { dir, client, menu, copy, site, pages, byId } = cfg;
   const errors = [];
   const need = (cond, msg) => { if (!cond) errors.push(msg); };
   const fileExists = (rel) => existsSync(join(dir, rel));
@@ -76,10 +77,32 @@ export function validate(cfg) {
   need(band.decorative === true || (band.alt && band.alt.length > 3), 'menu band needs alt text, or decorative: true');
   if (copy.story.image) need(fileExists(copy.story.image.src), `story: missing file ${copy.story.image.src}`);
 
+  // Our story, Visit us, Order online
+  const st = copy.story;
+  need(Array.isArray(st.chapters) && st.chapters.length >= 3, 'copy.story.chapters needs at least three chapters');
+  (st.chapters || []).forEach((c) => need(c.id && c.heading && c.paragraphs?.length, `story chapter "${c.id}" needs id, heading and paragraphs`));
+  need(Array.isArray(st.name?.characters) && st.name.characters.length === 2, 'copy.story.name.characters must be exactly two characters');
+  need(st.image?.alt && st.image.alt.length > 10, 'story image needs alt text');
+  const ids2 = (st.chapters || []).map((c) => c.id);
+  need(new Set(ids2).size === ids2.length, 'story chapter ids must be unique');
+  const vg = copy.visit.goodToKnow?.groups || [];
+  vg.forEach((g) => need(g.title && Array.isArray(g.items) && g.items.length, `visit "good to know" group "${g.title}" needs a title and items`));
+  const os = copy.order.steps || [];
+  need(os.length >= 2 && os.length <= 4, 'copy.order.steps needs 2 to 4 steps');
+  os.forEach((s) => { need(s.name && s.text, 'every order step needs a name and text'); if (s.link) need(byId[s.link.page], `order step links to unknown page ${s.link.page}`); });
+  need(copy.order.pickup?.link && byId[copy.order.pickup.link.page], 'copy.order.pickup.link must name a page');
+  if (client.address.mapUrl) need(/^https:\/\//.test(client.address.mapUrl), 'client.address.mapUrl must be null or an https:// URL');
+
   // a client build must carry no demonstration text
   if (!cfg.demo) {
-    const walk = (o, path) => { if (o && typeof o === 'object') { if (o.sample === true) errors.push(`${path} is marked sample but flags.demo is false`); Object.entries(o).forEach(([k, v]) => walk(v, `${path}.${k}`)); } };
-    walk(copy, 'copy');
+    const DEMO = /\b(fictional|fictionland|sample|samples|invented|sampletown|nonfunctional)\b|example street|\(555\)/i;
+    const skip = new Set(['site.demo', 'copy.demo', 'copy.visit.fictionalNote']);   // text that only ever renders when flags.demo is true
+    const walk = (o, path) => {
+      if (skip.has(path)) return;
+      if (typeof o === 'string') { if (DEMO.test(o)) errors.push(`${path} still contains demonstration text ("${o.slice(0, 50)}...") but flags.demo is false`); return; }
+      if (o && typeof o === 'object') { if (o.sample === true) errors.push(`${path} is marked sample but flags.demo is false`); Object.entries(o).forEach(([k, v]) => walk(v, `${path}.${k}`)); }
+    };
+    walk(client, 'client'); walk(menu, 'menu'); walk(copy, 'copy'); walk(site, 'site');
   }
   return errors;
 }

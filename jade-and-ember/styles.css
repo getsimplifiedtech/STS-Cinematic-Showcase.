@@ -181,7 +181,7 @@ h1 span{display:block}
 .item-head .heat{margin-left:calc(var(--s1) * -1)}
 /* wider than the photographs are sharp: soften the two outer edges so the frame does not show as a box on very large screens */
 @media (min-width:1681px){
-  .dish-fig img,.menu-band img{-webkit-mask-image:linear-gradient(90deg,transparent 0,#000 10%,#000 90%,transparent 100%);mask-image:linear-gradient(90deg,transparent 0,#000 10%,#000 90%,transparent 100%)}
+  .dish-fig img,.menu-band img,.story-fig img{-webkit-mask-image:linear-gradient(90deg,transparent 0,#000 10%,#000 90%,transparent 100%);mask-image:linear-gradient(90deg,transparent 0,#000 10%,#000 90%,transparent 100%)}
 }
 
 /* Current page in the navigation */
@@ -258,11 +258,71 @@ address{font-family:var(--serif);font-size:clamp(1.5rem,2.4vw,2rem);line-height:
 .item-fav{display:block;font-size:.875rem;font-weight:600;color:var(--celadon)}
 .item-tags{font-size:.875rem;font-weight:600;color:var(--celadon)}
 
-/* Holding page for pages built in the second gate */
-.pending{background:var(--lacquer);padding-block:var(--s10)}
-.pending-grid{display:grid;gap:var(--s5);justify-items:start}
-.pending h1{font-family:var(--serif);font-weight:400;font-size:clamp(2.5rem,6vw,5rem);line-height:1.04;letter-spacing:-.015em;max-width:20ch}
-.pending-note{color:var(--rice-dim);font-size:1.125rem;max-width:32rem}
+/* Our story: the quote, one edge-to-edge photograph, three short chapters stepped across the page, then the seal */
+.story-head{background:var(--lacquer);padding-block:var(--s9) var(--s8)}
+.story-head h1{font-family:var(--serif);font-weight:400;font-size:clamp(2.75rem,6.6vw,5.5rem);line-height:1.04;letter-spacing:-.015em;max-width:15ch;margin:0}
+.story-fig{margin:0;background:var(--lacquer)}
+.story-fig img{width:100%;max-width:1680px;margin-inline:auto;aspect-ratio:2.2/1;object-fit:cover;object-position:88% 50%}
+.story-fig figcaption{font-size:.9375rem;color:var(--rice-dim);padding-top:var(--s3);text-align:right}
+.chapters{background:var(--lacquer);padding-block:var(--s9) var(--s10)}
+.chapter{display:grid;grid-template-columns:repeat(12,minmax(0,1fr));column-gap:var(--s5)}
+.chapter+.chapter{margin-top:var(--s9)}
+.chapter-body{grid-column:2/8}
+.chapter:nth-child(even) .chapter-body{grid-column:6/12}
+.chapter h2{font-size:clamp(1.75rem,3vw,2.5rem);margin-bottom:var(--s4)}
+.chapter p{color:var(--rice-dim);font-size:1.125rem;max-width:34rem}
+.chapter p+p{margin-top:var(--s4)}
+.name{background:var(--pine);padding-block:var(--sec)}
+.name-grid{display:grid;grid-template-columns:repeat(12,minmax(0,1fr));column-gap:var(--s5);align-items:center}
+.seal-xl{grid-column:1/8;display:flex;gap:.06em;font-family:var(--seal);font-weight:600;font-size:clamp(7rem,21vw,18rem);line-height:.95;margin:0}
+.seal-xl span:first-child{color:var(--celadon)}
+.seal-xl span:last-child{color:var(--ember)}
+.name-text{grid-column:8/13}
+.name-line{font-family:var(--serif);font-size:clamp(1.5rem,2.6vw,2.125rem);line-height:1.25;margin-top:var(--s4)}
+.name-note{margin-top:var(--s5);color:var(--rice-dim)}
+
+/* Visit us: type only. The address is the headline element. */
+.visit-head{background:var(--lacquer);padding-block:var(--s9) var(--s6)}
+.visit-head h1{font-family:var(--serif);font-weight:400;font-size:clamp(2.5rem,5.4vw,4.5rem);line-height:1.04;letter-spacing:-.015em;margin:0}
+.visit-head .sample-flag{margin-top:var(--s4)}
+.visit-main{background:var(--lacquer);padding-block:var(--s7) var(--sec)}
+.visit-grid{display:grid;grid-template-columns:repeat(12,minmax(0,1fr));column-gap:var(--s5);row-gap:var(--s7);align-items:start}
+.visit-where{grid-column:1/8;display:grid;gap:var(--s5);justify-items:start}
+.visit-address{font-size:clamp(1.75rem,3.9vw,3.5rem);line-height:1.1;letter-spacing:-.01em}
+.visit-contact{display:flex;flex-wrap:wrap;gap:var(--s2) var(--s4);align-items:center}
+.visit-grid .hours{grid-column:8/13;margin-top:var(--s5)}
+.good{background:var(--pine);padding-block:var(--sec)}
+.good>.wrap>h2{margin-bottom:var(--s8)}
+.good-group{display:grid;grid-template-columns:repeat(12,minmax(0,1fr));column-gap:var(--s5);row-gap:var(--s3)}
+.good-group+.good-group{margin-top:var(--s7)}
+.good-group h3{grid-column:1/5}
+.good-group ul,.good-link{grid-column:5/12}
+.good-group ul{display:grid;gap:var(--s2);color:var(--rice-dim);font-size:1.125rem;max-width:36rem}
+.good-link{grid-row:2}
+.good-link a{display:inline-flex;align-items:center;min-height:44px;color:var(--rice)}
+
+/* Order online: one action and what happens after it */
+.order-head{background:var(--lacquer);padding-block:var(--s9) var(--s9)}
+.order-head-grid{display:grid;grid-template-columns:repeat(12,minmax(0,1fr));column-gap:var(--s5);row-gap:var(--s5)}
+.order-head h1{grid-column:1/11;font-family:var(--serif);font-weight:400;font-size:clamp(3rem,7.4vw,6.25rem);line-height:1;letter-spacing:-.02em;margin:0}
+.order-lede{grid-column:1/7;color:var(--rice-dim);font-size:1.25rem;max-width:28rem}
+.order-action{grid-column:1/7;margin-top:var(--s3)}
+.order-action .btn-off{font-size:1.25rem}
+.order-steps{background:var(--pine);padding-block:var(--s9) var(--s8)}
+.order-steps h2{margin-bottom:var(--s8);font-size:clamp(1.75rem,3vw,2.5rem)}
+.steps-3{grid-template-columns:repeat(3,minmax(0,1fr))}
+.steps a{display:inline-block;min-height:24px;line-height:24px;color:var(--rice)}
+.order-info{background:var(--pine);padding-block:var(--s7) var(--sec)}
+.info-grid{display:grid;grid-template-columns:repeat(12,minmax(0,1fr));column-gap:var(--s5);row-gap:var(--s7)}
+.info-pickup{grid-column:1/6;display:grid;gap:var(--s3);align-content:start;justify-items:start}
+.info-allergy{grid-column:7/13;display:grid;gap:var(--s3);align-content:start}
+.info-grid h2{font-size:clamp(1.5rem,2.4vw,2rem)}
+.info-grid p{color:var(--rice-dim);font-size:1.125rem;max-width:30rem}
+.info-call{margin-top:var(--s3)}
+.owner{background:var(--lacquer);padding-block:var(--s9)}
+.owner-grid{display:grid;grid-template-columns:repeat(12,minmax(0,1fr));column-gap:var(--s5);row-gap:var(--s4)}
+.note-title{grid-column:1/5;font-family:var(--sans);font-weight:600;font-size:1.0625rem;color:var(--rice);line-height:1.5}
+.owner-body{grid-column:5/12;display:grid;gap:var(--s3);color:var(--rice-dim);font-size:1rem;max-width:36rem}
 
 /* Footer */
 .foot{background:var(--kitchen);padding-block:var(--s8)}
@@ -298,6 +358,15 @@ address{font-family:var(--serif);font-size:clamp(1.5rem,2.4vw,2rem);line-height:
   .cat{display:block}
   .cat-title{position:static;margin-bottom:var(--s5)}
   .items{column-gap:var(--s7)}
+  .chapter-body,.chapter:nth-child(even) .chapter-body{grid-column:1/10}
+  .seal-xl{grid-column:1/-1;margin-bottom:var(--s6)}.name-text{grid-column:1/10}
+  .story-fig img{aspect-ratio:21/9}
+  .visit-where{grid-column:1/-1}.visit-grid .hours{grid-column:1/9;margin-top:0}
+  .good-group h3{grid-column:1/-1}.good-group ul,.good-link{grid-column:1/10}.good-link{grid-row:auto}
+  .order-head h1,.order-lede,.order-action{grid-column:1/-1}
+  .steps-3{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .info-pickup,.info-allergy{grid-column:1/-1}
+  .note-title,.owner-body{grid-column:1/-1}
   .foot-brand{grid-column:1/-1}.foot-nav{grid-column:1/5}.foot-disc{grid-column:5/13}
 }
 /* Phone */
@@ -342,6 +411,22 @@ address{font-family:var(--serif);font-size:clamp(1.5rem,2.4vw,2rem);line-height:
   .cat+.cat{margin-top:var(--s9)}
   .bar-long{display:none}
   .bar-short{display:inline}
+  .story-head{padding-block:var(--s8) var(--s6)}
+  .story-fig img{aspect-ratio:4/3}
+  .chapters{padding-block:var(--s8) var(--s9)}
+  .chapter+.chapter{margin-top:var(--s8)}
+  .chapter-body,.chapter:nth-child(even) .chapter-body{grid-column:1/-1}
+  .seal-xl{font-size:clamp(6rem,38vw,9rem)}
+  .name-text{grid-column:1/-1}
+  .visit-head{padding-block:var(--s8) var(--s5)}
+  .visit-grid .hours{grid-column:1/-1}
+  .visit-grid .hours tr,.visit-grid .hours th,.visit-grid .hours td{display:block}
+  .visit-grid .hours th{padding:var(--s4) 0 0}.visit-grid .hours td{padding:0}
+  .good-group ul,.good-link{grid-column:1/-1}
+  .order-head{padding-block:var(--s8)}
+  .steps-3{grid-template-columns:1fr}
+  .order-steps{padding-block:var(--s8) var(--s7)}
+  .owner{padding-block:var(--s8)}
   .foot-nav,.foot-disc{grid-column:1/-1}
 }
 @media (prefers-reduced-motion:reduce){

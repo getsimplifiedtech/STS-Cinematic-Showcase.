@@ -1,8 +1,44 @@
-# Jade & Ember — QA and critique (concept v0.6, Gate 1: shared build, Home, Menu)
+# Jade & Ember — QA and critique (concept v0.7, all five pages)
 
 Branch `feature/jade-and-ember-brief`. Dates: 2026-10-09. Tooling: Playwright 1.64 + axe-core 4.13, Lighthouse 12.6.1 (`@lhci/cli` 0.15 for the mobile preset, the Lighthouse CLI for the desktop preset), Chromium 1194 (headless, Linux), ffmpeg 6.1. **Nothing was run on a real device.**
 
 Re-runnable: `npm run test:a11y`, `npm run test:contrast`, `npm run test:lighthouse`, `npm run test:video-tools`, and `python3 tools/video-qa.py media/hero-loop.webm --poster media/hero-wok.webp`.
+
+## What v0.7 (Gate 2) changed
+Scope approved: **Our story, Visit us and Order online**, completed on the Gate 1 shared configuration and components; Home, Menu and the hero are untouched in design. Design authority: Anthropic's `frontend-design` skill. No media was generated, no credits spent, nothing merged or deployed. Plan: `docs/JADE_AND_EMBER_FIVE_PAGE_ARCHITECTURE.md`.
+
+| Page | What it is |
+|---|---|
+| Our story (`our-story.html`) | The quote as `h1`, the bowls photograph edge to edge, three short chapters (the question, the room, the wok) stepped across the page, then **the seal itself**: 玉 in celadon and 火 in ember set very large on the pine band, with a line saying what they mean. The page's one bold moment. Chapters are **sample copy** written for this fictional restaurant (no real people, awards or dates), flagged `"sample": true` in config. No new photograph, and no staff or chef images |
+| Visit us (`visit-us.html`) | Type only. The address is the headline element, hours as a table beside it, phone as a `tel:` link, "Get directions" only when `address.mapUrl` is set (no embedded map, no third-party request), then "Good to know" groups (seating, takeaway, getting here, access; the last two are sample copy). No "open now" status, by decision |
+| Order online (`order-online.html`) | One action and what follows: `h1`, one sentence, the button (the plainly labelled non-link "Order online (example)" while `ordering.url` is empty; a safe new-tab link when live), three numbered steps (choose, order and pay on the platform, collect), pickup, allergies (the Menu's own note) and a phone fallback, then **"For restaurant owners"** (demo only, and only while the button is the example) |
+| Shared | `steps` takes optional links and a modifier; `cta-band` takes a secondary link; new `owner-note` component; the holding-page renderer is deleted; `status` removed from the page registry |
+| Configuration | New copy structures for the three pages, validated at build; `client.ordering.pickupNote`. A client build now fails if **any demonstration wording** (fictional, sample, invented, Sampletown, Example Street, (555)...) is left in client, menu, copy or site data. The hero's hidden "AI-generated concept image and video" caption text is now demo-only |
+
+## Results after Gate 2
+| Check | Result |
+|---|---|
+| `tests/site.mjs` | all 7 groups pass, including the structure of the three new pages (chapters and seal, hours and address from config, no photographs on Visit and Order, the example button is not a link, no unreplaced placeholders) |
+| `tests/qa.mjs`: axe (WCAG 2.0/2.1/2.2 A and AA, best practice) on **all five pages** at 1440, 820, 390, 320, 844×390 and reduced motion; overflow, 24 px targets, alt text, ids, external requests; hero video, Pause, off-screen pause, mobile nav, reduced motion, no JavaScript, 14 video scenarios; Menu behaviour and print | all pass, 0 violations. It caught two inline links under 24 px on the new pages; both fixed |
+| `tests/contrast.mjs` (hero, 374 lines) | 0 below the gate |
+| `tests/contrast-sections.mjs`, five pages × 13 viewports | 4267 text blocks, 0 below the 99 % gate (includes the huge seal characters on pine) |
+| `tests/variants.mjs` (new) | 9 invalid configurations fail the build and write nothing; a live ordering URL gives a safe `_blank` link on the Order page and goes direct from the header; a **client build** (demo off, indexable, no hero video, live ordering) has no demonstration text, canonical links, no disclosure, no owner note and no "fictional" in any title |
+| `tests/extracted.mjs` (new): **index.html in a folder, clicked through all five pages** | pass on the repository folder; see the preview ZIP section below for the extracted ZIP |
+| Lighthouse mobile preset, 3 runs per page | all five pages: accessibility 100, best practices 100, CLS 0, TBT 0, performance 99 to 100; LCP 1.4 to 2.0 s. SEO 60 to 63: the only failing audit is "page is crawlable", because every page is noindex |
+| Lighthouse desktop preset | all five pages: performance, accessibility and best practices 100; LCP 0.4 s; CLS 0 |
+| Weight against the architecture budgets (mobile, no video) | Home 174 KiB (190), Menu 129 KiB (130, **tight**), Our story 91 KiB (110), Visit us 67 KiB (80), Order online 67 KiB (80). Home on desktop 799 KiB including the 584 KB WebM |
+
+## Honest critique after Gate 2 (frontend-design standard)
+- **Visit and Order are quiet by design, and they read as quiet.** They are the least memorable pages. The address as a headline and the joined steps line carry them; whether that is "restrained" or "thin" next to Home and Our story is for your eye. An optional reused dish frame on Order remains available, at a weight cost.
+- **Our story takes its one risk on the seal.** Large Chinese characters can read as decoration. The text beside them says what they mean and the characters are the brand's own mark, but a native reader's view would be worth having. **[unverified]**
+- **Chapters, and Visit's "getting here" and "access", are invented sample copy.** Nothing in them is a claim about a real place, and the build refuses to publish them in a client build until they are replaced.
+- **Order in the demo state:** the primary action is deliberately a plain, non-link label, so the page has no strong button until ordering is live (the live state, tested, shows the ember button).
+- **Repetition:** every page ends with the same closing-band pattern (heading, sentence, ember button). It is consistent, and it is also a template habit.
+- **Menu weight (129 of 130 KiB)** is unchanged and leaves no room for a second image there.
+- **Unverified:** real devices (iOS Safari including the sticky Menu bar, Android, Firefox), the print layout on paper, 200 percent zoom, a screen reader, and the MP4 fallback in a browser. On `file://` the browser refuses the crossorigin font preload (console message only; fonts load through the CSS and are verified).
+
+## Superseded: v0.6 Gate 1 notes
+The Gate 1 section below is kept for history; its "holding pages" no longer exist.
 
 ## What v0.6 (Gate 1) changed
 Scope approved: shared configuration and components, **Home** and **Menu** only. The Jade Lacquer design (v0.5) is unchanged and the hero (markup, `hero.js`, video logic, fallbacks) is moved, not edited. Design authority: Anthropic's `frontend-design` skill. No media was generated, no credits spent, nothing merged or deployed. Plan: `docs/JADE_AND_EMBER_FIVE_PAGE_ARCHITECTURE.md` (approved at `d717896`).

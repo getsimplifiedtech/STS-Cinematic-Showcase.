@@ -310,3 +310,10 @@ Checked against the skill's list of generic traits, applied to the sub-pages:
 6. **Header Order CTA:** the Order page by default (recommended), or straight to the platform?
 7. **Story copy:** may I write four sample chapters (about 100 words each), clearly flagged as samples?
 8. **Print stylesheet and "open now" status:** include in v1, or later?
+
+---
+
+## 15. Implementation log (added after approval)
+- **Gate 1 (`b19f0eb`):** shared configuration and components, Home, Menu. Decisions applied as approved: sentence-case navigation, the proposed file names, menu jump links (no tabs), type-led Visit and Order, two gates, the header button goes to the Order page, the menu print stylesheet; "open now" deferred.
+- **Gate 2:** Our story (four sample chapters, the last one the seal), Visit us, Order online; `owner-note`; variant and extracted-folder tests. See `jade-and-ember/QA.md` for results and the honest critique.
+- **Changes from this plan:** a build-time demo-wording scan (a client build fails if demonstration text remains); the story chapters are three headed chapters plus the name band; the hero's hidden AI-generated caption note is demo-only; the owner note appears only while the order button is the nonfunctional example; `serve.py` (with video Range support) is part of the folder; `status` is not part of the page registry.

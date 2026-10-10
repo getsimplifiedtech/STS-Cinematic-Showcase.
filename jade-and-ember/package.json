@@ -5,13 +5,15 @@
   "description": "Jade & Ember — fictional modern Chinese kitchen website concept by STS. Static; no runtime dependencies.",
   "scripts": {
     "build": "node build.mjs",
-    "serve": "python3 -m http.server 8766",
+    "serve": "python3 serve.py",
     "test:a11y": "node tests/qa.mjs",
     "test:lighthouse": "lhci autorun --config=lighthouserc.json",
     "test:contrast": "node tests/contrast.mjs",
     "test:video-tools": "python3 tools/video-qa-selftest.py",
     "test:contrast-sections": "node tests/contrast-sections.mjs",
-    "test:site": "node tests/site.mjs"
+    "test:site": "node tests/site.mjs",
+    "test:variants": "node tests/variants.mjs",
+    "test:extracted": "node tests/extracted.mjs"
   },
   "devDependencies": {
     "@axe-core/playwright": "^4.10.0",

@@ -135,6 +135,66 @@ for (const pg of pages) {
   }
   report('business facts and prices come from config on every page', p);
 }
+{
+  // The three pages built in Gate 2: structure and content come from config.
+  const p = [];
+  const copy = JSON.parse(readFileSync(new URL('config/copy.json', root), 'utf8'));
+  const ctx = await browser.newContext({ viewport: { width: 1280, height: 800 } });
+  const grab = async (file, fn, arg) => { const pg = await ctx.newPage(); await pg.goto(base + file); const r = await pg.evaluate(fn, arg); await pg.close(); return r; };
+
+  const s = await grab('our-story.html', () => ({
+    h2: [...document.querySelectorAll('main h2')].map((h) => h.textContent.trim()),
+    seal: (() => { const e = document.querySelector('.seal-xl'); return e ? { hidden: e.getAttribute('aria-hidden'), lang: e.getAttribute('lang'), text: e.textContent } : null; })(),
+    img: (() => { const i = document.querySelector('.story-fig img'); return i ? { alt: i.alt.length, w: i.width, h: i.height } : null; })(),
+    note: document.querySelector('.name-note')?.textContent || '',
+    numbered: document.querySelectorAll('main .step-no').length,
+  }));
+  const wantH2 = [...copy.story.chapters.map((c) => c.heading), copy.story.name.heading];
+  if (JSON.stringify(s.h2.slice(0, wantH2.length)) !== JSON.stringify(wantH2)) p.push(`Our story headings should be the chapters then the name: ${s.h2}`);
+  if (!s.seal || s.seal.hidden !== 'true' || s.seal.lang !== 'zh-Hans' || s.seal.text !== copy.story.name.characters.join('')) p.push(`the large seal should be aria-hidden, lang zh-Hans, and the two configured characters: ${JSON.stringify(s.seal)}`);
+  if (!s.img || s.img.alt < 10 || !s.img.w || !s.img.h) p.push(`story photograph needs alt text and dimensions: ${JSON.stringify(s.img)}`);
+  if (!/jade/.test(s.note) || !/fire/.test(s.note)) p.push('the seal note should say what the characters mean');
+  if (s.numbered) p.push('story chapters are headed, not numbered');
+
+  const v = await grab('visit-us.html', () => ({
+    rows: [...document.querySelectorAll('.hours tr')].map((r) => [r.querySelector('th').textContent.trim(), r.querySelector('td').textContent.trim()]),
+    addr: document.querySelector('.visit-address')?.innerText.split('\n').map((x) => x.trim()),
+    tel: document.querySelector('.visit-contact a.phone')?.getAttribute('href'),
+    groups: [...document.querySelectorAll('.good-group h3')].map((h) => h.textContent.trim()),
+    map: !!document.querySelector('a[target=_blank]'),
+    photos: document.querySelectorAll('main img').length,
+  }));
+  if (JSON.stringify(v.rows) !== JSON.stringify(client.hours.rows.map((r) => [r.days, r.time]))) p.push(`Visit hours differ from config: ${JSON.stringify(v.rows)}`);
+  if (JSON.stringify(v.addr) !== JSON.stringify(client.address.lines)) p.push(`Visit address differs from config: ${JSON.stringify(v.addr)}`);
+  if (v.tel !== client.contact.phone.href) p.push(`Visit phone link differs from config: ${v.tel}`);
+  if (JSON.stringify(v.groups) !== JSON.stringify(copy.visit.goodToKnow.groups.map((g) => g.title))) p.push(`good-to-know groups differ from config: ${v.groups}`);
+  if (v.photos) p.push(`Visit is a type-only page, found ${v.photos} images`);
+  if (!client.address.mapUrl && v.map) p.push('no "Get directions" link may appear while address.mapUrl is empty');
+
+  const o = await grab('order-online.html', () => ({
+    steps: [...document.querySelectorAll('ol.steps li')].map((li) => li.querySelector('h3').textContent.replace(/^\d+/, '').trim()),
+    ordered: !!document.querySelector('ol.steps'),
+    off: (() => { const e = document.querySelector('.order-action .btn-off'); return e ? { tag: e.tagName, text: e.textContent.trim() } : null; })(),
+    link: document.querySelector('.order-action a')?.href || null,
+    owner: !!document.querySelector('.owner'),
+    allergy: document.querySelector('.info-allergy p')?.textContent.trim(),
+    tel: document.querySelector('.info-call a')?.getAttribute('href'),
+    photos: document.querySelectorAll('main img').length,
+    placeholders: /\{(platform|pickup)\}/.test(document.body.innerText),
+  }));
+  if (JSON.stringify(o.steps) !== JSON.stringify(copy.order.steps.map((x) => x.name))) p.push(`Order steps differ from config: ${o.steps}`);
+  if (!client.ordering.url) {
+    if (!o.off || o.off.tag !== 'SPAN' || !/\(example\)/.test(o.off.text)) p.push(`with no ordering URL the button must be the plainly labelled non-link example: ${JSON.stringify(o.off)}`);
+    if (o.link) p.push('no link may exist in the primary action while ordering.url is empty');
+    if (!o.owner) p.push('the example state needs the note for restaurant owners');
+  }
+  if (o.allergy !== JSON.parse(readFileSync(new URL('config/copy.json', root), 'utf8')).menu.note) p.push('the Order page allergy text must be the Menu note (one source)');
+  if (o.tel !== client.contact.phone.href) p.push('Order page phone link differs from config');
+  if (o.photos) p.push(`Order is a type-only page, found ${o.photos} images`);
+  if (o.placeholders) p.push('an unreplaced {platform} or {pickup} placeholder is showing');
+  await ctx.close();
+  report('Our story, Visit us and Order online: structure and content come from config', p);
+}
 await browser.close(); server.close();
 console.log(failed ? `\n${failed} group(s) failed.` : '\nAll site checks passed.');
 process.exit(failed ? 1 : 0);

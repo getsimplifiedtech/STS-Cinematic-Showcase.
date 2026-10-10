@@ -49,7 +49,7 @@
     "label": "Order online",
     "platformName": "the restaurant's ordering page",
     "headerCta": "page",
-    "pickupNote": null
+    "pickupNote": "Ready in about 20 minutes."
   },
   "seo": {
     "baseUrl": null,

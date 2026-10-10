@@ -30,11 +30,44 @@
 </header>
 
 <main id="main">
-  <section class="pending" aria-labelledby="pending-title">
-    <div class="wrap pending-grid">
-      <h1 id="pending-title">Dinner, to go.</h1>
-      <p class="pending-note">This page is built in the second implementation gate. The header, footer and navigation are the real shared components.</p>
-      <p><a class="btn btn-ink" href="index.html">Back to Home</a></p>
+  <section class="order-head" aria-labelledby="order-title">
+    <div class="wrap order-head-grid">
+      <h1 id="order-title">Dinner, to go.</h1>
+      <p class="order-lede">Choose from the full menu and collect it hot from the pass.</p>
+      <p class="order-action"><span class="btn btn-off">Order online (example)</span></p>
+    </div>
+  </section>
+
+  <section class="order-steps" aria-labelledby="steps-title">
+    <div class="wrap">
+      <h2 id="steps-title">How ordering works</h2>
+      <ol class="steps steps-3">
+        <li><h3><span class="step-no" aria-hidden="true">1</span>Choose</h3><p>Pick your dishes from the menu. <a href="menu.html">See the menu</a></p></li>
+        <li><h3><span class="step-no" aria-hidden="true">2</span>Order and pay</h3><p>Order on the restaurant's ordering page. Payment is taken there, not on this site.</p></li>
+        <li><h3><span class="step-no" aria-hidden="true">3</span>Collect</h3><p>Come to the pass and we hand it over hot. Ready in about 20 minutes.</p></li>
+      </ol>
+    </div>
+  </section>
+
+  <section class="order-info" aria-label="Pickup, allergies and phone">
+    <div class="wrap info-grid">
+      <div class="info-pickup">
+        <h2>Pickup</h2>
+        <p>Orders are collected at the pass during opening hours.</p>
+        <p><a class="btn btn-ink" href="visit-us.html">See hours and address</a></p>
+      </div>
+      <div class="info-allergy">
+        <h2>Allergies</h2>
+        <p>Please tell us about allergies when ordering: peanuts, sesame, soy, wheat, shellfish and egg appear throughout.</p>
+        <p class="info-call">Prefer to call? <a class="phone" href="tel:+15550100188">(555) 010-0188</a> <span class="sample-inline">(sample number)</span></p>
+      </div>
+    </div>
+  </section>
+
+  <section class="owner" aria-labelledby="owner-title">
+    <div class="wrap owner-grid">
+      <h2 id="owner-title" class="note-title">For restaurant owners</h2>
+      <div class="owner-body"><p>This is a nonfunctional example. A live Jade &amp; Ember would send this button to its own online-ordering page. In this concept that page is set in config.json (ordering.url) and is currently empty, so nothing can be ordered and no payment is taken.</p><p>Designed for restaurants that already take orders through a MenuSifu page. No MenuSifu integration, embed or partnership has been built or verified here; the button simply links out.</p></div>
     </div>
   </section>
 </main>
@@ -44,7 +77,7 @@
     <p class="foot-brand"><span class="seal" lang="zh-Hans" aria-hidden="true"><span>玉</span><span>火</span></span><span>Jade &amp; Ember</span> <span class="foot-desc">Modern Chinese kitchen</span></p>
     <nav class="foot-nav" aria-label="Footer"><ul><li><a href="index.html">Home</a></li><li><a href="menu.html">Menu</a></li><li><a href="our-story.html">Our story</a></li><li><a href="visit-us.html">Visit us</a></li><li><a href="order-online.html" aria-current="page">Order online</a></li></ul></nav>
     <p class="foot-disc">Jade &amp; Ember is a fictional restaurant created by Simplified Tech Solutions as a website design concept. It does not exist. All menu items, prices, the address, the phone number and the opening hours are invented samples. Food imagery and the hero video are AI-generated concept media and do not depict real dishes served by any restaurant.</p>
-    <p class="foot-meta"><a href="../">Back to the STS showcase</a><a href="https://getsimplifiedtech.com/">Website concept by Simplified Tech Solutions</a><span>Concept v0.6, Gate 1 of 2 (Home and Menu). Hero loop on desktop widths only (concept footage).</span></p>
+    <p class="foot-meta"><a href="../">Back to the STS showcase</a><a href="https://getsimplifiedtech.com/">Website concept by Simplified Tech Solutions</a><span>Concept v0.7: five pages. Hero loop on desktop widths only (concept footage).</span></p>
   </div>
 </footer>
 <script src="site.js" defer></script>

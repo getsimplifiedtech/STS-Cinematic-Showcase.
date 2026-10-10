@@ -116,11 +116,53 @@
       "alt": "Three stacked jade-green celadon bowls beside a bowl of steamed white rice on a matte black plate, on a slate board."
     },
     "caption": "Celadon rice bowls, stacked on the pass.",
-    "paragraphs": [
-      "Jade & Ember began as a question about a single flame: what if a dining room felt like standing beside a wok at full heat, without the noise or the smoke?",
-      "The room is charcoal and slate, lit low, with celadon bowls stacked on the pass. The kitchen cooks Cantonese and Sichuan dishes with a lighter hand, and the menu stays short so every dish gets its turn at the fire.",
-      "Jade for the bowls, ember for the flame. The name is the whole palette."
-    ]
+    "chapters": [
+      {
+        "id": "question",
+        "heading": "The question",
+        "sample": true,
+        "paragraphs": [
+          "Jade & Ember began as a question about a single flame: what if a dining room felt like standing beside a wok at full heat, without the noise or the smoke?",
+          "The answer was not a bigger kitchen. It was a smaller one, with the burner close enough to feel and a counter where you can watch the pan do its work."
+        ]
+      },
+      {
+        "id": "room",
+        "heading": "The room",
+        "sample": true,
+        "paragraphs": [
+          "The room is charcoal and slate, lit low, with celadon bowls stacked on the pass. Nothing is bright except the flame.",
+          "The wok counter seats eight, so the quickest way to understand the menu is to sit where the cooking happens."
+        ]
+      },
+      {
+        "id": "wok",
+        "heading": "The wok",
+        "sample": true,
+        "paragraphs": [
+          "The kitchen cooks Cantonese and Sichuan dishes with a lighter hand. A carbon steel wok is seasoned until it is nearly black, then kept hotter than a home stove can reach.",
+          "That heat gives wok hei, the smoky, singed sweetness this place is named for. It is also why the menu stays short: every dish gets its turn at the fire."
+        ]
+      }
+    ],
+    "name": {
+      "heading": "The name",
+      "sample": true,
+      "characters": [
+        "玉",
+        "火"
+      ],
+      "line": "Jade for the bowls, ember for the flame. The name is the whole palette.",
+      "note": "玉 is the character for jade. 火 is the character for fire."
+    },
+    "orderBand": {
+      "heading": "Taste the fire.",
+      "text": "Start with the menu, then collect it hot from the pass.",
+      "secondary": {
+        "page": "menu",
+        "label": "See the menu"
+      }
+    }
   },
   "visit": {
     "meta": {
@@ -129,10 +171,47 @@
     },
     "h1": "Visit us (sample details)",
     "fictionalNote": "Fictional address, phone number and hours. Please do not travel or call.",
-    "notes": [
-      "Walk-ins are welcome; the wok counter seats eight.",
-      "Takeaway orders are placed through the online-ordering page."
-    ]
+    "directionsLabel": "Get directions",
+    "goodToKnow": {
+      "heading": "Good to know",
+      "groups": [
+        {
+          "title": "Seating",
+          "items": [
+            "Walk-ins are welcome; the wok counter seats eight."
+          ]
+        },
+        {
+          "title": "Takeaway",
+          "items": [
+            "Takeaway orders are placed through the online-ordering page."
+          ],
+          "link": {
+            "page": "order",
+            "label": "Order online"
+          }
+        },
+        {
+          "title": "Getting here",
+          "sample": true,
+          "items": [
+            "Example Street is a five-minute walk from the Sample Street tram stop.",
+            "Street parking is available on Example Street after 6 pm."
+          ]
+        },
+        {
+          "title": "Access",
+          "sample": true,
+          "items": [
+            "The entrance is step-free. Tell us when you book a counter seat if you need a chair with a back."
+          ]
+        }
+      ]
+    },
+    "orderBand": {
+      "heading": "Dinner, to go.",
+      "text": "Choose from the full menu and collect it hot from the pass."
+    }
   },
   "order": {
     "meta": {
@@ -140,14 +219,48 @@
       "description": "How ordering works at Jade & Ember, a fictional modern Chinese kitchen (the ordering button is a nonfunctional example)."
     },
     "h1": "Dinner, to go.",
-    "text": "Choose from the full menu and collect it hot from the pass."
+    "text": "Choose from the full menu and collect it hot from the pass.",
+    "stepsHeading": "How ordering works",
+    "steps": [
+      {
+        "name": "Choose",
+        "text": "Pick your dishes from the menu.",
+        "link": {
+          "page": "menu",
+          "label": "See the menu"
+        }
+      },
+      {
+        "name": "Order and pay",
+        "text": "Order on {platform}. Payment is taken there, not on this site."
+      },
+      {
+        "name": "Collect",
+        "text": "Come to the pass and we hand it over hot. {pickup}"
+      }
+    ],
+    "pickup": {
+      "heading": "Pickup",
+      "text": "Orders are collected at the pass during opening hours.",
+      "link": {
+        "page": "visit",
+        "label": "See hours and address"
+      }
+    },
+    "allergy": {
+      "heading": "Allergies"
+    },
+    "phone": {
+      "heading": "Prefer to call?"
+    },
+    "newTab": "(opens the restaurant's ordering page in a new tab)"
   },
   "demo": {
     "ownerNoteTitle": "For restaurant owners",
     "demoNote": "This is a nonfunctional example. A live Jade & Ember would send this button to its own online-ordering page. In this concept that page is set in config.json (ordering.url) and is currently empty, so nothing can be ordered and no payment is taken.",
     "platformNote": "Designed for restaurants that already take orders through a MenuSifu page. No MenuSifu integration, embed or partnership has been built or verified here; the button simply links out.",
     "exampleSuffix": "(example)",
-    "pendingNote": "This page is built in the second implementation gate. The header, footer and navigation are the real shared components.",
-    "menuSample": "Sample menu with invented prices in fictional dollars."
+    "menuSample": "Sample menu with invented prices in fictional dollars.",
+    "heroCaptionNote": ". AI-generated concept image and video."
   }
 }

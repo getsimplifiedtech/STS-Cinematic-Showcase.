@@ -4,32 +4,27 @@
     {
       "id": "home",
       "file": "index.html",
-      "nav": "Home",
-      "status": "built"
+      "nav": "Home"
     },
     {
       "id": "menu",
       "file": "menu.html",
-      "nav": "Menu",
-      "status": "built"
+      "nav": "Menu"
     },
     {
       "id": "story",
       "file": "our-story.html",
-      "nav": "Our story",
-      "status": "pending"
+      "nav": "Our story"
     },
     {
       "id": "visit",
       "file": "visit-us.html",
-      "nav": "Visit us",
-      "status": "pending"
+      "nav": "Visit us"
     },
     {
       "id": "order",
       "file": "order-online.html",
       "nav": "Order online",
-      "status": "pending",
       "cta": true
     }
   ],
@@ -41,7 +36,7 @@
     "backShort": "STS showcase",
     "backHref": "../",
     "titleSuffix": " (fictional concept by STS)",
-    "stamp": "Concept v0.6, Gate 1 of 2 (Home and Menu). Hero loop on desktop widths only (concept footage)."
+    "stamp": "Concept v0.7: five pages. Hero loop on desktop widths only (concept footage)."
   },
   "credit": {
     "label": "Website concept by Simplified Tech Solutions",

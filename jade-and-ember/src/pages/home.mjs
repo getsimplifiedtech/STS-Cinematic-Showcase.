@@ -31,7 +31,7 @@ export default function home(cfg) {
       <p class="hero-text">${esc(h.text)}</p>
       <p class="hero-actions"><a class="btn btn-ember" href="${link(h.primaryCta.page)}">${esc(h.primaryCta.label)}</a> ${orderLink(cfg, 'btn hero-order')}</p>
     </div>
-    <p class="hero-caption"><span class="vh">Pictured: </span>${esc(h.caption)}<span class="vh">. AI-generated concept image and video.</span></p>
+    <p class="hero-caption"><span class="vh">Pictured: </span>${esc(h.caption)}${cfg.demo ? `<span class="vh">${esc(copy.demo.heroCaptionNote)}</span>` : ''}</p>
     <button class="pause" type="button" aria-pressed="false" hidden><span class="pause-ico" aria-hidden="true"></span><span class="pause-txt">Pause motion</span></button>
   </section>
 
