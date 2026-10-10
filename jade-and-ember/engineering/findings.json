@@ -79,7 +79,7 @@
       "severity": "Info",
       "visual": false,
       "maxValue": 1,
-      "status": "accepted with verification (APR-JE-028): the Tab stop's focus indicator, keyboard operation and absence of a focus trap are being confirmed (Gate 5 Phase 1 review investigation)",
+      "status": "accepted with verification (APR-JE-028): verified in Firefox 157.0 (Actions run 19): the strip is a Tab stop only at phone width, shows a 3 px solid focus ring (2487 pixels change), scrolls with the arrow keys, Tab and Shift+Tab walk through it without a trap and Enter on a link still navigates",
       "description": "At 390 px the Menu page's category strip (.jump ul, overflow-x:auto) scrolls. Firefox makes any scrollable container a keyboard focus stop, so Tab lands once on the <ul> before its links. The element is not an interactive control and has no focus ring of its own in the v0.8 design; Chromium (141 locally, 156 in CI) and WebKit do not stop there. The check reports the stop instead of hiding it.",
       "proposal": "Recommended: accept. This is Firefox's intended access to scrolled content and it adds one extra Tab stop on one page at phone width. A visible focus ring on the strip would be a visual change and needs the owner's approval; no change was made.",
       "ledger": "ENG-G5-03"

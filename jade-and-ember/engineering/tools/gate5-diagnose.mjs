@@ -75,10 +75,10 @@ async function partHours(ctx) {
 }
 
 const CANDIDATES = [
-  { id: 'K1', css: '.hours th{white-space:normal}', note: 'let the day label wrap inside its cell' },
-  { id: 'K2', css: '.hours th{min-width:max-content}', note: 'the day-label cell is never narrower than its own text' },
-  { id: 'K3', css: '.hours th{width:max-content}', note: 'the day-label cell is as wide as its own text' },
-  { id: 'K4', css: '.hours{display:grid;grid-template-columns:max-content 1fr} .hours tbody,.hours tr{display:contents} .hours caption{display:none}', note: 'lay the table out as a two-column grid (changes structure semantics: shown only for comparison)' },
+  { id: 'K1m', css: '@media (min-width:1200px){.hours th{white-space:normal}}', note: 'K1 (let the day label wrap) only at widths of 1200 px and more, where the table is wide enough that it never wraps in the normal state' },
+  { id: 'K5', css: '.hours th{white-space:normal;min-width:max-content}', note: 'allow wrapping but never narrower than the label\'s own width' },
+  { id: 'K9', css: '.hours th{width:1px}', note: 'the shrink-to-fit column idiom: the day-label column takes exactly its content width' },
+  { id: 'K10', css: '.hours th{padding-right:0}.hours td{padding-left:var(--s5)}', note: 'move the gap from the label cell to the value cell' },
 ];
 const WIDTHS = [1440, 1280, 1100, 1024, 820, 600, 390];
 
@@ -111,6 +111,43 @@ async function partCandidates(ctx) {
     r.reflowAdded = [...ci].filter((x) => !baseItems.has(x)); r.reflowRemoved = [...baseItems].filter((x) => !ci.has(x));
     out(`candidate.${k.id}.${ENGINE}`, r);
   }
+}
+
+
+// Root cause: is the column width stale after a style change, or does the engine mis-measure the spaced label even from the first layout?
+const SPACING_ONLY = { ls: '* { letter-spacing: 0.12em !important; }', ws: '* { word-spacing: 0.16em !important; }', lh: '* { line-height: 1.5 !important; }' };
+const hoursNumbers = (page) => page.evaluate(() => { const t = document.querySelector('table.hours'); const r = t.rows[1]; const th = r.cells[0], td = r.cells[1]; const rg = document.createRange(); rg.selectNodeContents(th.firstChild); const tr = [...rg.getClientRects()]; const rg2 = document.createRange(); rg2.selectNodeContents(td.firstChild); const dr = [...rg2.getClientRects()];
+  const textRight = Math.max(...tr.map((x) => x.right)), tdLeft = Math.min(...dr.map((x) => x.left)); return { thBoxW: Math.round(th.getBoundingClientRect().width * 10) / 10, thTextW: Math.round((textRight - Math.min(...tr.map((x) => x.left))) * 10) / 10, gapTextToValue: Math.round((tdLeft - textRight) * 10) / 10, thScrollW: th.scrollWidth, thClientW: th.clientWidth }; });
+
+async function partExperiments(ctx) {
+  const res = {};
+  const open = async (viewport, init) => { const c = await ctx.browser.newContext({ viewport, deviceScaleFactor: 1, reducedMotion: 'reduce' }); const page = await c.newPage(); if (init) await page.addInitScript(init); await page.goto(ctx.base + 'visit-us.html'); await page.evaluate(async () => { await Promise.all([...document.fonts].filter((f) => !/Fallback/.test(f.family)).map((f) => f.load().catch(() => {}))); await document.fonts.ready; }); await page.waitForTimeout(250); return { page, close: () => c.close() }; };
+  const V = { width: 1440, height: 900 };
+  // A: the spacing rule is in the HTML itself (a <style> element in <head>, added by a route), so it applies from the very first layout
+  { const c = await ctx.browser.newContext({ viewport: V, deviceScaleFactor: 1, reducedMotion: 'reduce' }); await c.route('**/visit-us.html', async (route) => { const resp = await route.fetch(); const body = (await resp.text()).replace('</head>', `<style>${SPACING}</style></head>`); await route.fulfill({ response: resp, body }); });
+    const page = await c.newPage(); await page.goto(ctx.base + 'visit-us.html'); await page.evaluate(async () => { await Promise.all([...document.fonts].filter((f) => !/Fallback/.test(f.family)).map((f) => f.load().catch(() => {}))); await document.fonts.ready; }); await page.waitForTimeout(250);
+    res.A_spacingInTheHtmlFromFirstLayout = await hoursNumbers(page); await c.close(); }
+  // B: injected after load (what check:reflow, bookmarklets and extensions do), then forced relayouts
+  { const { page, close } = await open(V, null); res.B0_normal = await hoursNumbers(page);
+    await page.addStyleTag({ content: SPACING }); await page.waitForTimeout(250); res.B1_injectedAfterLoad = await hoursNumbers(page);
+    await page.evaluate(() => { const t = document.querySelector('table.hours'); t.style.display = 'none'; void t.offsetHeight; t.style.display = ''; void t.offsetHeight; }); res.B2_afterHideShowTable = await hoursNumbers(page);
+    await page.setViewportSize({ width: 1441, height: 900 }); await page.waitForTimeout(150); await page.setViewportSize(V); await page.waitForTimeout(250); res.B3_afterResizeBy1pxAndBack = await hoursNumbers(page);
+    await close(); }
+  { const { page, close } = await open(V, null); await page.addStyleTag({ content: SPACING }); await page.waitForTimeout(250); await page.evaluate(() => { for (const c of document.querySelectorAll('table.hours th')) c.textContent = c.textContent; }); await page.waitForTimeout(150); res.B4_afterRewritingLabelText = await hoursNumbers(page); await close(); }
+  // C: which property is not picked up when injected after load
+  for (const [k, css] of Object.entries(SPACING_ONLY)) { const { page, close } = await open(V, null); await page.addStyleTag({ content: css }); await page.waitForTimeout(250); res['C_only_' + k] = await hoursNumbers(page); await close(); }
+  // D: scope of the rule, injected after load
+  for (const [k, css] of Object.entries({ cellsOnly: '.hours th, .hours td { letter-spacing: 0.12em !important; word-spacing: 0.16em !important; line-height: 1.5 !important; }', tableOnly: 'table.hours { letter-spacing: 0.12em !important; word-spacing: 0.16em !important; }', bodyInherited: 'body { letter-spacing: 0.12em; word-spacing: 0.16em; line-height: 1.5; }' })) { const { page, close } = await open(V, null); await page.addStyleTag({ content: css }); await page.waitForTimeout(250); res['D_' + k] = await hoursNumbers(page); await close(); }
+  out(`experiments.${ENGINE}`, res);
+}
+
+// Does the defect occur at other widths, and do the candidates leave those widths alone?
+async function partSweep(ctx) {
+  const rows = {};
+  const one = async (css, w, spacing) => { const { page, close } = await ctx.newPage({ viewport: { width: w, height: 900 } }, 'visit-us.html'); if (css) await page.addStyleTag({ content: css }); if (spacing) { await page.addStyleTag({ content: SPACING }); await page.waitForTimeout(200); } const n = await page.evaluate(() => { const t = document.querySelector('table.hours'); const rowsOut = [...t.rows].map((r) => { const th = r.cells[0], td = r.cells[1]; const a = document.createRange(); a.selectNodeContents(th.firstChild); const b = document.createRange(); b.selectNodeContents(td.firstChild); const ar = [...a.getClientRects()], br = [...b.getClientRects()]; let ov = 0; for (const x of ar) for (const y of br) { const ww = Math.min(x.right, y.right) - Math.max(x.left, y.left), hh = Math.min(x.bottom, y.bottom) - Math.max(x.top, y.top); if (ww > 0 && hh > 0) ov = Math.max(ov, ww); } return { thBoxW: Math.round(th.getBoundingClientRect().width), overlapPx: Math.round(ov * 10) / 10 }; }); return { tableW: Math.round(t.getBoundingClientRect().width), worstOverlapPx: Math.max(...rowsOut.map((r) => r.overlapPx)), thBoxW: rowsOut.map((r) => r.thBoxW) }; });
+    await close(); return n; };
+  for (const [id, css] of [['none', null], ...CANDIDATES.map((k) => [k.id, k.css])]) { rows[id] = {}; for (const w of WIDTHS) rows[id][w] = { normal: id === 'none' ? await one(null, w, false) : undefined, spacing: await one(css, w, true) }; }
+  out(`sweep.${ENGINE}`, rows);
 }
 
 async function partStrip(ctx) {
@@ -158,7 +195,7 @@ async function partStrip(ctx) {
 export async function diagnose() {
   await withSite(async (ctx) => {
     out('engine', { engine: ENGINE, version: ctx.version });
-    const parts = { hours: partHours, candidates: partCandidates, strip: partStrip };
+    const parts = { hours: partHours, experiments: partExperiments, sweep: partSweep, candidates: partCandidates, strip: partStrip };
     for (const [name, fn] of Object.entries(parts)) {
       if (PART !== 'all' && PART !== name) continue;
       try { await fn(ctx); } catch (e) { out(`${name}.ERROR.${ENGINE}`, { message: String(e.message).split('\n')[0] }); }
