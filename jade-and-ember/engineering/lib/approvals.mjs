@@ -7,7 +7,7 @@ import { repoRoot } from './git.mjs';
 export function parseApprovals(text) {
   const rows = [];
   for (const line of text.split('\n')) {
-    if (!/^\|\s*APR-JE-\d+\s*\|/.test(line) && !/^\|\s*(REL|DEP|RIGHTS)-JE-\d+\s*\|/.test(line)) continue;
+    if (!/^\|\s*APR-JE-\d+\s*\|/.test(line) && !/^\|\s*(REL|DEP|RIGHTS|SRCH)-JE-\d+\s*\|/.test(line)) continue;
     const cells = line.split('|').slice(1, -1).map((c) => c.trim());
     if (cells.length < 6) continue;
     rows.push({ id: cells[0], date: cells[1], type: cells[2], decision: cells[3], concerns: cells[4], limits: cells[5] });
@@ -24,3 +24,13 @@ export function findApproval(rows, kind, { channel, version, commit }) {
     && new RegExp(`commit:\\s*\`?${commit}\`?`).test(r.decision)) || null;
 }
 export const findRightsVerification = (rows) => rows.find((r) => r.type.toLowerCase().includes('rights-verification') && /verified by/i.test(r.decision) && /sources?/i.test(r.decision) && /\d{4}-\d{2}-\d{2}/.test(r.decision)) || null;
+
+// The human search review (facts, structured data, crawler policy) for exactly the generated search artifacts: the Decision text names who
+// reviewed what and carries `digest: <sha256>` of sitemap.xml, robots.txt, llms.txt and the JSON-LD (npm run release:search-digest).
+export function findSearchReview(rows, digest) {
+  if (!digest) return null;
+  return rows.find((r) => r.type.toLowerCase().includes('search-review')
+    && /reviewed by/i.test(r.decision) && /\bfacts?\b/i.test(r.decision) && /structured data/i.test(r.decision) && /crawler/i.test(r.decision)
+    && /\d{4}-\d{2}-\d{2}/.test(r.decision)
+    && new RegExp(`digest:\\s*\`?${digest}\`?`).test(r.decision)) || null;
+}

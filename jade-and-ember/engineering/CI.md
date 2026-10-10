@@ -5,7 +5,7 @@ One workflow, `.github/workflows/jade-and-ember-verify.yml`, approved for the v0
 ## What it does
 | Job | Runs on | Does | Blocks? |
 |---|---|---|---|
-| `verify` | `ubuntu-24.04` | checkout (full history), Node 22.22.0, `npm ci --ignore-scripts`, `npx playwright install --with-deps chromium`, ffmpeg, `npm run verify` | yes |
+| `verify` | `ubuntu-24.04` | checkout (full history), Node 22.22.0, `npm ci --ignore-scripts`, `npx playwright install --with-deps chromium`, ffmpeg, `npm run verify`, then (always) the latency probe, which never fails the build | yes |
 | `portability-smoke` | `macos-latest` | `npm ci --ignore-scripts`, `npm run verify:fast` (no browser) | no (`continue-on-error`): it exists to show tooling portability problems. **Windows is not run**: the repository name ends with a dot and Windows cannot create that folder, so the checkout step fails before any project code runs |
 
 Triggers: a push to `feature/jade-and-ember-v0.9`, any pull request, and manual dispatch. A newer run on the same ref cancels the older one.
@@ -34,6 +34,21 @@ Triggers: a push to `feature/jade-and-ember-v0.9`, any pull request, and manual 
 | 4 (`38059526037`) | `b24ec81` | **success** | Confirmed from the GitHub API, not assumed: `verify (Ubuntu 24.04)` succeeded (all 31 checks; verify step 11 min 54 s), and `fast checks on macos-latest (informational)` succeeded. First run of the corrected budget. The runner's Chromium is 156, not the pinned 141 of the local reference runs |
 What the remote runs showed (Chromium 156.0.8078.4, a different build from the pinned 141): the regression harness reports **0 differences** in source, text, structure, styles, pixels and behaviour, and the Gate 2 and Gate 3 self-tests pass; this is independent evidence that the comparison holds across browser builds. The one failure was **interaction latency 584 to 784 ms against a 200 ms limit** (32 ms on the development machine). The metric included the time to the next frame, which depends on the machine's software rendering under the 4x CPU throttle. The first correction (Gate 4, commit `8a3c9af`) gated input delay plus handler time and reported only the presentation delay. **Run 3 showed that was the wrong diagnosis:** the presentation delay was only 27 ms, the delay was before or inside the handler, yet the main thread was idle (blocking time 5 ms, so no long task existed). A delay of that size with an idle main thread cannot come from this site's code; it is the headless input pipeline of the runner. The budget now gates the **handler time** (the page's own code, `processingStart` to `processingEnd`; 6 ms measured locally) and the blocking-time limit, and reports input delay and presentation delay without gating them. A negative test (`budgets: a slow click handler`, a 700 ms click handler) proves the gate still catches slow page code. This is a change to the measurement, made after seeing a remote failure; it is stated here so nobody reads it as a quiet relaxation. Run 4 (below) is the first run of the corrected budget.
 Other notes: GitHub warns that `actions/checkout` and `actions/setup-node` v4 target Node 20 and are being forced to Node 24; this is a warning, not a failure, and the pinned SHAs are kept until the upgrade to the Node 24 releases is reviewed.
+
+## Interaction latency investigation (Gate 4 review decision 1)
+**The question.** Run 3 measured 567 to 746 ms for opening the phone menu on the GitHub runner, 6 to 30 ms on the development machine, with the main thread idle (blocking time 5 ms). The budget therefore gates the page's own handler time (`budgets.json`, `interactionMs`, limit 200 ms) and **retains and reports end-to-end latency** (`endToEndMs`, the Event Timing duration: input delay + handler + presentation) as a number that is not gated. The 200 ms INP "good" reference is printed next to it and a note says when it is exceeded.
+
+**The tool.** `engineering/tools/latency-probe.mjs` (investigation only, exit code always 0) opens the phone menu on two pages for each combination of conditions (plain, CPU x4, network emulation, both = the budget profile) and dispatch methods (Playwright click, raw mouse click, touch tap), and records input delay, handler time, time to the next frame, the Event Timing duration, the longest gap of a 4 ms timer chain on the main thread during the interaction, and long tasks. Reading it: a small handler and a small main-thread gap with a large input delay mean the delay is outside the page.
+
+**Local result (development machine, Chromium 141.0.7390.37, 3 repetitions x 2 pages per cell).** Input delay at most 35 ms (median 2 to 28 ms), handler 0.1 to 3.8 ms, event duration 0 to 80 ms in every condition, including the budget profile. The delay seen on the runner does **not** reproduce here, in any condition or dispatch method, so it cannot be explained from this machine.
+
+**On the runner.** The workflow runs the probe as the last step of the `verify` job (`if: always()`, so a budget failure comes with evidence, and it can never fail the build). Its output is in the job log under "Interaction latency probe". Results are recorded below once a run has produced them; **until then the cause is unproven**.
+
+| Run | Commit | Probe on the runner |
+|---|---|---|
+| (pending) | | |
+
+Controlled follow-ups, none run yet: the same probe on the same runner image with the pinned Chromium 141 instead of the runner's 156 (to separate browser version from machine); with `--headless=new` against the headless shell; with a quiet runner (`concurrency` limits) to rule out noisy neighbours; and, if the delay is in the input path, whether it appears in real-device traces at all (it is a lab artefact until a real device shows it).
 
 ## Status and limits
 - The workflow is validated by `check:ci` (structure and safety), by running its steps locally from a clean clone, and by the remote runs above.

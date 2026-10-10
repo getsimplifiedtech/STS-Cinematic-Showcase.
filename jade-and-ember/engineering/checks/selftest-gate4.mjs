@@ -1,11 +1,16 @@
 // check:selftest-gate4. Targeted negative tests for the Gate 4 checks (HTML validation, internal links, SEO output, release gate, hosting files).
 // Each test damages a COPY of the delivered site, a client build, a configuration, the gate's input or the host files in a way a real mistake
 // could, runs the real check, and requires it to report the defect. Nothing in the working tree or the baseline is touched. Options: --only <text>
-import { cpSync, readFileSync, rmSync, writeFileSync, renameSync, mkdirSync } from 'node:fs';
+import { appendFileSync, cpSync, readFileSync, rmSync, writeFileSync, renameSync, mkdirSync } from 'node:fs';
 import { join } from 'node:path';
 import { validateHtml, probeTelWrapping } from './html.mjs';
 import { scanLinks, checkSearchAgreement } from './links.mjs';
-import { checkSeoClient, readSitemap, readRobots } from './seo.mjs';
+import { checkPhone, WIDTHS as PHONE_WIDTHS } from './phone.mjs';
+import { checkSeo, checkSeoClient, readSitemap, readRobots } from './seo.mjs';
+import { findSearchReview } from '../lib/approvals.mjs';
+import { searchDigest } from '../lib/release.mjs';
+import { llmsProblems, readLlms, robotsProblems, urlStrategyProblems, metadataProblems, factsProblems, hostProblems, pageText } from '../lib/search.mjs';
+import { isReservedHost, publicUrl } from '../../src/lib/seo.mjs';
 import { checkFolder, checkHeadersFile } from './hosting.mjs';
 import { greenClientContext, policyProblems } from './release.mjs';
 import { buildClient } from '../lib/client-fixture.mjs';
@@ -15,7 +20,7 @@ import { loadPolicy, renderHeadersFile } from '../lib/security.mjs';
 import { assembleCandidate, pagesOf } from '../lib/site.mjs';
 import { isMain, projectDir, readJson, tempDir } from '../lib/git.mjs';
 
-const edit = (file, fn) => writeFileSync(file, fn(readFileSync(file, 'utf8')));
+const edit = (file, fn) => { const before = readFileSync(file, 'utf8'), after = fn(before); if (after === before) throw new Error(`the edit changed nothing in ${file}: the test would prove nothing`); writeFileSync(file, after); };
 const clone = (o) => JSON.parse(JSON.stringify(o));
 const sandbox = [];
 const demoDir = () => { const d = assembleCandidate(projectDir, 'g4'); sandbox.push(d); return d; };
@@ -31,6 +36,20 @@ const linksOf = (dir) => scanLinks({ root: dir }).problems;
 const gate = (over) => evaluateGate(greenClientContext(over));
 const blockedBy = (r) => (r.allowed ? [] : r.requirements.filter((x) => !x.ok).map((x) => `${x.id}: ${x.detail}`));
 const badConfig = (edit_) => { const f = buildClient({ edit: edit_, label: 'g4-bad' }); sandbox.push(f.root); return f.status === 0 ? [] : [f.text]; };
+
+// ---- helpers for the search-readiness cases (Gate 4 reconciliation)
+const cfgOf = (fx) => ({ client: readJson(join(fx.cfgDir, 'client.json')), copy: readJson(join(fx.cfgDir, 'copy.json')), pages: readJson(join(fx.cfgDir, 'site.json')).pages });
+const htmlMap = (fx, cfg) => Object.fromEntries(cfg.pages.map((p) => [p.file, readFileSync(join(fx.dir, p.file), 'utf8')]));
+const llmsOf = (fx) => { const cfg = cfgOf(fx); return llmsProblems({ text: readFileSync(join(fx.dir, 'llms.txt'), 'utf8'), cfg, pagesHtml: htmlMap(fx, cfg), sitemapUrls: readSitemap(readFileSync(join(fx.dir, 'sitemap.xml'), 'utf8')).urls.map((u) => u.loc) }); };
+const robotsOf = (fx) => robotsProblems({ text: readFileSync(join(fx.dir, 'robots.txt'), 'utf8'), cfg: cfgOf(fx) });
+const build = (edit_, opts = {}) => { const f = buildClient({ edit: edit_, label: 'g4-sr', ...opts }); sandbox.push(f.root); if (f.status !== 0) throw new Error('fixture failed: ' + f.text.slice(0, 200)); return f; };
+const clientFx = (h, c) => build((n, o) => { if (n === 'client') { o.seo.host = h; o.seo.urlStyle = c; } });
+const publicUrlsOf = (fx) => { const cfg = cfgOf(fx); const ld = JSON.parse(/<script type="application\/ld\+json">([\s\S]*?)<\/script>/.exec(readFileSync(join(fx.dir, 'index.html'), 'utf8'))[1]); return [...cfg.pages.map((p) => publicUrl(cfg, p)), ...readSitemap(readFileSync(join(fx.dir, 'sitemap.xml'), 'utf8')).urls.map((u) => u.loc), ...readLlms(readFileSync(join(fx.dir, 'llms.txt'), 'utf8')).links.map((l) => l.url), ld.url, ld.hasMenu]; };
+const strategy = async (fx, host = null) => (await urlStrategyProblems({ dir: fx.dir, cfg: cfgOf(fx), publicUrls: publicUrlsOf(fx), host })).problems;
+const wholeSeo = (fx) => checkSeoClient({ fixture: fx }).problems;
+const crawlers = (c) => build((n, o) => { if (n === 'client') o.seo.crawlers = c; });
+const css = (d, rule) => appendFileSync(join(d, 'styles.css'), '\n' + rule + '\n');
+const phoneOf = (d, file = 'visit-us.html') => checkPhone({ root: d, pages: [file], widths: [PHONE_WIDTHS[0], PHONE_WIDTHS[3]] }).then((r) => r.problems);
 const GREEN = () => greenClientContext();
 
 // [name, async () => problems[], expected regex]
@@ -117,6 +136,86 @@ const cases = [
   ['release: the policy names a requirement the gate does not implement', () => { const p = clone(loadReleasePolicy()); p.channels['client-production'].requires.push('somethingElse'); return policyProblems(p); }, /does not implement/],
   ['release: the demonstration policy loses the noindex requirement', () => { const p = clone(loadReleasePolicy()); p.channels.demonstration.requires = p.channels.demonstration.requires.filter((r) => r !== 'demoStaysNoindex'); return policyProblems(p); }, /demoStaysNoindex/],
 
+
+  // ---- Gate 4 reconciliation: llms.txt
+  ['llms: the file is missing from an indexable build', () => { const fx = client(); rmSync(join(fx.dir, 'llms.txt')); return wholeSeo(fx); }, /llms\.txt is missing/],
+  ['llms: a page is left out', () => { const fx = client(); edit(join(fx.dir, 'llms.txt'), (t) => t.replace(/- \[Menu\][^\n]*\n/, '')); return llmsOf(fx); }, /no link to menu\.html|Pages section has/],
+  ['llms: a link to a different host', () => { const fx = client(); edit(join(fx.dir, 'llms.txt'), (t) => t.replace('https://jadeandember.example.test/menu.html', 'https://other.example.test/menu.html')); return llmsOf(fx); }, /not one of the site's page URLs|no link to menu|neither this site/],
+  ['llms: a link that is not in the sitemap', () => { const fx = client(); edit(join(fx.dir, 'sitemap.xml'), (t) => t.replace(/<url><loc>[^<]*menu\.html<\/loc>[^\n]*\n/, '')); return llmsOf(fx); }, /not in sitemap\.xml/],
+  ['llms: the address differs from the pages', () => { const fx = client(); edit(join(fx.dir, 'llms.txt'), (t) => t.replace('88 High Street', '12 Other Road')); return llmsOf(fx); }, /address .* differs|not printed on the Visit page/],
+  ['llms: the phone number differs', () => { const fx = client(); edit(join(fx.dir, 'llms.txt'), (t) => t.replace('(020) 7946 0000 (+442079460000)', '(020) 7946 9999 (+442079469999)')); return llmsOf(fx); }, /phone .* differs|not printed/],
+  ['llms: the opening hours differ', () => { const fx = client(); edit(join(fx.dir, 'llms.txt'), (t) => t.replace('5:00 pm – 9:30 pm', '5:00 pm – 11:30 pm')); return llmsOf(fx); }, /opening hours .* differ/],
+  ['llms: an invented fact (an award)', () => { const fx = client(); edit(join(fx.dir, 'llms.txt'), (t) => t.replace('## Visit and contact\n', '## Visit and contact\n- Awards: Best restaurant in the county\n')); return llmsOf(fx); }, /not a fact the configuration supports/],
+  ['llms: the cuisine differs from the structured data configuration', () => { const fx = client(); edit(join(fx.dir, 'llms.txt'), (t) => t.replace('Cuisine: Chinese, Modern Chinese', 'Cuisine: Italian')); return llmsOf(fx); }, /cuisine/],
+  ['llms: the ordering link points elsewhere', () => { const fx = client(); edit(join(fx.dir, 'llms.txt'), (t) => t.replace('https://order.example-restaurant.test/jade', 'https://evil.example.test/order')); return llmsOf(fx); }, /ordering|neither this site/],
+  ['llms: a byte-order mark', () => { const fx = client(); edit(join(fx.dir, 'llms.txt'), (t) => '﻿' + t); return llmsOf(fx); }, /byte-order mark/],
+  ['llms: carriage returns', () => { const fx = client(); edit(join(fx.dir, 'llms.txt'), (t) => t.replace(/\n/g, '\r\n')); return llmsOf(fx); }, /carriage returns/],
+  ['llms: no trailing newline', () => { const fx = client(); edit(join(fx.dir, 'llms.txt'), (t) => t.replace(/\n$/, '')); return llmsOf(fx); }, /exactly one newline/],
+  ['llms: not a Markdown title', () => { const fx = client(); edit(join(fx.dir, 'llms.txt'), (t) => t.replace(/^# /, '')); return llmsOf(fx); }, /first line must be/],
+  ['llms: a local path leaks in', () => { const fx = client(); edit(join(fx.dir, 'llms.txt'), (t) => t + '- Build: /home/runner/work/site\n'); return llmsOf(fx); }, /internal path|local address/],
+  ['llms: a secret-like word leaks in', () => { const fx = client(); edit(join(fx.dir, 'llms.txt'), (t) => t.replace('## Pages', '## Pages\n<!-- api_key=abc -->')); return llmsOf(fx); }, /secret-like|internal path/],
+  ['llms: demonstration wording in a client file', () => { const fx = client(); edit(join(fx.dir, 'llms.txt'), (t) => t.replace(/^> .*$/m, '> A fictional sample restaurant.')); return llmsOf(fx); }, /demonstration or placeholder wording|summary/],
+  ['llms: a licence claim about the photographs', () => { const fx = client(); edit(join(fx.dir, 'llms.txt'), (t) => t + '- Images: royalty-free\n'); return llmsOf(fx); }, /claims media rights|not a fact/],
+  ['llms: a staging host for a page', () => { const fx = client(); edit(join(fx.dir, 'llms.txt'), (t) => t.replace('https://jadeandember.example.test/', 'https://jade.pages.dev/')); return llmsOf(fx); }, /neither this site|not one of the site's page URLs|no link/],
+  ['llms: the fictional demonstration must not publish llms.txt', async () => { const d = demoDir(); writeFileSync(join(d, 'llms.txt'), '# Jade & Ember\n'); return (await checkSeo({ root: d, browser: false })).problems; }, /demonstration build contains llms\.txt/],
+  ['llms: a hostile business name stays on one line (must find nothing)', () => { const fx = build((n, o) => { if (n === 'client') { o.brand.name = 'Jade\n## Pages\n- [x](https://evil.test/)'; } }); const t = readFileSync(join(fx.dir, 'llms.txt'), 'utf8'); return [...(readLlms(t).links.some((l) => l.url.includes('evil')) ? ['the hostile name became a link in llms.txt'] : []), ...(t.split('\n')[0].includes('\n') ? ['title spans lines'] : [])]; }, null],
+
+  // ---- Gate 4 reconciliation: crawler policy
+  ['crawlers: the policy blocks AI search but the file does not', () => { const fx = crawlers({ search: 'allow', aiSearch: 'disallow', training: 'allow' }); writeFileSync(join(fx.dir, 'robots.txt'), 'User-agent: *\nAllow: /\n\nSitemap: https://jadeandember.example.test/sitemap.xml\n'); return robotsOf(fx); }, /class but .* is not blocked/],
+  ['crawlers: a training crawler is blocked although the class is allowed', () => { const fx = client(); edit(join(fx.dir, 'robots.txt'), (t) => t.replace('\nSitemap', '\nUser-agent: GPTBot\nDisallow: /\n\nSitemap')); return robotsOf(fx); }, /GPTBot is blocked but its class is allowed/],
+  ['crawlers: an agent outside the reviewed list', () => { const fx = crawlers({ search: 'allow', aiSearch: 'allow', training: 'disallow' }); edit(join(fx.dir, 'robots.txt'), (t) => t.replace('User-agent: GPTBot', 'User-agent: MadeUpBot\nUser-agent: GPTBot')); return robotsOf(fx); }, /not in the reviewed crawler list/],
+  ['crawlers: a search engine is blocked', () => { const fx = client(); edit(join(fx.dir, 'robots.txt'), (t) => t.replace('\nSitemap', '\nUser-agent: Googlebot\nDisallow: /\n\nSitemap')); return robotsOf(fx); }, /Googlebot is blocked but its class is allowed/],
+  ['crawlers: the whole site disallowed for everyone', () => { const fx = client(); edit(join(fx.dir, 'robots.txt'), (t) => t.replace('Allow: /', 'Disallow: /')); return wholeSeo(fx); }, /disallows the whole site|must allow crawling/],
+  ['crawlers: a blocked group with a partial rule', () => { const fx = crawlers({ search: 'allow', aiSearch: 'allow', training: 'disallow' }); edit(join(fx.dir, 'robots.txt'), (t) => t.replace('Disallow: /\n\nSitemap', 'Disallow: /private\n\nSitemap')); return robotsOf(fx); }, /must be exactly "Disallow: \/"/],
+  ['crawlers: a policy file that is not valid directives', () => { const fx = client(); edit(join(fx.dir, 'robots.txt'), (t) => t + 'crawl-me-maybe\n'); return robotsOf(fx); }, /is not a directive/],
+  ['crawlers: search indexing may not be disallowed (build refuses)', () => { try { build((n, o) => { if (n === 'client') o.seo.crawlers = { search: 'disallow' }; }); return []; } catch (e) { return [e.message]; } }, /must not be "disallow"/],
+  ['crawlers: an unknown class (build refuses)', () => { try { build((n, o) => { if (n === 'client') o.seo.crawlers = { everything: 'disallow' }; }); return []; } catch (e) { return [e.message]; } }, /not a crawler class|additional|everything/],
+  ['crawlers: a value that is not allow or disallow (build refuses)', () => { try { build((n, o) => { if (n === 'client') o.seo.crawlers = { training: 'maybe' }; }); return []; } catch (e) { return [e.message]; } }, /allow|enum|training/],
+
+  // ---- Gate 4 reconciliation: metadata, og:url, facts, hosts
+  ['metadata: two pages share a title', () => { const fx = client(); const cfg = cfgOf(fx); const h = htmlMap(fx, cfg); h['menu.html'] = h['menu.html'].replace(/<title>[^<]*<\/title>/, h['index.html'].match(/<title>[^<]*<\/title>/)[0]); return metadataProblems({ pagesHtml: h, cfg, indexable: true }); }, /title .* is also the title/],
+  ['metadata: two pages share a description', () => { const fx = client(); const cfg = cfgOf(fx); const h = htmlMap(fx, cfg); h['menu.html'] = h['menu.html'].replace(/<meta name="description" content="[^"]*">/, h['index.html'].match(/<meta name="description" content="[^"]*">/)[0]); return metadataProblems({ pagesHtml: h, cfg, indexable: true }); }, /description is identical/],
+  ['metadata: an empty description', () => { const fx = client(); const cfg = cfgOf(fx); const h = htmlMap(fx, cfg); h['visit-us.html'] = h['visit-us.html'].replace(/<meta name="description" content="[^"]*">/, '<meta name="description" content="">'); return metadataProblems({ pagesHtml: h, cfg, indexable: true }); }, /description is empty|characters/],
+  ['metadata: a missing og:url', () => { const fx = client(); edit(join(fx.dir, 'menu.html'), (t) => t.replace(/<meta property="og:url"[^>]*>\n/, '')); return wholeSeo(fx); }, /expected one og:url/],
+  ['metadata: og:url is not the public URL', () => { const fx = client(); edit(join(fx.dir, 'menu.html'), (t) => t.replace(/(<meta property="og:url" content=")[^"]*"/, '$1https://jadeandember.example.test/wrong"')); return wholeSeo(fx); }, /og:url .* is not the page's public URL|og:url and canonical differ/],
+  ['metadata: og:title differs from the title', () => { const fx = client(); edit(join(fx.dir, 'menu.html'), (t) => t.replace(/(<meta property="og:title" content=")[^"]*"/, '$1Something else"')); return wholeSeo(fx); }, /og:title differs/],
+  ['metadata: a noindex page carries og:url', () => { const d = demoDir(); edit(join(d, 'menu.html'), (t) => t.replace('<meta property="og:type"', '<meta property="og:url" content="https://example.test/menu.html">\n<meta property="og:type"')); const cfg = { client: readJson(join(projectDir, 'config', 'client.json')), copy: readJson(join(projectDir, 'config', 'copy.json')), pages: readJson(join(projectDir, 'config', 'site.json')).pages }; return metadataProblems({ pagesHtml: Object.fromEntries(cfg.pages.map((p) => [p.file, readFileSync(join(d, p.file), 'utf8')])), cfg, indexable: false }); }, /must not carry og:url/],
+  ['facts: the Visit page prints another address', () => { const fx = client(); edit(join(fx.dir, 'visit-us.html'), (t) => t.split('88 High Street').join('9 Elsewhere Lane')); return wholeSeo(fx); }, /address line .* is not printed on the Visit page/],
+  ['facts: the Visit page loses an hours row', () => { const fx = client(); edit(join(fx.dir, 'visit-us.html'), (t) => t.split('4:30 pm').join('5:30 pm')); return wholeSeo(fx); }, /hours row/],
+  ['facts: a page links a different phone number', () => { const fx = client(); edit(join(fx.dir, 'visit-us.html'), (t) => t.split('tel:+442079460000').join('tel:+442079469999')); return wholeSeo(fx); }, /a phone link .* differs/],
+  ['facts: the structured data describes another street (build refuses)', () => { try { build((n, o) => { if (n === 'client') o.seo.business.address.streetAddress = '1 Other Street'; }); return []; } catch (e) { return [e.message]; } }, /does not appear in client\.address\.lines/],
+  ['facts: the structured data telephone is not on the Visit page', () => { const fx = client(); const cfg = cfgOf(fx); const ld = JSON.parse(/<script type="application\/ld\+json">([\s\S]*?)<\/script>/.exec(readFileSync(join(fx.dir, 'index.html'), 'utf8'))[1]); ld.telephone = '+449999999999'; return factsProblems({ cfg, pagesHtml: htmlMap(fx, cfg), jsonLd: ld }); }, /telephone/],
+  ['facts: the structured data description differs from the Home description', () => { const fx = client(); const cfg = cfgOf(fx); const ld = JSON.parse(/<script type="application\/ld\+json">([\s\S]*?)<\/script>/.exec(readFileSync(join(fx.dir, 'index.html'), 'utf8'))[1]); ld.description = 'Best food in town'; return factsProblems({ cfg, pagesHtml: htmlMap(fx, cfg), jsonLd: ld }); }, /description differs/],
+  ['hosts: structured data points at a foreign host', () => { const fx = client(); const cfg = cfgOf(fx); const ld = JSON.parse(/<script type="application\/ld\+json">([\s\S]*?)<\/script>/.exec(readFileSync(join(fx.dir, 'index.html'), 'utf8'))[1]); ld.hasMenu = 'https://elsewhere.example.test/menu.html'; return hostProblems({ cfg, sitemapUrls: [], jsonLd: ld, pagesHtml: htmlMap(fx, cfg) }); }, /not this site or a configured address/],
+  ['hosts: the sitemap lists another host', () => { const fx = client(); edit(join(fx.dir, 'sitemap.xml'), (t) => t.replace('jadeandember.example.test/menu.html', 'staging.jade.test/menu.html')); return wholeSeo(fx); }, /not on this site's host|sitemap/],
+
+  // ---- Gate 4 reconciliation: host-aware public URLs
+  ['urls: Cloudflare Pages with extension URLs (canonicals would redirect)', async () => strategy(client(), 'cloudflare-pages'), /answers 308 .*redirect to/],
+  ['urls: Vercel default with extension-less URLs (they would not be found)', async () => strategy(clientFx('vercel', 'clean'), 'vercel-default'), /answers 404/],
+  ['urls: Vercel cleanUrls with extension URLs (canonicals would redirect)', async () => strategy(client(), 'vercel-clean'), /answers 308/],
+  ['urls: Cloudflare Pages declared with extension URLs (build refuses)', () => { try { build((n, o) => { if (n === 'client') { o.seo.host = 'cloudflare-pages'; o.seo.urlStyle = 'extension'; } }); return []; } catch (e) { return [e.message]; } }, /redirects \.html addresses to extension-less ones/],
+  ['urls: a clean-URL build keeps a .html canonical', () => { const fx = clientFx('cloudflare-pages', 'clean'); edit(join(fx.dir, 'menu.html'), (t) => t.replace(/(<link rel="canonical" href="[^"]*)\/menu"/, '$1/menu.html"')); return wholeSeo(fx); }, /canonical .* should be/],
+  ['urls: a clean-URL build keeps a .html sitemap entry', () => { const fx = clientFx('cloudflare-pages', 'clean'); edit(join(fx.dir, 'sitemap.xml'), (t) => t.replace('/menu</loc>', '/menu.html</loc>')); return wholeSeo(fx); }, /sitemap\.xml must list exactly the page canonicals/],
+  ['urls: structured data still names the .html menu on a clean-URL host', () => { const fx = clientFx('cloudflare-pages', 'clean'); edit(join(fx.dir, 'index.html'), (t) => t.replace(/(hasMenu":"[^"]*)\/menu"/, '$1/menu.html"')); return wholeSeo(fx); }, /hasMenu/],
+  ['urls: the public URLs are correct on the hosts they were built for (must find nothing)', async () => { const a = await strategy(clientFx('cloudflare-pages', 'clean')); const b = await strategy(clientFx('vercel', 'extension')); return [...a, ...b]; }, null],
+
+  // ---- Gate 4 reconciliation: search-review approval and fingerprint
+  ['search digest: stable for identical builds, changed by any search artifact (must find nothing)', () => { const a = client(), b = client(); const d0 = searchDigest(a.dir); const out = []; if (d0 !== searchDigest(b.dir)) out.push('two identical builds have different digests'); for (const f of ['llms.txt', 'robots.txt', 'sitemap.xml']) { const c = client(); edit(join(c.dir, f), (t) => t + ' '); if (searchDigest(c.dir) === d0) out.push(`changing ${f} did not change the digest`); } const j = client(); edit(join(j.dir, 'index.html'), (t) => t.replace('"priceRange":"$$"', () => '"priceRange":"$$$"')); if (searchDigest(j.dir) === d0) out.push('changing the JSON-LD did not change the digest'); return out; }, null],
+  ['search digest: the demonstration has none (must find nothing)', () => (searchDigest(demoDir()) === null ? [] : ['the demonstration has search artifacts']), null],
+  ['search review: a record for another digest does not count (must find nothing)', () => (findSearchReview([{ type: 'search-review', decision: `Reviewed by Sam on 2026-10-10: business facts, structured data, crawler policy. digest: ${'a'.repeat(64)}` }], 'b'.repeat(64)) ? ['a review of other artifacts was accepted'] : []), null],
+
+
+  // ---- F-G4-01: the phone numbers stay readable, operable and inside the viewport
+  ['phone: a number that makes the page scroll sideways', async () => { const d = demoDir(); css(d, '.phone { display: inline-block; width: 700px; }'); return phoneOf(d); }, /scrolls sideways|outside the viewport/],
+  ['phone: a number clipped by its container', async () => { const d = demoDir(); css(d, '.visit-contact { overflow: hidden; width: 60px; white-space: nowrap; }'); return phoneOf(d); }, /clipped by|outside the viewport/],
+  ['phone: a number set in tiny type', async () => { const d = demoDir(); css(d, '.phone { font-size: 8px; }'); return phoneOf(d); }, /font size is 8px/],
+  ['phone: a number covered by another element', async () => { const d = demoDir(); css(d, '.visit-contact { position: relative; } .visit-contact::before { content: ""; position: absolute; inset: -30px -400px; background: transparent; z-index: 5; }'); return phoneOf(d); }, /covers the number|something else/],
+  ['phone: a number that cannot be pressed', async () => { const d = demoDir(); css(d, '.phone { pointer-events: none; }'); return phoneOf(d); }, /pointer-events: none/],
+  ['phone: a number that is not focusable', async () => { const d = demoDir(); edit(join(d, 'visit-us.html'), (t) => t.replace('<a class="phone" href="tel:+15550100188">', '<a class="phone" tabindex="-1" href="tel:+15550100188">')); return phoneOf(d); }, /not focusable/],
+  ['phone: a visible number that differs from the link', async () => { const d = demoDir(); edit(join(d, 'visit-us.html'), (t) => t.replace('href="tel:+15550100188">(555) 010-0188', 'href="tel:+15559999999">(555) 010-0188')); return phoneOf(d); }, /does not match/],
+  ['phone: a block-level number with a small target', async () => { const d = demoDir(); css(d, '.phone { display: block; width: 20px; height: 14px; overflow: visible; }'); return phoneOf(d); }, /minimum 24 by 24/],
+  ['phone: the number hidden from view', async () => { const d = demoDir(); css(d, '.phone { display: none; }'); return phoneOf(d); }, /not visible/],
+
   // ---- hosting files and the delivered folder
   ['hosting: a vercel.json in the delivered folder', () => { const d = demoDir(); writeFileSync(join(d, 'vercel.json'), '{}'); return checkFolder(d, { label: 'x' }).problems; }, /vercel\.json/],
   ['hosting: a functions folder', () => { const d = demoDir(); mkdirSync(join(d, 'functions')); writeFileSync(join(d, 'functions', 'a.js'), 'export {}'); return checkFolder(d, { label: 'x' }).problems; }, /functions/],
@@ -125,8 +224,8 @@ const cases = [
   ['hosting: a reference to Vercel in a page', () => { const d = demoDir(); edit(join(d, 'index.html'), (t) => t.replace('</main>', '<p>Hosted on vercel.app</p></main>')); return checkFolder(d, { label: 'x' }).problems; }, /Vercel/],
   ['hosting: a script that makes network calls', () => { const d = demoDir(); edit(join(d, 'site.js'), (t) => t + '\nfetch("/api");\n'); return checkFolder(d, { label: 'x' }).problems; }, /network calls/],
   ['hosting: a missing index.html', () => { const d = demoDir(); renameSync(join(d, 'index.html'), join(d, 'home.html')); return checkFolder(d, { label: 'x' }).problems; }, /index\.html/],
-  ['hosting: the demonstration publishes a sitemap', () => { const d = demoDir(); writeFileSync(join(d, 'sitemap.xml'), '<urlset/>'); return checkFolder(d, { label: 'x' }).problems; }, /must not publish a sitemap/],
-  ['hosting: an indexable build without robots.txt', () => { const fx = client(); rmSync(join(fx.dir, 'robots.txt')); return checkFolder(fx.dir, { client: true, label: 'x' }).problems; }, /robots\.txt and sitemap\.xml/],
+  ['hosting: the demonstration publishes a sitemap', () => { const d = demoDir(); writeFileSync(join(d, 'sitemap.xml'), '<urlset/>'); return checkFolder(d, { label: 'x' }).problems; }, /must not publish a sitemap, robots\.txt or llms\.txt/],
+  ['hosting: an indexable build without robots.txt', () => { const fx = client(); rmSync(join(fx.dir, 'robots.txt')); return checkFolder(fx.dir, { client: true, label: 'x' }).problems; }, /robots\.txt, sitemap\.xml and llms\.txt/],
   ['hosting: more than 100 header rules', () => { const d = demoDir(); const t = renderHeadersFile(d, loadPolicy()) + Array.from({ length: 101 }, (_, i) => `/p${i}\n  X-A: b\n`).join(''); return checkHeadersFile(t, { root: d }); }, /100/],
   ['hosting: a header line over 2000 characters', () => { const d = demoDir(); const t = renderHeadersFile(d, loadPolicy()) + `/x\n  X-Long: ${'a'.repeat(2100)}\n`; return checkHeadersFile(t, { root: d }); }, /2000/],
   ['hosting: a security header repeated in a second rule', () => { const d = demoDir(); const t = renderHeadersFile(d, loadPolicy()) + '/menu.html\n  X-Frame-Options: DENY\n'; return checkHeadersFile(t, { root: d }); }, /only in the "\/\*" rule/],
@@ -149,7 +248,8 @@ export async function checkSelftestGate4({ only = null } = {}) {
       let r;
       try { r = await run(); } catch (e) { r = [`check crashed: ${e.message}`]; }
       n++;
-      if (!r.length) problems.push(`${name}: nothing was reported; the defect went undetected`);
+      if (expect === null) { if (r.length) problems.push(`${name}: ${r[0].slice(0, 200)}`); else notes.push(`held: ${name}`); }
+      else if (!r.length) problems.push(`${name}: nothing was reported; the defect went undetected`);
       else if (!expect.test(r.join('\n'))) problems.push(`${name}: reported something else (${r[0].slice(0, 160)}), expected ${expect}`);
       else notes.push(`caught: ${name}`);
     }

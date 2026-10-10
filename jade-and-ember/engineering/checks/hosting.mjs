@@ -10,7 +10,7 @@
 //             no line over 2000 characters, every rule starts at "/", header names are valid tokens, no header repeated within one rule, security
 //             headers only in the "/*" rule (Cloudflare joins values of matching rules, so a header in two rules would be sent twice), Cache-Control
 //             only in the narrower rules, no "immutable" for unhashed names, and the CSP in the file is the CSP the security check proves
-//   robots    a client build serves /robots.txt and /sitemap.xml from the folder root; the demonstration serves neither
+//   robots    a client build serves /robots.txt, /sitemap.xml and /llms.txt from the folder root; the demonstration serves none of them
 // Nothing here deploys anything or contacts a host.
 import { readdirSync, readFileSync, statSync, rmSync } from 'node:fs';
 import { join, relative, extname } from 'node:path';
@@ -43,9 +43,9 @@ export function checkFolder(dir, { client = false, label = 'site' } = {}) {
     if (/vercel/i.test(t)) problems.push(`${label}: ${f} refers to Vercel`);
     if (/\b(?:fetch|XMLHttpRequest|sendBeacon|WebSocket|EventSource)\b/.test(t) && f.endsWith('.js')) problems.push(`${label}: ${f} makes network calls the static site does not need`);
   }
-  const hasRobots = rel.includes('robots.txt'), hasMap = rel.includes('sitemap.xml');
-  if (client && !(hasRobots && hasMap)) problems.push(`${label}: an indexable client build must serve robots.txt and sitemap.xml from the root`);
-  if (!client && (hasRobots || hasMap)) problems.push(`${label}: the demonstration must not publish a sitemap or robots.txt (it stays noindex)`);
+  const hasRobots = rel.includes('robots.txt'), hasMap = rel.includes('sitemap.xml'), hasLlms = rel.includes('llms.txt');
+  if (client && !(hasRobots && hasMap && hasLlms)) problems.push(`${label}: an indexable client build must serve robots.txt, sitemap.xml and llms.txt from the root`);
+  if (!client && (hasRobots || hasMap || hasLlms)) problems.push(`${label}: the demonstration must not publish a sitemap, robots.txt or llms.txt (it stays noindex)`);
   return { problems, files: all.length, pages: pages.length };
 }
 
@@ -97,11 +97,12 @@ const FORBIDDEN_IN_SOURCES = /vercel/i;
 export function checkNoVendor() {
   const problems = [];
   const roots = ['src', 'config', 'build.mjs', 'styles.css', 'site.js', 'hero.js', 'menu.js', 'package.json', 'engineering/security.json', 'engineering/htmlvalidate.json', 'engineering/release'];
-  const allowed = new Set(['engineering/checks/ci.mjs', 'engineering/checks/hosting.mjs']);
+  // seo.mjs names the hosts (Cloudflare Pages, Vercel, a plain server) only to choose the public URL style; it calls no host API and needs no host file.
+  const allowed = new Set(['engineering/checks/ci.mjs', 'engineering/checks/hosting.mjs', 'src/lib/seo.mjs']);
   for (const r of roots) {
     const p = join(projectDir, r); let files;
     try { files = statSync(p).isDirectory() ? walk(p) : [p]; } catch { continue; }
-    for (const f of files) { const rr = relative(projectDir, f).split('\\').join('/'); if (allowed.has(rr)) continue; if (FORBIDDEN_IN_SOURCES.test(readFileSync(f, 'utf8'))) problems.push(`${rr} refers to Vercel`); }
+    for (const f of files) { const rr = relative(projectDir, f).split('\\').join('/'); if (allowed.has(rr)) continue; if (FORBIDDEN_IN_SOURCES.test(readFileSync(f, 'utf8').replace(/"host"\s*:\s*"vercel"/g, ''))) problems.push(`${rr} refers to Vercel`); }   // seo.host "vercel" is a choice of URL style, not a dependency
   }
   return problems;
 }

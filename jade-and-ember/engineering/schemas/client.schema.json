@@ -200,6 +200,57 @@
           "type": "string",
           "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}$"
         },
+        "urlStyle": {
+          "enum": [
+            "extension",
+            "clean"
+          ]
+        },
+        "host": {
+          "enum": [
+            "cloudflare-pages",
+            "vercel",
+            "static"
+          ]
+        },
+        "llms": {
+          "type": "object",
+          "properties": {
+            "summary": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 400,
+              "pattern": "^[^\\r\\n]+$"
+            }
+          },
+          "required": [],
+          "additionalProperties": false
+        },
+        "crawlers": {
+          "type": "object",
+          "properties": {
+            "search": {
+              "enum": [
+                "allow",
+                "disallow"
+              ]
+            },
+            "aiSearch": {
+              "enum": [
+                "allow",
+                "disallow"
+              ]
+            },
+            "training": {
+              "enum": [
+                "allow",
+                "disallow"
+              ]
+            }
+          },
+          "required": [],
+          "additionalProperties": false
+        },
         "business": {
           "type": "object",
           "properties": {

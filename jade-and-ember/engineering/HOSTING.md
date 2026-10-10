@@ -1,6 +1,6 @@
 # Hosting: static folder, Cloudflare Pages, no vendor lock-in
 
-The deliverable is a **plain static folder**: five HTML pages, `styles.css`, three scripts, fonts and media (23 files in the demonstration; a client build adds `robots.txt` and `sitemap.xml`). It opens from `file://`, from any web server, and from Cloudflare Pages. Nothing in it needs Node.js, a build service, a function, a redirect rule or a vendor account. **Functionality is independent of Vercel**, and of every other host: no file, script, configuration or engineering rule depends on Vercel (`check:hosting` fails if one does).
+The deliverable is a **plain static folder**: five HTML pages, `styles.css`, three scripts, fonts and media (23 files in the demonstration; a client build adds `robots.txt`, `sitemap.xml` and `llms.txt`). It opens from `file://`, from any web server, and from Cloudflare Pages. Nothing in it needs Node.js, a build service, a function, a redirect rule or a vendor account. **Functionality is independent of Vercel**, and of every other host: no file, script, configuration or engineering rule depends on Vercel (`check:hosting` fails if one does).
 
 Nothing in this repository deploys anything. Deployment of any build needs a recorded release approval (`APPROVALS`, section B) and, for a client, the release gate below.
 
@@ -28,9 +28,39 @@ Pretty URLs (`/menu` for `/menu.html`) are done by Cloudflare Pages itself; the 
 
 Cloudflare joins the values of every matching `_headers` rule instead of replacing them, so the generated file puts the security headers only in the `/*` rule and `Cache-Control` only in the narrower rules; the check fails if a header appears twice or `immutable` is used for names that are not content-hashed.
 
+## Host-aware public URLs (Gate 4 reconciliation)
+
+The files stay `menu.html` etc. on disk, so the folder works from `file://` and any server. What changes per host is the **final public address**:
+
+| Host | Behaviour (as confirmed by the owner; provider pages were not re-fetched, no network here) | `seo.host` | `seo.urlStyle` |
+|---|---|---|---|
+| Cloudflare Pages | redirects `.html` page URLs to extension-less ones (`/menu.html` becomes `/menu`, `/index.html` becomes `/`) | `cloudflare-pages` | **`clean`** (the build refuses `extension`) |
+| Vercel, `cleanUrls: true` | serves `/menu`; `/menu.html` is redirected to it | `vercel` | `clean` |
+| Vercel default | serves `/menu.html` as named; `/menu` is not found. `cleanUrls` is **not** on by default | `vercel` | `extension` |
+| Plain static server (nginx, Apache, ...) | serves the file names as they are | `static` or unset | `extension` |
+
+Canonical links, `og:url`, `sitemap.xml`, the structured data's `url` and `hasMenu`, and `llms.txt` all use the final address (`publicUrl` in `src/lib/seo.mjs`); a URL that the host would redirect, or not find, is wrong, and `check:seo` fails on it. Home is always the base URL itself. `urlStyle` and the host's own setting must agree: choosing `clean` for Vercel is a promise that `cleanUrls` is on, which only a Vercel adapter (not built; out of scope) could write into the deployment.
+
+**How it is validated without deploying anything.** `engineering/lib/server.mjs` simulates the documented behaviour of each host (`cloudflare-pages`, `vercel-clean`, `vercel-default`, `static`). `check:seo` requests every public URL from the right simulation (no redirect, status 200) and follows every internal link of every page from the page's public address. Negative tests prove the simulation catches a mismatch (extension URLs on Cloudflare Pages answer 308, extension-less URLs on default Vercel answer 404).
+
+**What the simulation cannot show, and a later live check must:** that the real hosts behave exactly as modelled (trailing-slash handling, `/index` forms, query strings, case sensitivity, Cloudflare's behaviour when both `menu.html` and a `menu/` folder exist); that `robots.txt`, `sitemap.xml` and `llms.txt` are served with sensible content types and are not cached stale; the redirect chains as search engines see them; and, on Cloudflare Pages, a first preview deployment checked in the browser with the headers on.
+
+**One cost to know.** Internal navigation links stay relative `.html` files so the folder works from `file://`. On a clean-URL host each such link answers one redirect to the same final page (25 links across the five pages are redirected once in the simulation). The destination and the canonical are identical, so search engines and visitors end in the right place; it is one extra hop per click. Emitting extension-less internal links for clean builds would remove the hop but break `file://` use, so it is not done.
+
+## Which controls are platform-independent, which need a host adapter
+
+| Platform-independent (operate on the built folder, the sources or git) | Host-specific (adapter or per-host setting) |
+|---|---|
+| every correctness and quality check: baseline, schema, determinism, delivery, authority, contracts, media, tokens, secrets, deps, html, links, seo (generation and validation), release, assets, privacy, budgets, keyboard, reflow, forced-colours, a11y-tree, order, phone, regression, the self-test suites | rendering the security headers: `_headers` (Cloudflare Pages, Netlify) exists; nginx and Apache renderings exist; a Vercel rendering (`vercel.json` `headers`) would be a new adapter |
+| the `security.json` policy and the CSP hash computation; `VERSION.json`; release manifest and gate; approvals and evidence | the limits `check:hosting` enforces (the Cloudflare Pages numbers) and its rule that the delivered folder holds no vendor file: with a Vercel adapter the check must accept exactly the selected adapter's file, generated outside the delivered folder |
+| `check:portability` (local server: root, sub-folder, extension-less, no Range) | the redirect and clean-URL behaviour (`seo.host`, `seo.urlStyle`, and the simulation in `lib/server.mjs`); a live preview check per host |
+| the CI workflow (GitHub specific, not host specific) | deployment itself, previews, caching rules beyond headers, anything that touches the provider |
+
+The pattern for an adapter already exists: one policy (`security.json`), several renderings, a check that all renderings carry the same headers. A Vercel adapter would add a rendering and a host profile to the simulation without touching the HTML, CSS, scripts or media. **No Vercel adapter has been implemented**; the website remains independent of Vercel.
+
 ## What `check:hosting` proves
 
-1. The demonstration and a realistic client build contain only static web files, an `index.html`, no application, function, redirect, vendor or secret files; the demonstration has no `sitemap.xml` or `robots.txt`, the indexable client build has both.
+1. The demonstration and a realistic client build contain only static web files, an `index.html`, no application, function, redirect, vendor or secret files; the demonstration has no `sitemap.xml` or `robots.txt`, the indexable client build has all three (`sitemap.xml`, `robots.txt`, `llms.txt`).
 2. No source, configuration, delivered file or engineering rule refers to Vercel; no site script makes a network call.
 3. `_headers` generated for both builds, at the domain root and under a sub-path, parse as valid rules within the limits above and carry the CSP computed from the built pages.
 

@@ -10,7 +10,7 @@
     },
     "client-production": {
       "meaning": "any build with flags.demo false or seo.noindex false: a real client site, indexable, with production metadata.",
-      "requires": ["cleanTree", "verifyPassed", "noBlockingFindings", "requiredApprovalsPresent", "versionConsistent", "stableVersion", "releaseApproval", "rightsVerification", "evidence:real-device", "evidence:screen-reader", "evidence:browser-matrix", "evidence:ci-run", "noDemoText", "productionSeoComplete"],
+      "requires": ["cleanTree", "verifyPassed", "noBlockingFindings", "requiredApprovalsPresent", "versionConsistent", "stableVersion", "releaseApproval", "rightsVerification", "evidence:real-device", "evidence:screen-reader", "evidence:browser-matrix", "evidence:ci-run", "noDemoText", "productionSeoComplete", "productionDomain", "searchReadiness"],
       "allows": ["site-package", "host-files"]
     }
   },
@@ -18,6 +18,7 @@
   "approvalRows": {
     "release-approval": "Type contains release-approval; the Decision text contains `channel: <channel>`, `version: <x.y.z>` and `commit: <40 hex>` that equal the build being released",
     "rights-verification": "Type contains rights-verification; the Decision text names who verified, the sources reviewed and the date (docs/JADE_AND_EMBER_MEDIA_RIGHTS_POLICY.md)",
+    "search-review": "Type contains search-review; the Decision text says `reviewed by <who>` on a date, names business facts, structured data and crawler policy, and carries `digest: <64 hex>` equal to `npm run release:search-digest` for the build, so a change to any fact, URL or crawler rule invalidates the review (STS Search and AI Discovery Readiness: human review gate)",
     "deployment-approval": "Type contains deployment-approval; the Decision text contains `channel:` and `commit:` like a release approval"
   },
   "evidence": {

@@ -20,29 +20,30 @@ import { validateSchema } from '../lib/schema.mjs';
 import { engDir, isMain, projectDir, readJson } from '../lib/git.mjs';
 import { readFileSync } from 'node:fs';
 
-const KNOWN = ['cleanTree', 'verifyPassed', 'noBlockingFindings', 'requiredApprovalsPresent', 'versionConsistent', 'demoStaysNoindex', 'stableVersion', 'releaseApproval', 'rightsVerification', 'noDemoText', 'productionSeoComplete', 'evidence:real-device', 'evidence:screen-reader', 'evidence:browser-matrix', 'evidence:ci-run'];
+const KNOWN = ['cleanTree', 'verifyPassed', 'noBlockingFindings', 'requiredApprovalsPresent', 'versionConsistent', 'demoStaysNoindex', 'stableVersion', 'releaseApproval', 'rightsVerification', 'noDemoText', 'productionSeoComplete', 'productionDomain', 'searchReadiness', 'evidence:real-device', 'evidence:screen-reader', 'evidence:browser-matrix', 'evidence:ci-run'];
 const C = 'a'.repeat(40);
 
 // A fully approved client-production context (invented), used to prove the gate passes when it should and blocks when anything is missing.
 export function greenClientContext(over = {}) {
   const base = collectContext({});
   const client = JSON.parse(JSON.stringify(base.client));
-  Object.assign(client.flags, { demo: false }); Object.assign(client.seo, { noindex: false, structuredData: true, baseUrl: 'https://jade.example.test', business: { x: 1 } });
+  Object.assign(client.flags, { demo: false }); Object.assign(client.seo, { noindex: false, structuredData: true, baseUrl: 'https://www.jade-and-ember-fixture.com', host: 'cloudflare-pages', urlStyle: 'clean', crawlers: { search: 'allow', aiSearch: 'allow', training: 'disallow' }, business: { x: 1 } });
   const version = { name: 'jade-and-ember', version: '1.0.0', baseline: '0.8', channel: 'client-production', previewPackage: 'x.zip' };
   const ev = (type) => ({ file: `${type}.json`, type, commit: C, valid: true });
+  const DIGEST = 'f'.repeat(64);
   const decision = `release-approval for the client. channel: client-production; version: 1.0.0; commit: ${C}`;
   return {
     ...base, client, version, pkg: { ...base.pkg, version: '1.0.0' }, channel: 'client-production', findings: [{ id: 'F-1', severity: 'Minor', visual: false, status: 'open' }],
     git: { commit: C, tree: C, branch: 'release', dirty: false, commitDate: '2026-10-10T00:00:00Z' }, verify: { mode: 'full', passed: true, commit: C, dirty: false, assetsTree: 'T', results: [] }, assetsTree: 'T', buildOk: true,
-    approvals: [...base.authority.records.requiredApprovals.map((id) => ({ id, date: '2026-10-10', type: 'approval', decision: 'x', concerns: '', limits: '' })), { id: 'REL-JE-001', date: '2026-10-10', type: 'release-approval', decision, concerns: '', limits: '' }, { id: 'RIGHTS-JE-001', date: '2026-10-10', type: 'rights-verification', decision: 'Verified by the owner against the sources reviewed (generator terms) on 2026-10-10', concerns: '', limits: '' }],
-    evidence: ['real-device', 'screen-reader', 'browser-matrix'].map(ev).concat([ev('ci-run')]), ...over,
+    approvals: [...base.authority.records.requiredApprovals.map((id) => ({ id, date: '2026-10-10', type: 'approval', decision: 'x', concerns: '', limits: '' })), { id: 'REL-JE-001', date: '2026-10-10', type: 'release-approval', decision, concerns: '', limits: '' }, { id: 'SRCH-JE-001', date: '2026-10-10', type: 'search-review', decision: `Reviewed by the owner on 2026-10-10: business facts, structured data, crawler policy. digest: ${DIGEST}`, concerns: '', limits: '' }, { id: 'RIGHTS-JE-001', date: '2026-10-10', type: 'rights-verification', decision: 'Verified by the owner against the sources reviewed (generator terms) on 2026-10-10', concerns: '', limits: '' }],
+    evidence: ['real-device', 'screen-reader', 'browser-matrix'].map(ev).concat([ev('ci-run')]), searchDigest: DIGEST, siteHasSearchFiles: true, ...over,
   };
 }
 
 export function policyProblems(policy) {
   const problems = [];
   for (const [ch, def] of Object.entries(policy.channels)) { for (const r of def.requires) if (!KNOWN.includes(r)) problems.push(`policy: channel ${ch} requires "${r}", which the gate does not implement`); if (!def.allows?.length) problems.push(`policy: channel ${ch} allows nothing`); }
-  for (const must of ['releaseApproval', 'rightsVerification', 'evidence:real-device', 'evidence:screen-reader', 'evidence:browser-matrix', 'evidence:ci-run', 'stableVersion', 'noBlockingFindings']) if (!policy.channels['client-production'].requires.includes(must)) problems.push(`policy: client-production must require ${must}`);
+  for (const must of ['releaseApproval', 'rightsVerification', 'evidence:real-device', 'evidence:screen-reader', 'evidence:browser-matrix', 'evidence:ci-run', 'stableVersion', 'noBlockingFindings', 'productionDomain', 'searchReadiness', 'productionSeoComplete']) if (!policy.channels['client-production'].requires.includes(must)) problems.push(`policy: client-production must require ${must}`);
   if (!policy.channels.demonstration.requires.includes('demoStaysNoindex')) problems.push('policy: the demonstration must require demoStaysNoindex');
   return problems;
 }
@@ -108,6 +109,19 @@ export async function checkRelease({ root = null } = {}) {
       'CI evidence for another commit': { evidence: greenClientContext().evidence.map((e) => (e.type === 'ci-run' ? { ...e, commit: 'd'.repeat(40) } : e)) },
       'invalid (not successful) evidence': { evidence: greenClientContext().evidence.map((e) => (e.type === 'real-device' ? { ...e, valid: false } : e)) },
       'a client configuration that does not build': { buildOk: false },
+      'no search review': { approvals: greenClientContext().approvals.filter((a) => a.type !== 'search-review') },
+      'a search review of different search artifacts (digest mismatch)': { searchDigest: '0'.repeat(64) },
+      'a search review that does not name the crawler policy': { approvals: greenClientContext().approvals.map((a) => (a.type === 'search-review' ? { ...a, decision: a.decision.replace('crawler policy', 'policy') } : a)) },
+      'a search review that does not name the structured data': { approvals: greenClientContext().approvals.map((a) => (a.type === 'search-review' ? { ...a, decision: a.decision.replace('structured data', 'schema') } : a)) },
+      'a search review with no reviewer': { approvals: greenClientContext().approvals.map((a) => (a.type === 'search-review' ? { ...a, decision: a.decision.replace('Reviewed by', 'Seen by') } : a)) },
+      'no search artifacts to review': { searchDigest: null },
+      'a staging domain (pages.dev)': { client: (() => { const c = greenClientContext().client; c.seo.baseUrl = 'https://jade.pages.dev'; return c; })() },
+      'an example domain': { client: (() => { const c = greenClientContext().client; c.seo.baseUrl = 'https://jade.example.test'; return c; })() },
+      'a vercel.app preview domain': { client: (() => { const c = greenClientContext().client; c.seo.baseUrl = 'https://jade.vercel.app'; return c; })() },
+      'no hosting target declared': { client: (() => { const c = greenClientContext().client; delete c.seo.host; return c; })() },
+      'a crawler policy that was never decided': { client: (() => { const c = greenClientContext().client; delete c.seo.crawlers; return c; })() },
+      'a crawler policy missing the AI search decision': { client: (() => { const c = greenClientContext().client; delete c.seo.crawlers.aiSearch; return c; })() },
+      'llms.txt, robots.txt or sitemap.xml missing from the build': { siteHasSearchFiles: false },
       'indexing on without structured data': { client: (() => { const c = greenClientContext().client; c.seo.structuredData = false; return c; })() },
     };
     let blocked = 0;

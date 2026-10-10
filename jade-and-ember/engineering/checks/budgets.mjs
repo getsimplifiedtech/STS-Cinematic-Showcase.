@@ -54,15 +54,15 @@ export function measureStatic(root) {
 
 // Runtime: in-page collectors are installed before any script runs.
 const COLLECT = () => {
-  window.__m = { lcp: 0, cls: 0, blocking: 0, events: [], delay: [], present: [] };
+  window.__m = { lcp: 0, cls: 0, blocking: 0, events: [], delay: [], present: [], total: [] };
   new PerformanceObserver((l) => { for (const e of l.getEntries()) window.__m.lcp = Math.max(window.__m.lcp, e.startTime); }).observe({ type: 'largest-contentful-paint', buffered: true });
   new PerformanceObserver((l) => { for (const e of l.getEntries()) if (!e.hadRecentInput) window.__m.cls += e.value; }).observe({ type: 'layout-shift', buffered: true });
   new PerformanceObserver((l) => { for (const e of l.getEntries()) window.__m.blocking += Math.max(0, e.duration - 50); }).observe({ type: 'longtask', buffered: true });
   // Interaction cost is the time the page's OWN code takes to handle the event (processingStart to processingEnd). The wait before the handler
-  // starts (input delay) and the wait for the next frame (presentation delay) are reported but not gated: on a CI runner they reached 570 to 750 ms
+  // starts (input delay) and the wait for the next frame (presentation delay) are retained and reported (endToEndMs) but not gated: on a CI runner they reached 570 to 750 ms
   // and 700 ms while the main thread was idle (blocking time 5 ms, no long task), so they measure the headless input and rendering pipeline of the
   // machine, not this site. Anything the page does to hold the main thread up is still caught by the blocking-time limit and by the handler time.
-  new PerformanceObserver((l) => { for (const e of l.getEntries()) { window.__m.events.push(Math.max(0, e.processingEnd - e.processingStart)); window.__m.delay.push(Math.max(0, e.processingStart - e.startTime)); window.__m.present.push(Math.max(0, e.duration - (e.processingEnd - e.startTime))); } }).observe({ type: 'event', durationThreshold: 16, buffered: true });
+  new PerformanceObserver((l) => { for (const e of l.getEntries()) { window.__m.events.push(Math.max(0, e.processingEnd - e.processingStart)); window.__m.delay.push(Math.max(0, e.processingStart - e.startTime)); window.__m.present.push(Math.max(0, e.duration - (e.processingEnd - e.startTime))); window.__m.total.push(e.duration); } }).observe({ type: 'event', durationThreshold: 16, buffered: true });
 };
 
 export async function measureRuntime(root, browserName, only = null) {
@@ -85,11 +85,11 @@ export async function measureRuntime(root, browserName, only = null) {
         // an interaction: the phone menu button, then Escape
         if (await page.$('.nav-toggle')) { await page.click('.nav-toggle'); await page.waitForTimeout(150); await page.keyboard.press('Escape'); await page.waitForTimeout(250); }
         const m = await page.evaluate(() => window.__m);
-        runs.push({ lcp: m.lcp, cls: m.cls, blocking: m.blocking, interaction: Math.max(0, ...m.events), delay: Math.max(0, ...m.delay), present: Math.max(0, ...m.present), requests: seen.size, bytes: [...seen.values()].reduce((s, v) => s + v, 0) });
+        runs.push({ lcp: m.lcp, cls: m.cls, blocking: m.blocking, interaction: Math.max(0, ...m.events), delay: Math.max(0, ...m.delay), total: Math.max(0, ...m.total), present: Math.max(0, ...m.present), requests: seen.size, bytes: [...seen.values()].reduce((s, v) => s + v, 0) });
         await ctx.close();
       }
       const med = (k) => runs.map((r) => r[k]).sort((a, b) => a - b)[1];
-      out[file] = { lcpMs: Math.round(med('lcp')), cls: Math.round(med('cls') * 1000) / 1000, blockingMs: Math.round(med('blocking')), interactionMs: Math.round(med('interaction')), inputDelayMs: Math.round(med('delay')), presentationMs: Math.round(med('present')), requests: med('requests'), transferBytes: med('bytes') };
+      out[file] = { lcpMs: Math.round(med('lcp')), cls: Math.round(med('cls') * 1000) / 1000, blockingMs: Math.round(med('blocking')), interactionMs: Math.round(med('interaction')), inputDelayMs: Math.round(med('delay')), endToEndMs: Math.round(med('total')), presentationMs: Math.round(med('present')), requests: med('requests'), transferBytes: med('bytes') };
     }
   }, { root, browserName, pages: only });
   return out;
@@ -147,7 +147,7 @@ export async function checkBudgets({ root = null, browser = true, browserName = 
         drift(`${file} requests`, m.requests, was?.requests);
       }
       const worst = (k) => Math.max(...Object.values(rt).map((m) => m[k]));
-      notes.push(`runtime (390 px, 150 ms / 1.6 Mbit/s / CPU x4, median of 3): worst LCP ${worst('lcpMs')} ms (limit ${v.lcpMs}), CLS ${worst('cls')} (limit ${v.cls}), blocking ${worst('blockingMs')} ms (limit ${v.blockingMs}), interaction handler time ${worst('interactionMs')} ms (limit ${v.interactionMs}; input delay ${worst('inputDelayMs')} ms and presentation ${worst('presentationMs')} ms reported, not gated), most requests ${worst('requests')}, most bytes ${worst('transferBytes')}`);
+      notes.push(`runtime (390 px, 150 ms / 1.6 Mbit/s / CPU x4, median of 3): worst LCP ${worst('lcpMs')} ms (limit ${v.lcpMs}), CLS ${worst('cls')} (limit ${v.cls}), blocking ${worst('blockingMs')} ms (limit ${v.blockingMs}), interaction handler time ${worst('interactionMs')} ms (limit ${v.interactionMs}; END-TO-END ${worst('endToEndMs')} ms (input delay ${worst('inputDelayMs')} ms + handler + presentation ${worst('presentationMs')} ms) is reported, not gated; 200 ms is the INP good reference${worst('endToEndMs') > 200 ? ' and it is EXCEEDED here: see the latency investigation in engineering/CI.md' : ''}), most requests ${worst('requests')}, most bytes ${worst('transferBytes')}`);
     } else notes.push('runtime budgets skipped (no browser in this tier)');
 
     if (update) { b.measured = { static: { pages: Object.fromEntries(Object.entries(s.pages).map(([k, p]) => [k, { htmlGzip: p.htmlGzip, initialGzip: p.initialGzip, fullGzip: p.fullGzip, jsGzip: p.jsGzip }])), deliveredBytes: s.deliveredBytes }, ...(rt ? { runtime: rt } : {}) }; writeFileSync(join(engDir, 'budgets.json'), JSON.stringify(b, null, 2) + '\n'); notes.push('budgets.json measured values updated'); }

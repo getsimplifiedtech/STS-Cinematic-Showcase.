@@ -9,7 +9,7 @@ function headTags(cfg, page, extraHead) {
   const { client, copy, site } = cfg;
   const meta = copy[page.id].meta;
   const title = client.seo.titleTemplate.replace('{page}', meta.title).replace('{brand}', client.brand.name) + (cfg.demo ? site.demo.titleSuffix : '');
-  const canonical = !client.seo.noindex && client.seo.baseUrl ? `<link rel="canonical" href="${esc(canonicalFor(cfg, page))}">` : '';
+  const canonical = !client.seo.noindex && client.seo.baseUrl ? `<meta property="og:url" content="${esc(canonicalFor(cfg, page))}">\n<link rel="canonical" href="${esc(canonicalFor(cfg, page))}">` : '';
   const jsonLd = jsonLdFor(cfg, page);   // '' unless an indexable client build turned structured data on
   return `<meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">

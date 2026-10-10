@@ -34,6 +34,7 @@ import { checkSeo } from './checks/seo.mjs';
 import { checkRelease } from './checks/release.mjs';
 import { checkHosting } from './checks/hosting.mjs';
 import { checkSelftestGate4 } from './checks/selftest-gate4.mjs';
+import { checkPhone } from './checks/phone.mjs';
 import { checkSelftestGate3 } from './checks/selftest-gate3.mjs';
 import { checkRegression } from './checks/regression.mjs';
 import { checkSelftest } from './checks/selftest.mjs';
@@ -75,13 +76,14 @@ const checks = [
     ['check:forced-colors', 'text and controls in forced-colours emulation', () => checkForcedColors({ browserName })],
     ['check:a11y-tree', 'landmarks, headings, names, ARIA references in the accessibility tree', () => checkA11yTree({ browserName })],
     ['check:order', 'DOM order against visual reading order', () => checkOrder({ browserName })],
+    ['check:phone', 'phone numbers readable, pressable and inside the viewport at 9 supported mobile widths (F-G4-01)', () => checkPhone({ browserName })],
     ['check:portability', 'the folder works from an extracted ZIP over file://, at a domain root, in a subdirectory, with pretty URLs, without Range', () => checkPortability({ browserName })],
     ['check:regression', 'candidate against the frozen v0.8 baseline (source, text, structure, styles, pixels, behaviour)', () => checkRegression({ browserName, strictEnv: has('--strict-env') })],
     ...(has('--no-selftest') ? [] : [
       ['check:selftest', 'Gate 1 checks fail when they should (mutation tests)', () => checkSelftest()],
       ['check:selftest-gate2', 'Gate 2 checks fail when they should (targeted negative tests)', () => checkSelftestGate2()],
       ['check:selftest-gate3', 'Gate 3 checks fail when they should (targeted negative tests)', () => checkSelftestGate3()],
-      ['check:selftest-gate4', 'Gate 4 checks fail when they should (HTML, links, SEO, release gate, hosting)', () => checkSelftestGate4()],
+      ['check:selftest-gate4', 'Gate 4 checks fail when they should (HTML, links, SEO and llms.txt, crawler policy, release gate, hosting, phone numbers)', () => checkSelftestGate4()],
     ]),
   ]),
 ];

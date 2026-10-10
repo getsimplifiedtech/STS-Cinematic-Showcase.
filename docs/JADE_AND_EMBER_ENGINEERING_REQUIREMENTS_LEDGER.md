@@ -115,6 +115,10 @@
 | ENG-105 | Host-neutral deployment output: `dist/` plus optional per-host adapters | NEW | N | The committed folder is the output; no host files | Missing | `dist/` build and adapters for static hosts (WP5, WP6); no deployment is performed | None |
 | ENG-106 | Cross-browser: Chromium, Firefox, WebKit | 09 §Tier 1 "browser resilience" | U | Chromium only | Missing | Automated Firefox and WebKit runs where browsers are installable (WP8); real devices remain human work | None |
 | ENG-107 | Valid HTML and fully resolving internal links | NEW | N | Never validated; `tests/site.mjs` checks some links | Partial | `check:html` (html-validate) and `check:links` (every href, src, srcset, fragment, CSS url(), video source; exact letter case; reachability graph). Phone-number wrapping (F-G4-01) is a known finding | None |
+| ENG-108 | `llms.txt` generated from verified business facts and validated (STS Search and AI Discovery Readiness, item 5) | framework standard `architecture/11-core-search-ai-discovery-readiness-v1.md` | N | Absent | Missing | `llmsTxt` (indexable client builds only; never the demonstration) and `llmsProblems` in `check:seo`: links equal the sitemap, facts printed on the pages, no invented fact, no foreign host, no local path or secret, Markdown-injection safe | None |
+| ENG-109 | Crawler policy per client separating search, AI retrieval and training (standard item 9) | same standard | N | One fixed `User-agent: *` allow file | Missing | `seo.crawlers` and `src/lib/crawlers.mjs`; `robotsProblems`; search indexing can never be disallowed on an indexable build. The agent list was not re-fetched from provider pages (no network) and must be re-verified before release | None |
+| ENG-110 | Host-aware public URLs: canonical, sitemap, JSON-LD and `llms.txt` use the URL the host finally serves | owner decision (Cloudflare Pages redirects `.html`; Vercel needs `cleanUrls`) | N | `.html` canonicals everywhere | Missing | `seo.host`, `seo.urlStyle`, `publicUrl`; host simulations in `lib/server.mjs`; `urlStrategyProblems`. Live verification on real hosts is still required | None |
+| ENG-111 | Human search review before a production release (facts, structured data, crawler policy) | same standard | N | None | Missing | `search-review` approval bound to `npm run release:search-digest`; gate requirements `searchReadiness` and `productionDomain` | None |
 
 ## Gate 2 update (2026-10-10, `APR-JE-021`)
 Rows whose status changed because Gate 2 implemented the checks proposed above. The v0.8 column above is the baseline analysis and is not edited. "Automated" means a check in `npm run verify`; a human pass is still required where stated.
@@ -164,3 +168,17 @@ Rows whose status changed because Gate 2 implemented the checks proposed above. 
 | ENG-100 | Implemented (automated) | `check:seo` | Canonical URLs, `sitemap.xml`, `robots.txt` and Restaurant JSON-LD generated from validated client configuration for an indexable client build only; escaping, determinism and agreement between canonicals, sitemap and robots proven |
 | ENG-105 | Partial | `check:hosting`, `engineering/HOSTING.md` | Static folder plus generated host files; a separate `dist/` folder still not created (decision pending) |
 | ENG-107 | Implemented (automated); one known finding | `check:html`, `check:links` | All pages of the demonstration and of a client build are valid HTML5 and pass the accessibility rules; every internal reference resolves. F-G4-01 (phone numbers may wrap) awaits an owner decision |
+
+## Gate 4 reconciliation update (2026-10-10, `APR-JE-024`)
+| ID | New status | Check | Result |
+|---|---|---|---|
+| ENG-100 | Implemented (automated), extended | `check:seo` | Adds unique page metadata, `og:url`, facts consistent across pages, structured data and `llms.txt`, and exclusion of foreign, staging and example hosts |
+| ENG-103 | Unchanged: proposal only | | `og:url` added; `og:image` still absent (needs authorised media) |
+| ENG-105 | Partial | `check:hosting`, `engineering/HOSTING.md` | Platform-independent controls and host-specific adapters identified; no Vercel adapter built |
+| ENG-107 | Implemented; F-G4-01 accepted | `check:html`, `check:phone` | The phone numbers do not wrap, overflow, clip or get covered at 9 supported mobile widths |
+| ENG-108 | Implemented (automated) | `check:seo` | `llms.txt` generated and validated for indexable client builds; omitted from the demonstration |
+| ENG-109 | Implemented (automated); agent list to re-verify | `check:seo` | Four policy variants render exactly the configured groups |
+| ENG-110 | Implemented (simulated); live check pending | `check:seo`, `check:links` | Cloudflare Pages, Vercel (with and without `cleanUrls`) and a plain server: every public URL answers 200 directly; internal links resolve (one redirect hop each on clean-URL hosts) |
+| ENG-111 | Implemented (gate); no review exists | `check:release` | 13 single defects added to the gate matrix; a client-production release is blocked until a search review is recorded |
+| ENG-060 | Metric revised, provisional | `check:budgets`, `engineering/CI.md` | Handler time is gated; end-to-end latency is retained and reported; the investigation tool runs on the CI runner |
+

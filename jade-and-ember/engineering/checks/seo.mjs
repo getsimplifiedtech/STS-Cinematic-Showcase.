@@ -3,11 +3,15 @@
 //                  indexable demonstration, and refuses structured data on a noindex build
 //   client build   an indexable client fixture (the demonstration configuration with the demo wording replaced and the production fields set):
 //                  every page has one absolute https canonical equal to base URL + file, unique, no noindex; sitemap.xml is well-formed, lists exactly
-//                  the five canonicals, valid dates, escaped; robots.txt allows crawling and names the sitemap; the Home page carries one JSON-LD
+//                  the five canonicals, valid dates, escaped; robots.txt allows crawling, carries exactly the configured crawler policy and names the sitemap; llms.txt lists every page and agrees with the pages; titles, descriptions and og:url unique and correct; facts agree across pages, structured data and llms.txt; no foreign host; the Home page carries one JSON-LD
 //                  Restaurant that parses, matches the configuration (name, phone, address, cuisine, hours from the rows, Closed days absent, menu
 //                  page, image that exists) and cannot break out of its script element; it claims no licence or rights; a hostile configuration
 //                  cannot inject markup into any generated file; the build is deterministic; a base URL with a path is handled; the client build also
 //                  passes the static security and privacy checks and loads under the CSP without a violation
+//   search artifacts (Gate 4 reconciliation, STS Search and AI Discovery Readiness): unique titles and descriptions, og:url, llms.txt (generated for
+//                  indexable client builds, never for the demonstration, validated against the pages), the crawler policy in robots.txt, facts that
+//                  agree across pages, structured data and llms.txt, no foreign or internal hosts, and the final public URL on each kind of host
+//                  (Cloudflare Pages, Vercel with and without cleanUrls, a plain server) with the host's documented behaviour simulated locally
 //   validation     bad configuration fails the build with readable messages: http or localhost base URL, structured data without the business block,
 //                  unparseable hours, a phone number that is not international, demonstration + indexable, structured data + noindex
 import { readFileSync, rmSync, readdirSync, existsSync } from 'node:fs';
@@ -15,12 +19,12 @@ import { join } from 'node:path';
 import { assembleCandidate, pagesOf } from '../lib/site.mjs';
 import { BUSINESS, buildClient } from '../lib/client-fixture.mjs';
 import { treeHash } from '../lib/hashed.mjs';
-import { hoursSpecs } from '../../src/lib/seo.mjs';
+import { hoursSpecs, publicUrl, urlStyleOf, isReservedHost } from '../../src/lib/seo.mjs';
+import { RIGHTS_CLAIM, factsProblems, hostProblems, llmsProblems, metadataProblems, readLlms, readRobotsGroups, reservedBase, robotsProblems, urlStrategyProblems } from '../lib/search.mjs';
 import { checkSecurityStatic } from './security.mjs';
 import { checkPrivacyStatic } from './privacy.mjs';
 import { isMain, projectDir, readJson } from '../lib/git.mjs';
 
-const RIGHTS_CLAIM = /\b(royalty[- ]free|fully licen[cs]ed|licen[cs]ed (for|to|under)|rights[- ]cleared|copyright[- ]cleared|commercially (cleared|licen[cs]ed)|all rights (granted|reserved by us))\b/i;
 const LD_FORBIDDEN_KEYS = ['license', 'copyrightHolder', 'copyrightNotice', 'copyrightYear', 'creditText', 'acquireLicensePage', 'usageInfo', 'isAccessibleForFree'];
 const DAYS = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
 
@@ -42,13 +46,14 @@ export function readSitemap(text) {
 }
 
 export function readRobots(text) {
-  const errors = [], lines = text.split('\n').filter(Boolean);
-  if (lines[0] !== 'User-agent: *') errors.push('the first line must be "User-agent: *"');
-  if (lines.some((l) => /^Disallow:\s*\/\s*$/i.test(l))) errors.push('robots.txt disallows the whole site');
-  if (!lines.includes('Allow: /')) errors.push('robots.txt must allow crawling ("Allow: /")');
-  const sm = lines.filter((l) => /^Sitemap:/i.test(l));
-  if (sm.length !== 1 || !/^Sitemap: https:\/\/[^\s]+\/sitemap\.xml$/.test(sm[0])) errors.push('robots.txt must name exactly one https sitemap.xml');
-  return { errors, sitemap: sm[0]?.replace(/^Sitemap: /, '') };
+  const r = readRobotsGroups(text), errors = [...r.errors];
+  if (!r.groups[0] || r.groups[0].agents.join() !== '*') errors.push('the first line must be "User-agent: *"');
+  else {
+    if (r.groups[0].rules.some(([k, v]) => k === 'disallow' && v === '/')) errors.push('robots.txt disallows the whole site');
+    if (!r.groups[0].rules.some(([k, v]) => k === 'allow' && v === '/')) errors.push('robots.txt must allow crawling ("Allow: /")');
+  }
+  if (r.sitemaps.length !== 1 || !/^https:\/\/[^\s]+\/sitemap\.xml$/.test(r.sitemaps[0])) errors.push('robots.txt must name exactly one https sitemap.xml');
+  return { errors, sitemap: r.sitemaps[0] };
 }
 
 // Validates one JSON-LD Restaurant against the configuration it came from. Returns problems.
@@ -87,7 +92,7 @@ export function validateRestaurant(ld, cfg, root) {
     }
   }
   const menu = cfg.pages.find((x) => x.id === 'menu');
-  if (ld.hasMenu !== `${base}/${menu.file}`) bad('hasMenu must be the menu page URL');
+  if (ld.hasMenu !== publicUrl({ client: cfg.client, pages: cfg.pages }, menu)) bad('hasMenu must be the menu page\'s public URL');
   if (ld.sameAs !== undefined && (!Array.isArray(ld.sameAs) || ld.sameAs.some((s) => !url(s)))) bad('sameAs must list https URLs');
   for (const k of Object.keys(ld)) if (LD_FORBIDDEN_KEYS.includes(k)) bad(`the structured data must not assert ${k}: media rights are unverified (docs/JADE_AND_EMBER_MEDIA_RIGHTS_POLICY.md)`);
   return p;
@@ -101,11 +106,13 @@ export function checkSeoClient({ fixture }) {
   const cfg = loadCfg(dir, cfgDir);
   const base = cfg.client.seo.baseUrl.replace(/\/+$/, '');
   const pages = pagesOf(dir).length ? pages_(cfg) : [];
-  const canon = [];
+  const canon = [], pagesHtml = {};
+  let ldData = null;
   for (const p of cfg.pages) {
-    const html = readFileSync(join(dir, p.file), 'utf8');
+    const html = readFileSync(join(dir, p.file), 'utf8'); pagesHtml[p.file] = html;
     const cs = [...html.matchAll(/<link rel="canonical" href="([^"]*)">/g)].map((m) => m[1].replace(/&amp;/g, '&'));
-    const want = `${base}/${p.file === 'index.html' ? '' : p.file}`;
+    const clean = cfg.client.seo.urlStyle === 'clean';   // independent of the generator: the public address is the file name, or without .html for a clean-URL host
+    const want = `${base}/${p.file === 'index.html' ? '' : clean ? p.file.replace(/\.html$/, '') : p.file}`;
     if (cs.length !== 1) problems.push(`${p.file}: expected one canonical link, found ${cs.length}`);
     else if (cs[0] !== want) problems.push(`${p.file}: canonical ${cs[0]} should be ${want}`);
     canon.push(cs[0]);
@@ -116,7 +123,7 @@ export function checkSeoClient({ fixture }) {
       else {
         if (/[<>]/.test(lds[0][1])) problems.push(`${p.file}: JSON-LD contains a raw < or >; it could break out of its script element`);
         let ld; try { ld = JSON.parse(lds[0][1]); } catch (e) { problems.push(`${p.file}: JSON-LD does not parse (${e.message})`); }
-        if (ld) validateRestaurant(ld, cfg, dir).forEach((m) => problems.push(`${p.file} JSON-LD: ${m}`));
+        if (ld) { ldData = ld; validateRestaurant(ld, cfg, dir).forEach((m) => problems.push(`${p.file} JSON-LD: ${m}`)); }
       }
     } else if (lds.length) problems.push(`${p.file}: only the Home page carries structured data`);
     if (RIGHTS_CLAIM.test(html.replace(/<script[\s\S]*?<\/script>/g, (s) => s))) problems.push(`${p.file}: wording that claims media rights or licences`);
@@ -128,10 +135,18 @@ export function checkSeoClient({ fixture }) {
   if (JSON.stringify(sm.urls.map((u) => u.loc)) !== JSON.stringify(canon)) problems.push('sitemap.xml must list exactly the page canonicals, in page order');
   sm.urls.forEach((u) => { if (u.lastmod !== undefined && !/^\d{4}-\d{2}-\d{2}$/.test(u.lastmod)) problems.push(`sitemap.xml: bad lastmod ${u.lastmod}`); if (!/^https:\/\//.test(u.loc)) problems.push(`sitemap.xml: ${u.loc} is not an https URL`); });
   if (sm.urls.length > 50000) problems.push('sitemap.xml exceeds 50,000 URLs');
-  const rb = readRobots(readFileSync(join(dir, 'robots.txt'), 'utf8'));
-  rb.errors.forEach((m) => problems.push(`robots.txt: ${m}`));
-  if (rb.sitemap !== `${base}/sitemap.xml`) problems.push(`robots.txt names ${rb.sitemap}; expected ${base}/sitemap.xml`);
-  for (const f of ['sitemap.xml', 'robots.txt']) if (RIGHTS_CLAIM.test(readFileSync(join(dir, f), 'utf8'))) problems.push(`${f}: wording that claims media rights`);
+  const robotsText = readFileSync(join(dir, 'robots.txt'), 'utf8');
+  readRobots(robotsText).errors.forEach((m) => problems.push(`robots.txt: ${m}`));
+  problems.push(...robotsProblems({ text: robotsText, cfg }));
+  // llms.txt, page metadata, facts and hosts
+  let llmsText = null;
+  try { llmsText = readFileSync(join(dir, 'llms.txt'), 'utf8'); } catch { problems.push('llms.txt is missing from the indexable client build'); }
+  const sitemapUrls = sm.urls.map((u) => u.loc);
+  if (llmsText !== null) problems.push(...llmsProblems({ text: llmsText, cfg, pagesHtml, sitemapUrls }));
+  problems.push(...metadataProblems({ pagesHtml, cfg, indexable: true }));
+  problems.push(...factsProblems({ cfg, pagesHtml, jsonLd: ldData }));
+  problems.push(...hostProblems({ cfg, sitemapUrls, jsonLd: ldData, llmsUrls: llmsText ? readLlms(llmsText).urls : [], pagesHtml }));
+  for (const f of ['sitemap.xml', 'robots.txt', 'llms.txt']) if (RIGHTS_CLAIM.test((() => { try { return readFileSync(join(dir, f), 'utf8'); } catch { return ''; } })())) problems.push(`${f}: wording that claims media rights`);
   // the client build also passes the static security and privacy policies
   checkSecurityStatic({ root: dir }).problems.forEach((m) => problems.push(`client build, security: ${m}`));
   checkPrivacyStatic({ root: dir, cfgRoot: join(cfgDir, '..') }).problems.forEach((m) => problems.push(`client build, privacy: ${m}`));
@@ -149,13 +164,15 @@ export async function checkSeo({ root = null, browser = true, browserName = 'chr
   try {
     // demonstration
     const names = readdirSync(dir);
-    for (const f of ['sitemap.xml', 'robots.txt']) if (names.includes(f)) problems.push(`the demonstration build contains ${f}: it must stay noindex with no search files`);
+    for (const f of ['sitemap.xml', 'robots.txt', 'llms.txt']) if (names.includes(f)) problems.push(`the demonstration build contains ${f}: it must stay noindex with no search files`);
     for (const f of pagesOf(dir)) {
       const h = readFileSync(join(dir, f), 'utf8');
       if (!h.includes('<meta name="robots" content="noindex, nofollow">')) problems.push(`${f}: the demonstration must carry the noindex, nofollow robots meta`);
       if (/rel="canonical"|application\/ld\+json/.test(h)) problems.push(`${f}: the demonstration must have no canonical link and no structured data`);
     }
-    notes.push('demonstration: all five pages noindex, nofollow; no canonical, no JSON-LD, no sitemap.xml, no robots.txt');
+    const demoCfg = loadCfg(projectDir, join(projectDir, 'config'));
+    problems.push(...metadataProblems({ pagesHtml: Object.fromEntries(pagesOf(dir).map((f) => [f, readFileSync(join(dir, f), 'utf8')])), cfg: demoCfg, indexable: false }).map((m) => `demonstration: ${m}`));
+    notes.push('demonstration: all five pages noindex, nofollow; unique titles and descriptions; no og:url, canonical, JSON-LD, sitemap.xml, robots.txt or llms.txt (it is a fictional concept and is never presented as a real restaurant)');
 
     // client build
     const ok = fx({});
@@ -169,7 +186,7 @@ export async function checkSeo({ root = null, browser = true, browserName = 'chr
     }
     // a hostile configuration cannot inject markup
     const evil = '</script><script>alert(1)</script>"><img src=x onerror=alert(1)>&';
-    const h = fx({ edit: (n, o) => { if (n === 'client') { o.brand.name = `Jade ${evil}`; o.seo.business.address.streetAddress = evil; o.seo.business.servesCuisine = [evil]; } } });
+    const h = fx({ edit: (n, o) => { if (n === 'client') { o.brand.name = `Jade ${evil}`; o.seo.business.address.streetAddress = evil; o.address.lines[0] = evil; o.seo.business.servesCuisine = [evil]; } } });
     if (h.status !== 0) problems.push(`hostile-text fixture failed to build: ${h.text.slice(0, 200)}`);
     else {
       for (const f of [...pagesOf(h.dir), 'sitemap.xml', 'robots.txt']) { const t = readFileSync(join(h.dir, f), 'utf8'); if (/<img src=x|<script>alert|<\/script><script>/.test(t)) problems.push(`hostile configuration text became markup in ${f}`); }
@@ -196,6 +213,47 @@ export async function checkSeo({ root = null, browser = true, browserName = 'chr
     let refused = 0;
     for (const [name, opts, re] of bads) { const f = fx(opts); if (f.status === 0) problems.push(`"${name}" should fail the build but passed`); else if (!re.test(f.text)) problems.push(`"${name}" failed with an unexpected message: ${f.text.slice(0, 200)}`); else refused++; if (f.status !== 0 && existsSync(join(f.dir, 'sitemap.xml'))) problems.push(`"${name}" wrote a sitemap although validation failed`); }
     notes.push(`validation: ${refused}/${bads.length} bad production configurations are refused with readable messages and write nothing`);
+    // staging and example hosts are recognised; real-looking domains are not
+    const reservedYes = ['jade.example.test', 'example.com', 'www.example.org', 'localhost', '127.0.0.1', '10.1.2.3', 'jade.pages.dev', 'jade.vercel.app', 'jade.netlify.app', 'staging.jade.com', 'preview.jade.com', 'jade.local', 'intranet.corp', 'jade.github.io', 'jade'];
+    const reservedNo = ['www.jadeandember.com', 'jadeandember.co.uk', 'kitchen.restaurant', 'www.jade-and-ember-fixture.com'];
+    for (const h of reservedYes) if (!isReservedHost(h)) problems.push(`${h} must be recognised as a staging, example or local host`);
+    for (const h of reservedNo) if (isReservedHost(h)) problems.push(`${h} must not be treated as a staging host`);
+    notes.push(`staging and example hosts: ${reservedYes.length} reserved, preview and local names recognised, ${reservedNo.length} real-looking domains not flagged; the fixture's own host ${reservedBase(loadCfg(ok.dir, ok.cfgDir)) || '(none)'} is reserved by design`);
+    // a production-shaped domain builds clean end to end
+    const prod = fx({ base: 'https://www.jade-and-ember-fixture.com', edit: (n, o) => { if (n === 'client') { o.seo.host = 'cloudflare-pages'; o.seo.urlStyle = 'clean'; o.seo.crawlers = { search: 'allow', aiSearch: 'allow', training: 'disallow' }; } } });
+    if (prod.status !== 0) problems.push(`production-shaped fixture failed to build: ${prod.text.slice(0, 200)}`);
+    else {
+      const c = checkSeoClient({ fixture: prod }); problems.push(...c.problems.map((m) => `production-shaped build: ${m}`));
+      if (reservedBase(loadCfg(prod.dir, prod.cfgDir))) problems.push('the production-shaped fixture must not be a reserved host');
+    }
+    // the final public URL on each host, with the host's documented behaviour simulated (nothing is deployed)
+    const hostsTested = [];
+    for (const [label, opts] of [
+      ['Cloudflare Pages (extension-less URLs, .html redirected)', { edit: (n, o) => { if (n === 'client') { o.seo.host = 'cloudflare-pages'; o.seo.urlStyle = 'clean'; } } }],
+      ['Vercel with cleanUrls true', { edit: (n, o) => { if (n === 'client') { o.seo.host = 'vercel'; o.seo.urlStyle = 'clean'; } } }],
+      ['Vercel default (no cleanUrls, .html served as named)', { edit: (n, o) => { if (n === 'client') { o.seo.host = 'vercel'; o.seo.urlStyle = 'extension'; } } }],
+      ['a plain static server', {}],
+    ]) {
+      const f = fx(opts);
+      if (f.status !== 0) { problems.push(`${label}: fixture failed to build: ${f.text.slice(0, 200)}`); continue; }
+      const c = checkSeoClient({ fixture: f }); problems.push(...c.problems.map((m) => `${label}: ${m}`));
+      const cfgF = loadCfg(f.dir, f.cfgDir);
+      const urls = [...cfgF.pages.map((pg) => publicUrl(cfgF, pg)), ...readSitemap(readFileSync(join(f.dir, 'sitemap.xml'), 'utf8')).urls.map((u) => u.loc), ...readLlms(readFileSync(join(f.dir, 'llms.txt'), 'utf8')).links.map((l) => l.url)];
+      const ld = JSON.parse(/<script type="application\/ld\+json">([\s\S]*?)<\/script>/.exec(readFileSync(join(f.dir, 'index.html'), 'utf8'))[1]); urls.push(ld.url, ld.hasMenu);
+      const r = await urlStrategyProblems({ dir: f.dir, cfg: cfgF, publicUrls: urls });
+      problems.push(...r.problems.map((m) => `${label}: ${m}`));
+      hostsTested.push(`${label}: ${r.sim}, ${urls.length} public URLs answer 200 directly, ${r.links} internal links resolve${r.hops ? ` (${r.hops} redirect once to the same final page)` : ''}`);
+    }
+    notes.push(`host-aware public URLs (simulated, nothing deployed): ${hostsTested.join('; ')}`);
+    // crawler policy variants
+    let crawlerOk = 0;
+    for (const crawlers of [{ search: 'allow', aiSearch: 'allow', training: 'allow' }, { search: 'allow', aiSearch: 'disallow', training: 'allow' }, { search: 'allow', aiSearch: 'allow', training: 'disallow' }, { search: 'allow', aiSearch: 'disallow', training: 'disallow' }]) {
+      const f = fx({ edit: (n, o) => { if (n === 'client') o.seo.crawlers = crawlers; } });
+      if (f.status !== 0) { problems.push(`crawler policy ${JSON.stringify(crawlers)} failed to build: ${f.text.slice(0, 160)}`); continue; }
+      const m = robotsProblems({ text: readFileSync(join(f.dir, 'robots.txt'), 'utf8'), cfg: loadCfg(f.dir, f.cfgDir) });
+      if (m.length) problems.push(...m.map((x) => `crawler policy ${JSON.stringify(crawlers)}: ${x}`)); else crawlerOk++;
+    }
+    notes.push(`crawler policy: ${crawlerOk}/4 variants (all allowed, AI search blocked, training blocked, both blocked) render exactly the configured groups; search indexing can never be blocked on an indexable build`);
     // browser: the client build under the CSP
     if (browser && ok.status === 0) {
       const { launchBrowser } = await import('../lib/browser.mjs');

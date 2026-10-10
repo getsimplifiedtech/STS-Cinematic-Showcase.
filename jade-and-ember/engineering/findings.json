@@ -31,9 +31,9 @@
       "severity": "Minor",
       "visual": false,
       "maxValue": 6,
-      "status": "open: awaiting owner decision (recommended: leave as is)",
-      "description": "html-validate's tel-non-breaking rule reports 6 phone numbers across the five pages (header, visit, order and footer occurrences) written with ordinary spaces and hyphens, \"(555) 010-0188\". On a narrow screen the number could break across two lines. The same markup is in the frozen v0.8 baseline. The rule is switched off in htmlvalidate.json and measured here so the count cannot grow unnoticed.",
-      "proposal": "Recommended: leave it. Replacing the spaces and hyphens with non-breaking characters is a typographic change to the visible text of every page and to the v0.8 page bytes (it would need an allowlist entry, a visual re-check and owner approval). The 320 px reflow check shows no clipped or overlapping number today. If approved, the build could emit the non-breaking form for client builds only (the demonstration stays byte-identical). Not applied.",
+      "status": "accepted (APR-JE-024) without visual change, on condition that the numbers stay readable, operable and free of overflow and clipping at supported mobile widths (enforced by check:phone)",
+      "description": "html-validate's tel-non-breaking rule reports 6 messages for the 3 telephone links on the demonstration (Home address block, Visit, Order): 2 messages per link (spaces and the hyphen could break). The same markup is in the frozen v0.8 baseline. The rule is switched off in htmlvalidate.json and counted here so the number cannot grow unnoticed. check:phone measured every phone link at 9 supported mobile widths (320 to 768, portrait and landscape): none wraps onto a second line, none overflows or is clipped or covered, all are pressable.",
+      "proposal": "Accepted as is: no visual change. If a future layout makes a number wrap, check:phone records it as information; it fails only on a genuine defect (overflow, clipping, covering, tiny type, a number that does not match its link, an unpressable target).",
       "ledger": "ENG-107"
     }
   ]

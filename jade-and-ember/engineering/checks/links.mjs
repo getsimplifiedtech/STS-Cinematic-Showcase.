@@ -100,7 +100,8 @@ export function checkSearchAgreement({ dir, base }) {
   const sm = readSitemap(readFileSync(join(dir, 'sitemap.xml'), 'utf8'));
   for (const u of sm.urls) {
     const path = new URL(u.loc).pathname.replace(new URL(base).pathname.replace(/\/$/, ''), '').replace(/^\//, '') || 'index.html';
-    if (!pages.includes(path)) problems.push(`sitemap.xml lists ${u.loc}, which is not a delivered page (${path})`);
+    // a clean-URL host serves menu.html at /menu: the public address may omit .html, but it must still name a delivered page
+    if (!pages.includes(path) && !pages.includes(`${path}.html`)) problems.push(`sitemap.xml lists ${u.loc}, which is not a delivered page (${path})`);
   }
   for (const f of pages) { const m = /<link rel="canonical" href="([^"]*)">/.exec(readFileSync(join(dir, f), 'utf8')); if (m && !sm.urls.some((u) => u.loc === decode(m[1]))) problems.push(`${f}: canonical ${m[1]} is not in sitemap.xml`); }
   return problems;
@@ -121,6 +122,10 @@ export async function checkLinks({ root = null, online = false } = {}) {
       problems.push(...client.problems);
       problems.push(...checkSearchAgreement({ dir: fx.dir, base: 'https://jadeandember.example.test' }).map((m) => `client build ${m}`));
     }
+    // the same site built for a clean-URL host (Cloudflare Pages): the files and internal links are unchanged, the public addresses lose .html
+    const fc = buildClient({ edit: (n, o) => { if (n === 'client') { o.seo.host = 'cloudflare-pages'; o.seo.urlStyle = 'clean'; } } }); cleanup.push(fc.root);
+    if (fc.status !== 0) problems.push(`the clean-URL client fixture failed to build: ${fc.text.slice(0, 200)}`);
+    else { const c2 = scanLinks({ root: fc.dir, label: 'clean-URL client build ' }); problems.push(...c2.problems); problems.push(...checkSearchAgreement({ dir: fc.dir, base: 'https://jadeandember.example.test' }).map((m) => `clean-URL client build ${m}`)); }
     const ext = [...new Set([...demo.externals, ...client.externals])];
     if (online) {
       // only the real addresses of the demonstration; the client fixture uses invented .test hosts

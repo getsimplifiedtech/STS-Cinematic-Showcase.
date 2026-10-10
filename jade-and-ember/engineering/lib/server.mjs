@@ -8,8 +8,14 @@ import { extname, join, normalize, sep } from 'node:path';
 const TYPES = { '.html': 'text/html; charset=utf-8', '.js': 'text/javascript; charset=utf-8', '.css': 'text/css; charset=utf-8', '.json': 'application/json', '.webp': 'image/webp', '.woff2': 'font/woff2', '.webm': 'video/webm', '.mp4': 'video/mp4', '.txt': 'text/plain; charset=utf-8', '.md': 'text/markdown; charset=utf-8' };
 
 // options: prefix ('/' or '/some/dir/'), pretty (map /menu to menu.html), ranges (default true), headers (fn(pathname, type) -> object),
-//          cacheStyle (ignored), notFoundHtml
-export function serveSite(root, { prefix = '/', pretty = false, ranges = true, headers = null } = {}) {
+//          host: how a real host treats page URLs (a simulation of the documented behaviour, not a test of the real service):
+//            'static'            files exactly as named; with `pretty`, /menu also reaches menu.html (the earlier behaviour, the default)
+//            'cloudflare-pages'  /menu serves menu.html; a request for /menu.html is redirected (308) to /menu and /index.html to /
+//            'vercel-clean'      Vercel with "cleanUrls": true: the same behaviour as above
+//            'vercel-default'    Vercel without cleanUrls: /menu.html is served as it is and /menu is not found
+export function serveSite(root, { prefix = '/', pretty = false, ranges = true, headers = null, host = 'static' } = {}) {
+  const cleanHost = host === 'cloudflare-pages' || host === 'vercel-clean';
+  if (cleanHost) pretty = true;
   const log = [];
   const pre = prefix.endsWith('/') ? prefix : prefix + '/';
   const server = createServer(async (req, res) => {
@@ -22,6 +28,7 @@ export function serveSite(root, { prefix = '/', pretty = false, ranges = true, h
       if (pre !== '/' && p === pre.slice(0, -1)) return send(301, { location: pre + url.search }, '');
       if (!p.startsWith(pre)) return send(404, { 'content-type': 'text/plain' }, 'not found');
       let rel = p.slice(pre.length);
+      if (cleanHost && rel.endsWith('.html')) { const target = rel === 'index.html' ? '' : rel.replace(/\.html$/, ''); return send(308, { location: pre + target + url.search }, ''); }
       if (rel === '' || rel.endsWith('/')) rel += 'index.html';
       let file = normalize(join(root, rel));
       if (file !== root && !file.startsWith(root + sep)) return send(403, {}, 'forbidden');
