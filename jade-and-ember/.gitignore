@@ -5,3 +5,6 @@ __pycache__/
 
 # Reports written by engineering checks (screenshots, diffs, JSON)
 engineering/.reports/
+/release/
+/host/
+/hashed/

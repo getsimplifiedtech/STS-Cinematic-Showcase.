@@ -1,4 +1,4 @@
-// npm run verify: the Gate 1 and Gate 2 engineering checks, in order, with one summary. Exit code 0 only when every selected check passes.
+// npm run verify: the Gate 1 to Gate 4 engineering checks, in order, with one summary. Exit code 0 only when every selected check passes.
 //   node engineering/verify.mjs               everything: static checks, browser checks, regression against v0.8, and the self-tests
 //   node engineering/verify.mjs --fast        no browser (seconds): baseline, schema, determinism, delivery, authority, contracts,
 //                                             tokens, secrets, deps, ci, media, privacy, security, assets and budgets (static parts)
@@ -28,10 +28,20 @@ import { checkTokens } from './checks/tokens.mjs';
 import { checkAssets } from './checks/assets.mjs';
 import { checkPortability } from './checks/portability.mjs';
 import { checkCi } from './checks/ci.mjs';
+import { checkHtml } from './checks/html.mjs';
+import { checkLinks } from './checks/links.mjs';
+import { checkSeo } from './checks/seo.mjs';
+import { checkRelease } from './checks/release.mjs';
+import { checkHosting } from './checks/hosting.mjs';
+import { checkSelftestGate4 } from './checks/selftest-gate4.mjs';
 import { checkSelftestGate3 } from './checks/selftest-gate3.mjs';
 import { checkRegression } from './checks/regression.mjs';
 import { checkSelftest } from './checks/selftest.mjs';
-import { engDir } from './lib/git.mjs';
+import { engDir, projectDir } from './lib/git.mjs';
+import { gitState } from './lib/release.mjs';
+import { assembleCandidate } from './lib/site.mjs';
+import { buildManifest } from './lib/hashed.mjs';
+import { rmSync } from 'node:fs';
 
 const has = (f) => process.argv.includes(f);
 const arg = (n) => { const i = process.argv.indexOf(n); return i > -1 ? process.argv[i + 1] : null; };
@@ -50,6 +60,11 @@ const checks = [
   ['check:secrets', 'no credentials in the working tree or the history', () => checkSecrets()],
   ['check:deps', 'dependency pinning, lockfile integrity, licences, npm audit', () => checkDeps()],
   ['check:ci', 'the GitHub Actions workflow is read-only and keeps its promises', () => checkCi()],
+  ['check:html', 'valid HTML5 and accessibility rules for the demonstration and an indexable client build', () => checkHtml()],
+  ['check:links', 'every internal link, fragment, image, font and video source resolves (exact case); sitemap and canonicals agree', () => checkLinks()],
+  ['check:seo', fast ? 'canonical, sitemap, robots and JSON-LD generated from client configuration (static part)' : 'canonical, sitemap, robots and JSON-LD generated from client configuration; demonstration stays noindex; hostile input; served in the browser', () => checkSeo({ browser: !fast, browserName })],
+  ['check:release', 'version file, release manifest and the release gate (a client-production build needs recorded approvals and evidence)', () => checkRelease()],
+  ['check:hosting', 'static-folder delivery for Cloudflare Pages: no application or vendor files, _headers within limits, no Vercel dependency', () => checkHosting()],
   ['check:privacy', fast ? 'no storage, cookies, third parties or fingerprinting (static part)' : 'no storage, cookies, third parties or fingerprinting (static and in the browser)', () => checkPrivacy({ browser: !fast, browserName })],
   ['check:security', fast ? 'security headers and Content Security Policy (static part)' : 'security headers and CSP: generated, enforced in the browser, probed, and identical to v0.8 under the headers', () => checkSecurity({ browser: !fast, browserName })],
   ['check:assets', fast ? 'asset manifest and hashed copy (static part)' : 'asset manifest, content-hashed copy equal to v0.8 in the browser', () => checkAssets({ browser: !fast, browserName })],
@@ -66,11 +81,12 @@ const checks = [
       ['check:selftest', 'Gate 1 checks fail when they should (mutation tests)', () => checkSelftest()],
       ['check:selftest-gate2', 'Gate 2 checks fail when they should (targeted negative tests)', () => checkSelftestGate2()],
       ['check:selftest-gate3', 'Gate 3 checks fail when they should (targeted negative tests)', () => checkSelftestGate3()],
+      ['check:selftest-gate4', 'Gate 4 checks fail when they should (HTML, links, SEO, release gate, hosting)', () => checkSelftestGate4()],
     ]),
   ]),
 ];
 
-const NOT_YET = ['HTML validation and link checks', 'release manifest, version file and approvals gate', 'SEO files (production, from client configuration)', 'Firefox and WebKit runs (not installed here)', 'portability of the tooling on Windows and macOS (a CI job reports it, informational)', 'a human screen-reader pass and real-device testing (release requirements, never automated here)'];
+const NOT_YET = ['external link reachability (the online link check cannot run in the sandbox)', 'Firefox and WebKit runs (not installed here)', 'portability of the tooling on Windows and macOS (a CI job reports it, informational)', 'a human screen-reader pass and real-device testing (release requirements, never automated here)'];
 
 const results = [];
 for (const [id, what, run] of checks) {
@@ -90,6 +106,9 @@ for (const r of results) console.log(`  ${r.passed ? 'PASS' : 'FAIL'}  ${r.id.pa
 console.log(`\n  Not covered yet (planned for later gates, or manual): ${NOT_YET.join('; ')}.`);
 const failed = results.filter((r) => !r.passed).length;
 mkdirSync(join(engDir, '.reports'), { recursive: true });
-writeFileSync(join(engDir, '.reports', 'verify.json'), JSON.stringify({ mode: fast ? 'fast' : 'full', passed: failed === 0, results }, null, 2));
+// The report records which commit and which delivered bytes it vouches for; the release gate accepts only a full run for exactly those.
+const st = gitState(), site = assembleCandidate(projectDir, 'verify-report');
+const assetsTree = buildManifest(site).treeSha256; rmSync(site, { recursive: true, force: true });
+writeFileSync(join(engDir, '.reports', 'verify.json'), JSON.stringify({ mode: fast ? 'fast' : 'full', passed: failed === 0, commit: st.commit, dirty: st.dirty, assetsTree, results }, null, 2));
 console.log(failed ? `\nverify FAILED (${failed} of ${results.length} checks)` : `\nverify passed (${results.length} of ${results.length} checks)`);
 process.exit(failed ? 1 : 0);

@@ -7,6 +7,7 @@ import { dirname, join, resolve } from 'node:path';
 import { loadConfig, validate } from './src/lib/config.mjs';
 import { configSchemaErrors } from './engineering/lib/config-schema.mjs';
 import { document } from './src/components/document.mjs';
+import { isIndexable, robotsTxt, sitemapXml, baseOf } from './src/lib/seo.mjs';
 import home from './src/pages/home.mjs';
 import menu from './src/pages/menu.mjs';
 import story from './src/pages/story.mjs';
@@ -35,5 +36,12 @@ for (const page of cfg.pages) {
   const html = document(cfg, page, out);
   writeFileSync(join(outDir, page.file), html);
   console.log(`${page.file.padEnd(18)} ${String(html.length).padStart(6)} bytes`);
+}
+// Production search files exist only for an indexable client build; the demonstration (noindex) gets none.
+if (isIndexable(cfg) || !cfg.demo) console.log('NOTICE: this is a client-production configuration (demo off or indexable). It may not be released until `npm run release:gate` passes: a recorded release approval, rights verification, device, screen-reader, browser and CI evidence.');
+if (isIndexable(cfg)) {
+  writeFileSync(join(outDir, 'sitemap.xml'), sitemapXml(cfg));
+  writeFileSync(join(outDir, 'robots.txt'), robotsTxt(cfg));
+  console.log(`sitemap.xml and robots.txt written for ${baseOf(cfg)}/` + (new URL(cfg.client.seo.baseUrl).pathname.replace(/\/$/, '') ? ' (the base URL has a path: robots.txt is only read at the root of the domain, so place it there)' : ''));
 }
 console.log(`Ordering: ${cfg.live ? 'live URL' : 'demo placeholder'}. Demo flag: ${cfg.demo}.`);

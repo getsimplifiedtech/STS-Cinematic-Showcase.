@@ -1,6 +1,7 @@
 // The full HTML document: head, disclosure bar, header, main, footer, scripts. Every page goes through this one function.
 import { esc } from '../lib/util.mjs';
 import { pageHref, ctaPage, orderLink, sealMark } from './shared.mjs';
+import { canonicalFor, jsonLdFor } from '../lib/seo.mjs';
 
 const FAVICON = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' fill='%23101211'/%3E%3Ccircle cx='16' cy='16' r='7' fill='none' stroke='%23a9d2be' stroke-width='2.5'/%3E%3Ccircle cx='16' cy='16' r='2.6' fill='%23f08a3c'/%3E%3C/svg%3E";
 
@@ -8,7 +9,8 @@ function headTags(cfg, page, extraHead) {
   const { client, copy, site } = cfg;
   const meta = copy[page.id].meta;
   const title = client.seo.titleTemplate.replace('{page}', meta.title).replace('{brand}', client.brand.name) + (cfg.demo ? site.demo.titleSuffix : '');
-  const canonical = !client.seo.noindex && client.seo.baseUrl ? `<link rel="canonical" href="${esc(client.seo.baseUrl.replace(/\/$/, '') + '/' + (page.file === 'index.html' ? '' : page.file))}">` : '';
+  const canonical = !client.seo.noindex && client.seo.baseUrl ? `<link rel="canonical" href="${esc(canonicalFor(cfg, page))}">` : '';
+  const jsonLd = jsonLdFor(cfg, page);   // '' unless an indexable client build turned structured data on
   return `<meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>${esc(title)}</title>
@@ -17,7 +19,7 @@ ${client.seo.noindex ? '<meta name="robots" content="noindex, nofollow">\n' : ''
 <meta property="og:title" content="${esc(title)}">
 <meta property="og:description" content="${esc(meta.description)}">
 <meta property="og:type" content="website">
-${canonical}
+${canonical}${jsonLd ? '\n' + jsonLd : ''}
 <link rel="icon" href="${FAVICON}">
 <link rel="preload" as="font" type="font/woff2" href="fonts/young-serif-latin-400-normal.woff2" crossorigin>
 <link rel="preload" as="font" type="font/woff2" href="fonts/karla-latin-400-normal.woff2" crossorigin>

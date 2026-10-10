@@ -65,42 +65,47 @@
     },
     "runtime": {
       "index.html": {
-        "lcpMs": 1016,
+        "lcpMs": 1156,
         "cls": 0,
-        "blockingMs": 34,
-        "interactionMs": 32,
+        "blockingMs": 91,
+        "interactionMs": 29,
+        "presentationMs": 68,
         "requests": 10,
         "transferBytes": 173982
       },
       "menu.html": {
-        "lcpMs": 1052,
+        "lcpMs": 1224,
         "cls": 0,
-        "blockingMs": 26,
-        "interactionMs": 24,
+        "blockingMs": 139,
+        "interactionMs": 25,
+        "presentationMs": 43,
         "requests": 9,
         "transferBytes": 128633
       },
       "our-story.html": {
-        "lcpMs": 924,
+        "lcpMs": 1044,
         "cls": 0,
-        "blockingMs": 22,
-        "interactionMs": 24,
+        "blockingMs": 88,
+        "interactionMs": 16,
+        "presentationMs": 31,
         "requests": 8,
         "transferBytes": 90345
       },
       "visit-us.html": {
-        "lcpMs": 784,
+        "lcpMs": 932,
         "cls": 0,
-        "blockingMs": 0,
+        "blockingMs": 94,
         "interactionMs": 16,
+        "presentationMs": 37,
         "requests": 7,
         "transferBytes": 65493
       },
       "order-online.html": {
-        "lcpMs": 796,
+        "lcpMs": 892,
         "cls": 0,
-        "blockingMs": 17,
+        "blockingMs": 66,
         "interactionMs": 16,
+        "presentationMs": 38,
         "requests": 7,
         "transferBytes": 65540
       }

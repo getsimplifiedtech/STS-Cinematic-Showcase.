@@ -1,0 +1,32 @@
+{
+  "$comment": "The release gate policy (Gate 4, ledger ENG-071, ENG-079). A build is classified by its CONFIGURATION, never by what someone calls it: demo flag on and noindex on is the demonstration channel; anything else (demo off, or indexable) is client-production. The gate then requires everything listed for that channel. No channel may deploy: deployment needs its own recorded approval for the exact commit, and no tool in this repository deploys anything.",
+  "severities": ["Blocker", "Major", "Minor", "Info"],
+  "blockingSeverities": ["Blocker", "Major"],
+  "channels": {
+    "demonstration": {
+      "meaning": "the fictional Jade & Ember showcase: flags.demo true, seo.noindex true. It may be packaged as a preview for review. It may never be indexed or sold as a client site.",
+      "requires": ["cleanTree", "verifyPassed", "noBlockingFindings", "requiredApprovalsPresent", "versionConsistent", "demoStaysNoindex"],
+      "allows": ["preview-package", "host-files"]
+    },
+    "client-production": {
+      "meaning": "any build with flags.demo false or seo.noindex false: a real client site, indexable, with production metadata.",
+      "requires": ["cleanTree", "verifyPassed", "noBlockingFindings", "requiredApprovalsPresent", "versionConsistent", "stableVersion", "releaseApproval", "rightsVerification", "evidence:real-device", "evidence:screen-reader", "evidence:browser-matrix", "evidence:ci-run", "noDemoText", "productionSeoComplete"],
+      "allows": ["site-package", "host-files"]
+    }
+  },
+  "deployment": "never performed by any tool here; a deployment approval row for the exact commit and channel is recorded for information, and the gate reports it, but nothing acts on it",
+  "approvalRows": {
+    "release-approval": "Type contains release-approval; the Decision text contains `channel: <channel>`, `version: <x.y.z>` and `commit: <40 hex>` that equal the build being released",
+    "rights-verification": "Type contains rights-verification; the Decision text names who verified, the sources reviewed and the date (docs/JADE_AND_EMBER_MEDIA_RIGHTS_POLICY.md)",
+    "deployment-approval": "Type contains deployment-approval; the Decision text contains `channel:` and `commit:` like a release approval"
+  },
+  "evidence": {
+    "$comment": "JSON files in engineering/release/evidence/. They are human or tool records of work the automated checks cannot do. Each: { type, commit, date, by, summary, url? , conclusion? }. commit must equal the release commit for ci-run; the others must name the release commit or an earlier one for the same version.",
+    "types": {
+      "real-device": "at least one iPhone and one Android phone, recorded by a person",
+      "screen-reader": "NVDA, VoiceOver and TalkBack passes on all five pages, recorded by a person",
+      "browser-matrix": "automated and manual results in Chromium, Firefox and WebKit (decision D-11: Firefox and WebKit are tested before production deployment)",
+      "ci-run": "a GitHub Actions run of the verify workflow for the release commit with conclusion success, with its URL"
+    }
+  }
+}

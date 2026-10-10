@@ -2,6 +2,7 @@
 // A validation error fails the build (not the page): nothing half-configured is ever written.
 import { readFileSync, existsSync } from 'node:fs';
 import { join } from 'node:path';
+import { seoErrors } from './seo.mjs';
 
 const read = (configDir, name) => JSON.parse(readFileSync(join(configDir, `${name}.json`), 'utf8'));
 
@@ -36,6 +37,8 @@ export function validate(cfg) {
   need(client.ordering.headerCta !== 'direct' || cfg.live, 'client.ordering.headerCta "direct" needs a live ordering.url');
   need(typeof client.flags.demo === 'boolean' && typeof client.flags.heroVideo === 'boolean', 'client.flags.demo and heroVideo must be booleans');
   if (client.seo.noindex === false) need(/^https:\/\//.test(client.seo.baseUrl || ''), 'seo.noindex false needs a seo.baseUrl so canonical tags can be written');
+  if (client.seo.business?.image) { need(/\.webp$/.test(client.seo.business.image), 'seo.business.image must be a .webp file'); need(fileExists(client.seo.business.image), `seo.business.image: missing file ${client.seo.business.image}`); }
+  errors.push(...seoErrors(cfg));   // demonstration stays noindex; production canonical, sitemap, robots and structured data need valid configuration
 
   // page registry
   const ids = new Set();

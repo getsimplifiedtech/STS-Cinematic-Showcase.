@@ -47,7 +47,7 @@ export function checkSecurityStatic({ root, policy = loadPolicy() }) {
     if (/\son[a-z]+\s*=/i.test(html.replace(/<script[\s\S]*?<\/script>/g, ''))) bad(`${f} has an inline event handler`);
     if (/javascript:/i.test(html)) bad(`${f} has a javascript: URL`);
     for (const [re, what] of [[/<style[\s>]/i, 'a <style> element'], [/<base[\s>]/i, 'a <base> element'], [/<form[\s>]/i, 'a form'], [/<(iframe|frame|embed|object)[\s>]/i, 'an embedded frame or object'], [/http-equiv\s*=/i, 'a http-equiv meta tag']]) if (re.test(html)) bad(`${f} contains ${what}, which the policy does not allow for`);
-    const scripts = [...html.matchAll(/<script(?![^>]*\ssrc=)[^>]*>/g)].length;
+    const scripts = [...html.matchAll(/<script(?![^>]*\ssrc=)(?![^>]*type="application\/ld\+json")[^>]*>/g)].length;
     if (scripts > 1) bad(`${f} has ${scripts} inline scripts (one tiny bootstrap is the budget)`);
   }
   // hosts renderings agree

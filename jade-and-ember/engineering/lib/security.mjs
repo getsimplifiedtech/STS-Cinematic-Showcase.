@@ -14,7 +14,8 @@ export function inlineItems(root) {
   const scripts = new Set(), styles = new Set(), perPage = {};
   for (const file of pagesOf(root)) {
     const html = readFileSync(join(root, file), 'utf8');
-    const s = [...html.matchAll(/<script(?![^>]*\ssrc=)[^>]*>([\s\S]*?)<\/script>/g)].map((m) => m[1]);
+    // JSON-LD is a data block, not executable script: CSP does not govern it and it needs no hash
+    const s = [...html.matchAll(/<script(?![^>]*\ssrc=)(?![^>]*type="application\/ld\+json")[^>]*>([\s\S]*?)<\/script>/g)].map((m) => m[1]);
     const st = [...html.matchAll(/\sstyle="([^"]*)"/g)].map((m) => decode(m[1]));
     s.forEach((x) => scripts.add(x)); st.forEach((x) => styles.add(x));
     perPage[file] = { scripts: s.length, styleAttributes: st.length };

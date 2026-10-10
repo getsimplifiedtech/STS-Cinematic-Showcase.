@@ -5,6 +5,8 @@ import { menuCategory } from '../components/menu-category.mjs';
 import { ctaBand } from '../components/cta-band.mjs';
 
 export default function menu(cfg) {
+  // The list region is named "Menu" unless the page heading already is "Menu" (a client's own copy): landmark names must be unique on a page.
+  const bodyLabel = String(cfg.copy.menu.h1).trim().toLowerCase() === 'menu' ? 'Menu items' : 'Menu';
   const m = cfg.copy.menu;
   const band = m.band;
   const jump = cfg.menu.categories.map((k) => `<li><a href="#${esc(k.id)}">${esc(k.name)}</a></li>`).join('');
@@ -26,7 +28,7 @@ export default function menu(cfg) {
 
   <nav class="jump" aria-label="Menu categories"><div class="wrap"><ul>${jump}</ul></div></nav>
 
-  <section class="menu-body" aria-label="Menu">
+  <section class="menu-body" aria-label="${bodyLabel}">
     <div class="wrap cats">${cfg.menu.categories.map(menuCategory).join('')}
     </div>
   </section>

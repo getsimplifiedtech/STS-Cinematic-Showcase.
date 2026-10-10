@@ -20,7 +20,7 @@ export function checkPrivacyStatic({ root, cfgRoot = projectDir }) {
   const hosts = new Set(pol.allowedLinkHosts);
   for (const u of [cfg.ordering.url, cfg.address.mapUrl].filter(Boolean)) hosts.add(new URL(u).host);
   const scripts = [...SHARED.filter((f) => f.endsWith('.js')).map((f) => [f, readFileSync(join(root, f), 'utf8')])];
-  for (const f of pagesOf(root)) for (const m of readFileSync(join(root, f), 'utf8').matchAll(/<script(?![^>]*\ssrc=)[^>]*>([\s\S]*?)<\/script>/g)) scripts.push([`${f} (inline)`, m[1]]);
+  for (const f of pagesOf(root)) for (const m of readFileSync(join(root, f), 'utf8').matchAll(/<script(?![^>]*\ssrc=)(?![^>]*type="application\/ld\+json")[^>]*>([\s\S]*?)<\/script>/g)) scripts.push([`${f} (inline)`, m[1]]);
   for (const [name, text] of scripts) {
     const code = text.replace(/\/\*[\s\S]*?\*\//g, '').replace(/(^|[^:])\/\/.*$/gm, '$1');
     for (const api of pol.forbiddenScriptApis) if (code.includes(api)) problems.push(`${name} uses ${api}`);

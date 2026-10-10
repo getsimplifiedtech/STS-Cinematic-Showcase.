@@ -6,7 +6,7 @@ One workflow, `.github/workflows/jade-and-ember-verify.yml`, approved for the v0
 | Job | Runs on | Does | Blocks? |
 |---|---|---|---|
 | `verify` | `ubuntu-24.04` | checkout (full history), Node 22.22.0, `npm ci --ignore-scripts`, `npx playwright install --with-deps chromium`, ffmpeg, `npm run verify` | yes |
-| `portability-smoke` | `windows-latest`, `macos-latest` | `npm ci --ignore-scripts`, `npm run verify:fast` (no browser) | no (`continue-on-error`): it exists to show tooling portability problems |
+| `portability-smoke` | `macos-latest` | `npm ci --ignore-scripts`, `npm run verify:fast` (no browser) | no (`continue-on-error`): it exists to show tooling portability problems. **Windows is not run**: the repository name ends with a dot and Windows cannot create that folder, so the checkout step fails before any project code runs |
 
 Triggers: a push to `feature/jade-and-ember-v0.9`, any pull request, and manual dispatch. A newer run on the same ref cancels the older one.
 
@@ -25,7 +25,15 @@ Triggers: a push to `feature/jade-and-ember-v0.9`, any pull request, and manual 
 - Network access to the npm registry for `npm ci` and `npm audit`.
 - Python 3 is not needed by `npm run verify`.
 
+## Remote results (actual GitHub Actions runs)
+| Run | Commit | Result | Notes |
+|---|---|---|---|
+| 1 (`38028793711`) | `3c3c79a` (Gate 3) | **failure** | `verify`: 24 of 25 checks passed in about 14 minutes; `check:budgets` failed on interaction latency (see below). Windows: checkout failed (repository name ends with a dot). macOS fast checks: passed |
+| 2 (`38029955167`) | `d205d26` | **failure** | Same: `verify` 24 of 25, the same budget failure; Windows checkout failure; macOS passed |
+What the remote runs showed (Chromium 156.0.8078.4, a different build from the pinned 141): the regression harness reports **0 differences** in source, text, structure, styles, pixels and behaviour, and the Gate 2 and Gate 3 self-tests pass; this is independent evidence that the comparison holds across browser builds. The one failure was **interaction latency 584 to 784 ms against a 200 ms limit** (32 ms on the development machine). The metric included the time to the next frame, which depends on the machine's software rendering under the 4x CPU throttle. Fix (Gate 4): the budget now gates the main-thread part of an interaction (input delay plus handler time) and only reports the presentation delay. The Gate 4 result of the workflow is recorded in `QA.md` after the push and is **not assumed**.
+Other notes: GitHub warns that `actions/checkout` and `actions/setup-node` v4 target Node 20 and are being forced to Node 24; this is a warning, not a failure, and the pinned SHAs are kept until the upgrade to the Node 24 releases is reviewed.
+
 ## Status and limits
-- The workflow was validated here by `check:ci` (structure and safety) and by running its steps locally from a clean clone. **It had not run on GitHub when this was written**: the first run happens on the first push of the branch after the workflow is added, and its result is not known here. A CI environment can differ from the development one (browser build, fonts, CPU speed): the budget limits have headroom for that, but a first-run failure there is possible.
-- The Windows and macOS job is untested and informational. The engineering scripts avoid symbolic links, shell-specific code and absolute paths, but they have only been run on Linux.
+- The workflow is validated by `check:ci` (structure and safety), by running its steps locally from a clean clone, and by the remote runs above.
+- The macOS job passed (informational). Windows cannot run this repository (name ends with a dot); the engineering scripts avoid symbolic links, shell-specific code and absolute paths, but were run only on Linux and macOS.
 - Firefox and WebKit are not run (not installed in the development environment, and the checks are Chromium-based).

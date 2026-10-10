@@ -54,7 +54,9 @@ jobs:
       - name: Verify (all checks, regression against the frozen v0.8 baseline, self-tests)
         run: npm run verify
 
-  # Informational: the fast checks (no browser) on Windows and macOS, to show portability problems of the tooling. Never blocks.
+  # Informational: the fast checks (no browser) on macOS, to show portability problems of the tooling. Never blocks.
+  # Windows is not in the matrix: the repository name ends with a dot ("STS-Cinematic-Showcase."), which Windows cannot use as a folder name,
+  # so the checkout fails there before any of our code runs (seen in the first run).
   portability-smoke:
     name: fast checks on ${{ matrix.os }} (informational)
     runs-on: ${{ matrix.os }}
@@ -63,7 +65,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [windows-latest, macos-latest]
+        os: [macos-latest]
     defaults:
       run:
         shell: bash

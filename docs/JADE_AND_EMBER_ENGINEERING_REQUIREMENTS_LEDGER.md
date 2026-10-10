@@ -114,6 +114,7 @@
 | ENG-104 | Runtime and platform support declared and tested (Node, Python, operating systems) | TPL README | U | "Node 18+" in README; no `engines`; `tests/variants.mjs` uses symlinks | Partial | `engines`, a Windows-safe test path, a CI matrix (WP6) | None |
 | ENG-105 | Host-neutral deployment output: `dist/` plus optional per-host adapters | NEW | N | The committed folder is the output; no host files | Missing | `dist/` build and adapters for static hosts (WP5, WP6); no deployment is performed | None |
 | ENG-106 | Cross-browser: Chromium, Firefox, WebKit | 09 §Tier 1 "browser resilience" | U | Chromium only | Missing | Automated Firefox and WebKit runs where browsers are installable (WP8); real devices remain human work | None |
+| ENG-107 | Valid HTML and fully resolving internal links | NEW | N | Never validated; `tests/site.mjs` checks some links | Partial | `check:html` (html-validate) and `check:links` (every href, src, srcset, fragment, CSS url(), video source; exact letter case; reachability graph). Phone-number wrapping (F-G4-01) is a known finding | None |
 
 ## Gate 2 update (2026-10-10, `APR-JE-021`)
 Rows whose status changed because Gate 2 implemented the checks proposed above. The v0.8 column above is the baseline analysis and is not edited. "Automated" means a check in `npm run verify`; a human pass is still required where stated.
@@ -149,3 +150,17 @@ Rows whose status changed because Gate 2 implemented the checks proposed above. 
 | ENG-105 | Partial | `npm run host:files` | Host files for Netlify/Cloudflare Pages, nginx, Apache are generated from one policy. A separate `dist/` folder was not created (the delivered folder is unchanged). Nothing is deployed |
 | ENG-096 | Partial | proposal | Media rights wording proposed in `docs/JADE_AND_EMBER_MEDIA_RIGHTS_PROPOSAL.md` (Option A recommended); **not applied**, nothing asserted |
 
+## Gate 4 update (2026-10-10, `APR-JE-023`)
+| ID | New status | Check | Result |
+|---|---|---|---|
+| ENG-071 | Implemented (automated) | `check:release`, `npm run release:gate` | Severity vocabulary enforced: an open Blocker or Major finding blocks a client-production release; an unknown severity blocks it |
+| ENG-076 | Implemented; remote result recorded | `check:ci`, `engineering/CI.md` | The workflow ran on GitHub twice and failed twice; the causes and the corrections are in `engineering/CI.md`, "Remote results", together with the result of the Gate 4 push |
+| ENG-079 | Implemented (manifest); package not produced | `npm run release:manifest`, `release/release-manifest.schema.json` | The manifest records version, source commit, baseline, framework reference, configuration and asset hashes, QA status and approvals; deterministic and valid under two validators. A release package is written only by `release:prepare`, and only when the gate allows it (it does not today) |
+| ENG-080 | Implemented | `check:baseline` | Unchanged; the permanent branch is verified on every run |
+| ENG-081 | Implemented (automated) | `check:release`, `check:hosting` | The gate and the tooling contain no deployment; no deployment approval exists. The static-folder model is checked against Cloudflare Pages limits; nothing depends on Vercel |
+| ENG-082 | Implemented (automated) | `check:seo` | The demonstration stays `noindex, nofollow` on all five pages with no canonical, sitemap, robots file or structured data; a configuration that makes it indexable is refused by the build and by the gate |
+| ENG-095 | Evaluated; unchanged | `check:deps`, `engineering/DEPENDENCY-ADVISORIES.md` | 11 high advisories in the development-only Lighthouse CI tree: actual exposure assessed (none reachable), four remediation options tested in a scratch copy, none applied |
+| ENG-096 | Policy accepted | `docs/JADE_AND_EMBER_MEDIA_RIGHTS_POLICY.md` | Option A adopted as a documentation policy; no licence asserted; `media/PROVENANCE.md` unchanged; rights verification is a release requirement and structured data may not assert a licence |
+| ENG-100 | Implemented (automated) | `check:seo` | Canonical URLs, `sitemap.xml`, `robots.txt` and Restaurant JSON-LD generated from validated client configuration for an indexable client build only; escaping, determinism and agreement between canonicals, sitemap and robots proven |
+| ENG-105 | Partial | `check:hosting`, `engineering/HOSTING.md` | Static folder plus generated host files; a separate `dist/` folder still not created (decision pending) |
+| ENG-107 | Implemented (automated); one known finding | `check:html`, `check:links` | All pages of the demonstration and of a client build are valid HTML5 and pass the accessibility rules; every internal reference resolves. F-G4-01 (phone numbers may wrap) awaits an owner decision |

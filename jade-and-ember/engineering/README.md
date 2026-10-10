@@ -1,4 +1,4 @@
-# Jade & Ember engineering checks (v0.9, Gates 1 to 3)
+# Jade & Ember engineering checks (v0.9, Gates 1 to 4)
 
 STS governs engineering and delivery; Anthropic Frontend Design is the creative authority (`../../docs/JADE_AND_EMBER_FRAMEWORK_REFERENCE.md`). Nothing in this folder is shipped: the website is the five HTML pages plus `styles.css`, three scripts, `fonts/` and `media/`, and it works without Node.js. Everything here is development tooling.
 
@@ -7,10 +7,13 @@ npm run verify          every check below, with a summary (about 15 minutes: it 
 npm run verify:fast     no browser (seconds): the static parts of every check
 npm run check:<name>    one check: baseline | schema | determinism | delivery | authority | contracts | tokens | secrets | deps | ci | privacy |
                         security | assets | media | budgets | keyboard | reflow | forced-colors | a11y-tree | order | portability | regression |
-                        selftest | selftest-gate2 | selftest-gate3
+                        selftest | selftest-gate2 | selftest-gate3 | html | links | seo | release | hosting | selftest-gate4
 npm run host:files      write _headers, nginx.conf, htaccess for the built site (security headers and CSP); nothing is deployed
 npm run build:hashed    a content-hashed COPY of the site (name.<hash>.ext) for immutable caching; the delivered site keeps its names
 npm run assets:manifest rewrite assets.manifest.json after a reviewed change to a delivered file
+npm run release:gate    evaluate the release gate for the build's channel (reads and reports; exit 1 when blocked)
+npm run release:manifest  print the release manifest (version, commit, framework, configuration, asset integrity, QA, approvals)
+npm run release:prepare write release/ (package, manifest, SHA256SUMS, host files) ONLY if the gate passes; nothing is deployed
 ```
 `CHROMIUM_PATH` (or `CHROME_PATH`) selects a preinstalled Chromium; otherwise Playwright's own download, then a build under `PLAYWRIGHT_BROWSERS_PATH`, is used. Pass `--framework <dir>` (or set `STS_FRAMEWORK_DIR`) to `check:authority` to also verify the pinned framework commit and skill hashes against a local checkout of the framework (read only).
 
@@ -51,6 +54,19 @@ npm run assets:manifest rewrite assets.manifest.json after a reviewed change to 
 | `ci` | The GitHub Actions workflow is read-only (`contents: read`), every action pinned to a commit SHA, no secrets, deployment, merge, publish, cloud or AI service, `npm ci --ignore-scripts`, timeouts set, documented in `CI.md`. | `CI.md` |
 | `selftest-gate3` | 68 targeted negative tests across the Gate 3 checks (weakened policies, risky pages, privacy leaks, bad dependencies, planted credentials, token changes, tampered assets, portability breakers, ZIP attacks, 17 ways to make the workflow unsafe). | none |
 
+## Gate 4 checks (validation, SEO, release control, hosting)
+| Check | Proves | Policy in |
+|---|---|---|
+| `html` | Every page of the demonstration and of an indexable client build passes html-validate (recommended, document and accessibility rule sets). Four rules are off, each with a recorded reason; one of them (phone-number wrapping) is measured as known finding F-G4-01 | `htmlvalidate.json` |
+| `links` | Every `href`, `src`, `srcset`, video source and stylesheet `url()` resolves inside the folder with its exact letter case; every `#fragment` names exactly one element; no bare `#`, `javascript:`, malformed `tel:` or `mailto:`, no non-https external link; every page is reachable from Home and links to every other page; the client sitemap and canonicals name delivered pages. External reachability is `npm run check:links -- --online` (not possible in this sandbox) | |
+| `seo` | The demonstration stays `noindex, nofollow` with no canonical, sitemap, robots file or JSON-LD. An indexable client build gets one canonical per page, `sitemap.xml`, `robots.txt` and Restaurant JSON-LD (Home only), all generated from validated configuration, deterministic, escaped against hostile text, and with no licence or rights claim. The build refuses misconfiguration (http or localhost base URL, structured data without business details, unparseable hours, the demonstration made indexable) | `src/lib/seo.mjs`, `schemas/client.schema.json` |
+| `release` | `VERSION.json`, `package.json` and the configuration agree on version and channel; the release manifest is valid under two validators, deterministic and consistent with its sources; the release gate passes a fully approved client build, blocks it for any one missing requirement (27 single defects), refuses to label a client configuration a demonstration, and passes the demonstration only while it is `noindex`. Today a client-production release is blocked by its unmet approvals and evidence, as designed | `release/policy.json` |
+| `hosting` | The delivered folder is plain static files (no function, redirect, worker, vendor or secret file) under the Cloudflare Pages limits; nothing depends on Vercel; the generated `_headers` (root and sub-path) respects the Pages limits and carries the CSP computed from the pages. See `HOSTING.md` | |
+| `selftest-gate4` | 93 targeted negative tests across the Gate 4 checks (invalid HTML, broken links, wrong canonicals, malformed sitemaps, rights wording, release-gate holes, vendor and oversized files, bad header files) | |
+
+### Release control
+`VERSION.json` is the only version source. `release/policy.json` lists what each channel requires. A build is a **demonstration** while `flags.demo` is true and `seo.noindex` is true; otherwise it is **client-production**, whatever its version file says. Approvals are read from `docs/JADE_AND_EMBER_APPROVALS.md`: a `release-approval` record must name the channel, version and exact commit, and a `rights-verification` record must name the sources reviewed. Evidence (real device, screen reader, browser matrix, CI run) is a JSON record in `release/evidence/` bound to the commit. See `release/evidence/README.md`. No release approval exists today, so no client-production build can pass. The tooling only reads and reports.
+
 ### Known findings
 A check never hides a defect, and a defect in the frozen v0.8 baseline cannot be fixed without a visible change or a change to a frozen file, which needs owner approval. `findings.json` lists such defects (id, key, severity, whether it is visual, the proposed correction, status). A check reports a known finding as a note and **fails on any new finding, on a worse one, and on a register entry that no longer occurs**, so the register can neither hide new defects nor go stale. At the end of Gate 3 the register holds two non-visual findings: F-G2-01 (no licence terms in `media/PROVENANCE.md`; wording proposed in `docs/JADE_AND_EMBER_MEDIA_RIGHTS_PROPOSAL.md`) and F-G3-01 (over `file://` Chromium logs console messages about the two font preloads; nothing changes on screen). Neither is a visual defect.
 
@@ -81,6 +97,8 @@ A check never hides a defect, and a defect in the frozen v0.8 baseline cannot be
 `baseline.json` and `authority.json` are machine-readable records that mirror `../../baselines/jade-and-ember-v0.8/BASELINE.md` and `../../docs/JADE_AND_EMBER_FRAMEWORK_REFERENCE.md`; the checks keep each pair in agreement. `lib/schema.mjs` is the dependency-free validator the build uses, so `node build.mjs` needs only Node; Ajv (development only) cross-checks it. `.reports/` is git-ignored output.
 
 ## Not yet implemented
-HTML validation and link checks, the release manifest, version file and approvals gate, SEO files for production (from client configuration, decision D-7), Firefox and WebKit runs (the harness accepts `--browser firefox|webkit`; those browsers are not installed in this environment), portability of the tooling on Windows and macOS (a CI job reports it, informational, unverified). All browser checks run in Chromium only.
+Firefox and WebKit runs (the harness accepts `--browser firefox|webkit`; those browsers are not installed in this environment; required before production deployment, decision D-11), reachability checks for external links (the check exists, the sandbox proxy refuses outbound requests), portability of the tooling on Windows (GitHub cannot check this repository out there because its name ends with a dot) and macOS (an informational CI job reports it), a human screen-reader pass and real-device testing (release requirements recorded as evidence, never automated), content-hashed names in the delivered site and a separate `dist/` folder (opt-in copy only, pending decision), and social preview images (ENG-103, needs imagery).
+
+Gate 4 added `DEPENDENCY-ADVISORIES.md` (evaluation of the 11 high development-dependency advisories) and `HOSTING.md` (static folder and Cloudflare Pages).
 
 Other documents here: `ENG-SECURITY.md` (security by delivery mode, the CSP, decision D-11), `CI.md` (the workflow and runner requirements). See `../../docs/JADE_AND_EMBER_V0.9_IMPLEMENTATION_PLAN.md`.

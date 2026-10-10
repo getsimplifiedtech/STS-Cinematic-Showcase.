@@ -1,0 +1,16 @@
+{
+  "$comment": "HTML validation policy (check:html). The pages must be valid HTML5 and pass html-validate's recommended, document and accessibility rule sets. Every rule switched off is listed in `disabled` with its reason; check:html fails if a rule is off without one. The three style rules below concern how the source is written, not what the page is or does; the fourth is the integrity policy of ENG-SECURITY.md.",
+  "extends": ["html-validate:recommended", "html-validate:document", "html-validate:a11y"],
+  "rules": {
+    "doctype-style": "off",
+    "no-trailing-whitespace": "off",
+    "tel-non-breaking": "off",
+    "require-sri": "off"
+  },
+  "disabled": {
+    "doctype-style": "The pages use the lowercase doctype (<!doctype html>); both spellings are valid HTML and the choice is a style preference only.",
+    "no-trailing-whitespace": "A blank-space-only line in the generated Visit page source. Invisible, valid, and removing it would change delivered bytes for no benefit.",
+    "tel-non-breaking": "Suggests non-breaking spaces and hyphens in the phone number so it cannot wrap. That would change how the number breaks across lines on narrow screens, which is a visible typographic decision: recorded as finding F-G4-01 for the owner, not applied.",
+    "require-sri": "Subresource Integrity on same-origin files adds nothing a file-level manifest does not (assets.manifest.json), and it is unreliable over file://. See ENG-SECURITY.md and check:assets."
+  }
+}
