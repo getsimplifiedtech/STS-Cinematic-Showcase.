@@ -26,7 +26,7 @@ export function reconcile(checkId, measured, known = loadFindings().filter((f) =
     if (!f) { problems.push(`${m.key}: ${m.detail}`); continue; }
     seen.add(m.key);
     if (f.maxValue !== undefined && m.value !== undefined && m.value > f.maxValue) problems.push(`${m.key}: worse than the known finding ${f.id} (${m.value} against the recorded ${f.maxValue}): ${m.detail}`);
-    else notes.push(`known finding ${f.id} (${f.status}): ${m.key}`);
+    else notes.push(`known finding ${f.id} (${f.status}): ${m.key}${m.value !== undefined && f.maxValue !== undefined ? ` [measured ${m.value}, recorded limit ${f.maxValue}]` : ''}`);
   }
   for (const f of known) if (!seen.has(f.key)) problems.push(`known finding ${f.id} no longer occurs (${f.key}): remove it from engineering/findings.json, or fix the check`);
   return { problems, notes };

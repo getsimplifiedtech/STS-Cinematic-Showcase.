@@ -8,12 +8,12 @@
       "note": "Reference build used for the Gate 1 evidence (Chromium via CHROMIUM_PATH, /opt/pw-browsers chromium-1194). Playwright 1.64.0's own bundled Chromium is 156.0.8078.4; a CI run (Gate 3) will pin that build instead. --strict-env fails on any other build."
     },
     "firefox": {
-      "version": null,
-      "note": "Not installable in the development sandbox (the download host is unreachable). Gate 5 Phase 1 runs it on GitHub Actions (node engineering/cross-browser.mjs --engine firefox, Playwright's own build). The version is recorded from the first successful run and pinned here afterwards."
+      "version": "157.0",
+      "note": "Not installable in the development sandbox (the download host is unreachable). Runs only on GitHub Actions (node engineering/cross-browser.mjs --engine firefox, Playwright 1.64.0's own build, downloaded at run time). Version observed in Actions runs 13 and 14 (Gate 5 Phase 1); a different Playwright pin means a different build."
     },
     "webkit": {
-      "version": null,
-      "note": "Not installable in the development sandbox (the download host is unreachable). Gate 5 Phase 1 runs it on GitHub Actions (node engineering/cross-browser.mjs --engine webkit, Playwright's own build). The version is recorded from the first successful run and pinned here afterwards."
+      "version": "27.2",
+      "note": "Not installable in the development sandbox (the download host is unreachable). Runs only on GitHub Actions (node engineering/cross-browser.mjs --engine webkit, Playwright 1.64.0's own build on Linux, downloaded at run time; reports itself as Safari 27.2 / AppleWebKit 605.1.15). This is Playwright's WebKit on Linux, not Safari on macOS or iOS: real-device Safari evidence is separate (human testing)."
     }
   },
   "context": {
