@@ -6,9 +6,24 @@ One workflow, `.github/workflows/jade-and-ember-verify.yml`, approved for the v0
 | Job | Runs on | Does | Blocks? |
 |---|---|---|---|
 | `verify` | `ubuntu-24.04` | checkout (full history), Node 22.22.0, `npm ci --ignore-scripts`, `npx playwright install --with-deps chromium`, ffmpeg, `npm run verify` | yes |
+| `cross-browser-firefox` | `ubuntu-24.04` | checkout, Node 22.22.0, `npm ci --ignore-scripts`, `npx playwright install --with-deps firefox`, ffmpeg, `node engineering/cross-browser.mjs --engine firefox` | **no** (`continue-on-error`, informational while compatibility is established; Gate 5 Phase 1) |
+| `cross-browser-webkit` | `ubuntu-24.04` | the same with WebKit | **no** (informational) |
 | `portability-smoke` | `macos-latest` | `npm ci --ignore-scripts`, `npm run verify:fast` (no browser) | no (`continue-on-error`): it exists to show tooling portability problems. **Windows is not run**: the repository name ends with a dot and Windows cannot create that folder, so the checkout step fails before any project code runs |
 
 Triggers: a push to `feature/jade-and-ember-v0.9`, any pull request, and manual dispatch. A newer run on the same ref cancels the older one.
+
+## Cross-browser verification (Gate 5, Phase 1)
+**What runs.** Two informational jobs run the browser-driven checks of `npm run verify` inside Firefox and WebKit with the **same assertions** as the Chromium job: `media`, `seo` (browser part), `privacy`, `security` (CSP under the headers), `d11`, `assets` (hashed copy equal to v0.8), `keyboard`, `reflow`, `forced-colors`, `a11y-tree`, `order`, `phone`, `portability` and `regression` (candidate against the frozen v0.8 baseline, **both rendered in the same engine in the same run**). The command is `node engineering/cross-browser.mjs --engine firefox|webkit|chromium [--only check:a,check:b]`; it never touches `.reports/verify.json`, which the release gate binds.
+
+**Nothing is skipped silently.** `engineering/lib/cross-catalogue.mjs` classifies every check of `verify.mjs` as `engine` (runs in each engine), `static` (no browser; identical in every engine; run once in the Chromium job) or `chromium-only` (with its reason). Each job ends with a matrix of **all** checks for its engine: PASS, FAIL, N/A with the reason, or MISSING (a runner defect). `check:selftest-gate5` fails if a check exists that is not classified, if a browser-driven check has no runner, or if the matrix omits a row. The only `chromium-only` browser check is `budgets` (it needs the Chromium DevTools protocol throttling and the Event Timing, LCP and long-task APIs), so **performance in Firefox and WebKit is not measured by automation**.
+
+**Adaptations are reported.** Playwright cannot honour every option in every engine (Firefox has no `isMobile` context option). The launcher removes only such an option, counts it, and the runner prints `ADAPTED: ...` under the check that needed it; baseline and candidate always get the same adapted options. `forced-colors` first probes whether the engine activates forced-colours emulation and reports **NOT APPLICABLE with the evidence** if it does not (a coverage gap needing a human, not a pass).
+
+**D-11 is tested explicitly** by `check:d11` (it also runs in the Chromium job): every element with a style attribute must resolve the same custom properties and `object-position` with the security headers on as with no headers (desktop and phone width), with no style violation, and an unlisted inline style set by script must be blocked (so "honoured" cannot mean "CSP off").
+
+**Reading a result.** Open the job log; the capability block at the top lists the engine version, video support (`canPlayType` for WebM VP9, WebM VP8, MP4 H.264) and which CSS features `styles.css` uses are supported; then each check with its notes and problems; the matrix and the one-line count at the end. A failure is **evidence about that engine, not a verdict**: a person reviews it and records it in `findings.json` (with a proposal if a visible change would be needed; no visual change without the owner's approval). The jobs become required only when the owner says so.
+
+**Requirements.** Playwright downloads the browsers at run time (`npx playwright install --with-deps firefox`/`webkit`); no change to `package-lock.json`, no new npm dependency. Firefox and WebKit cannot be installed in the development sandbox (their download host is unreachable), so these jobs are the only place they run. The runner stops a check after 12 minutes (`--timeout-minutes`) and reports it as a failure, so one hang cannot stall the job.
 
 ## Safety properties (enforced by `check:ci`)
 - `permissions: contents: read` at the top level, and no job widens it; the checkout does not persist credentials.

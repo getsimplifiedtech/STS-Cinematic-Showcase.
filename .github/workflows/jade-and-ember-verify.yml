@@ -86,3 +86,71 @@ jobs:
         run: npm ci --ignore-scripts
       - name: Fast verification (no browser)
         run: npm run verify:fast
+
+  # Informational while compatibility is established (Gate 5, Phase 1, owner decision): the browser-driven checks of `npm run verify`, with the same
+  # assertions, in Firefox. A failure here is evidence about Firefox, recorded as a finding by a person; it does not fail the run. Nothing is skipped
+  # silently: the runner prints a matrix of every check (run, or not applicable with its reason). Baseline comparisons are made inside the engine.
+  cross-browser-firefox:
+    name: 'cross-browser: Firefox (informational)'
+    runs-on: ubuntu-24.04
+    continue-on-error: true
+    timeout-minutes: 55
+    defaults:
+      run:
+        shell: bash
+        working-directory: jade-and-ember
+    steps:
+      - name: Check out the repository (all branches, because the frozen v0.8 baseline branch is needed)
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - name: Set up Node.js
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
+        with:
+          node-version: '22.22.0'
+          cache: npm
+          cache-dependency-path: jade-and-ember/package-lock.json
+      - name: Install the pinned development tools (lockfile only, no install scripts)
+        run: npm ci --ignore-scripts
+      - name: Install Firefox for Playwright, and ffmpeg for the flash check
+        run: |
+          npx playwright install --with-deps firefox
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends ffmpeg
+      - name: Cross-browser verification in Firefox
+        run: node engineering/cross-browser.mjs --engine firefox
+
+  # Informational while compatibility is established (Gate 5, Phase 1, owner decision): the browser-driven checks of `npm run verify`, with the same
+  # assertions, in WebKit. A failure here is evidence about WebKit, recorded as a finding by a person; it does not fail the run. Nothing is skipped
+  # silently: the runner prints a matrix of every check (run, or not applicable with its reason). Baseline comparisons are made inside the engine.
+  cross-browser-webkit:
+    name: 'cross-browser: WebKit (informational)'
+    runs-on: ubuntu-24.04
+    continue-on-error: true
+    timeout-minutes: 55
+    defaults:
+      run:
+        shell: bash
+        working-directory: jade-and-ember
+    steps:
+      - name: Check out the repository (all branches, because the frozen v0.8 baseline branch is needed)
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - name: Set up Node.js
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
+        with:
+          node-version: '22.22.0'
+          cache: npm
+          cache-dependency-path: jade-and-ember/package-lock.json
+      - name: Install the pinned development tools (lockfile only, no install scripts)
+        run: npm ci --ignore-scripts
+      - name: Install WebKit for Playwright, and ffmpeg for the flash check
+        run: |
+          npx playwright install --with-deps webkit
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends ffmpeg
+      - name: Cross-browser verification in WebKit
+        run: node engineering/cross-browser.mjs --engine webkit

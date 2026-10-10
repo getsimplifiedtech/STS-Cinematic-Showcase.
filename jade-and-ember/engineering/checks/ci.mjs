@@ -35,7 +35,12 @@ export function checkCiFile(text, { docs = true } = {}) {
     const informational = job['continue-on-error'] === true && /informational/i.test(job.name || '') && !runsFull;   // only a named, fast-checks-only job may be allowed to fail
     const runsOn = JSON.stringify(job['runs-on']);
     if (!informational && /latest/.test(runsOn)) bad(`blocking job ${id} runs on a floating image (${runsOn}); pin the runner version`);
-    if (!informational && job['continue-on-error'] !== undefined) bad(`job ${id}: continue-on-error is only allowed on a job named "(informational)" that runs the fast checks only`);
+    if (!informational && job['continue-on-error'] !== undefined) bad(`job ${id}: continue-on-error is only allowed on a job named "(informational)" that runs the fast checks or the cross-browser runner only`);
+    // a job that runs the cross-browser runner for an engine must install that engine (otherwise it would fail for the wrong reason, or pass nothing)
+    for (const step of job.steps || []) {
+      const m = /engineering\/cross-browser\.mjs\s+--engine\s+(\w+)/.exec(step.run || '');
+      if (m && !(job.steps || []).some((x) => new RegExp(`playwright install[^\\n]*\\b${m[1]}\\b`).test(x.run || ''))) bad(`job ${id} runs the ${m[1]} cross-browser runner but does not install ${m[1]} (npx playwright install --with-deps ${m[1]})`);
+    }
     if (job.environment) bad(`job ${id} uses an environment (environments carry deployment secrets)`);
     for (const step of job.steps || []) {
       steps++;

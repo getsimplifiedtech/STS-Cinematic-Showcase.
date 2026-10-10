@@ -9,11 +9,11 @@
     },
     "firefox": {
       "version": null,
-      "note": "Not installed in the Gate 1 environment. The harness accepts --browser firefox; pin a version when it is first run."
+      "note": "Not installable in the development sandbox (the download host is unreachable). Gate 5 Phase 1 runs it on GitHub Actions (node engineering/cross-browser.mjs --engine firefox, Playwright's own build). The version is recorded from the first successful run and pinned here afterwards."
     },
     "webkit": {
       "version": null,
-      "note": "Not installed in the Gate 1 environment. The harness accepts --browser webkit; pin a version when it is first run."
+      "note": "Not installable in the development sandbox (the download host is unreachable). Gate 5 Phase 1 runs it on GitHub Actions (node engineering/cross-browser.mjs --engine webkit, Playwright's own build). The version is recorded from the first successful run and pinned here afterwards."
     }
   },
   "context": {

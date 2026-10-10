@@ -36,8 +36,16 @@ const controls = () => [...document.querySelectorAll('a[href], button')].filter(
 export async function checkForcedColors({ root = null, browserName = 'chromium', pages: only = null } = {}) {
   const cfg = readJson(join(engDir, 'a11y.json')).forcedColors;
   const measured = [], notes = [];
-  let lines = 0, ctrls = 0, adjustNone = 0;
+  let lines = 0, ctrls = 0, adjustNone = 0, notApplicable = null;
   await withSite(async ({ pages, newPage }) => {
+    // Another engine may not support forced-colours emulation at all. That is reported as NOT APPLICABLE with the evidence, never as a pass and never
+    // silently skipped (Chromium, the reference engine, keeps its strict behaviour: no activation is a problem).
+    if (browserName !== 'chromium') {
+      const probe = await newPage({ viewport: { width: 800, height: 600 }, forcedColors: 'active' }, pages[0]);
+      const active = await probe.page.evaluate(() => matchMedia('(forced-colors: active)').matches);
+      await probe.close();
+      if (!active) { notApplicable = `${browserName} did not activate forced-colours emulation: matchMedia('(forced-colors: active)') stayed false after the forcedColors context option was applied`; return; }
+    }
     for (const c of cfg.contexts) for (const file of pages) {
       const tag = `forced-colors:${file}@${c.name}`;
       const bad = (rule, who, detail, extra = {}) => measured.push({ key: `${tag}:${rule}:${who}`, detail, ...extra });
@@ -95,6 +103,7 @@ export async function checkForcedColors({ root = null, browserName = 'chromium',
       await close();
     }
   }, { root, browserName, pages: only });
+  if (notApplicable) return { problems: [], notes: [`NOT APPLICABLE on ${browserName}: ${notApplicable}. Forced-colours behaviour is NOT verified in this engine by automation; it needs a human on a real high-contrast configuration (Windows high contrast for Firefox, macOS Increase Contrast / Windows for Safari-equivalents).`], notApplicable };
   notes.push(`${lines} lines of text and ${ctrls} controls measured in forced-colours emulation on every page at ${cfg.contexts.map((c) => c.name).join(' and ')}; ${adjustNone} element(s) opt out with forced-color-adjust: none (those need a human look)`);
   const r = reconcile('forced-colors', measured);
   return { problems: r.problems, notes: [...notes, ...r.notes] };

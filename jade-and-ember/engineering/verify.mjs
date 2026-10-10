@@ -35,6 +35,8 @@ import { checkRelease } from './checks/release.mjs';
 import { checkHosting } from './checks/hosting.mjs';
 import { checkSelftestGate4 } from './checks/selftest-gate4.mjs';
 import { checkPhone } from './checks/phone.mjs';
+import { checkD11 } from './checks/d11.mjs';
+import { checkSelftestGate5 } from './checks/selftest-gate5.mjs';
 import { checkSelftestGate3 } from './checks/selftest-gate3.mjs';
 import { checkRegression } from './checks/regression.mjs';
 import { checkSelftest } from './checks/selftest.mjs';
@@ -76,6 +78,7 @@ const checks = [
     ['check:forced-colors', 'text and controls in forced-colours emulation', () => checkForcedColors({ browserName })],
     ['check:a11y-tree', 'landmarks, headings, names, ARIA references in the accessibility tree', () => checkA11yTree({ browserName })],
     ['check:order', 'DOM order against visual reading order', () => checkOrder({ browserName })],
+    ['check:d11', 'D-11: the engine honours the style-attribute hashes (photographs keep their crop under the headers) and blocks an unlisted inline style', () => checkD11({ browserName })],
     ['check:phone', 'phone numbers readable, pressable and inside the viewport at 9 supported mobile widths (F-G4-01)', () => checkPhone({ browserName })],
     ['check:portability', 'the folder works from an extracted ZIP over file://, at a domain root, in a subdirectory, with pretty URLs, without Range', () => checkPortability({ browserName })],
     ['check:regression', 'candidate against the frozen v0.8 baseline (source, text, structure, styles, pixels, behaviour)', () => checkRegression({ browserName, strictEnv: has('--strict-env') })],
@@ -83,12 +86,13 @@ const checks = [
       ['check:selftest', 'Gate 1 checks fail when they should (mutation tests)', () => checkSelftest()],
       ['check:selftest-gate2', 'Gate 2 checks fail when they should (targeted negative tests)', () => checkSelftestGate2()],
       ['check:selftest-gate3', 'Gate 3 checks fail when they should (targeted negative tests)', () => checkSelftestGate3()],
+      ['check:selftest-gate5', 'the cross-browser harness cannot skip a check silently, reports engine adaptations, and D-11 detection works', () => checkSelftestGate5()],
       ['check:selftest-gate4', 'Gate 4 checks fail when they should (HTML, links, SEO and llms.txt, crawler policy, release gate, hosting, phone numbers)', () => checkSelftestGate4()],
     ]),
   ]),
 ];
 
-const NOT_YET = ['external link reachability (the online link check cannot run in the sandbox)', 'Firefox and WebKit runs (not installed here)', 'portability of the tooling on Windows and macOS (a CI job reports it, informational)', 'a human screen-reader pass and real-device testing (release requirements, never automated here)'];
+const NOT_YET = ['external link reachability (the online link check cannot run in the sandbox)', 'Firefox and WebKit runs inside this sandbox (their jobs run on GitHub Actions: `node engineering/cross-browser.mjs --engine firefox|webkit`)', 'portability of the tooling on Windows and macOS (a CI job reports it, informational)', 'a human screen-reader pass and real-device testing (release requirements, never automated here)'];
 
 const results = [];
 for (const [id, what, run] of checks) {
