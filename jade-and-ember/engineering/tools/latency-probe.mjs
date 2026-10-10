@@ -24,7 +24,7 @@ const REPS = Number(arg('--reps', 3));
 const CONDITIONS = [
   { name: 'plain', cpu: 1, net: false }, { name: 'cpu x4', cpu: 4, net: false }, { name: 'network', cpu: 1, net: true }, { name: 'cpu x4 + network (budget profile)', cpu: 4, net: true },
 ];
-const DISPATCH = ['playwright click', 'raw mouse click', 'touch tap'];
+const DISPATCH = ['playwright click', 'raw mouse click', 'touch tap', 'click then Escape (the budget check sequence)'];
 
 const INIT = () => {
   window.__p = { handlers: [], frames: [], events: [], gaps: [], long: 0, mark: 0 };
@@ -54,6 +54,7 @@ async function once(browser, base, file, cond, how) {
   const box = await page.locator('.nav-toggle').boundingBox();
   if (how === 'playwright click') await page.click('.nav-toggle');
   else if (how === 'raw mouse click') await page.mouse.click(box.x + box.width / 2, box.y + box.height / 2);
+  else if (how.startsWith('click then Escape')) { await page.click('.nav-toggle'); await page.waitForTimeout(150); await page.keyboard.press('Escape'); await page.waitForTimeout(250); }
   else await page.touchscreen.tap(box.x + box.width / 2, box.y + box.height / 2);
   await page.waitForTimeout(600);
   const p = await page.evaluate(() => window.__p);
@@ -65,6 +66,7 @@ async function once(browser, base, file, cond, how) {
     toNextFrame: Math.max(0, ...p.frames.map((f) => f.toFrame)),
     duration: Math.max(0, ...click.map((e) => e.duration)),
     heartbeatGap: Math.max(0, ...p.gaps), longTasks: p.long, nEvents: p.events.length,
+    byEvent: p.events.map((e) => `${e.name}:${Math.round(e.delay)}/${Math.round(e.handler)}/${Math.round(e.duration)}`).join(' '),
   };
 }
 
@@ -82,8 +84,9 @@ try {
     const ok = runs.filter((r) => !r.error);
     const m = (k) => r1(med(ok.map((r) => r[k])));
     const row = { condition: cond.name, dispatch: how, runs: ok.length, failed: runs.length - ok.length, inputDelay: m('inputDelay'), handler: m('handler'), toNextFrame: m('toNextFrame'), duration: m('duration'), heartbeatGap: m('heartbeatGap'), longTasks: m('longTasks'), worstInputDelay: r1(Math.max(0, ...ok.map((r) => r.inputDelay))), worstDuration: r1(Math.max(0, ...ok.map((r) => r.duration))) };
+    row.slowest = ok.map((r) => r.byEvent).filter(Boolean).slice(-1)[0] || '';
     rows.push(row);
-    console.log(`${cond.name} | ${how} | ${row.inputDelay} | ${row.handler} | ${row.toNextFrame} | ${row.duration} | ${row.heartbeatGap} | ${row.longTasks}${row.failed ? ` | ${row.failed} failed` : ''}   (worst inputDelay ${row.worstInputDelay}, worst duration ${row.worstDuration})`);
+    console.log(`${cond.name} | ${how} | ${row.inputDelay} | ${row.handler} | ${row.toNextFrame} | ${row.duration} | ${row.heartbeatGap} | ${row.longTasks}${row.failed ? ` | ${row.failed} failed` : ''}   (worst inputDelay ${row.worstInputDelay}, worst duration ${row.worstDuration}; events name:delay/handler/duration ${row.slowest})`);
   }
   const worst = rows.reduce((a, r) => (r.worstInputDelay > a.worstInputDelay ? r : a), rows[0]);
   const verdict = worst.worstInputDelay > 100 && worst.heartbeatGap < 100 && worst.handler < 50
