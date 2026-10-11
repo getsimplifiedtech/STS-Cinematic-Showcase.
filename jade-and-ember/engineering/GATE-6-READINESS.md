@@ -1,5 +1,7 @@
 # Gate 6 readiness summary (Phase 9, `APR-JE-037`)
 
+> **G6-3 update (2026-10-11, `APR-JE-040`).** G6-1 and G6-2 are closed; G6-3 is authorised (see the record and `G6-3-SCOPE.md`). G6-0 and G6-4 to G6-8 remain unauthorised.
+
 > **G6-2 update (2026-10-11, `APR-JE-039`).** G6-1 is closed; G6-2 is authorised (see the record). G6-0 and G6-3 to G6-8 remain unauthorised.
 
 > **Update (`APR-JE-038`, 2026-10-11):** Gate 5 is closed and **G6-1 is authorised** within the scope recorded in the matrix (restrictions: no deployment, no merge into main, no extraction, no release-model redesign, no redesign or media change, no weakening of the CSP or release requirements, no automatic dependency merging, no paid services). The owner chose to authorise G6-1 ahead of G6-0 (the matrix lists G6-0 as a dependency; this page already noted G6-1 is independent of it). G6-2 onward remain unauthorised, and G6-2 may not start before the owner has reviewed the G6-1 completion report. The text below is the snapshot delivered for review. Correction: the three-runs-median wording in section 3 was the Phase 6 assumption; Lighthouse CI actually used the optimistic aggregation, and the direct runner asserts the median (never kinder). `setup-node` v7.0.0, not v7.1.0, is pinned.

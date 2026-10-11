@@ -1,5 +1,7 @@
 # Gate 6 implementation order, dependencies and release blockers (Gate 5 Phase 8, `APR-JE-036`)
 
+> **G6-3 update (2026-10-11, `APR-JE-040`).** G6-2 is closed by the owner as an engineering milestone (client-production release authorisation is not complete). G6-3 is authorised; its scope is reconciled with this document in `G6-3-SCOPE.md`, which also records a blocking architectural gap: **no work package in this plan implements authenticated release authorisation and build provenance (RG-14, RB-15)**. G6-4 onward remain unauthorised.
+
 > **G6-2 update (2026-10-11, `APR-JE-039`).** G6-1 is closed by the owner. G6-2 (release model v2) is authorised according to this document, with nine required controls (record `APR-JE-039`) and the instruction to stop and present alternatives for any part of the trust model that cannot be resolved safely from the approved architecture. G6-0 was not run first; G6-3 onward remain unauthorised.
 
 > **G6-1 update (2026-10-11, `APR-JE-038`).** G6-1 is authorised and delivered for review (`G6-1-REPORT.md`). Corrections to the G6-1 paragraph below: the Actions pinned are `actions/checkout` v7.0.1 (`3d3c42e5…`) and `actions/setup-node` **v7.0.0** (`82076278…`, not v7.1.0), and the Lighthouse thresholds are asserted on the **median** of three runs, whereas Lighthouse CI actually used the optimistic aggregation (not the median, as the Phase 6 documents said); the median is never kinder than the optimistic method. G6-2 and later remain unauthorised.

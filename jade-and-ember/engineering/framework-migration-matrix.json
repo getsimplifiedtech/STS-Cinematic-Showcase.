@@ -1132,7 +1132,10 @@
     "jade-and-ember/engineering/G6-1-REPORT.md",
     "jade-and-ember/engineering/g6-1-evidence/",
     "jade-and-ember/engineering/G6-2-REPORT.md",
-    "jade-and-ember/engineering/g6-2-evidence/"
+    "jade-and-ember/engineering/g6-2-evidence/",
+    "jade-and-ember/engineering/G6-3-SCOPE.md",
+    "jade-and-ember/engineering/G6-3-REPORT.md",
+    "jade-and-ember/engineering/g6-3-evidence/"
    ],
    "target": "stays (absorbed by the framework specification at G6-0)",
    "external": [
@@ -1313,7 +1316,7 @@
     "RB-09",
     "RB-13"
    ],
-   "status": "authorised by APR-JE-039; in progress",
+   "status": "closed by APR-JE-040 as an engineering implementation milestone (client-production release authorisation is not complete)",
    "scope": {
     "repository": "getsimplifiedtech/STS-Cinematic-Showcase.",
     "branch": "feature/jade-and-ember-v0.9",
@@ -1362,13 +1365,15 @@
      "jade-and-ember/engineering/environment.json",
      "jade-and-ember/engineering/evidence/"
     ],
-    "amendments": []
+    "amendments": [],
+    "endCommit": "485e513978bc45bac69f764d08d84921cf0233a3",
+    "closedBy": "APR-JE-040"
    }
   },
   {
    "id": "G6-3",
    "title": "Requirement completion",
-   "summary": "Add the previously approved requirements to the gate: external links (D-P5-1), media rights bound to the asset inventory digest (D-P5-4) with provider-terms evidence (D-P5-5), dependency and security requirements incl. SBOM, provenance, exception expiry (D-P6-5, D-P6-7), crawler evaluation (D-P4-1), approved social image support (D-P4-3). The credit-link and Noto notice corrections need their own authorisation because they change delivered files.",
+   "summary": "Add the previously approved requirements to the gate: external links (D-P5-1), media rights bound to the asset inventory digest (D-P5-4) with provider-terms evidence (D-P5-5), dependency and security requirements incl. the composite SBOM, provenance evidence and exception expiry (D-P6-5, D-P6-7), crawler evaluation (D-P4-1), approved social image support (D-P4-3). The credit-link and Noto notice corrections need their own authorisation because they change delivered files. Authenticity (RG-14; authenticated authorisation and build provenance) is NOT implemented here: G6-3 adds a fail-closed authenticity requirement so that no client-production release path exists until it is implemented, and documents that the current plan allocates the implementation to no work package (a blocking architectural gap; decision requested, G6-3-SCOPE.md).",
    "dependsOn": [
     "G6-2"
    ],
@@ -1382,7 +1387,61 @@
     "RB-02",
     "RB-10",
     "RB-11"
-   ]
+   ],
+   "scope": {
+    "repository": "getsimplifiedtech/STS-Cinematic-Showcase.",
+    "branch": "feature/jade-and-ember-v0.9",
+    "baseCommit": "485e513978bc45bac69f764d08d84921cf0233a3",
+    "authorisedBy": "APR-JE-040",
+    "note": "Derived from GATE-6-IMPLEMENTATION-ORDER.md (G6-3), the approved decisions D-P5-1, D-P5-4, D-P6-5, D-P6-7, D-P4-1 and D-P4-3, and the owner's G6-3 authorisation (APR-JE-040). Allowed: the approvals ledger, the media-rights policy note, the project package scripts and the engineering folder (release policy, gate, records, tools, libraries, checks and their self-tests, the dependency register, the matrix and documents). Denied: the master framework repository, the main and baseline branches, every delivered page, style, script, font, media file and configuration, the renderer and sources (no change to the approved design, media or client-facing content; the credit-link and Noto notice corrections need their own authorisation), the lockfile and the workflow, the security policy and CSP code, the hosting adapters, the recorded asset manifest, media-rights inventory, external-destination registry and its verification history, the crawler record, the findings register, the baseline records and the reviewer table (it stays empty: no reviewer identity is invented), and Gate 6 packages G6-4 onward.",
+    "allow": [
+     "docs/JADE_AND_EMBER_APPROVALS.md",
+     "docs/JADE_AND_EMBER_MEDIA_RIGHTS_POLICY.md",
+     "jade-and-ember/package.json",
+     "jade-and-ember/engineering/"
+    ],
+    "deny": [
+     ".github/",
+     "jade-and-ember/index.html",
+     "jade-and-ember/menu.html",
+     "jade-and-ember/order-online.html",
+     "jade-and-ember/our-story.html",
+     "jade-and-ember/visit-us.html",
+     "jade-and-ember/styles.css",
+     "jade-and-ember/site.js",
+     "jade-and-ember/hero.js",
+     "jade-and-ember/menu.js",
+     "jade-and-ember/media/",
+     "jade-and-ember/fonts/",
+     "jade-and-ember/config/",
+     "jade-and-ember/src/",
+     "jade-and-ember/build.mjs",
+     "jade-and-ember/serve.py",
+     "jade-and-ember/package-lock.json",
+     "jade-and-ember/baselines/",
+     "jade-and-ember/README.md",
+     "README.md",
+     "jade-and-ember/engineering/security.json",
+     "jade-and-ember/engineering/privacy.json",
+     "jade-and-ember/engineering/hosting/",
+     "jade-and-ember/engineering/lib/security.mjs",
+     "jade-and-ember/engineering/checks/security.mjs",
+     "jade-and-ember/engineering/assets.manifest.json",
+     "jade-and-ember/engineering/media-rights-inventory.json",
+     "jade-and-ember/engineering/search-crawler-verification.json",
+     "jade-and-ember/engineering/findings.json",
+     "jade-and-ember/engineering/baseline.json",
+     "jade-and-ember/engineering/immutability-allowlist.json",
+     "jade-and-ember/engineering/lighthouse.json",
+     "jade-and-ember/engineering/environment.json",
+     "jade-and-ember/engineering/evidence/",
+     "jade-and-ember/engineering/release/reviewers.json",
+     "jade-and-ember/engineering/external-destinations.json",
+     "jade-and-ember/engineering/external-links-verification.json"
+    ],
+    "amendments": []
+   },
+   "status": "authorised by APR-JE-040; in progress"
   },
   {
    "id": "G6-4",
@@ -1514,7 +1573,7 @@
    "id": "RG-01",
    "source": "APR-JE-036",
    "summary": "Approval and CI record cannot be bound to a commit from inside the repository",
-   "status": "open",
+   "status": "closed by G6-2 (APR-JE-040): blocking dry-run scenarios",
    "workPackage": "G6-2",
    "components": [
     "FM-18",
@@ -1547,7 +1606,7 @@
    "id": "RG-04",
    "source": "APR-JE-036",
    "summary": "A release-approval row saying REJECTED still counts",
-   "status": "open",
+   "status": "closed by G6-2 (APR-JE-040): blocking dry-run scenarios",
    "workPackage": "G6-2",
    "components": [
     "FM-18"
@@ -1557,7 +1616,7 @@
    "id": "RG-05",
    "source": "APR-JE-036",
    "summary": "A rights row saying NOT verified still counts",
-   "status": "open",
+   "status": "closed by G6-2 (APR-JE-040): blocking dry-run scenarios",
    "workPackage": "G6-2",
    "components": [
     "FM-18"
@@ -1567,7 +1626,7 @@
    "id": "RG-06",
    "source": "APR-JE-036",
    "summary": "A release-approval Type saying REVOKED still counts",
-   "status": "open",
+   "status": "closed by G6-2 (APR-JE-040): blocking dry-run scenarios",
    "workPackage": "G6-2",
    "components": [
     "FM-18"
@@ -1577,7 +1636,7 @@
    "id": "RG-07",
    "source": "APR-JE-036",
    "summary": "A search-review row saying NOT reviewed still counts",
-   "status": "open",
+   "status": "closed by G6-2 (APR-JE-040): blocking dry-run scenarios",
    "workPackage": "G6-2",
    "components": [
     "FM-18"
@@ -1587,7 +1646,7 @@
    "id": "RG-08",
    "source": "APR-JE-036",
    "summary": "A hand-written verification report satisfies the gate",
-   "status": "open",
+   "status": "closed by G6-2 (APR-JE-040) except the authenticity residual, which is RG-14",
    "workPackage": "G6-2",
    "components": [
     "FM-03",
@@ -1598,7 +1657,7 @@
    "id": "RG-09",
    "source": "APR-JE-036",
    "summary": "A stale recorded asset manifest does not block; only the package verifier notices",
-   "status": "open",
+   "status": "closed by G6-2 (APR-JE-040): blocking dry-run scenarios",
    "workPackage": "G6-2",
    "components": [
     "FM-07",
@@ -1641,7 +1700,7 @@
    "id": "RG-13",
    "source": "APR-JE-036",
    "summary": "The demonstration label is self-declared (client-style content passes as a demonstration)",
-   "status": "open",
+   "status": "closed by G6-2 (APR-JE-040): blocking dry-run scenarios",
    "workPackage": "G6-2",
    "components": [
     "FM-18"
@@ -1651,7 +1710,7 @@
    "id": "RG-14",
    "source": "APR-JE-036",
    "summary": "A fully re-forged package verifies; nothing is signed or anchored",
-   "status": "open",
+   "status": "open: authenticity (authenticated authorisation and build provenance) is not implemented and no work package is allocated; see OI-4 (APR-JE-040)",
    "workPackage": "G6-2",
    "components": [
     "FM-20"
@@ -1982,7 +2041,8 @@
    "id": "RB-09",
    "kind": "engineering",
    "text": "Release model v2: artifact-digest binding, structured approvals, authentic verification evidence, domain authorisation, restricted demonstration channel (RG-01, RG-04 to RG-08, RG-13, RG-14)",
-   "resolvedBy": "G6-2"
+   "resolvedBy": "G6-2",
+   "status": "engineering implemented in G6-2 (APR-JE-040); not an authorisation"
   },
   {
    "id": "RB-10",
@@ -2006,13 +2066,20 @@
    "id": "RB-13",
    "kind": "engineering",
    "text": "Provenance of CI evidence: the CI record is bound to the candidate artifact digest, not to the commit",
-   "resolvedBy": "G6-2"
+   "resolvedBy": "G6-2",
+   "status": "binding to the candidate digest implemented in G6-2; authenticity of the provenance is RB-15"
   },
   {
    "id": "RB-14",
    "kind": "engineering",
    "text": "A client build must pin a Framework Release; none exists (authority.json release is null)",
    "resolvedBy": "G6-0, G6-6, G6-8"
+  },
+  {
+   "id": "RB-15",
+   "kind": "engineering",
+   "text": "Authenticated release authorisation and independently verifiable build provenance (RG-14): GitHub artifact attestations, protected environments and owner approval (preferred) or detached owner signatures; the authorised GitHub identities verified; no client-production release path is enabled until this is implemented and independently verified (APR-JE-040)",
+   "resolvedBy": "not allocated to any current work package: decision requested (OI-4)"
   }
  ],
  "decisions": [
@@ -2239,6 +2306,41 @@
     "G6-1"
    ],
    "consequences": []
+  },
+  {
+   "id": "D-G62-1",
+   "text": "Authorised reviewers",
+   "ownerWords": "STS owner: final release and deployment authorization. Claude: implementation, technical assessment and evidence preparation; not an independent release approver. ChatGPT: architecture and evidence review; not an independent cryptographic signing authority. GitHub Actions: trusted verification producer only after repository, workflow, permissions and execution identity are authenticated. Verify actual authorized GitHub identities before enforcing the reviewer table.",
+   "status": "decided (APR-JE-040); recorded; the reviewer table stays empty until the identities are verified and named by the owner",
+   "workPackages": [
+    "G6-3"
+   ],
+   "consequences": []
+  },
+  {
+   "id": "D-G62-2",
+   "text": "Authenticity",
+   "ownerWords": "Client-production releases must eventually require authenticated authorization and independently verifiable build provenance. Evaluate GitHub artifact attestations, protected environments, and owner approval as the preferred architecture; detached owner signatures if these cannot satisfy the trust boundaries. Do not treat a plain JSON record, commit SHA, digest or manually supplied CI URL as proof of authenticity. Do not enable a client-production release path until the authenticity requirement is implemented and independently verified.",
+   "status": "decided (APR-JE-040); evaluated and made fail-closed in G6-3; implementation not allocated (OI-4)",
+   "workPackages": [
+    "G6-3"
+   ],
+   "consequences": [
+    {
+     "wp": "G6-3",
+     "mustMention": "authenticity"
+    }
+   ]
+  },
+  {
+   "id": "D-G62-3",
+   "text": "Demonstration identity",
+   "ownerWords": "Confirm DEMO-JE-001 for the fictional Jade & Ember demonstration. Maintain strict separation from client-production authorization.",
+   "status": "decided (APR-JE-040); confirmed",
+   "workPackages": [
+    "G6-3"
+   ],
+   "consequences": []
   }
  ],
  "operatingPrinciples": [
@@ -2308,6 +2410,16 @@
    "id": "OI-7",
    "text": "The reviewer evidence bundle: what ChatGPT receives to review evidence and architecture independently (commands, CI run links, hashes, the dry-run report) and how independence is evidenced.",
    "wp": "G6-0"
+  },
+  {
+   "id": "OI-4",
+   "text": "Which work package implements authenticated release authorisation and build provenance (RG-14, RB-15)? The current plan allocates it to none: G6-2 only evaluated it, G6-7 (centralised GitHub automation) is the nearest fit for a separate release workflow with attestation and a protected environment but comes after hosting, de-coupling and extraction, and G6-8 validates only afterwards. G6-3 adds a fail-closed requirement, so no client-production release path exists meanwhile. Decision requested (G6-3-SCOPE.md section 5).",
+   "wp": "G6-3"
+  },
+  {
+   "id": "OI-5",
+   "text": "The owner confirms which GitHub identities are the STS owner (the observed account carlito3k is the only collaborator, with admin rights, and Claude sessions push through it, so the identity alone does not distinguish a person from a session).",
+   "wp": "G6-3"
   }
  ]
 }

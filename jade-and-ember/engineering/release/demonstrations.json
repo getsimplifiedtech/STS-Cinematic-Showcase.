@@ -6,6 +6,7 @@
       "id": "DEMO-JE-001",
       "configurationDigest": "6516c509bd7278d2e4309974d2c29233fca9ac7ac19d4c299575b26457d1bbdc",
       "registeredBy": "APR-JE-039",
+      "confirmedBy": "APR-JE-040",
       "description": "The fictional Jade & Ember modern Chinese kitchen demonstration (config/*.json as committed at G6-2): demo flag on, noindex on, no production domain."
     }
   ]
