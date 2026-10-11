@@ -7,11 +7,11 @@ Requirements for a future, separately approved Cloudflare Pages deployment of th
 | Setting | Requirement | Class |
 |---|---|---|
 | Framework preset | None | T (`HOSTING.md`, static folder) |
-| Build command | None. The deployed folder is a **staged, checked bundle** produced outside Cloudflare (a build in Cloudflare's builder adds a Node version, a clone of a repository whose name ends with a dot, and a second place where the bytes can differ) | **G6** (staging step); D-P3-3 |
+| Build command | None. The deployed folder is a **staged, checked bundle** produced by the pipeline, so Cloudflare serves exactly what was checked (a build in Cloudflare's own builder adds a Node version and a second place where the bytes can differ). With the default GitHub-connected deployment (D-P3-3) the bundle is the content of the branch Cloudflare serves, with "framework preset: none" and no build command | **G6** (staging step); D-P3-3 |
 | Build output directory | The staged folder that holds `index.html`, the other four pages, `styles.css`, the scripts, `fonts/`, `media/` and `_headers` at its root | **G6** |
 | Environment variables | None. Exception to note: a paid plan that wants the 100,000-file limit needs `PAGES_WRANGLER_MAJOR_VERSION=4` (D); this site has 27 files and does not need it | D |
 | Functions, `_worker.js`, `_routes.json`, `_redirects`, `wrangler` file | None. `check:hosting` fails if any appears in the folder it inspects | T |
-| Deployment method | Direct upload of the staged bundle after the gate and the checksums pass. A Git-connected project is not recommended while the repository name ends with a dot (HR-07) | **L**; D-P3-3 |
+| Deployment method | **GitHub-connected deployment is the STS default (D-P3-3).** The pipeline must verify the exact staged artifact: the bundle is checked in CI, its file list and hashes are in the release manifest, and the bytes Cloudflare serves are compared with it after deployment (checklist C-07). Direct Upload of the same bundle is an optional alternative. This showcase repository's name ends with a dot (HR-07): confirm the integration accepts it before the first connected deployment, or use Direct Upload for the showcase | **L**; **G6** |
 | Production branch / preview branches | Not applicable to a direct upload; with Git, previews are non-production and carry `X-Robots-Tag: noindex` (D) | D |
 
 ## 2. Files the bundle must contain
@@ -24,7 +24,7 @@ Requirements for a future, separately approved Cloudflare Pages deployment of th
 | `serve.py`, `START-HERE.txt` | present in the release package (a hand-over package) | must **not** be deployed | **G6** |
 | `_headers` | `npm run host:files -- --out <dir>` (or `release:prepare`'s `host/_headers`), generated from the exact built pages | at the bundle root; regenerated after every rebuild because the CSP hashes belong to the exact bytes | T (content); **G6** (placement and a check of the final bundle) (HR-05) |
 | `sitemap.xml`, `robots.txt`, `llms.txt` | the client build | present for an indexable client build; absent for the demonstration | T |
-| `404.html` | **does not exist** | see section 4 | D-P3-1 |
+| `404.html` | **does not exist** | see section 4; **a proper 404 is required before live release (D-P3-1)** | D-P3-1 (requirement documented; page not created) |
 
 `check:hosting` rejects a folder that contains `_headers` (probe, 2026-10-11: `_headers is not a static web file type`), yet `HOSTING.md` tells the deployer to copy it in. The final bundle is therefore not covered by that check today (HR-05, **G6**).
 
@@ -47,7 +47,7 @@ Cloudflare documents that a project without a top-level `404.html` is treated as
 2. on the **fictional demonstration** (which publishes no `robots.txt`, `sitemap.xml` or `llms.txt`), those three paths answer 200 with the home page, so a crawler reading `/robots.txt` receives HTML;
 3. the local simulation answers 404 for all of these (probe), so no test sees it.
 
-This phase changes nothing. Options for the owner (D-P3-1): accept the behaviour and rely on `noindex` (meta today, header in Phase 4); or authorise a `404.html` as a separate, design-approved page (it is a new page, so it needs an owner decision on its design; visual proposal VP-3 "404 page" in `APR-JE-019` is not approved). The first live check (checklist C-04) records the real behaviour before any decision.
+**Owner decision D-P3-1 (`APR-JE-032`): proper 404 handling is required before live release.** The requirement is documented; no 404 page is created or redesigned now (visual proposal VP-3 "404 page" in `APR-JE-019` stays unapproved, so the page needs its own design decision). Until it exists, the behaviour above stands and the live-release requirement is open. The demonstration's `noindex` is defended by the meta tag and, since Phase 4, by an `X-Robots-Tag` header in the generated host files (it applies to every response the rule covers, including a fallback response, but a live check must confirm that). Checklist item C-04 records the real behaviour.
 
 ## 5. Security headers, CSP and caching
 
@@ -83,4 +83,4 @@ Any feature that changes the served HTML changes the bytes the CSP hashes were c
 1. A staged-bundle step exists, with a check of the **final** bundle (file list, `_headers` accepted, limits, no vendor file other than the adapter's) (**G6**).
 2. The simulation applies the generated `_headers` rules, models the unknown-path behaviour and serves `.xml` correctly (**G6**).
 3. The live checklist sections 1 to 4 (C-01 to C-14) and CF-1 to CF-6 have been run on an approved preview and the results are filed (**L**).
-4. Owner decisions D-P3-1, D-P3-3 and D-P3-4 are recorded.
+4. A proper 404 exists (D-P3-1), HSTS `includeSubDomains` is a per-client opt-in (D-P3-4) and the deployment pipeline verifies the exact staged artifact (D-P3-3); see `GATE-6-HOSTING-REQUIREMENTS.md`.

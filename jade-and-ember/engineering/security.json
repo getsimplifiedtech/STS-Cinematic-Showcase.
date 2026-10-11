@@ -34,6 +34,10 @@
     "code": "no-cache",
     "static": "public, max-age=604800"
   },
+  "noindexHeaders": {
+    "$comment": "Gate 5 Phase 4 (APR-JE-032). Defence in depth for the FICTIONAL demonstration: when every built page carries the robots noindex meta tag, the generated host files (_headers, nginx, Apache) also send this response header, so the demonstration stays out of search results even if a host rewrites or strips the HTML. An indexable client build never gets it. It is not a security header and is not part of securityHeaders(), the CSP or the simulations; it is added only to the host-file renderings.",
+    "X-Robots-Tag": "noindex, nofollow"
+  },
   "forbidden": {
     "cspSources": ["'unsafe-inline'", "'unsafe-eval'", "*", "http:", "https:", "blob:", "filesystem:"],
     "$comment2": "data: is allowed for img-src only (the inline favicon)."

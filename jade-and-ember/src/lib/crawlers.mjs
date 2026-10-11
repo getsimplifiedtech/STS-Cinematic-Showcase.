@@ -8,12 +8,14 @@
 //    be told apart; Google-Extended is a control token for model training and grounding, not a separate crawler. Bing's AI answers use Bingbot.
 //  - Some fetches are made on behalf of a person typing a request (the *-User agents); providers state that robots.txt may not apply to
 //    those, and they are listed so a client can choose, not as a guarantee.
-//  - The agent names below were written from the providers' published documentation as known when this was written. They were NOT re-fetched
-//    when this file was written (the sandbox has no network). Re-verify each against the provider's page before a production release; the
-//    search review (release gate) records that the policy was reviewed. Providers add and rename agents without notice.
+//  - The agent names were re-checked on 2026-10-11 against summaries of the providers' official pages (the pages themselves could not be fetched
+//    from the sandbox); the dated, sourced record is engineering/search-crawler-verification.json; `npm run check:seo` fails if it is missing or
+//    disagrees with this list, and the release gate refuses a client-production build while a person has not re-read the pages (confirmedByPerson is
+//    false there today) or the review is older than its stated age limit.
+//    Providers add and rename agents without notice: re-verify before each production release; the search review (release gate) records it.
 export const CRAWLERS = Object.freeze({
-  reviewed: '2026-10-10',
-  verifiedAgainstProviderDocs: false,
+  reviewed: '2026-10-11',
+  verifiedAgainstProviderDocs: false,   // a person has not re-read the pages; see engineering/search-crawler-verification.json (confirmedByPerson)
   classes: Object.freeze({
     search: Object.freeze({
       meaning: 'search indexing: the crawlers that build the classic search indexes',

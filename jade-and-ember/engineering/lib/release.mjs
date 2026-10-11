@@ -9,7 +9,8 @@ import { engDir, projectDir, readJson, repoRoot, sha256 } from './git.mjs';
 import { findApproval, findRightsVerification, findSearchReview, loadApprovals } from './approvals.mjs';
 import { isReservedHost } from '../../src/lib/seo.mjs';
 import { buildManifest } from './hashed.mjs';
-import { buildCsp, loadPolicy as loadSecurityPolicy, inlineItems, securityHeaders } from './security.mjs';
+import { crawlerReviewGaps } from './search.mjs';
+import { buildCsp, loadPolicy as loadSecurityPolicy, inlineItems, robotsHeaders, securityHeaders } from './security.mjs';
 
 export const loadReleasePolicy = () => readJson(join(engDir, 'release', 'policy.json'));
 const sha = (s) => createHash('sha256').update(s).digest('hex');
@@ -60,6 +61,7 @@ export function collectContext(o = {}) {
     git: o.git || gitState(), verify: o.verify === undefined ? loadVerifyReport() : o.verify,
     assets: o.assets, buildOk: o.buildOk ?? true, siteDir: o.siteDir || null,
     evidence: o.evidence || loadEvidence(), assetsManifestMatches: o.assetsManifestMatches ?? true,
+    crawlerRecord: o.crawlerRecord === undefined ? readJson(join(engDir, 'search-crawler-verification.json')) : o.crawlerRecord,
   };
 }
 
@@ -89,7 +91,7 @@ export function evaluateGate(ctx, policy = loadReleasePolicy()) {
   let baseHost = null; try { baseHost = new URL(sd.baseUrl).hostname; } catch { /* reported below */ }
   const review = findSearchReview(ctx.approvals, ctx.searchDigest);
   const crawlersExplicit = sd.crawlers && ['search', 'aiSearch', 'training'].every((k) => sd.crawlers[k] === 'allow' || sd.crawlers[k] === 'disallow');
-  const searchGaps = [!sd.host && 'seo.host is not declared (cloudflare-pages, vercel or static)', !crawlersExplicit && 'seo.crawlers does not state a decision for search, aiSearch and training', ctx.siteHasSearchFiles === false && 'sitemap.xml, robots.txt or llms.txt is missing from the built site', !ctx.searchDigest && 'there are no search artifacts to review', ctx.searchDigest && !review && 'no search-review record for the current search artifacts (npm run release:search-digest prints the digest to review)'].filter(Boolean);
+  const searchGaps = [!sd.host && 'seo.host is not declared (cloudflare-pages, vercel or static)', !crawlersExplicit && 'seo.crawlers does not state a decision for search, aiSearch and training', ctx.siteHasSearchFiles === false && 'sitemap.xml, robots.txt or llms.txt is missing from the built site', !ctx.searchDigest && 'there are no search artifacts to review', ctx.searchDigest && !review && 'no search-review record for the current search artifacts (npm run release:search-digest prints the digest to review)', ...crawlerReviewGaps({ record: ctx.crawlerRecord, today: ctx.today })].filter(Boolean);
   const checks = {
     cleanTree: [!ctx.git.dirty, ctx.git.dirty ? 'the working tree has uncommitted changes' : 'clean'],
     verifyPassed: [ctx.verify && ctx.verify.passed === true && ctx.verify.mode === 'full' && ctx.verify.commit === c && ctx.verify.dirty === false && (!ctx.assetsTree || ctx.verify.assetsTree === ctx.assetsTree), !ctx.verify ? 'no verification report: run npm run verify' : `report: mode ${ctx.verify.mode}, passed ${ctx.verify.passed}, commit ${String(ctx.verify.commit).slice(0, 7)} against ${c.slice(0, 7)}${ctx.verify.dirty ? ', run on a dirty tree' : ''}`],
@@ -134,7 +136,7 @@ export function buildReleaseManifest(ctx, { siteDir, qaReport = ctx.verify, pack
     framework: { repository: ctx.authority.framework.repository, branch: ctx.authority.framework.branch, commit: ctx.authority.framework.commit, release: ctx.authority.framework.release, skillSha256: ctx.authority.creativeAuthority.skillSha256, licenseSha256: ctx.authority.creativeAuthority.licenseSha256, modifiedByThisProject: ctx.authority.framework.modifiedByThisProject },
     configuration: { files: ctx.files, treeSha256: sha(Object.entries(ctx.files).map(([k, v]) => `${v}  ${k}`).join('\n') + '\n'), flags: { demo: ctx.client.flags.demo, heroVideo: ctx.client.flags.heroVideo, noindex: ctx.client.seo.noindex, structuredData: ctx.client.seo.structuredData }, orderingLive: typeof ctx.client.ordering.url === 'string', baseUrl: ctx.client.seo.baseUrl },
     assets: { treeSha256: am.treeSha256, fileCount: am.fileCount, totalBytes: am.totalBytes, manifestMatches: recorded ? recorded.treeSha256 === am.treeSha256 : false },
-    search: { artifactsDigest: sdig, files: ['sitemap.xml', 'robots.txt', 'llms.txt'].filter((f) => existsSync(join(siteDir, f))), host: ctx.client.seo.host ?? null, urlStyle: ctx.client.seo.urlStyle ?? 'extension', crawlers: ctx.client.seo.crawlers ?? null, baseUrlReserved: (() => { try { return isReservedHost(new URL(ctx.client.seo.baseUrl).hostname); } catch { return null; } })() },
+    search: { artifactsDigest: sdig, files: ['sitemap.xml', 'robots.txt', 'llms.txt'].filter((f) => existsSync(join(siteDir, f))), host: ctx.client.seo.host ?? null, urlStyle: ctx.client.seo.urlStyle ?? 'extension', crawlers: ctx.client.seo.crawlers ?? null, baseUrlReserved: (() => { try { return isReservedHost(new URL(ctx.client.seo.baseUrl).hostname); } catch { return null; } })(), crawlerReview: ctx.crawlerRecord ? { verifiedOn: ctx.crawlerRecord.verifiedOn, confirmedByPerson: ctx.crawlerRecord.confirmedByPerson === true, maxAgeDays: ctx.crawlerRecord.maxAgeDays, agents: (ctx.crawlerRecord.agents || []).length } : null, noindexHeader: Object.keys(robotsHeaders(siteDir)).length > 0 },
     security: { cspSha256: sha(csp), headers: Object.keys(securityHeaders(siteDir, policy)).sort(), inlineScriptHashes: items.scripts.length, inlineStyleHashes: items.styles.length },
     qa: { verified: Boolean(qaReport && qaReport.passed && qaReport.mode === 'full' && qaReport.commit === c && qaReport.dirty === false), report: qaReport ? { mode: qaReport.mode, passed: qaReport.passed, commit: qaReport.commit ?? null, checks: qaReport.results.map((r) => ({ id: r.id, status: r.passed ? 'pass' : 'fail' })) } : null },
     approvals: { required: [...required].sort(), present: have.filter((a) => required.includes(a.id) || /release|rights|deployment|search/i.test(a.type)).map((a) => ({ id: a.id, date: a.date, type: a.type })), missing: required.filter((r) => !have.some((a) => a.id === r)), releaseApproval: rel?.id || null, rightsVerification: rights?.id || null, deploymentApproval: dep?.id || null },

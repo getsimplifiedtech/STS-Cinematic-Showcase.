@@ -37,7 +37,7 @@ export function greenClientContext(over = {}) {
     ...base, client, version, pkg: { ...base.pkg, version: '1.0.0' }, channel: 'client-production', findings: [{ id: 'F-1', severity: 'Minor', visual: false, status: 'open' }],
     git: { commit: C, tree: C, branch: 'release', dirty: false, commitDate: '2026-10-10T00:00:00Z' }, verify: { mode: 'full', passed: true, commit: C, dirty: false, assetsTree: FIXTURE_TREE, results: [] }, assetsTree: FIXTURE_TREE, buildOk: true,
     approvals: [...base.authority.records.requiredApprovals.map((id) => ({ id, date: '2026-10-10', type: 'approval', decision: 'x', concerns: '', limits: '' })), { id: 'REL-JE-001', date: '2026-10-10', type: 'release-approval', decision, concerns: '', limits: '' }, { id: 'SRCH-JE-001', date: '2026-10-10', type: 'search-review', decision: `Reviewed by the owner on 2026-10-10: business facts, structured data, crawler policy. digest: ${DIGEST}`, concerns: '', limits: '' }, { id: 'RIGHTS-JE-001', date: '2026-10-10', type: 'rights-verification', decision: 'Verified by the owner against the sources reviewed (generator terms) on 2026-10-10', concerns: '', limits: '' }],
-    evidence: fx.entries.map((e) => ({ ...e, type: e.record.type })), evidenceVctx: { git: fv.git, fs: fv.fs, today: fv.today }, searchDigest: DIGEST, siteHasSearchFiles: true, ...over,
+    evidence: fx.entries.map((e) => ({ ...e, type: e.record.type })), evidenceVctx: { git: fv.git, fs: fv.fs, today: fv.today }, searchDigest: DIGEST, siteHasSearchFiles: true, crawlerRecord: { ...base.crawlerRecord, confirmedByPerson: true }, today: '2026-10-12', ...over,
   };
 }
 
@@ -137,6 +137,9 @@ export async function checkRelease({ root = null } = {}) {
       'a crawler policy that was never decided': { client: (() => { const c = greenClientContext().client; delete c.seo.crawlers; return c; })() },
       'a crawler policy missing the AI search decision': { client: (() => { const c = greenClientContext().client; delete c.seo.crawlers.aiSearch; return c; })() },
       'llms.txt, robots.txt or sitemap.xml missing from the build': { siteHasSearchFiles: false },
+      'crawler identities that no person has re-read against the providers': { crawlerRecord: { ...greenClientContext().crawlerRecord, confirmedByPerson: false } },
+      'a crawler review older than its age limit': { today: '2027-06-01' },
+      'no crawler verification record': { crawlerRecord: null },
       'indexing on without structured data': { client: (() => { const c = greenClientContext().client; c.seo.structuredData = false; return c; })() },
     };
     let blocked = 0;

@@ -22,6 +22,7 @@ export function pageMeta(html) {
     ogTitle: metaContent(html, /<meta property="og:title" content="([^"]*)">/g),
     ogDescription: metaContent(html, /<meta property="og:description" content="([^"]*)">/g),
     ogUrl: metaContent(html, /<meta property="og:url" content="([^"]*)">/g),
+    images: metaContent(html, /<meta (?:property|name)="(?:og:image|twitter:image)[^"]*" content="([^"]*)">/g),
     canonical: metaContent(html, /<link rel="canonical" href="([^"]*)">/g),
   };
 }
@@ -40,6 +41,8 @@ export function metadataProblems({ pagesHtml, cfg, indexable }) {
     if (d && seenD.has(d)) p.push(`${f}: the meta description is identical to that of ${seenD.get(d)} (descriptions must be unique per page)`); else if (d) seenD.set(d, f);
     if (m.ogTitle[0] !== t) p.push(`${f}: og:title differs from the title`);
     if (m.ogDescription[0] !== d) p.push(`${f}: og:description differs from the meta description`);
+    // og:image / twitter:image need a licensed, approved image; none exists (media rights are not verified), so none may be emitted (Gate 5 Phase 4)
+    if (m.images.length) p.push(`${f}: a social preview image (${m.images[0]}) is declared, but no licensed, approved image exists; generate none until the media rights are verified and the owner approves one`);
     if (indexable) {
       if (m.ogUrl.length !== 1) p.push(`${f}: expected one og:url, found ${m.ogUrl.length}`);
       else if (m.ogUrl[0] !== publicUrl(cfg, page)) p.push(`${f}: og:url ${m.ogUrl[0]} is not the page's public URL ${publicUrl(cfg, page)}`);
@@ -237,4 +240,51 @@ export async function urlStrategyProblems({ dir, cfg, publicUrls, host = null })
     }
   } finally { sv.close(); }
   return { problems: p, sim, hops, links };
+}
+
+// ---- the crawler-identity review record (engineering/search-crawler-verification.json): one dated, sourced, confirmed entry per agent in the policy
+const PROVIDER_HOSTS = /^https:\/\/(developers\.google\.com|www\.bing\.com|duckduckgo\.com|support\.apple\.com|developers\.openai\.com|platform\.openai\.com|help\.openai\.com|docs\.perplexity\.ai|www\.perplexity\.ai|support\.claude\.com|support\.anthropic\.com|commoncrawl\.org|developers\.facebook\.com)\//;
+export function crawlerRecordProblems({ record, crawlers = CRAWLERS, today = new Date().toISOString().slice(0, 10) }) {
+  const p = [], days = (a, b) => Math.round((Date.parse(b) - Date.parse(a)) / 86400000);
+  const isDate = (d) => /^\d{4}-\d{2}-\d{2}$/.test(d) && !Number.isNaN(Date.parse(d));
+  if (!record || typeof record !== 'object') return ['the crawler verification record is missing or not an object'];
+  if (!isDate(record.verifiedOn)) p.push('verifiedOn must be a date such as 2026-10-11');
+  else if (record.verifiedOn > today) p.push(`verifiedOn ${record.verifiedOn} is in the future`);
+  if (typeof record.method !== 'string' || record.method.trim().length < 20) p.push('method must say how the review was done (what could and could not be fetched)');
+  if (typeof record.confirmedByPerson !== 'boolean') p.push('confirmedByPerson must be true or false (a person re-reading the pages)');
+  if (!Number.isInteger(record.maxAgeDays) || record.maxAgeDays < 1) p.push('maxAgeDays must be a positive whole number');
+  if (crawlers.reviewed !== record.verifiedOn) p.push(`CRAWLERS.reviewed (${crawlers.reviewed}) must equal the record's verifiedOn (${record.verifiedOn}): update both together`);
+  const entries = Array.isArray(record.agents) ? record.agents : [];
+  const seen = new Map();
+  for (const e of entries) {
+    const w = `agent ${e && e.agent}`;
+    if (!e || typeof e.agent !== 'string') { p.push('an entry has no agent name'); continue; }
+    if (seen.has(e.agent)) p.push(`${w}: listed twice`);
+    seen.set(e.agent, e);
+    const cls = Object.entries(crawlers.classes).find(([, c]) => c.agents.includes(e.agent));
+    if (!cls) p.push(`${w}: is not an agent of the policy (move it to identitiesNotInPolicy, or add it to the policy with the owner's approval)`);
+    else if (e.class !== cls[0]) p.push(`${w}: recorded as class "${e.class}" but the policy puts it in "${cls[0]}"`);
+    if (typeof e.provider !== 'string' || !e.provider.trim()) p.push(`${w}: provider is missing`);
+    if (typeof e.source !== 'string' || !PROVIDER_HOSTS.test(e.source)) p.push(`${w}: source must be an https page on the provider's own site (got ${JSON.stringify(e.source)})`);
+    if (!isDate(e.verifiedOn)) p.push(`${w}: verifiedOn must be a date`);
+    else if (e.verifiedOn > today) p.push(`${w}: verifiedOn ${e.verifiedOn} is in the future`);
+    if (e.status !== 'confirmed') p.push(`${w}: status is "${e.status}"; only "confirmed" is acceptable (a changed or missing name means the policy list is out of date)`);
+    if (typeof e.finding !== 'string' || e.finding.trim().length < 20) p.push(`${w}: finding must state what the provider's page says`);
+  }
+  for (const a of KNOWN_AGENTS) if (!seen.has(a)) p.push(`agent ${a}: has no verification entry`);
+  for (const e of Array.isArray(record.identitiesNotInPolicy) ? record.identitiesNotInPolicy : []) if (KNOWN_AGENTS.includes(e.agent)) p.push(`agent ${e.agent}: is in the policy but listed as not in the policy`);
+  if (!Array.isArray(record.limits) || !record.limits.some((l) => /robots\.txt is a request/i.test(l))) p.push('limits must state that robots.txt is a request, not access control');
+  return p;
+}
+
+// What the RELEASE gate additionally asks (not CI, so the checks do not start failing by themselves as time passes): a person has re-read the
+// providers' pages, and the review is not older than the record's age limit.
+export function crawlerReviewGaps({ record, today = new Date().toISOString().slice(0, 10) }) {
+  const gaps = [], days = (a, b) => Math.round((Date.parse(b) - Date.parse(a)) / 86400000);
+  if (!record) return ['the crawler verification record is missing'];
+  if (record.confirmedByPerson !== true) gaps.push('the crawler identities have not been re-read against the providers\' pages by a person (search-crawler-verification.json confirmedByPerson is not true)');
+  const dates = [record.verifiedOn, ...(record.agents || []).map((a) => a.verifiedOn)].filter(Boolean).sort();
+  if (!dates.length) gaps.push('the crawler verification record carries no dates');
+  else if (days(dates[0], today) > record.maxAgeDays) gaps.push(`the crawler review is ${days(dates[0], today)} days old (limit ${record.maxAgeDays}): re-verify against the providers' pages`);
+  return gaps;
 }

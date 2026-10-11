@@ -1,4 +1,6 @@
-# Unresolved hosting risks (Gate 5 Phase 3, `APR-JE-031`)
+# Unresolved hosting risks (Gate 5 Phase 3, `APR-JE-031`; preserved for Gate 6 by `APR-JE-032`)
+
+**Owner decisions that touch this list (`APR-JE-032`):** D-P3-1 a proper 404 is required before live release (HR-01 becomes a release requirement); D-P3-2 indexable production sites use a domain or subdomain root (HR-18 narrows to non-indexable builds); D-P3-3 GitHub-connected deployment stays the default and the pipeline must verify the exact staged artifact (HR-05 and HR-07 become Gate 6 requirements); D-P3-4 HSTS `includeSubDomains` off by default for clients (HR-09); D-P3-5 no preview is authorised (every **L** item stays open); D-P3-6 provider documentation is re-verified before adapters (HR-14). See `GATE-6-HOSTING-REQUIREMENTS.md`.
 
 Severity is about consequence if the risk is real and unnoticed at launch, not about likelihood: **High** (broken delivery, broken security policy or misleading search behaviour), **Medium** (degraded behaviour, rework or an owner decision needed), **Low** (cosmetic or documentation). Classes (**T**, **D**, **L**, **G6**) are defined in `README.md`. Nothing here is a defect in the approved design or media; every risk concerns delivery.
 

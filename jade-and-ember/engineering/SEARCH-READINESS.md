@@ -1,4 +1,6 @@
-# Search and AI-discovery readiness (Gate 4 reconciliation, `APR-JE-024`)
+# Search and AI-discovery readiness (Gate 4 reconciliation, `APR-JE-024`; audited again in Gate 5 Phase 4, `APR-JE-032`)
+
+**Gate 5 Phase 4 re-audited every item against the standard as it stands on 2026-10-11: see [`SEARCH-AUDIT-GATE5.md`](SEARCH-AUDIT-GATE5.md)** (requirement-by-requirement result, the crawler review, the structured-data and `og:image` assessments, the `X-Robots-Tag` defence). This page keeps the Gate 4 mapping, updated where Phase 4 changed it.
 
 Maps the STS framework standard `architecture/11-core-search-ai-discovery-readiness-v1.md` (branch `feature/sts-core-ai-search-readiness`, proposed, read only) to what this project generates and checks. The standard tests **technical readiness**. Nothing here measures, promises or implies rankings, citations or inclusion in any search result or AI answer.
 
@@ -14,9 +16,9 @@ Maps the STS framework standard `architecture/11-core-search-ai-discovery-readin
 | 4 `robots.txt`: deliberate policy, sitemap URL | `robotsTxt` + crawler policy | `check:seo` (`robotsProblems`) | automated |
 | 5 **`llms.txt`** from verified business facts, links to canonical pages | `llmsTxt` | `check:seo` (`llmsProblems`), `check:hosting` (served from the root) | automated (this reconciliation) |
 | 6 Valid, accurate JSON-LD | `jsonLdFor` | `check:seo` (`validateRestaurant`, `factsProblems`) | automated |
-| 7 Open Graph and preview image | `og:title`, `og:description`, `og:type`, **`og:url`** (indexable only) | `check:seo` | `og:image` **not generated**: it needs licensed, approved media (proposal only, ENG-103) |
+| 7 Open Graph and preview image | `og:title`, `og:description`, `og:type`, **`og:url`** (indexable only) | `check:seo` | `og:image` **not generated** (needs licensed, approved media, ENG-103); since Phase 4 `check:seo` fails if any page declares `og:image` or `twitter:image` |
 | 8 Facts agree across HTML, JSON-LD, `llms.txt` | all from `client.json` | `factsProblems`, `llmsProblems`, the build's own `seoErrors` (structured-data address must appear in `client.address.lines`) | automated |
-| 9 Crawler policy per client, separating search, AI retrieval and training | `seo.crawlers` | `robotsProblems` | automated; the agent list needs re-verifying before release (below) |
+| 9 Crawler policy per client, separating search, AI retrieval and training | `seo.crawlers` | `robotsProblems` | automated; the agent list was re-checked on 2026-10-11 (`search-crawler-verification.json`); a person must re-read the pages before release (below) |
 | 10 Search assets in the deployable output, root and subpath semantics | `build.mjs` | `check:hosting`; a base URL with a path draws a warning because `robots.txt` is only read at the domain root | automated; live check needed |
 | Environment controls: no demo or staging leakage, no secrets or private paths | | `check:seo` (`hostProblems`, internal-path and demo-wording scans of `llms.txt`), release gate `productionDomain` | automated |
 | Human review gate: facts, schema choice, crawler policy | | release gate `searchReadiness` + a `search-review` approval bound to the artifacts' digest | **human** |
@@ -48,7 +50,7 @@ The validator compares it with the **pages**, not with the generator: the addres
 | `aiSearch` | OAI-SearchBot, ChatGPT-User, PerplexityBot, Perplexity-User, Claude-SearchBot, Claude-User | the `*-User` agents act for a person; providers say robots.txt may not apply to them |
 | `training` | GPTBot, ClaudeBot, Google-Extended, Applebot-Extended, CCBot, Meta-ExternalAgent | `Google-Extended` and `Applebot-Extended` are control tokens, not separate crawlers |
 
-**Limits, stated in the file and here.** robots.txt is a request, not access control; it does not control every AI system. Where a provider does not separate the classes the policy cannot either: Google uses Googlebot for search and its AI search features, and Bing's AI answers use Bingbot, so "block AI search" cannot be done for them without leaving search. **The agent names were written from the providers' published documentation as known when this was written and were not re-fetched (the sandbox has no network).** Re-verify each against the provider's page before a production release; the search review records that this was done.
+**Limits, stated in the file and here.** robots.txt is a request, not access control; it does not control every AI system. Where a provider does not separate the classes the policy cannot either: Google uses Googlebot for search and its AI search features, and Bing's AI answers use Bingbot, so "block AI search" cannot be done for them without leaving search. **Phase 4 (2026-10-11) re-checked all 16 names against summaries of the providers' official pages** (the pages themselves could not be fetched from the sandbox) and recorded the result in `engineering/search-crawler-verification.json`: every name was found, none renamed or retired; DuckAssistBot and Meta-ExternalFetcher exist and are not in the policy (owner decision D-P4-1). `check:seo` requires the record to match the policy. **A person has not re-read the pages**: the release gate (`searchReadiness`) refuses a client-production build until `confirmedByPerson` is true and the review is under 180 days old.
 
 ## Search review (release gate)
 
@@ -57,10 +59,14 @@ A client-production release needs, in addition to the release approval and right
 1. `seo.host` declared and every crawler class decided;
 2. `sitemap.xml`, `robots.txt`, `llms.txt` and the Home JSON-LD present in the build;
 3. a production domain: `seo.baseUrl` is not a reserved, example, local or preview/staging name (`*.test`, `example.com`, `localhost`, IP addresses, `*.pages.dev`, `*.vercel.app`, `*.netlify.app`, `*.github.io`, labels such as `staging` or `preview`, and similar);
-4. a **search-review** row in `docs/JADE_AND_EMBER_APPROVALS.md`: *Reviewed by NAME on DATE: business facts, structured data, crawler policy. digest: SHA-256*, where the digest is the output of `npm run release:search-digest` for exactly this build. Changing any fact, URL or crawler rule changes the digest and invalidates the review. The person checks: every fact against the client, the schema.org type, the crawler classes against the client's wishes and the provider pages, and the production domain.
+4. a **search-review** row in `docs/JADE_AND_EMBER_APPROVALS.md`: *Reviewed by NAME on DATE: business facts, structured data, crawler policy. digest: SHA-256*, where the digest is the output of `npm run release:search-digest` for exactly this build. Changing any fact, URL or crawler rule changes the digest and invalidates the review. The person checks: every fact against the client, the schema.org type, the crawler classes against the client's wishes and the provider pages (and re-reads those pages, recording it in `search-crawler-verification.json`), and the production domain.
 
 No such row exists, and none may be written for work that was not done.
 
+## The demonstration's header
+
+Besides the robots meta tag on all five pages, the generated host files (`_headers`, nginx, Apache) now send `X-Robots-Tag: noindex, nofollow` for the fictional demonstration, and never for an indexable client build (`security.json` `noindexHeaders`; checked by `check:hosting` and `check:security`). It protects the demonstration even if a host rewrites the HTML, but only where the generated file is used.
+
 ## Not covered
 
-`og:image` and social preview images (media not authorised); Organization, WebSite and breadcrumb schemas (Restaurant on Home only); `hreflang`; verifying the live site after deployment; Search Console or any search-engine submission; rankings, AI citations, inclusion.
+`og:image` and social preview images (media not authorised, assessed in Phase 4); Organization, WebSite and breadcrumb schemas (assessed in Phase 4: Restaurant on Home only, decision D-P4-2); `hreflang`; verifying the live site after deployment; Search Console or any search-engine submission; rankings, AI citations, inclusion.

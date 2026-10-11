@@ -112,4 +112,6 @@ Gate 4 added `DEPENDENCY-ADVISORIES.md` (evaluation of the 11 high development-d
 
 Gate 5 Phase 3 added `hosting/` (documents only, `APR-JE-031`): the hosting compatibility matrix, Cloudflare deployment requirements, the Vercel adapter specification, the reusable adapter interface, the unresolved hosting risks and the live-deployment verification checklist. No adapter, deployment or configuration file was created.
 
+Gate 5 Phase 4 (`APR-JE-032`, SEO and AI search readiness audit) added `SEARCH-AUDIT-GATE5.md` (requirement-by-requirement result), `search-crawler-verification.json` (the dated review of the 16 crawler identities, checked by `check:seo`; the release gate also asks for a person's re-read and an age under 180 days), the `X-Robots-Tag: noindex, nofollow` header for the fictional demonstration in the generated host files (`security.json` `noindexHeaders`; checked by `check:hosting` and `check:security`), a guard against any `og:image`/`twitter:image` while no licensed image exists, and the negative tests for all of these (`check:selftest-gate4`, `check:release`).
+
 Other documents here: `ENG-SECURITY.md` (security by delivery mode, the CSP, decision D-11), `CI.md` (the workflow and runner requirements). See `../../docs/JADE_AND_EMBER_V0.9_IMPLEMENTATION_PLAN.md`.

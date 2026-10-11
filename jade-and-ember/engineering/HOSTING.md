@@ -65,6 +65,7 @@ The pattern for an adapter already exists: one policy (`security.json`), several
 1. The demonstration and a realistic client build contain only static web files, an `index.html`, no application, function, redirect, vendor or secret files; the demonstration has no `sitemap.xml` or `robots.txt`, the indexable client build has all three (`sitemap.xml`, `robots.txt`, `llms.txt`).
 2. No source, configuration, delivered file or engineering rule refers to Vercel; no site script makes a network call.
 3. `_headers` generated for both builds, at the domain root and under a sub-path, parse as valid rules within the limits above and carry the CSP computed from the built pages.
+4. (Phase 4) The demonstration's host files also carry `X-Robots-Tag: noindex, nofollow` in the `/*` rule, once, and an indexable client build's never do (`security.json` `noindexHeaders`).
 
 ## What it does not prove
 

@@ -16,7 +16,7 @@ import { readdirSync, readFileSync, statSync, rmSync } from 'node:fs';
 import { join, relative, extname } from 'node:path';
 import { assembleCandidate } from '../lib/site.mjs';
 import { buildClient } from '../lib/client-fixture.mjs';
-import { buildCsp, loadPolicy, renderHeadersFile } from '../lib/security.mjs';
+import { buildCsp, loadPolicy, noindexState, renderHeadersFile, robotsHeaders } from '../lib/security.mjs';
 import { isMain, projectDir } from '../lib/git.mjs';
 
 export const PAGES_LIMITS = { rules: 100, lineChars: 2000, files: 20000, fileBytes: 25 * 1024 * 1024 };
@@ -87,6 +87,24 @@ export function checkHeadersFile(text, { root, policy = loadPolicy(), prefix = '
     }
   }
   for (const name of security) if (!seen.has(name)) problems.push(`${label}: ${name} is missing`);
+  // The demonstration's noindex defence in depth (Gate 5 Phase 4): the header is in the "/*" rule, exactly once, with the policy's value, when every built
+  // page is noindex; and an indexable build never carries it, in any rule.
+  if (root) {
+    const { $comment, ...wanted } = policy.noindexHeaders || {};
+    const state = noindexState(root);
+    for (const [name, value] of Object.entries(wanted)) {
+      const where = rules.filter((r) => r.headers.some(([k]) => k.toLowerCase() === name.toLowerCase()));
+      const all = rules.flatMap((r) => r.headers.filter(([k]) => k.toLowerCase() === name.toLowerCase()).map(([, v]) => [r.path, v]));
+      if (state === 'all') {
+        if (!all.length) problems.push(`${label}: the demonstration is noindex but the ${name} header is missing (defence in depth if a host rewrites the HTML)`);
+        else {
+          if (all.length > 1) problems.push(`${label}: ${name} appears ${all.length} times (Cloudflare joins matching rules, so it would be sent twice)`);
+          for (const [path, v] of all) { if (path !== `${prefix}/*`) problems.push(`${label}: ${name} in rule "${path}" (must be only in the "/*" rule)`); if (v !== value) problems.push(`${label}: ${name} is "${v}", the policy says "${value}"`); }
+        }
+      } else if (state === 'none' && all.length) problems.push(`${label}: ${name} appears in an indexable build (${where.map((r) => r.path).join(', ')}): it would keep the real site out of search results`);
+      else if (state === 'mixed') problems.push(`${label}: only some pages carry the robots noindex meta tag`);
+    }
+  }
   const catchAll = rules.find((r) => r.path === `${prefix}/*`);
   const csp = catchAll?.headers.find(([k]) => k.toLowerCase() === 'content-security-policy')?.[1];
   if (root && csp !== buildCsp(root, policy, { https: true })) problems.push(`${label}: the CSP in the file is not the policy computed from the built pages (regenerate it after every rebuild)`);
@@ -119,11 +137,17 @@ export async function checkHosting() {
     notes.push(`static folder: demonstration ${a.files} files (${a.pages} pages), client build ${b.files} files (${b.pages} pages, with robots.txt, sitemap.xml and llms.txt); no application, function, redirect or vendor file; all under the Pages limits`);
     let n = 0;
     for (const [name, root] of [['demonstration', demo], ['client build', client.dir]]) for (const prefix of ['', '/site']) {
-      const t = renderHeadersFile(root, policy, { prefix, https: true });
+      let t; try { t = renderHeadersFile(root, policy, { prefix, https: true }); } catch (e) { problems.push(`${name} _headers: ${e.message}`); continue; }
       const p = checkHeadersFile(t, { root, policy, prefix, label: `${name} _headers${prefix ? ' under ' + prefix : ''}` });
       problems.push(...p); n++;
     }
     notes.push(`_headers: ${n} renderings (2 builds x domain root and sub-path) within 100 rules and 2000-character lines; security headers once, in "/*" only; Cache-Control only in narrower rules; no immutable; CSP equals the computed policy`);
+    const stDemo = noindexState(demo), stClient = noindexState(client.dir);
+    if (stDemo !== 'all') problems.push(`the demonstration must be entirely noindex (found: ${stDemo})`);
+    if (stClient !== 'none') problems.push(`the client build must be entirely indexable (found: ${stClient})`);
+    if (stDemo === 'all' && !Object.keys(robotsHeaders(demo, policy)).length) problems.push('the demonstration gets no X-Robots-Tag header from the policy');
+    if (stClient === 'none' && Object.keys(robotsHeaders(client.dir, policy)).length) problems.push('an indexable client build would get an X-Robots-Tag header');
+    notes.push(`noindex defence in depth: the demonstration's host files carry ${Object.entries(robotsHeaders(demo, policy)).map(([k, v]) => `${k}: ${v}`).join('; ')} (meta tag on all pages, header in "/*"); the indexable client build carries none`);
     const v = checkNoVendor(); problems.push(...v);
     notes.push('no source, configuration, delivered file or engineering rule depends on Vercel (functionality is vendor independent)');
   } finally { rmSync(demo, { recursive: true, force: true }); rmSync(client.root, { recursive: true, force: true }); }

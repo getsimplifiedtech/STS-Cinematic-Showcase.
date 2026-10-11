@@ -14,7 +14,7 @@ import { readFileSync, writeFileSync, rmSync } from 'node:fs';
 import { join, dirname } from 'node:path';
 import { assembleCandidate, pagesOf } from '../lib/site.mjs';
 import { settleFonts } from '../lib/runtime.mjs';
-import { buildCsp, inlineItems, loadPolicy, parseCsp, renderApache, renderHeadersFile, renderNginx, securityHeaders } from '../lib/security.mjs';
+import { buildCsp, inlineItems, loadPolicy, noindexState, parseCsp, renderApache, renderHeadersFile, renderNginx, robotsHeaders, securityHeaders } from '../lib/security.mjs';
 
 import { serveSite } from '../lib/server.mjs';
 import { launchBrowser } from '../lib/browser.mjs';
@@ -51,10 +51,20 @@ export function checkSecurityStatic({ root, policy = loadPolicy() }) {
     const scripts = [...html.matchAll(/<script(?![^>]*\ssrc=)(?![^>]*type="application\/ld\+json")[^>]*>/g)].length;
     if (scripts > 1) bad(`${f} has ${scripts} inline scripts (one tiny bootstrap is the budget)`);
   }
+  // a build where only some pages are noindex gets no host files (see robotsHeaders): report it and stop, the page-level checks name the page
+  if (noindexState(root) === 'mixed') { bad('some pages carry the robots noindex meta tag and others do not: no host file can be generated for such a build'); return { problems, notes }; }
   // hosts renderings agree
   const h = securityHeaders(root, policy, { https: true });
   const files = { '_headers': renderHeadersFile(root, policy, { https: true }), nginx: renderNginx(root, policy, { https: true }), apache: renderApache(root, policy, { https: true }) };
   for (const [name, text] of Object.entries(files)) for (const [k, v] of Object.entries(h)) if (!text.includes(k) || !text.includes(v.replace(/"/g, name === '_headers' ? '"' : '\\"'))) bad(`the ${name} output is missing ${k} or its value`);
+  // the demonstration's noindex header (Gate 5 Phase 4) is in every rendering, with its value; a build that is not noindex has none of it
+  const rh = robotsHeaders(root, policy), robotsName = Object.keys(policy.noindexHeaders || {}).find((k) => k !== '$comment');
+  if (robotsName) for (const [name, text] of Object.entries(files)) {
+    const has = text.toLowerCase().includes(robotsName.toLowerCase());
+    if (Object.keys(rh).length && !has) bad(`the ${name} output is missing ${robotsName}, which keeps the noindex demonstration out of search results`);
+    if (!Object.keys(rh).length && has) bad(`the ${name} output carries ${robotsName} for a build that is not noindex`);
+    for (const [k, v] of Object.entries(rh)) if (!text.includes(v)) bad(`the ${name} output has ${k} without the value "${v}"`);
+  }
   const headerNames = Object.keys(h);
   for (const need of ['Content-Security-Policy', 'X-Content-Type-Options', 'Referrer-Policy', 'X-Frame-Options', 'Permissions-Policy', 'Cross-Origin-Opener-Policy', 'Strict-Transport-Security']) if (!headerNames.includes(need)) bad(`header ${need} is not produced`);
   notes.push(`policy: ${Object.keys(csp).length} CSP directives, no unsafe-inline or unsafe-eval; ${items.scripts.length} inline script and ${items.styles.length} inline style values allowed by hash (${Object.values(items.perPage).reduce((s, p) => s + p.styleAttributes, 0)} style attributes on ${Object.values(items.perPage).filter((p) => p.styleAttributes).length} pages); ${headerNames.length} headers; three host renderings agree`);

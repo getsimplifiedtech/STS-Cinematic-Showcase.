@@ -2,6 +2,8 @@
 
 What to do, and what to record, **when a non-production preview deployment is separately approved**. Nothing in this phase deploys anything; this is the procedure for later, written so that a person (or Claude with the owner's explicit approval for that deployment) can run it and file the result. Evidence rows refer to the risks in [UNRESOLVED-HOSTING-RISKS.md](UNRESOLVED-HOSTING-RISKS.md) and the matrix rows in [HOSTING-COMPATIBILITY-MATRIX.md](HOSTING-COMPATIBILITY-MATRIX.md).
 
+**No preview deployment is authorised (D-P3-5, `APR-JE-032`).** This checklist is a procedure for later; nothing in it may be run against a real host until a separate approval says so.
+
 ## 0. Preconditions (all must hold; none is true today)
 
 | # | Precondition |

@@ -1,6 +1,6 @@
 # Gate 5 Phase 3: hosting compatibility assessment
 
-**Status: delivered for owner review. Assessment and documentation only (`APR-JE-031`).** Nothing was deployed, no Vercel adapter exists, no preview or production site was created, no credit was spent, the STS framework repository was not touched, and the approved design and media are unchanged. The only files added or changed are documents and the approval records.
+**Status: APPROVED and CLOSED by the owner (`APR-JE-032`, assessment commit `ecd44ad`). Assessment and documentation only (`APR-JE-031`).** The owner's six decisions are recorded below and in [GATE-6-HOSTING-REQUIREMENTS.md](GATE-6-HOSTING-REQUIREMENTS.md); the assessment and every identified risk are preserved for Gate 6. Nothing was deployed, no Vercel adapter exists, no preview or production site was created, no credit was spent, the STS framework repository was not touched, and the approved design and media are unchanged. The only files added or changed are documents and the approval records.
 
 | Document | What it answers |
 |---|---|
@@ -10,6 +10,7 @@
 | [HOSTING-ADAPTER-INTERFACE.md](HOSTING-ADAPTER-INTERFACE.md) | The reusable interface every host adapter must satisfy, for Gate 6 framework integration |
 | [UNRESOLVED-HOSTING-RISKS.md](UNRESOLVED-HOSTING-RISKS.md) | The risks that remain, ranked, with what would close each |
 | [LIVE-DEPLOYMENT-VERIFICATION-CHECKLIST.md](LIVE-DEPLOYMENT-VERIFICATION-CHECKLIST.md) | The steps, expected results and evidence to record when a preview deployment is separately approved |
+| [GATE-6-HOSTING-REQUIREMENTS.md](GATE-6-HOSTING-REQUIREMENTS.md) | The owner's decisions as requirements, and everything the assessment found, carried into Gate 6 |
 
 The existing description of the hosting implementation stays in [`../HOSTING.md`](../HOSTING.md); this folder assesses it.
 
@@ -40,13 +41,15 @@ A row can carry several tags (for example **T + D**). The tag in **bold** is the
 5. **The delivered folder is not yet a checked artefact.** `check:hosting` inspects an assembled candidate, not the folder that would be uploaded. `HOSTING.md` tells the deployer to copy `_headers` into the output folder, and `check:hosting` rejects a folder that contains `_headers` (probe). The release package is a hand-over package (it contains `serve.py` and `START-HERE.txt`), not a deployment folder. A staged deployment bundle with its own check is needed (**G6**).
 6. **Anything that rewrites the HTML breaks the policy.** The CSP allows the inline script and six inline style attributes by SHA-256 hash of the built bytes. A host feature that minifies, injects a script or rewrites addresses changes those bytes. The first live check must compare the served bytes with the built bytes (**L**).
 
-## Decisions requested from the owner (none is taken here)
+## Owner decisions (`APR-JE-032`, 2026-10-11)
 
-| # | Decision | Recommendation |
+| # | Decision | Owner's answer |
 |---|---|---|
-| D-P3-1 | Cloudflare Pages unknown-path behaviour: accept the single-page-application fallback for now, or authorise a `404.html` page as a **separate, design-approved** change (it is a new page; this phase does not add one) | decide at Gate 6 or Phase 4; record the live result first (checklist C-04) |
-| D-P3-2 | Subpath hosting: support it only for non-indexable builds, or not at all; indexable client builds at a domain or subdomain root | root only for production |
-| D-P3-3 | Deployment method for Cloudflare Pages and Vercel: upload of a checked staged bundle, rather than the provider reading this repository (its name ends with a dot) | staged bundle |
-| D-P3-4 | HSTS: keep `includeSubDomains` in the header for a client domain, or drop it until the client confirms every subdomain serves HTTPS | drop for clients by default, keep as a setting |
-| D-P3-5 | Whether a first non-production preview of the fictional demonstration is wanted, and on which provider, as a separate approval (decision 6 in `GATE-5-PLAN.md`) | Cloudflare first, demo only, `noindex` preserved |
-| D-P3-6 | Which person re-reads the cited provider pages and files the dated evidence | a person, before Gate 6 |
+| D-P3-1 | Cloudflare Pages unknown-path behaviour | **Proper 404 handling is required before live release.** Documented as a requirement; no 404 page is created or redesigned now |
+| D-P3-2 | Subpath hosting | **Indexable production websites must use a domain or subdomain root** |
+| D-P3-3 | Deployment method | **GitHub-connected deployment remains the STS default; the pipeline must verify the exact staged deployment artifact; Direct Upload is an optional alternative** (this replaces the Phase 3 recommendation of a staged bundle only) |
+| D-P3-4 | HSTS | **`includeSubDomains` disabled by default for clients unless authorised** |
+| D-P3-5 | Preview deployment | **None is authorised** |
+| D-P3-6 | Provider documentation | **Must be re-verified before the hosting adapters are implemented** |
+
+What each requires of Gate 6 is in [GATE-6-HOSTING-REQUIREMENTS.md](GATE-6-HOSTING-REQUIREMENTS.md).

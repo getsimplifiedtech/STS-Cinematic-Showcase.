@@ -21,10 +21,10 @@ import { assembleCandidate, pagesOf } from '../lib/site.mjs';
 import { BUSINESS, buildClient } from '../lib/client-fixture.mjs';
 import { treeHash } from '../lib/hashed.mjs';
 import { hoursSpecs, publicUrl, urlStyleOf, isReservedHost } from '../../src/lib/seo.mjs';
-import { RIGHTS_CLAIM, factsProblems, hostProblems, llmsProblems, metadataProblems, readLlms, readRobotsGroups, reservedBase, robotsProblems, urlStrategyProblems } from '../lib/search.mjs';
+import { RIGHTS_CLAIM, crawlerRecordProblems, factsProblems, hostProblems, llmsProblems, metadataProblems, readLlms, readRobotsGroups, reservedBase, robotsProblems, urlStrategyProblems } from '../lib/search.mjs';
 import { checkSecurityStatic } from './security.mjs';
 import { checkPrivacyStatic } from './privacy.mjs';
-import { isMain, projectDir, readJson } from '../lib/git.mjs';
+import { engDir, isMain, projectDir, readJson } from '../lib/git.mjs';
 
 const LD_FORBIDDEN_KEYS = ['license', 'copyrightHolder', 'copyrightNotice', 'copyrightYear', 'creditText', 'acquireLicensePage', 'usageInfo', 'isAccessibleForFree'];
 const DAYS = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
@@ -173,6 +173,13 @@ export async function checkSeo({ root = null, browser = true, browserName = 'chr
     }
     const demoCfg = loadCfg(projectDir, join(projectDir, 'config'));
     problems.push(...metadataProblems({ pagesHtml: Object.fromEntries(pagesOf(dir).map((f) => [f, readFileSync(join(dir, f), 'utf8')])), cfg: demoCfg, indexable: false }).map((m) => `demonstration: ${m}`));
+    // the review record of the crawler identities (Gate 5 Phase 4): complete, dated, sourced, and the same list as the policy
+    try {
+      const rec = readJson(join(engDir, 'search-crawler-verification.json'));
+      const cp = crawlerRecordProblems({ record: rec });
+      problems.push(...cp.map((m) => `crawler record: ${m}`));
+      if (!cp.length) notes.push(`crawler identities: ${rec.agents.length} agents in the policy each confirmed against the provider's documentation on ${rec.verifiedOn} (${rec.confirmedByPerson ? 'a person re-read the pages' : 'from search summaries of the official pages; no person has re-read them yet, so the release gate will not accept it'}); ${rec.identitiesNotInPolicy.length} further identities recorded for the owner`);
+    } catch (e) { problems.push(`crawler record: cannot be read (${e.message})`); }
     notes.push('demonstration: all five pages noindex, nofollow; unique titles and descriptions; no og:url, canonical, JSON-LD, sitemap.xml, robots.txt or llms.txt (it is a fictional concept and is never presented as a real restaurant)');
 
     // client build

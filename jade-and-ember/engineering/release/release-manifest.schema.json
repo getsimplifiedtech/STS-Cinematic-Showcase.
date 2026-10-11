@@ -570,7 +570,9 @@
         "host",
         "urlStyle",
         "crawlers",
-        "baseUrlReserved"
+        "baseUrlReserved",
+        "crawlerReview",
+        "noindexHeader"
       ],
       "properties": {
         "artifactsDigest": {
@@ -608,6 +610,36 @@
             "boolean",
             "null"
           ]
+        },
+        "crawlerReview": {
+          "type": [
+            "object",
+            "null"
+          ],
+          "additionalProperties": false,
+          "required": [
+            "verifiedOn",
+            "confirmedByPerson",
+            "maxAgeDays",
+            "agents"
+          ],
+          "properties": {
+            "verifiedOn": {
+              "type": "string"
+            },
+            "confirmedByPerson": {
+              "type": "boolean"
+            },
+            "maxAgeDays": {
+              "type": "integer"
+            },
+            "agents": {
+              "type": "integer"
+            }
+          }
+        },
+        "noindexHeader": {
+          "type": "boolean"
         }
       }
     }

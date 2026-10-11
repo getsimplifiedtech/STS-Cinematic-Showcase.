@@ -9,14 +9,14 @@ import { checkPhone, WIDTHS as PHONE_WIDTHS } from './phone.mjs';
 import { checkSeo, checkSeoClient, readSitemap, readRobots } from './seo.mjs';
 import { findSearchReview } from '../lib/approvals.mjs';
 import { searchDigest } from '../lib/release.mjs';
-import { llmsProblems, readLlms, robotsProblems, urlStrategyProblems, metadataProblems, factsProblems, hostProblems, pageText } from '../lib/search.mjs';
+import { crawlerRecordProblems, crawlerReviewGaps, llmsProblems, readLlms, robotsProblems, urlStrategyProblems, metadataProblems, factsProblems, hostProblems, pageText } from '../lib/search.mjs';
 import { isReservedHost, publicUrl } from '../../src/lib/seo.mjs';
 import { checkFolder, checkHeadersFile } from './hosting.mjs';
 import { greenClientContext, policyProblems } from './release.mjs';
 import { buildClient } from '../lib/client-fixture.mjs';
 import { evaluateGate, loadReleasePolicy } from '../lib/release.mjs';
 import { reconcile } from '../lib/findings.mjs';
-import { loadPolicy, renderHeadersFile } from '../lib/security.mjs';
+import { loadPolicy, noindexState, renderHeadersFile, robotsHeaders } from '../lib/security.mjs';
 import { assembleCandidate, pagesOf } from '../lib/site.mjs';
 import { isMain, projectDir, readJson, tempDir } from '../lib/git.mjs';
 
@@ -51,6 +51,8 @@ const crawlers = (c) => build((n, o) => { if (n === 'client') o.seo.crawlers = c
 const css = (d, rule) => appendFileSync(join(d, 'styles.css'), '\n' + rule + '\n');
 const phoneOf = (d, file = 'visit-us.html') => checkPhone({ root: d, pages: [file], widths: [PHONE_WIDTHS[0], PHONE_WIDTHS[3]] }).then((r) => r.problems);
 const GREEN = () => greenClientContext();
+const crawlerRecord = () => clone(readJson(join(projectDir, 'engineering', 'search-crawler-verification.json')));
+const recProblems = (fn, over = {}) => { const r = crawlerRecord(); fn(r); return crawlerRecordProblems({ record: r, today: '2026-10-12', ...over }); };
 
 // [name, async () => problems[], expected regex]
 const cases = [
@@ -235,6 +237,41 @@ const cases = [
   ['hosting: an invalid header name', () => { const d = demoDir(); const t = renderHeadersFile(d, loadPolicy()) + '/x\n  Bad Name: v\n'; return checkHeadersFile(t, { root: d }); }, /not "Name: value"|valid header name/],
   ['hosting: the Strict-Transport-Security header missing', () => { const d = demoDir(); const t = renderHeadersFile(d, loadPolicy()).replace(/ {2}Strict-Transport-Security:.*\n/, ''); return checkHeadersFile(t, { root: d }); }, /strict-transport-security is missing/],
   ['hosting: Cache-Control placed in the catch-all rule', () => { const d = demoDir(); const t = renderHeadersFile(d, loadPolicy()).replace('/*\n', '/*\n  Cache-Control: no-cache\n'); return checkHeadersFile(t, { root: d }); }, /catch-all/],
+  // ---- Gate 5 Phase 4 (APR-JE-032): the crawler review record, og:image, the demonstration's X-Robots-Tag, and the release gate's crawler review
+  ['crawler record: an agent of the policy has no entry', () => recProblems((r) => { r.agents = r.agents.filter((a) => a.agent !== 'ClaudeBot'); }), /agent ClaudeBot: has no verification entry/],
+  ['crawler record: an entry for an agent outside the policy', () => recProblems((r) => { r.agents.push({ ...r.agents[0], agent: 'DuckAssistBot' }); }), /not an agent of the policy/],
+  ['crawler record: an agent listed twice', () => recProblems((r) => { r.agents.push({ ...r.agents[0] }); }), /listed twice/],
+  ['crawler record: an agent recorded in the wrong class', () => recProblems((r) => { r.agents.find((a) => a.agent === 'GPTBot').class = 'aiSearch'; }), /puts it in "training"/],
+  ['crawler record: a source that is not the provider\'s own page', () => recProblems((r) => { r.agents[0].source = 'https://blog.example.com/crawlers'; }), /provider's own site/],
+  ['crawler record: a source over http', () => recProblems((r) => { r.agents[1].source = 'http://www.bing.com/webmasters/help/which-crawlers-does-bing-use-8c184ec0'; }), /provider's own site/],
+  ['crawler record: a name reported as changed', () => recProblems((r) => { r.agents[2].status = 'changed'; }), /only "confirmed" is acceptable/],
+  ['crawler record: a name reported as not found', () => recProblems((r) => { r.agents[3].status = 'not-found'; }), /only "confirmed" is acceptable/],
+  ['crawler record: a verification date in the future', () => recProblems((r) => { r.agents[4].verifiedOn = '2027-01-01'; }), /in the future/],
+  ['crawler record: no verification date', () => recProblems((r) => { delete r.agents[5].verifiedOn; }), /verifiedOn must be a date/],
+  ['crawler record: the policy was reviewed on another day', () => recProblems((r) => { r.verifiedOn = '2026-10-09'; }), /CRAWLERS\.reviewed/],
+  ['crawler record: a finding that says nothing', () => recProblems((r) => { r.agents[6].finding = 'ok'; }), /finding must state/],
+  ['crawler record: the method is not stated', () => recProblems((r) => { r.method = ''; }), /method must say how/],
+  ['crawler record: the limits lose the robots.txt statement', () => recProblems((r) => { r.limits = ['nothing to see']; }), /robots\.txt is a request/],
+  ['crawler record: an agent of the policy listed as outside it', () => recProblems((r) => { r.identitiesNotInPolicy.push({ agent: 'Googlebot' }); }), /listed as not in the policy/],
+  ['crawler record: not an object', () => crawlerRecordProblems({ record: null }), /missing or not an object/],
+  ['crawler record: the untouched record is accepted (must find nothing)', () => recProblems(() => {}), null],
+  ['crawler review: nobody has re-read the pages (the release gate asks for it)', () => crawlerReviewGaps({ record: { ...crawlerRecord(), confirmedByPerson: false }, today: '2026-10-12' }), /not been re-read/],
+  ['crawler review: a review older than its limit', () => crawlerReviewGaps({ record: { ...crawlerRecord(), confirmedByPerson: true }, today: '2027-06-01' }), /days old/],
+  ['crawler review: no record at all', () => crawlerReviewGaps({ record: null }), /missing/],
+  ['crawler review: a person-confirmed, recent review has no gap (must find nothing)', () => crawlerReviewGaps({ record: { ...crawlerRecord(), confirmedByPerson: true }, today: '2026-10-12' }), null],
+  ['release: crawler identities not re-read by a person', () => blockedBy(gate({ crawlerRecord: { ...crawlerRecord(), confirmedByPerson: false } })), /searchReadiness.*not been re-read/],
+  ['release: a crawler review that has gone stale', () => blockedBy(gate({ crawlerRecord: { ...crawlerRecord(), confirmedByPerson: true }, today: '2027-06-01' })), /searchReadiness.*days old/],
+  ['release: no crawler record', () => blockedBy(gate({ crawlerRecord: null })), /searchReadiness.*crawler verification record is missing/],
+  ['og:image: the demonstration declares a preview image', () => { const d = demoDir(); edit(join(d, 'menu.html'), (t) => t.replace('<meta property="og:type"', '<meta property="og:image" content="https://example.test/a.png">\n<meta property="og:type"')); const cfg = { client: readJson(join(projectDir, 'config', 'client.json')), copy: readJson(join(projectDir, 'config', 'copy.json')), pages: readJson(join(projectDir, 'config', 'site.json')).pages }; return metadataProblems({ pagesHtml: Object.fromEntries(cfg.pages.map((p) => [p.file, readFileSync(join(d, p.file), 'utf8')])), cfg, indexable: false }); }, /social preview image .* no licensed, approved image/],
+  ['og:image: a client page declares an og:image', () => { const fx = client(); edit(join(fx.dir, 'menu.html'), (t) => t.replace('<meta property="og:type"', '<meta property="og:image" content="https://jadeandember.example.test/media/hero-wok.webp">\n<meta property="og:type"')); return wholeSeo(fx); }, /social preview image/],
+  ['og:image: a client page declares a twitter:image', () => { const fx = client(); edit(join(fx.dir, 'index.html'), (t) => t.replace('<meta property="og:type"', '<meta name="twitter:image" content="https://jadeandember.example.test/media/hero-wok.webp">\n<meta property="og:type"')); return wholeSeo(fx); }, /social preview image/],
+  ['noindex header: the demonstration host file loses X-Robots-Tag', () => { const d = demoDir(); const t = renderHeadersFile(d, loadPolicy()).replace(/ {2}X-Robots-Tag:.*\n/, ''); return checkHeadersFile(t, { root: d }); }, /noindex but the X-Robots-Tag header is missing/],
+  ['noindex header: the demonstration sends it with another value', () => { const d = demoDir(); const t = renderHeadersFile(d, loadPolicy()).replace('X-Robots-Tag: noindex, nofollow', 'X-Robots-Tag: all'); return checkHeadersFile(t, { root: d }); }, /the policy says "noindex, nofollow"/],
+  ['noindex header: a second rule repeats it', () => { const d = demoDir(); const t = renderHeadersFile(d, loadPolicy()) + '/menu.html\n  X-Robots-Tag: noindex, nofollow\n'; return checkHeadersFile(t, { root: d }); }, /appears 2 times|must be only in the "\/\*" rule/],
+  ['noindex header: an indexable client build carries it', () => { const fx = client(); const t = renderHeadersFile(fx.dir, loadPolicy()).replace('/*\n', '/*\n  X-Robots-Tag: noindex, nofollow\n'); return checkHeadersFile(t, { root: fx.dir }); }, /appears in an indexable build/],
+  ['noindex header: only some pages are noindex', () => { const d = demoDir(); const t = renderHeadersFile(d, loadPolicy()); edit(join(d, 'menu.html'), (h) => h.replace('<meta name="robots" content="noindex, nofollow">\n', '')); return checkHeadersFile(t, { root: d }); }, /only some pages carry the robots noindex meta tag/],
+  ['noindex header: a build with mixed pages gets no host file', () => { const d = demoDir(); edit(join(d, 'menu.html'), (h) => h.replace('<meta name="robots" content="noindex, nofollow">\n', '')); try { renderHeadersFile(d, loadPolicy()); return []; } catch (e) { return [e.message]; } }, /some pages carry the robots noindex meta tag and others do not/],
+  ['noindex header: the demonstration and the client build are told apart (must find nothing)', () => { const d = demoDir(), fx = client(); const out = []; if (noindexState(d) !== 'all' || !robotsHeaders(d).hasOwnProperty('X-Robots-Tag')) out.push('the demonstration gets no header'); if (noindexState(fx.dir) !== 'none' || Object.keys(robotsHeaders(fx.dir)).length) out.push('the client build gets a header'); return out; }, null],
 ];
 function assembleCandidateRef() { const d = assembleCandidate(projectDir, 'g4-ref'); sandbox.push(d); return d; }
 
