@@ -6,6 +6,8 @@
 //               it leave the normal appearance (pixels at seven widths) and every other reflow/spacing measurement unchanged?
 //   strip       F-G5-03: the Menu page category strip at phone width: is it a Tab stop, does it show a focus indicator, can the keyboard scroll it,
 //               is there a focus trap, do its links still work?
+// After the APR-JE-029 correction the shipped stylesheet already contains rule K11, so the 'none' rows of the sweep show the shipped result and the candidates are
+// injected on top of it. The script is kept for reference; it is no longer run in CI.
 // Output: lines "DIAG <name> <json>" and "PNG-BEGIN <name>" ... base64 lines ... "PNG-END <name>".
 import { join } from 'node:path';
 import { PNG } from 'pngjs';

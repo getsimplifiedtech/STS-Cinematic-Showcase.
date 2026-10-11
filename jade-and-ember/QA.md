@@ -338,16 +338,24 @@ Chromium 141.0.7390.37, Playwright 1.64.0, Node 22. **`npm run verify`: 32 of 32
 | Production-release blockers | Unchanged: no release approval, rights verification or search review; no real-device, screen-reader or browser-matrix evidence; version 0.9.0-dev; hosting behaviour simulated only; external links unchecked; advisories accepted. |
 
 ## v0.9 Gate 5, Phase 1: Firefox and WebKit verification (2026-10-10, `APR-JE-027`)
-Two informational GitHub Actions jobs run the 14 browser-driven checks in Firefox 157.0 and WebKit 27.2 (Playwright 1.64.0's own builds; WebKit is the Linux build, not Safari on macOS or iOS). The Chromium job and its performance budgets are unchanged. Nothing is skipped silently: each job ends with a matrix of all 34 checks (PASS, FAIL, N/A with the reason). The checks that cannot run outside Chromium are `check:budgets` (needs the DevTools protocol and Event Timing, LCP and long-task APIs; its static page-weight part runs in the Chromium job) and the self-tests (they prove the checks, not the engine).
+Two informational GitHub Actions jobs run the browser-driven checks (14 at first, 15 with `check:supports`, added with the correction below) in Firefox 157.0 and WebKit 27.2 (Playwright 1.64.0's own builds; WebKit is the Linux build, not Safari on macOS or iOS). The Chromium job and its performance budgets are unchanged. Nothing is skipped silently: each job ends with a matrix of all 34 checks (PASS, FAIL, N/A with the reason). The checks that cannot run outside Chromium are `check:budgets` (needs the DevTools protocol and Event Timing, LCP and long-task APIs; its static page-weight part runs in the Chromium job) and the self-tests (they prove the checks, not the engine).
 
 | Check | Chromium | Firefox 157.0 | WebKit 27.2 |
 |---|---|---|---|
 | media, seo, privacy, security, assets, d11 (CSP and D-11), a11y-tree, order, phone, forced-colors, reflow-at-default, regression vs v0.8 | pass | pass | pass |
 | keyboard | pass | pass (F-G5-03 recorded) | pass |
 | portability | pass | pass (F-G5-02 recorded) | pass (F-G5-01 recorded) |
-| reflow (text spacing) | pass | pass | pass (F-G5-04 recorded) |
+| reflow (text spacing, now at 390, 1024, 1100, 1280 and 1440 px) | pass | pass | pass (F-G5-04 resolved by the correction below) |
 
-Genuine engine differences are findings F-G5-01 to F-G5-04 in `engineering/findings.json` (all open for owner decision, no page changed). Firefox cannot honour the `isMobile` context option; it is dropped and printed as `ADAPTED`. Real Safari, iOS, Android and screen-reader evidence is not produced by these jobs and stays a human task.
+Genuine engine differences were findings F-G5-01 to F-G5-04 in `engineering/findings.json`: F-G5-01 and F-G5-02 accepted (APR-JE-028), F-G5-03 accepted and closed after verification, F-G5-04 corrected (below). Firefox cannot honour the `isMobile` context option; it is dropped and printed as `ADAPTED`. Real Safari, iOS, Android and screen-reader evidence is not produced by these jobs and stays a human task.
+
+### Gate 5 Phase 1 correction (2026-10-11, `APR-JE-029`)
+**F-G5-04 (WebKit: Visit hours table under text spacing) is corrected** by one approved rule in `styles.css`: `@supports (hanging-punctuation:first){.hours th{white-space:normal;min-width:max-content}}`. Root cause, candidates and evidence: `engineering/GATE-5-PHASE-1-REVIEW-INVESTIGATION.md`. Evidence from Actions run 23 (WebKit 27.2):
+- text spacing (WCAG 1.4.12) passes at 390, 1024, 1100, 1280 and 1440 px on every page; the earlier overlap (3.1 px at 1440, 5.7 px at 1280, 18.2 px at 1100 and 1024) is gone, so the register entry reported `no longer occurs` and was removed;
+- the normal appearance is unchanged: the regression comparison against the frozen v0.8 baseline in WebKit reports 0 problems in text, structure and pixels (39 pixel comparisons), the four hours-table labels differ in computed style only as approved (ASD-1, geometry identical); in Firefox 157.0 and Chromium the rule does not apply and styles and pixels are identical to v0.8;
+- `check:supports` (new) confirms where the rule applies (WebKit yes, Firefox and Chromium no) and fails if a browser or Playwright upgrade changes that; `engine-features.json` records the expectation;
+- CSP enforcement and D-11 pass in Firefox and WebKit (`check:d11`, `check:security`); the other checks are unchanged.
+**F-G5-03 closed** (Firefox category-strip Tab stop verified, run 19). Open findings after this correction: F-G2-01, F-G3-01 (Chromium), F-G4-01, F-G5-01 (WebKit file:// fonts, accepted), F-G5-02 (Firefox preload warning, accepted), F-G5-03 (closed, kept in the register as a known behaviour). No open finding is blocking. Safari and iOS Safari remain **[unverified]** (human device testing).
 
 ## Remaining issues (honest list)
 1. **[unverified] Real devices.** Also the new CSS masks on Safari and iOS. iPhone, Safari (including whether VP9 WebM plays and is chosen, and Low Power Mode blocking autoplay), Android, Firefox, a high-refresh display, and battery or heat during the loop have not been tested. Safari and iOS are the biggest unknown.

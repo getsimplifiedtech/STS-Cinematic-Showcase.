@@ -79,24 +79,10 @@
       "severity": "Info",
       "visual": false,
       "maxValue": 1,
-      "status": "accepted with verification (APR-JE-028): verified in Firefox 157.0 (Actions run 19): the strip is a Tab stop only at phone width, shows a 3 px solid focus ring (2487 pixels change), scrolls with the arrow keys, Tab and Shift+Tab walk through it without a trap and Enter on a link still navigates",
+      "status": "closed (APR-JE-029): accepted; verified in Firefox 157.0 (Actions run 19): the strip is a Tab stop only at phone width, shows a 3 px solid focus ring (2487 pixels change), scrolls with the arrow keys, Tab and Shift+Tab walk through it without a trap and Enter on a link still navigates. Stays in the register because check:keyboard in Firefox reports the stop as a known, accepted behaviour",
       "description": "At 390 px the Menu page's category strip (.jump ul, overflow-x:auto) scrolls. Firefox makes any scrollable container a keyboard focus stop, so Tab lands once on the <ul> before its links. The element is not an interactive control and has no focus ring of its own in the v0.8 design; Chromium (141 locally, 156 in CI) and WebKit do not stop there. The check reports the stop instead of hiding it.",
       "proposal": "Recommended: accept. This is Firefox's intended access to scrolled content and it adds one extra Tab stop on one page at phone width. A visible focus ring on the strip would be a visual change and needs the owner's approval; no change was made.",
       "ledger": "ENG-G5-03"
-    },
-    {
-      "id": "F-G5-04",
-      "check": "reflow",
-      "key": "reflow:visit-us.html@spacing-desktop-1440:text-overlap:\"Tuesday – Thursday\" (th) over \"5:00 pm – 9:30 pm\" (td)",
-      "engines": [
-        "webkit"
-      ],
-      "severity": "Minor",
-      "visual": true,
-      "status": "open: investigation complete (APR-JE-028), awaiting the owner's decision (accept, or approve the proposed correction K11); no visual correction implemented",
-      "description": "With the WCAG 1.4.12 text-spacing override applied after the page loads, WebKit 27.2 (Playwright Linux build) does not recompute the Visit hours table's automatic column widths: the day-label column stays at its normal 189.3 px although the spaced label needs 216.4 px, so the nowrap label overflows its cell by 3.1 px at 1440 px (5.7 px at 1280, 18.2 px at 1100 and 1024) and its last letter touches the value. Glyph pixels do not overlap (0 shared ink pixels); the check's rectangle overlap includes trailing letter-spacing. With the rule in the HTML from the first layout, or after any forced relayout, WebKit sizes the column correctly; Chromium and Firefox are correct in every case. Details: engineering/GATE-5-PHASE-1-REVIEW-INVESTIGATION.md. Safari and iOS Safari are unverified.",
-      "proposal": "Option B (needs approval): add `@supports (hanging-punctuation:first){.hours th{white-space:normal;min-width:max-content}}`, which is tested to remove the overlap in WebKit at every width with the normal appearance pixel-identical in WebKit and with no effect in Firefox or Chromium. Option A: accept and document. Option C: also widen the check's spacing contexts to 1024, 1100 and 1280 px. Not implemented.",
-      "ledger": "ENG-G5-04"
     }
   ]
 }

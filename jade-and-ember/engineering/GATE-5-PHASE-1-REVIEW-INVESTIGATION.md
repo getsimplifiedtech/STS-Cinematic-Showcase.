@@ -87,3 +87,6 @@ Recommendation: **B if you want WebKit users who apply their own text spacing to
 ## 4. Housekeeping and what I did not do
 - The temporary diagnostic step in the Firefox and WebKit jobs (about 4 minutes each, running in parallel) is still in the workflow. I propose removing both steps once you have reviewed this report; the script stays in `engineering/tools/` like the latency probe.
 - No CSS, page, font or media change; no Phase 2 work; no framework repository change; no merge, deployment or paid generation.
+
+## 5. Resolution (APR-JE-029)
+Option B was approved. The K11 rule is in `styles.css` (the only source difference from v0.8, allowlist entry IMM-1). In WebKit 27.2 (Actions run 23) the text-spacing measurements pass at 390, 1024, 1100, 1280 and 1440 px, `check:supports` confirms the rule applies, the v0.8 regression comparison passes with the hours-table label differing only as approved (ASD-1) and 0 pixel problems, and F-G5-04 is removed from the register. Firefox and Chromium are unaffected (the rule does not apply; computed styles and pixels identical to v0.8). The diagnostic steps were removed from the workflow; this report, the script and the evidence stay. See `QA.md` and `CI.md` for the final verification run.
