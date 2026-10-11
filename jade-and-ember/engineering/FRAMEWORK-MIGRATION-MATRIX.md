@@ -188,7 +188,7 @@ Order = position of the owning work package in the dependency order (section 3).
 | RB-13 | engineering | Provenance of CI evidence: the CI record is bound to the candidate artifact digest, not to the commit | G6-2 |
 | RB-14 | engineering | A client build must pin a Framework Release; none exists (authority.json release is null) | G6-0, G6-6, G6-8 |
 
-## 7. Owner decisions of Phase 8 (APR-JE-037) and what each requires of the work packages
+## 7. Owner decisions (Phase 8, APR-JE-037; G6-1, APR-JE-039) and what each requires of the work packages
 
 The consequences column is machine-checked: each named work package must mention the quoted term.
 
@@ -199,11 +199,16 @@ The consequences column is machine-checked: each named work package must mention
 | D-P8-3 | Extensions to the master specifications | Structured approval and engineering-identifier extensions are approved for design. | approved for design only (no edit, no implementation) | G6-0, G6-2 | G6-0: "framework README" |
 | D-P8-4 | Builder scope and creative authority | Deterministic static HTML/CSS/JS generation is permitted. Lovable is an optional builder, not an exclusive implementation path. Anthropic Frontend Design remains the sole creative authority. STS engineering enforces technical standards without dictating aesthetic choices. | decided; the relation of the visual packages to a sole creative authority is open (OI-1) | G6-0 | G6-0: "builder-scope ruling"; G6-0: "sole creative authority" |
 | D-P8-5 | Gate 6 order | Nine proposed Gate 6 work packages (accepted). | accepted as proposed | G6-0, G6-1, G6-2, G6-3, G6-4, G6-5, G6-6, G6-7, G6-8 | - |
-| D-P8-6 | Start of G6-1 | G6-1 is approved in principle, but do not start implementation until the Phase 9 closure report has been reviewed. (Reviewed; G6-1 authorised by APR-JE-038.) | G6-1 authorised by APR-JE-038 and delivered for owner review (G6-1-REPORT.md); G6-2 onward not authorised | G6-1 | G6-1: "Node 24" |
+| D-P8-6 | Start of G6-1 | G6-1 is approved in principle, but do not start implementation until the Phase 9 closure report has been reviewed. (Reviewed; G6-1 authorised by APR-JE-038.) | G6-1 closed by APR-JE-039; G6-2 authorised by APR-JE-039; G6-3 onward not authorised | G6-1 | G6-1: "Node 24" |
 | D-P8-7 | Validation and the second project | MONOLITH House & Design is the established POC #2: a fictional five-page luxury residential architecture/design-build website targeted for Vercel. It begins after framework integration. | decided | G6-4, G6-8 | G6-8: "MONOLITH"; G6-8: "Vercel"; G6-4: "Vercel adapter" |
 | D-P8-8 | Centralised maintenance and security | GitHub Actions remains the foundation for centralized website maintenance and security, with no client-host installations. | decided in principle; the owner's confirmation of the GitHub-side settings is still an open owner action (OI-3) | G6-7 | G6-7: "no software is installed on any client host" |
 | D-P8-9 | Offerings and tiers | Preserve the same base engineering across Essential, Premium and Cinematic website offerings. | decided; the mapping of offerings to framework tiers is open (OI-2) | G6-0 | G6-0: "single base engineering" |
 | D-P8-10 | Roles and reproducibility | Claude implements, ChatGPT reviews evidence and architecture, and the owner authorizes releases. Automated verification must remain independently reproducible. | decided | G6-0, G6-8 | G6-0: "reviewer evidence bundle"; G6-8: "ChatGPT reviewing" |
+| D-G61-1 | Lighthouse scoring | Retain median-of-three Lighthouse scoring. | decided (APR-JE-039); recorded; implemented in G6-1 | G6-1 | - |
+| D-G61-2 | Lighthouse CI status | Keep Lighthouse CI informational until thresholds and runner variability are properly evaluated. | decided (APR-JE-039); recorded; implemented in G6-1 | G6-1 | - |
+| D-G61-3 | G6-1 scope additions | Accept the four documented G6-1 scope additions. | decided (APR-JE-039); recorded; implemented in G6-1 | G6-1 | - |
+| D-G61-4 | parse-cache-control licence | Close the parse-cache-control licence item by verified dependency removal. | decided (APR-JE-039); recorded; implemented in G6-1 | G6-1 | - |
+| D-G61-5 | setup-node and Node range | Accept verified setup-node v7.0.0 and Node >=24 <25. Record full action SHAs. | decided (APR-JE-039); recorded; implemented in G6-1 | G6-1 | - |
 
 ## 8. Operating principles stated by the owner (APR-JE-037)
 

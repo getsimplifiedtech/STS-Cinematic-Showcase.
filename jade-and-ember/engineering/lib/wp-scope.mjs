@@ -16,21 +16,24 @@ export function scopeOf(id, matrix = loadMatrix()) {
 }
 
 // every path that differs between the base commit and the working tree (committed, staged, modified, new and deleted)
-export function changedFiles(base) {
+// A package that is closed records its end commit: only the commits from the base to that end are then its changes, and later packages may change what
+// the closed one was not allowed to touch.
+export function changedFiles(base, end = null) {
   const lines = (s) => s.split('\n').filter(Boolean);
+  if (end) return lines(git(['diff', '--name-only', base, end])).sort();
   return [...new Set([...lines(git(['diff', '--name-only', base, 'HEAD'])), ...lines(git(['diff', '--name-only', 'HEAD'])), ...lines(git(['ls-files', '-o', '--exclude-standard']))])].sort();
 }
 
 export function verifyScope(id, { files = null, matrix = loadMatrix() } = {}) {
   const { scope } = scopeOf(id, matrix);
-  const changed = files || changedFiles(scope.baseCommit);
+  const changed = files || changedFiles(scope.baseCommit, scope.endCommit || null);
   const denied = changed.filter((f) => scope.deny.some((d) => matches(d, f)));
   const outside = changed.filter((f) => !denied.includes(f) && !scope.allow.some((a) => matches(a, f)));
   // GitHub Actions checks a branch out detached: the branch is then the one the run was triggered for (GITHUB_REF_NAME), or unknown (not checked)
   let head = git(['rev-parse', '--abbrev-ref', 'HEAD']);
   if (head === 'HEAD') head = process.env.GITHUB_REF_NAME || null;
   const problems = [];
-  if (head && head !== scope.branch) problems.push(`on branch ${head}, the authorised branch is ${scope.branch}`);
+  if (!scope.endCommit && head && head !== scope.branch) problems.push(`on branch ${head}, the authorised branch is ${scope.branch}`);
   for (const f of denied) problems.push(`${f}: explicitly denied for ${id}`);
   for (const f of outside) problems.push(`${f}: outside the authorised scope of ${id}`);
   return { scope, changed, problems, ok: !problems.length };
