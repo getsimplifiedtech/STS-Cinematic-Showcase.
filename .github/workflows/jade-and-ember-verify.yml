@@ -187,3 +187,47 @@ jobs:
           node engineering/tools/external-links.mjs inventory
           node engineering/tools/external-links.mjs verify
           node engineering/tools/external-links.mjs verify --json --runner github-actions --note "GitHub-hosted ubuntu-24.04 runner with open outbound network; TLS is verified against the runner's own certificate store" --run "$GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID"
+
+  # Informational (Gate 5, Phase 6): a read-only report on the dependency supply chain, from tools that ship with npm: registry signatures and
+  # provenance attestations (npm audit signatures), the advisory summary, a software bill of materials (CycloneDX and SPDX), and the versions that are
+  # behind. Nothing is installed beyond `npm ci --ignore-scripts`, nothing is written to the repository, no secret is used, and the job never fails the run.
+  supply-chain-report:
+    name: 'supply chain report (informational)'
+    runs-on: ubuntu-24.04
+    continue-on-error: true
+    timeout-minutes: 15
+    defaults:
+      run:
+        shell: bash
+        working-directory: jade-and-ember
+    steps:
+      - name: Check out the repository
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - name: Set up Node.js
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
+        with:
+          node-version: '22.22.0'
+          cache: npm
+          cache-dependency-path: jade-and-ember/package-lock.json
+      - name: Install the pinned development tools (lockfile only, no install scripts)
+        run: npm ci --ignore-scripts
+      - name: Report (signatures, advisories, SBOM, outdated)
+        run: |
+          echo "node $(node --version), npm $(npm --version)"
+          echo "--- npm audit signatures (registry signatures and provenance attestations)"
+          npm audit signatures || echo "npm audit signatures exited with code $?"
+          echo "--- npm audit (summary)"
+          npm audit --json > "$RUNNER_TEMP/audit.json" || true
+          node -e "const a=require(process.env.RUNNER_TEMP+'/audit.json');console.log(JSON.stringify(a.metadata&&a.metadata.vulnerabilities));console.log(Object.entries(a.vulnerabilities||{}).map(([n,v])=>v.severity+' '+n).sort().join('\n'))"
+          echo "--- SBOM (npm sbom, built into npm)"
+          npm sbom --sbom-format cyclonedx > "$RUNNER_TEMP/sbom.cdx.json" || true
+          npm sbom --sbom-format spdx > "$RUNNER_TEMP/sbom.spdx.json" || true
+          node -e "const fs=require('fs'),t=process.env.RUNNER_TEMP;const c=JSON.parse(fs.readFileSync(t+'/sbom.cdx.json'));const s=JSON.parse(fs.readFileSync(t+'/sbom.spdx.json'));console.log('CycloneDX '+c.specVersion+': '+c.components.length+' components, '+c.components.filter(x=>x.hashes&&x.hashes.length).length+' with hashes, '+c.components.filter(x=>x.licenses&&x.licenses.length).length+' with licences');console.log(s.spdxVersion+': '+s.packages.length+' packages')"
+          sha256sum "$RUNNER_TEMP/sbom.cdx.json" "$RUNNER_TEMP/sbom.spdx.json"
+          echo "--- npm outdated (direct dependencies)"
+          npm outdated || true
+          echo "--- packages with install scripts, and deprecated packages, in the lockfile"
+          node -e "const l=require('./package-lock.json').packages;console.log('install scripts:',Object.keys(l).filter(k=>k&&l[k].hasInstallScript).join(', ')||'none');console.log('deprecated:',Object.keys(l).filter(k=>k&&l[k].deprecated).join(', ')||'none')"

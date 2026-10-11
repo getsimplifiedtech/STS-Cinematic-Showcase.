@@ -1,6 +1,6 @@
 # Gate 5 Phase 5: media rights inventory and outstanding evidence (`APR-JE-033`)
 
-**Status: delivered for owner review.** **No licence or right in any generated image or video has been established, and none is asserted anywhere in this document or in the repository.** This is an inventory of what each asset is, what the repository records about where it came from, what is *not* established, and which official terms a person has to read. It was produced without legal advice and cannot establish legal rights. Nothing was generated, replaced or changed; the approved design and media are untouched.
+**Status: APPROVED and CLOSED for engineering assessment and verification by the owner (`APR-JE-034`).** **No licence or right in any generated image or video has been established, and none is asserted anywhere in this document or in the repository.** This is an inventory of what each asset is, what the repository records about where it came from, what is *not* established, and which official terms a person has to read. It was produced without legal advice and cannot establish legal rights. Nothing was generated, replaced or changed; the approved design and media are untouched.
 
 Machine-readable form: `engineering/media-rights-inventory.json`, validated by `check:media`. Policy: `docs/JADE_AND_EMBER_MEDIA_RIGHTS_POLICY.md` (APR-JE-023): the generated media is for the fictional demonstration only; replace it for any real client; the review "has not yet been performed".
 
@@ -104,11 +104,11 @@ Today the gate's `rightsVerification` requires a `rights-verification` row that 
 - `check:media` validates the inventory on every run; finding **F-G5-05** is registered and reported as a known finding.
 - 22 cases in `check:selftest-gate4` (an image added or changed, an entry for a deleted file, a duplicate, marked verified with no approval, with a real approval (must pass), generated media called licence-text-shipped or given an unknown status, no origin, no terms, an unknown term, wording that claims a right, terms reviewed with no reviewer, a term over http, a missing font section, a font section without the OFL, a font called unverified, the Noto notice mismatch, the other two notices agreeing).
 
-## 9. Decisions requested
+## 9. Owner decisions (`APR-JE-034`, 2026-10-11)
 
-| # | Decision | Recommendation |
+| # | Decision | Owner's answer |
 |---|---|---|
-| D-P5-4 | Approve the changes proposed in section 7 | yes, together with D-P5-1 |
-| D-P5-5 | Who captures the provider terms (section 6) and by when; whether legal advice is wanted | the owner or a named person; before any public deployment of the demonstration |
-| D-P5-6 | Correct the Noto Serif SC notice (F-G5-05) | yes, as a text-file change with an allowlist entry, after the upstream source is confirmed |
-| D-P5-7 | Whether the demonstration may be shown publicly on the studio's site before the terms are read | no |
+| D-P5-4 | Bind the media-rights approval to the exact delivered asset inventory (section 7) | **Approved.** Licensed or otherwise authorised usage is sufficient; outright ownership is not required. The approval row and the gate must therefore ask for **authorised use**, not ownership. Implementation needs its own authorisation |
+| D-P5-5 | Who captures the provider terms | **Provider-terms verification stays open until dated, authoritative evidence is reviewed** |
+| D-P5-6 | The Noto Serif SC notice (F-G5-05) | **Approved after comparison with authoritative upstream licensing information, preserving any required copyright attribution.** Not made yet |
+| D-P5-7 | Showing the demonstration publicly before the terms are read | **Not authorised while the applicable media-use rights remain unverified** |

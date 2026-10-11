@@ -1,6 +1,6 @@
 # Gate 5 Phase 5: external links (`APR-JE-033`)
 
-**Status: delivered for owner review.** What the demonstration links to, what a network said about each destination, and the release requirement proposed for external-link verification. Nothing was deployed, no page, style, font or media file changed, and the framework repository was not touched.
+**Status: APPROVED and CLOSED for engineering assessment and verification by the owner (`APR-JE-034`, code commit `a749a9f`, Actions run 33).** What the demonstration links to, what a network said about each destination, and the release requirement proposed for external-link verification. Nothing was deployed, no page, style, font or media file changed, and the framework repository was not touched.
 
 ## 1. Result in brief
 
@@ -94,10 +94,10 @@ APR-JE-027 recorded that external links "become release requirements (not excuse
 
 Not implemented now because the policy file is the owner's decision (APR-JE-027 asked for a proposal in this phase). Implementation is small once approved: one gate requirement, one digest command, the cases above.
 
-## 7. Decisions requested
+## 7. Owner decisions (`APR-JE-034`, 2026-10-11)
 
-| # | Decision | Recommendation |
+| # | Decision | Owner's answer |
 |---|---|---|
-| D-P5-1 | Make `externalLinks` (section 6) a client-production release requirement | yes |
-| D-P5-2 | Keep the external-links CI job informational, or make it required later | informational now; required once the release requirement is enabled |
-| D-P5-3 | Point the credit link at `https://www.getsimplifiedtech.com/` (saves one redirect) | do it in the next approved change to the pages, not as a standalone edit of the baseline files |
+| D-P5-1 | The `externalLinks` client-production release requirement (section 6) | **Approved.** Implementation needs its own authorisation (it is a release-policy change) |
+| D-P5-2 | The external-links CI job | **Stays informational during development** |
+| D-P5-3 | The canonical `www` credit link | **Approved; the pages are not modified during Phase 6.** Made in the next approved change to the pages |
