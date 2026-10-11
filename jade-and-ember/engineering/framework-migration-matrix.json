@@ -1113,7 +1113,9 @@
     "jade-and-ember/engineering/lib/gate5-closure.mjs",
     "jade-and-ember/engineering/tools/gate5-closure.mjs",
     "jade-and-ember/engineering/lib/wp-scope.mjs",
-    "jade-and-ember/engineering/tools/wp-scope.mjs"
+    "jade-and-ember/engineering/tools/wp-scope.mjs",
+    "jade-and-ember/engineering/G6-1-REPORT.md",
+    "jade-and-ember/engineering/g6-1-evidence/"
    ],
    "target": "stays (absorbed by the framework specification at G6-0)",
    "external": [
@@ -1265,7 +1267,8 @@
       "reason": "Found by the full verification (check:selftest-gate3 failed 4 of its cases): its four negative tests of check:ci mutate the workflow text by searching for the retired Action SHAs and for the exact line 'npm ci --ignore-scripts', both of which G6-1 replaced. The fixtures were updated to the new pins and install line; each test still injects the same defect (a tag instead of a SHA, an action not on the list, npm install, install scripts allowed) and expects the same message, so no guard is weakened."
      }
     ]
-   }
+   },
+   "status": "delivered for owner review (G6-1-REPORT.md)"
   },
   {
    "id": "G6-2",
@@ -1776,7 +1779,7 @@
    "id": "D-P6-1",
    "source": "APR-JE-035",
    "summary": "Accept 17 development advisories temporarily; replace Lighthouse CI with a tested direct Lighthouse before client production",
-   "status": "accepted temporarily; replacement not implemented",
+   "status": "implemented in G6-1 (APR-JE-038): @lhci/cli replaced by the direct lighthouse runner; 0 advisories; awaiting owner review",
    "workPackage": "G6-1",
    "components": [
     "FM-29"
@@ -1786,7 +1789,7 @@
    "id": "D-P6-2",
    "source": "APR-JE-035",
    "summary": "Migrate to verified Node 24-compatible Actions",
-   "status": "approved, not implemented",
+   "status": "implemented in G6-1 (APR-JE-038): checkout v7.0.1 and setup-node v7.0.0 pinned to SHAs; awaiting owner review",
    "workPackage": "G6-1",
    "components": [
     "FM-23"
@@ -1796,7 +1799,7 @@
    "id": "D-P6-3",
    "source": "APR-JE-035",
    "summary": "Node 24 as the proposed framework baseline, subject to full verification",
-   "status": "approved as a proposal, not verified",
+   "status": "verified in G6-1 (APR-JE-038): Node 24.21.0, full suite 40 of 40 locally and in Actions run 47; awaiting owner review",
    "workPackage": "G6-1",
    "components": [
     "FM-23",
@@ -1829,7 +1832,7 @@
    "id": "D-P6-6",
    "source": "APR-JE-035",
    "summary": "Authoritative licence-evidence correction (parse-cache-control)",
-   "status": "approved, not implemented",
+   "status": "resolved in G6-1 (APR-JE-038) by removing the package (no authoritative evidence obtained); awaiting owner review",
    "workPackage": "G6-1",
    "components": [
     "FM-14"
@@ -2032,7 +2035,7 @@
    "id": "D-P8-6",
    "text": "Start of G6-1",
    "ownerWords": "G6-1 is approved in principle, but do not start implementation until the Phase 9 closure report has been reviewed. (Reviewed; G6-1 authorised by APR-JE-038.)",
-   "status": "G6-1 authorised by APR-JE-038 (scope recorded); G6-2 onward not authorised",
+   "status": "G6-1 authorised by APR-JE-038 and delivered for owner review (G6-1-REPORT.md); G6-2 onward not authorised",
    "workPackages": [
     "G6-1"
    ],

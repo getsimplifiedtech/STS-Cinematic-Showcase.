@@ -1,0 +1,10 @@
+GitHub Actions run 47 (38172892500), commit 5dda905, job "supply chain report (informational)" (114569053612). Copied from the job log.
+node v24.21.0, npm 11.19.0
+npm audit signatures: audited 128 packages; 128 packages have verified registry signatures; 34 packages have verified attestations
+npm audit: {"info":0,"low":0,"moderate":0,"high":0,"critical":0,"total":0}
+SBOM: CycloneDX 1.5: 127 components, 127 with hashes, 127 with licences; SPDX-2.3: 128 packages
+  sha256 4f6dca51161f9f1cbd0029fc7442d36069e2327415972b8098e94d20afea3ef5  sbom.cdx.json
+  sha256 dade2b7875e8724a2c44fed1c0d125898af257aec88d5d2929e98370420e614b  sbom.spdx.json
+install scripts: none
+deprecated: none
+(Before G6-1, run 44, the same job: 349 packages, 17 advisories.)

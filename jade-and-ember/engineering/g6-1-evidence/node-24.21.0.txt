@@ -1,0 +1,7 @@
+Node.js 24.21.0 (the Node 24 "Krypton" long-term-support line), npm 11.19.0.
+Binary used locally: node-v24.21.0-linux-x64.tar.xz from nodejs.org/dist/v24.21.0/
+SHA-256 computed locally:           fd8e59d5a511510f6a298afb548f18c7d2b1be404d8b4a27d94fbe49f56cb2d6
+Entry in SHASUMS256.txt (nodejs.org): fd8e59d5a511510f6a298afb548f18c7d2b1be404d8b4a27d94fbe49f56cb2d6  node-v24.21.0-linux-x64.tar.xz
+They match. The GPG signature of SHASUMS256.txt itself was NOT verified in this sandbox.
+CI uses actions/setup-node v7.0.0 with node-version '24.21.0' (exact); run 47 jobs print: node v24.21.0, npm 11.19.0.
+The pin satisfies engines.node (>=24.8.0 <25) and the engines range of every one of the 128 locked packages (check:deps).

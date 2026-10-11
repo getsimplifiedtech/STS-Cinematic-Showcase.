@@ -1,0 +1,357 @@
+{
+ "comment": "Lighthouse CI 0.15.1 (Lighthouse 12.6.1) and the direct runner (Lighthouse 13.5.0), both run on the same machine against the same five pages, three runs each, Chromium 141. Lighthouse CI's own result for a minScore assertion is the OPTIMISTIC aggregate (best run). Thresholds: performance 0.8 warn, accessibility 0.95 error, best practices 0.9 warn, SEO 0.6 warn. In every cell both tools pass; the largest difference between medians is 0.01 (performance of three pages). One Lighthouse CI run of the home page scored 0.79 for performance (below 0.8) and still passed under the optimistic aggregation.",
+ "lighthouseCi": {
+  "tool": "@lhci/cli 0.15.1",
+  "runs": "15 (3 per page)"
+ },
+ "direct": {
+  "lighthouse": "13.5.0",
+  "userAgent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/141.0.0.0 Safari/537.36",
+  "seconds": 111,
+  "aggregation": "median",
+  "errors": [],
+  "warnings": []
+ },
+ "rows": [
+  {
+   "page": "index.html",
+   "category": "performance",
+   "lighthouseCiRuns": [
+    0.79,
+    1,
+    1
+   ],
+   "lighthouseCiOptimistic": 1,
+   "lighthouseCiMedian": 1,
+   "directRuns": [
+    0.99,
+    1,
+    0.99
+   ],
+   "directMedian": 0.99
+  },
+  {
+   "page": "index.html",
+   "category": "accessibility",
+   "lighthouseCiRuns": [
+    1,
+    1,
+    1
+   ],
+   "lighthouseCiOptimistic": 1,
+   "lighthouseCiMedian": 1,
+   "directRuns": [
+    1,
+    1,
+    1
+   ],
+   "directMedian": 1
+  },
+  {
+   "page": "index.html",
+   "category": "best-practices",
+   "lighthouseCiRuns": [
+    1,
+    1,
+    1
+   ],
+   "lighthouseCiOptimistic": 1,
+   "lighthouseCiMedian": 1,
+   "directRuns": [
+    1,
+    1,
+    1
+   ],
+   "directMedian": 1
+  },
+  {
+   "page": "index.html",
+   "category": "seo",
+   "lighthouseCiRuns": [
+    0.63,
+    0.63,
+    0.63
+   ],
+   "lighthouseCiOptimistic": 0.63,
+   "lighthouseCiMedian": 0.63,
+   "directRuns": [
+    0.63,
+    0.63,
+    0.63
+   ],
+   "directMedian": 0.63
+  },
+  {
+   "page": "menu.html",
+   "category": "performance",
+   "lighthouseCiRuns": [
+    0.99,
+    1,
+    1
+   ],
+   "lighthouseCiOptimistic": 1,
+   "lighthouseCiMedian": 1,
+   "directRuns": [
+    0.99,
+    0.99,
+    0.99
+   ],
+   "directMedian": 0.99
+  },
+  {
+   "page": "menu.html",
+   "category": "accessibility",
+   "lighthouseCiRuns": [
+    1,
+    1,
+    1
+   ],
+   "lighthouseCiOptimistic": 1,
+   "lighthouseCiMedian": 1,
+   "directRuns": [
+    1,
+    1,
+    1
+   ],
+   "directMedian": 1
+  },
+  {
+   "page": "menu.html",
+   "category": "best-practices",
+   "lighthouseCiRuns": [
+    1,
+    1,
+    1
+   ],
+   "lighthouseCiOptimistic": 1,
+   "lighthouseCiMedian": 1,
+   "directRuns": [
+    1,
+    1,
+    1
+   ],
+   "directMedian": 1
+  },
+  {
+   "page": "menu.html",
+   "category": "seo",
+   "lighthouseCiRuns": [
+    0.63,
+    0.63,
+    0.63
+   ],
+   "lighthouseCiOptimistic": 0.63,
+   "lighthouseCiMedian": 0.63,
+   "directRuns": [
+    0.63,
+    0.63,
+    0.63
+   ],
+   "directMedian": 0.63
+  },
+  {
+   "page": "our-story.html",
+   "category": "performance",
+   "lighthouseCiRuns": [
+    1,
+    1,
+    1
+   ],
+   "lighthouseCiOptimistic": 1,
+   "lighthouseCiMedian": 1,
+   "directRuns": [
+    0.99,
+    0.99,
+    0.99
+   ],
+   "directMedian": 0.99
+  },
+  {
+   "page": "our-story.html",
+   "category": "accessibility",
+   "lighthouseCiRuns": [
+    1,
+    1,
+    1
+   ],
+   "lighthouseCiOptimistic": 1,
+   "lighthouseCiMedian": 1,
+   "directRuns": [
+    1,
+    1,
+    1
+   ],
+   "directMedian": 1
+  },
+  {
+   "page": "our-story.html",
+   "category": "best-practices",
+   "lighthouseCiRuns": [
+    1,
+    1,
+    1
+   ],
+   "lighthouseCiOptimistic": 1,
+   "lighthouseCiMedian": 1,
+   "directRuns": [
+    1,
+    1,
+    1
+   ],
+   "directMedian": 1
+  },
+  {
+   "page": "our-story.html",
+   "category": "seo",
+   "lighthouseCiRuns": [
+    0.63,
+    0.63,
+    0.63
+   ],
+   "lighthouseCiOptimistic": 0.63,
+   "lighthouseCiMedian": 0.63,
+   "directRuns": [
+    0.63,
+    0.63,
+    0.63
+   ],
+   "directMedian": 0.63
+  },
+  {
+   "page": "visit-us.html",
+   "category": "performance",
+   "lighthouseCiRuns": [
+    1,
+    1,
+    1
+   ],
+   "lighthouseCiOptimistic": 1,
+   "lighthouseCiMedian": 1,
+   "directRuns": [
+    1,
+    1,
+    1
+   ],
+   "directMedian": 1
+  },
+  {
+   "page": "visit-us.html",
+   "category": "accessibility",
+   "lighthouseCiRuns": [
+    1,
+    1,
+    1
+   ],
+   "lighthouseCiOptimistic": 1,
+   "lighthouseCiMedian": 1,
+   "directRuns": [
+    1,
+    1,
+    1
+   ],
+   "directMedian": 1
+  },
+  {
+   "page": "visit-us.html",
+   "category": "best-practices",
+   "lighthouseCiRuns": [
+    1,
+    1,
+    1
+   ],
+   "lighthouseCiOptimistic": 1,
+   "lighthouseCiMedian": 1,
+   "directRuns": [
+    1,
+    1,
+    1
+   ],
+   "directMedian": 1
+  },
+  {
+   "page": "visit-us.html",
+   "category": "seo",
+   "lighthouseCiRuns": [
+    0.6,
+    0.6,
+    0.6
+   ],
+   "lighthouseCiOptimistic": 0.6,
+   "lighthouseCiMedian": 0.6,
+   "directRuns": [
+    0.6,
+    0.6,
+    0.6
+   ],
+   "directMedian": 0.6
+  },
+  {
+   "page": "order-online.html",
+   "category": "performance",
+   "lighthouseCiRuns": [
+    1,
+    1,
+    1
+   ],
+   "lighthouseCiOptimistic": 1,
+   "lighthouseCiMedian": 1,
+   "directRuns": [
+    1,
+    1,
+    1
+   ],
+   "directMedian": 1
+  },
+  {
+   "page": "order-online.html",
+   "category": "accessibility",
+   "lighthouseCiRuns": [
+    1,
+    1,
+    1
+   ],
+   "lighthouseCiOptimistic": 1,
+   "lighthouseCiMedian": 1,
+   "directRuns": [
+    1,
+    1,
+    1
+   ],
+   "directMedian": 1
+  },
+  {
+   "page": "order-online.html",
+   "category": "best-practices",
+   "lighthouseCiRuns": [
+    1,
+    1,
+    1
+   ],
+   "lighthouseCiOptimistic": 1,
+   "lighthouseCiMedian": 1,
+   "directRuns": [
+    1,
+    1,
+    1
+   ],
+   "directMedian": 1
+  },
+  {
+   "page": "order-online.html",
+   "category": "seo",
+   "lighthouseCiRuns": [
+    0.6,
+    0.6,
+    0.6
+   ],
+   "lighthouseCiOptimistic": 0.6,
+   "lighthouseCiMedian": 0.6,
+   "directRuns": [
+    0.6,
+    0.6,
+    0.6
+   ],
+   "directMedian": 0.6
+  }
+ ]
+}

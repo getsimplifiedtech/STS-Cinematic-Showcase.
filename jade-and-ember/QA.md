@@ -457,3 +457,6 @@ Delivered for owner review: `engineering/GATE-5-CLOSURE-REPORT.md`, `engineering
 1. **Watch the site on real devices** (at least one iPhone and one Android) before anything is shared.
 2. **Metered data at desktop widths:** accept, or add a network-based rule later?
 3. When ready: independent review, then explicit authorisation before any merge or deployment.
+
+## Gate 6, G6-1: runtime and tooling hygiene (`APR-JE-038`)
+Node 24.21.0 / npm 11.19.0, Node 24 Actions pinned to commit SHAs (`actions/checkout` v7.0.1, `actions/setup-node` v7.0.0), and the direct Lighthouse runner (`lighthouse` 13.5.0, `engineering/tools/lighthouse.mjs`) in place of Lighthouse CI. **`npm run verify`: 40 of 40 checks pass on Node 24.21.0 (18 min 26 s, commit `5dda905`); GitHub Actions run 47: all seven jobs successful.** `npm audit`: 0 vulnerabilities (was 17); 128 locked packages (was 349). Lighthouse, five pages, three runs, median: accessibility 1.00 and best practices 1.00 on every page, SEO 0.63 and 0.60 as before, performance 0.98 to 1.00 (CI) against 0.8. No page, style, font, media file or configuration changed (delivered tree hash `9061a227…` unchanged). Report and evidence: `engineering/G6-1-REPORT.md`, `engineering/g6-1-evidence/`. G6-2 is not started.

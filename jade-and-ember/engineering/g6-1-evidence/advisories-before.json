@@ -1,0 +1,81 @@
+{
+ "comment": "npm audit at 92a265a (registry data of 2026-10-11, before G6-1). After G6-1 npm audit reports 0 vulnerabilities (local and CI run 47).",
+ "counts": {
+  "info": 0,
+  "low": 2,
+  "moderate": 4,
+  "high": 11,
+  "critical": 0,
+  "total": 17
+ },
+ "packages": [
+  {
+   "package": "@lhci/cli",
+   "severity": "high"
+  },
+  {
+   "package": "@lhci/utils",
+   "severity": "high"
+  },
+  {
+   "package": "@puppeteer/browsers",
+   "severity": "high"
+  },
+  {
+   "package": "basic-ftp",
+   "severity": "high"
+  },
+  {
+   "package": "extract-zip",
+   "severity": "high"
+  },
+  {
+   "package": "get-uri",
+   "severity": "high"
+  },
+  {
+   "package": "lighthouse",
+   "severity": "high"
+  },
+  {
+   "package": "pac-proxy-agent",
+   "severity": "high"
+  },
+  {
+   "package": "proxy-agent",
+   "severity": "high"
+  },
+  {
+   "package": "puppeteer-core",
+   "severity": "high"
+  },
+  {
+   "package": "tmp",
+   "severity": "high"
+  },
+  {
+   "package": "external-editor",
+   "severity": "low"
+  },
+  {
+   "package": "inquirer",
+   "severity": "low"
+  },
+  {
+   "package": "argparse",
+   "severity": "moderate"
+  },
+  {
+   "package": "js-yaml",
+   "severity": "moderate"
+  },
+  {
+   "package": "sprintf-js",
+   "severity": "moderate"
+  },
+  {
+   "package": "uuid",
+   "severity": "moderate"
+  }
+ ]
+}

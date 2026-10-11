@@ -1,0 +1,4 @@
+actions/checkout   v7.0.1  3d3c42e5aac5ba805825da76410c181273ba90b1  (2026-07-17)  runs.using node24  replaces v4.2.2 11bd71901bbe5b1630ceea73d27597364c9af683 (node20)
+actions/setup-node v7.0.0  820762786026740c76f36085b0efc47a31fe5020  (2026-07-14)  runs.using node24  replaces v4.4.0 49933ea5288caeca8642d1e84afbd3f7d6820020 (node20)
+Verified 2026-10-11 from the repositories: git ls-remote shows the tags at these SHAs (lightweight tags); each commit is an ancestor of the default branch (main); action.yml at the commit declares runs.using node24 and the inputs the workflow uses (setup-node: node-version, cache, cache-dependency-path; checkout: fetch-depth, persist-credentials).
+Newer: setup-node v7.1.0 949feb2413d6458794dcd2491c4babbbce0c15c1 exists; not adopted (days old). The pins are enforced by check:ci from dependencies.json.
