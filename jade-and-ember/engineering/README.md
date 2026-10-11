@@ -124,4 +124,6 @@ Gate 5 Phase 7 (`APR-JE-035`, release readiness dry run) added `RELEASE-DRYRUN-G
 
 Gate 5 Phase 8 (`APR-JE-036`, framework-extraction assessment) added `FRAMEWORK-EXTRACTION-GATE5.md`, `FRAMEWORK-MIGRATION-MATRIX.md` (generated; `npm run framework:matrix` rewrites it), `FRAMEWORK-RECONCILIATION-GATE5.md`, `GATE-6-IMPLEMENTATION-ORDER.md` and `check:framework-matrix`. Assessment only: no framework code was extracted and the framework repository was not modified.
 
+Gate 5 Phase 9 (`APR-JE-037`, formal Gate 5 closure) added `GATE-5-CLOSURE-REPORT.md`, `GATE-6-READINESS.md`, `gate5-closure.json` and `npm run gate5:closure` (a read-only, offline verifier of the closure conditions; it approves nothing). Gate 5 is closed by the owner. Gate 6 is not authorised to start.
+
 Other documents here: `ENG-SECURITY.md` (security by delivery mode, the CSP, decision D-11), `CI.md` (the workflow and runner requirements). See `../../docs/JADE_AND_EMBER_V0.9_IMPLEMENTATION_PLAN.md`.

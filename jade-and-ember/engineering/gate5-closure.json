@@ -1,0 +1,30 @@
+{
+  "$comment": "The Gate 5 closure ledger (Phase 9, APR-JE-037): for every phase, which approval authorised it, which approval closed it, the commit that delivered it and the GitHub Actions run that verified that commit. tools/gate5-closure.mjs checks every entry against the approvals log, git and CI.md. A snapshot taken at closure: it records what was delivered, it does not approve anything, and Gate 5 is closed by the owner, not by this file.",
+  "assessedOn": "2026-10-11",
+  "frameworkTipsRead": {
+    "$comment": "Read through the GitHub read API on 2026-10-11 (not re-read by the verifier, which is offline). The tips are recorded so a reviewer can compare them with the repository later.",
+    "repository": "getsimplifiedtech/sts-web-design-framework",
+    "branches": {
+      "main": "f05f41f2e9112397d1b1755117e5b6314853a492",
+      "feature/anthropic-frontend-design-standard": "d2803c02408c27d4489ccddee0a11478621e26dd",
+      "feature/sts-core-ai-search-readiness": "08af1a0c22cb286baba01d0591e1b77c9ecc13a8",
+      "(the framework's earlier design-skill branch; its name is not repeated here)": "f2a03dc1b2c2474f16a1de475807ddf9c2f96672",
+      "architecture-v2-reconciliation": "7f111aec78f62418e8595320faa733b221813ad6",
+      "claude/keen-hamilton-vvj11a": "907db2552b60c76c1d9bc3569e7fc2c169102d0a"
+    },
+    "pullRequests": "2 (both from 2026-09-23, closed, not merged); none opened by Gate 5",
+    "localCloneHead": "f2a03dc1b2c2474f16a1de475807ddf9c2f96672"
+  },
+  "phases": [
+    { "n": 0, "name": "Plan and scope", "authorisedBy": ["APR-JE-026", "APR-JE-027"], "closedBy": "APR-JE-030", "code": { "commit": "51c7377", "run": 12 } },
+    { "n": 1, "name": "Cross-browser verification (Firefox, WebKit) and the approved WebKit correction", "authorisedBy": ["APR-JE-027", "APR-JE-028", "APR-JE-029"], "closedBy": "APR-JE-030", "code": { "commit": "630beec", "run": 24 }, "docs": { "commit": "5a1a8dc", "run": 25 } },
+    { "n": 2, "name": "Human-evidence tooling", "authorisedBy": ["APR-JE-030"], "closedBy": "APR-JE-031", "code": { "commit": "a3a01ea", "run": 26 }, "docs": { "commit": "9e9d6f1", "run": 27 } },
+    { "n": 3, "name": "Hosting compatibility assessment", "authorisedBy": ["APR-JE-031"], "closedBy": "APR-JE-032", "code": { "commit": "ecd44ad", "run": 28 }, "docs": { "commit": "8344dc7", "run": 29 } },
+    { "n": 4, "name": "SEO and AI search readiness", "authorisedBy": ["APR-JE-032"], "closedBy": "APR-JE-033", "code": { "commit": "aa38058", "run": 31 }, "docs": { "commit": "1ac6f02", "run": 32 } },
+    { "n": 5, "name": "External links and media rights", "authorisedBy": ["APR-JE-033"], "closedBy": "APR-JE-034", "code": { "commit": "a749a9f", "run": 33 }, "docs": { "commit": "f89a7a0", "run": 34 } },
+    { "n": 6, "name": "Dependencies and security assessment", "authorisedBy": ["APR-JE-034"], "closedBy": "APR-JE-035", "code": { "commit": "2ae78d6", "run": 35 }, "docs": { "commit": "c20cc8b", "run": 36 } },
+    { "n": 7, "name": "Release readiness dry run", "authorisedBy": ["APR-JE-035"], "closedBy": "APR-JE-036", "code": { "commit": "6133586", "run": 38 }, "docs": { "commit": "10ce2b2", "run": 39 } },
+    { "n": 8, "name": "Framework-extraction assessment", "authorisedBy": ["APR-JE-036"], "closedBy": "APR-JE-037", "code": { "commit": "980344e", "run": 40 }, "docs": { "commit": "9fa5aa4", "run": 41 } },
+    { "n": 9, "name": "Formal Gate 5 closure", "authorisedBy": ["APR-JE-037"], "closedBy": null }
+  ]
+}

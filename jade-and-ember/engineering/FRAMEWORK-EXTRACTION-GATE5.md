@@ -1,6 +1,6 @@
 # Gate 5 Phase 8: framework-extraction assessment and migration plan (`APR-JE-036`)
 
-**Status: delivered for owner review. An assessment only.** No framework code was extracted, copied or implemented. The master framework repository was **read** (a local clone and GitHub read access) and **not modified**. Nothing was deployed, merged or approved; no dependency, page, style, font or media file changed. The Gate 6 priorities of `APR-JE-036` are recorded, not implemented.
+**Status: APPROVED and CLOSED by the owner as an engineering assessment (`APR-JE-037`, commit `980344e`, Actions run 40).** An assessment only. No framework code was extracted, copied or implemented. The master framework repository was **read** (a local clone and GitHub read access) and **not modified**. Nothing was deployed, merged or approved; no dependency, page, style, font or media file changed. The Gate 6 priorities of `APR-JE-036` are recorded, not implemented.
 
 How to read this report: **F-nn** are verified facts, each with the way it was verified. **R-nn** are architectural recommendations: reasoned proposals that nothing has proven. Statements about GitHub or hosting providers taken from search-tool summaries are labelled **(summary)**: a person must re-read the pages before anything depends on them (the D-P3-6 rule).
 
@@ -190,6 +190,8 @@ Beyond the decisions: findings **RG-01 to RG-14** (all open) and the **eight req
 | 15 | Windows cannot run the project (repository name ends in a dot; the dry run uses symbolic links) | certain / low | Documented; Linux and macOS only |
 
 ## 13. Owner decisions needed before Gate 6
+
+**Decided in `APR-JE-037`** with nine clarifications; the decisions, the owner's words and what each requires of the work packages are in [`FRAMEWORK-MIGRATION-MATRIX.md`](FRAMEWORK-MIGRATION-MATRIX.md) sections 7 to 9 and in [`GATE-5-CLOSURE-REPORT.md`](GATE-5-CLOSURE-REPORT.md) section 4. The table below is the original proposal and recommendations. **Superseded:** the D-P8-9 recommendation to key check strictness by tier conflicts with the owner's clarification that the base engineering is the same across the Essential, Premium and Cinematic offerings; tiers may only key declared additions and budgets (open item OI-2).
 
 | # | Decision | Recommendation |
 |---|---|---|

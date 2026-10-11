@@ -75,9 +75,24 @@ export function validate(matrix, files, approvalsText = '') {
     if (!String(r.status).trim()) bad(`${r.id}: no status`);
   }
   for (let i = 1; i <= 14; i++) if (!rids.includes(`RG-${String(i).padStart(2, '0')}`)) bad(`finding RG-${String(i).padStart(2, '0')} is not in the register`);
-  // every owner decision in the approvals log is in the register, so a decision cannot be forgotten
-  const decided = [...new Set([...approvalsText.matchAll(/\*\*(D-P[3-6]-\d+)\*\*/g)].map((m) => m[1]))];
-  for (const d of decided) if (!rids.includes(d)) bad(`decision ${d} is recorded in the approvals log but not in the requirement register`);
+  // every owner decision in the approvals log is in the register (D-P3 to D-P6) or in the decisions list (D-P8), so a decision cannot be forgotten
+  const decided = [...new Set([...approvalsText.matchAll(/\*\*(D-P[3-8]-\d+)\*\*/g)].map((m) => m[1]))];
+  const dids = (matrix.decisions || []).map((d) => d.id);
+  for (const d of decided) if (!(d.startsWith('D-P8-') ? dids : rids).includes(d)) bad(`decision ${d} is recorded in the approvals log but not in the ${d.startsWith('D-P8-') ? 'decisions list' : 'requirement register'}`);
+  for (let i = 1; i <= 10; i++) if (!dids.includes(`D-P8-${i}`)) bad(`decision D-P8-${i} is not in the decisions list`);
+  if (new Set(dids).size !== dids.length) bad('duplicate decision ids');
+  for (const d of matrix.decisions || []) {
+    for (const k of ['text', 'status', 'ownerWords']) if (!String(d[k] || '').trim()) bad(`${d.id}: ${k} is empty`);
+    for (const w of d.workPackages) if (!wpIds.includes(w)) bad(`${d.id}: work package ${w} does not exist`);
+    // consistency: the work package must actually say what the decision requires of it
+    for (const c of d.consequences) {
+      const w = matrix.workPackages.find((x) => x.id === c.wp);
+      if (!w) bad(`${d.id}: consequence names work package ${c.wp}, which does not exist`);
+      else if (!new RegExp(c.mustMention, 'i').test(`${w.title} ${w.summary} ${w.verification}`)) bad(`${d.id}: ${c.wp} does not mention "${c.mustMention}", which this decision requires of it`);
+    }
+  }
+  if (!(matrix.operatingPrinciples || []).length) bad('operating principles are missing');
+  for (const o of matrix.openItems || []) if (!wpIds.includes(o.wp) || !String(o.text).trim()) bad(`${o.id}: incomplete or names a missing work package`);
   for (const b of matrix.releaseBlockers) if (!String(b.text).trim() || !String(b.resolvedBy).trim()) bad(`${b.id}: incomplete`);
   const k = classify(matrix, files);
   for (const f of k.unclassified) bad(`file not classified: ${f}`);
@@ -116,6 +131,9 @@ export function render(matrix, classification) {
   out.push('', '## 4. The eight required Gate 6 priorities (APR-JE-036; required, not implemented)', '', '| ID | Priority | Work package |', '|---|---|---|', ...matrix.priorities.map((x) => `| ${x.id} | ${esc(x.text)} | ${x.wp} |`), '');
   out.push('## 5. Approved requirements and findings not yet implemented (register)', '', '| ID | From | Summary | Status | Work package | Components |', '|---|---|---|---|---|---|', ...matrix.requirements.map((r) => `| ${r.id} | ${r.source} | ${esc(r.summary)} | ${esc(r.status)} | ${r.workPackage} | ${r.components.join(', ') || '-'} |`), '');
   out.push('## 6. Release blockers for a client-production release', '', '| ID | Kind | Blocker | Resolved by |', '|---|---|---|---|', ...matrix.releaseBlockers.map((b) => `| ${b.id} | ${b.kind} | ${esc(b.text)} | ${esc(b.resolvedBy)} |`), '');
+  out.push('## 7. Owner decisions of Phase 8 (APR-JE-037) and what each requires of the work packages', '', 'The consequences column is machine-checked: each named work package must mention the quoted term.', '', '| ID | Decision | Owner\'s words | Status | Work packages | Checked consequences |', '|---|---|---|---|---|---|', ...(matrix.decisions || []).map((d) => `| ${d.id} | ${esc(d.text)} | ${esc(d.ownerWords)} | ${esc(d.status)} | ${d.workPackages.join(', ')} | ${d.consequences.map((c) => `${c.wp}: "${c.mustMention}"`).join('; ') || '-'} |`), '');
+  out.push('## 8. Operating principles stated by the owner (APR-JE-037)', '', ...(matrix.operatingPrinciples || []).map((o) => `- **${o.id}** ${esc(o.text)} (${esc(o.source)})`), '');
+  out.push('## 9. Open items carried into Gate 6 (not decided by the owner)', '', '| ID | Open item | Work package |', '|---|---|---|', ...(matrix.openItems || []).map((o) => `| ${o.id} | ${esc(o.text)} | ${o.wp} |`), '');
   return out.join('\n') + '\n';
 }
 

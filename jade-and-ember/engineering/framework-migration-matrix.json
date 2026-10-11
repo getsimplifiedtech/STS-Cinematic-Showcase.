@@ -1092,8 +1092,8 @@
   },
   {
    "id": "FM-34",
-   "name": "Phase 8 assessment artefacts",
-   "summary": "This assessment: the migration matrix data, its checker and generator, and the reports.",
+   "name": "Gate 5 assessment and closure artefacts",
+   "summary": "The Phase 8 assessment (matrix data, its checker and generator, the reports) and the Phase 9 closure (closure ledger, verifier, closure report, Gate 6 readiness summary).",
    "paths": [
     "jade-and-ember/engineering/framework-migration-matrix.json",
     "jade-and-ember/engineering/FRAMEWORK-MIGRATION-MATRIX.md",
@@ -1102,7 +1102,12 @@
     "jade-and-ember/engineering/GATE-6-IMPLEMENTATION-ORDER.md",
     "jade-and-ember/engineering/checks/framework-matrix.mjs",
     "jade-and-ember/engineering/tools/framework-matrix.mjs",
-    "jade-and-ember/engineering/lib/framework-matrix.mjs"
+    "jade-and-ember/engineering/lib/framework-matrix.mjs",
+    "jade-and-ember/engineering/GATE-5-CLOSURE-REPORT.md",
+    "jade-and-ember/engineering/GATE-6-READINESS.md",
+    "jade-and-ember/engineering/gate5-closure.json",
+    "jade-and-ember/engineering/lib/gate5-closure.mjs",
+    "jade-and-ember/engineering/tools/gate5-closure.mjs"
    ],
    "target": "stays (absorbed by the framework specification at G6-0)",
    "external": [
@@ -1113,7 +1118,7 @@
    ],
    "redesign": {
     "level": "none",
-    "notes": "Assessment only: nothing here extracts or implements framework code."
+    "notes": ""
    },
    "verify": "check:framework-matrix passes (every file classified, every reference valid, generated Markdown current).",
    "masterSpecs": [],
@@ -1126,7 +1131,7 @@
   {
    "id": "G6-0",
    "title": "Decisions and specification",
-   "summary": "Close the Phase 8 owner decisions; write the engineering framework specification (proposed architecture/16) and the project manifest schema; define what a Framework Release is for engineering and how projects consume it (pinned commit, not a package); decide builder scope. Documents only. Any change to the framework repository needs the owner's explicit approval first.",
+   "summary": "Close the Phase 8 owner decisions; write the engineering framework specification (proposed architecture/16) and the project manifest schema; define what a Framework Release is for engineering and how projects consume it (pinned commit, not a package); decide builder scope. Documents only. Any change to the framework repository needs the owner's explicit approval first. It also records, as owner decisions, the builder-scope ruling (deterministic static generation is permitted, Lovable is an optional builder; engineering verifies any builder's folder), the relation of the Essential, Premium and Cinematic offerings to the framework tiers with a single base engineering (OI-2), how the architecture's visual packages sit under the sole creative authority (OI-1), the reviewer evidence bundle an independent reviewer receives so that every verification is reproducible without the implementer (OI-7), and the framework README and numbering fixes (OI-5).",
    "dependsOn": [],
    "priorities": [],
    "frameworkRepoChange": true,
@@ -1200,7 +1205,7 @@
   {
    "id": "G6-4",
    "title": "Hosting adapters and hosting requirements",
-   "summary": "One adapter interface; Cloudflare Pages first, then Vercel and a plain static adapter; a real 404 (D-P3-1), domain-root base URLs (D-P3-2), staged-bundle manifest and deployed-bytes comparison (D-P3-3), HSTS opt-in (D-P3-4, D-P4-5). Provider documentation must be re-verified by a person before an adapter is built (D-P3-6). Live verification needs a separately authorised preview (D-P3-5).",
+   "summary": "One adapter interface; Cloudflare Pages first, then Vercel and a plain static adapter; a real 404 (D-P3-1), domain-root base URLs (D-P3-2), staged-bundle manifest and deployed-bytes comparison (D-P3-3), HSTS opt-in (D-P3-4, D-P4-5). Provider documentation must be re-verified by a person before an adapter is built (D-P3-6). Live verification needs a separately authorised preview (D-P3-5). MONOLITH House & Design (proof of concept #2) targets Vercel, so the Vercel adapter and its re-verified provider documentation must be complete before that project starts; any Vercel preview needs its own authorisation (D-P3-5).",
    "dependsOn": [
     "G6-2",
     "G6-3"
@@ -1234,7 +1239,7 @@
   {
    "id": "G6-6",
    "title": "Extraction into the framework repository",
-   "summary": "Add the de-coupled core, adapters and fixtures to the framework repository on a branch (never main), with framework CI running the generic fixture. Needs the owner's explicit approval to modify the framework repository.",
+   "summary": "Add the de-coupled core, adapters and fixtures to the master framework repository, which owns the reusable engineering (D-P8-1), on a branch (never main), with framework CI running the generic fixture. Needs the owner's explicit approval to modify the framework repository, which has not been given.",
    "dependsOn": [
     "G6-5"
    ],
@@ -1249,7 +1254,7 @@
   {
    "id": "G6-7",
    "title": "Centralised GitHub automation",
-   "summary": "SHA-pinned reusable workflows in the framework repository called from a short workflow in each client repository; per-repository Dependabot configuration generated from a template with human approval and no automatic merging (D-P6-4); scheduled supply-chain, external-link and read-only live-site checks run from GitHub-hosted runners. Nothing is installed on a client's hosting; the client repository holds only a caller workflow and the manifest. The current workflow policy forbids schedule triggers and reusable-workflow calls and must be changed deliberately.",
+   "summary": "SHA-pinned reusable workflows in the framework repository called from a short workflow in each client repository; per-repository Dependabot configuration generated from a template with human approval and no automatic merging (D-P6-4); scheduled supply-chain, external-link and read-only live-site checks run from GitHub-hosted runners. Nothing is installed on a client's hosting; the client repository holds only a caller workflow and the manifest. The current workflow policy forbids schedule triggers and reusable-workflow calls and must be changed deliberately. GitHub Actions is the foundation for centralised maintenance and security (D-P8-8); no software is installed on any client host.",
    "dependsOn": [
     "G6-6"
    ],
@@ -1266,7 +1271,7 @@
   {
    "id": "G6-8",
    "title": "Consumption and independent validation",
-   "summary": "Jade & Ember consumes the framework at a pinned commit (M4); the framework is validated independently by the ladder V1 to V4 (generic fixture, reference consumer parity, a second structure, mutation tests) and a readiness checklist is completed before the first new project, MONOLITH House & Design, uses it (M5).",
+   "summary": "Jade & Ember consumes the framework at a pinned Git revision (M4, D-P8-2); the framework is validated independently by the ladder V1 to V4 (generic fixture, reference consumer parity, a second structure, mutation tests) with ChatGPT reviewing evidence and architecture (D-P8-10); a readiness checklist is completed. Then MONOLITH House & Design, the established proof of concept #2 (a fictional five-page luxury residential architecture/design-build website targeted for Vercel), begins; being fictional it uses the demonstration channel, not client production.",
    "dependsOn": [
     "G6-6",
     "G6-7"
@@ -1826,6 +1831,251 @@
    "kind": "engineering",
    "text": "A client build must pin a Framework Release; none exists (authority.json release is null)",
    "resolvedBy": "G6-0, G6-6, G6-8"
+  }
+ ],
+ "decisions": [
+  {
+   "id": "D-P8-1",
+   "text": "Where the engineering lives",
+   "ownerWords": "The master framework repository owns the reusable engineering. (Option A.)",
+   "status": "decided; modifying that repository still needs the owner's explicit approval",
+   "workPackages": [
+    "G6-0",
+    "G6-6"
+   ],
+   "consequences": [
+    {
+     "wp": "G6-6",
+     "mustMention": "master framework repository"
+    }
+   ]
+  },
+  {
+   "id": "D-P8-2",
+   "text": "How projects consume the framework",
+   "ownerWords": "Framework consumers use pinned Git revisions.",
+   "status": "decided",
+   "workPackages": [
+    "G6-7",
+    "G6-8"
+   ],
+   "consequences": [
+    {
+     "wp": "G6-8",
+     "mustMention": "pinned Git revision"
+    }
+   ]
+  },
+  {
+   "id": "D-P8-3",
+   "text": "Extensions to the master specifications",
+   "ownerWords": "Structured approval and engineering-identifier extensions are approved for design.",
+   "status": "approved for design only (no edit, no implementation)",
+   "workPackages": [
+    "G6-0",
+    "G6-2"
+   ],
+   "consequences": [
+    {
+     "wp": "G6-0",
+     "mustMention": "framework README"
+    }
+   ]
+  },
+  {
+   "id": "D-P8-4",
+   "text": "Builder scope and creative authority",
+   "ownerWords": "Deterministic static HTML/CSS/JS generation is permitted. Lovable is an optional builder, not an exclusive implementation path. Anthropic Frontend Design remains the sole creative authority. STS engineering enforces technical standards without dictating aesthetic choices.",
+   "status": "decided; the relation of the visual packages to a sole creative authority is open (OI-1)",
+   "workPackages": [
+    "G6-0"
+   ],
+   "consequences": [
+    {
+     "wp": "G6-0",
+     "mustMention": "builder-scope ruling"
+    },
+    {
+     "wp": "G6-0",
+     "mustMention": "sole creative authority"
+    }
+   ]
+  },
+  {
+   "id": "D-P8-5",
+   "text": "Gate 6 order",
+   "ownerWords": "Nine proposed Gate 6 work packages (accepted).",
+   "status": "accepted as proposed",
+   "workPackages": [
+    "G6-0",
+    "G6-1",
+    "G6-2",
+    "G6-3",
+    "G6-4",
+    "G6-5",
+    "G6-6",
+    "G6-7",
+    "G6-8"
+   ],
+   "consequences": []
+  },
+  {
+   "id": "D-P8-6",
+   "text": "Start of G6-1",
+   "ownerWords": "G6-1 is approved in principle, but do not start implementation until the Phase 9 closure report has been reviewed.",
+   "status": "approved in principle; NOT started",
+   "workPackages": [
+    "G6-1"
+   ],
+   "consequences": [
+    {
+     "wp": "G6-1",
+     "mustMention": "Node 24"
+    }
+   ]
+  },
+  {
+   "id": "D-P8-7",
+   "text": "Validation and the second project",
+   "ownerWords": "MONOLITH House & Design is the established POC #2: a fictional five-page luxury residential architecture/design-build website targeted for Vercel. It begins after framework integration.",
+   "status": "decided",
+   "workPackages": [
+    "G6-4",
+    "G6-8"
+   ],
+   "consequences": [
+    {
+     "wp": "G6-8",
+     "mustMention": "MONOLITH"
+    },
+    {
+     "wp": "G6-8",
+     "mustMention": "Vercel"
+    },
+    {
+     "wp": "G6-4",
+     "mustMention": "Vercel adapter"
+    }
+   ]
+  },
+  {
+   "id": "D-P8-8",
+   "text": "Centralised maintenance and security",
+   "ownerWords": "GitHub Actions remains the foundation for centralized website maintenance and security, with no client-host installations.",
+   "status": "decided in principle; the owner's confirmation of the GitHub-side settings is still an open owner action (OI-3)",
+   "workPackages": [
+    "G6-7"
+   ],
+   "consequences": [
+    {
+     "wp": "G6-7",
+     "mustMention": "no software is installed on any client host"
+    }
+   ]
+  },
+  {
+   "id": "D-P8-9",
+   "text": "Offerings and tiers",
+   "ownerWords": "Preserve the same base engineering across Essential, Premium and Cinematic website offerings.",
+   "status": "decided; the mapping of offerings to framework tiers is open (OI-2)",
+   "workPackages": [
+    "G6-0"
+   ],
+   "consequences": [
+    {
+     "wp": "G6-0",
+     "mustMention": "single base engineering"
+    }
+   ]
+  },
+  {
+   "id": "D-P8-10",
+   "text": "Roles and reproducibility",
+   "ownerWords": "Claude implements, ChatGPT reviews evidence and architecture, and the owner authorizes releases. Automated verification must remain independently reproducible.",
+   "status": "decided",
+   "workPackages": [
+    "G6-0",
+    "G6-8"
+   ],
+   "consequences": [
+    {
+     "wp": "G6-0",
+     "mustMention": "reviewer evidence bundle"
+    },
+    {
+     "wp": "G6-8",
+     "mustMention": "ChatGPT reviewing"
+    }
+   ]
+  }
+ ],
+ "operatingPrinciples": [
+  {
+   "id": "OP-1",
+   "text": "Anthropic Frontend Design is the sole creative authority; STS engineering enforces technical standards and never dictates aesthetic choices.",
+   "source": "clarification 5"
+  },
+  {
+   "id": "OP-2",
+   "text": "The base engineering is the same for the Essential, Premium and Cinematic offerings; differences may only add (profile, adapter or budget declarations), never weaken the base.",
+   "source": "clarification 6; the second clause is the implementer's reading, to be confirmed in G6-0"
+  },
+  {
+   "id": "OP-3",
+   "text": "Deterministic static HTML/CSS/JS generation is permitted; Lovable is an optional builder. The engineering verifies the delivered folder, whichever builder produced it.",
+   "source": "clarification 4"
+  },
+  {
+   "id": "OP-4",
+   "text": "GitHub Actions is the foundation for centralised maintenance and security; nothing is installed on a client host.",
+   "source": "clarification 8"
+  },
+  {
+   "id": "OP-5",
+   "text": "Claude implements; ChatGPT reviews evidence and architecture; the owner authorises releases; automated verification is independently reproducible (every claim carries the command or the CI job that reproduces it).",
+   "source": "clarification 9"
+  },
+  {
+   "id": "OP-6",
+   "text": "Framework consumers pin Git revisions; the master framework repository owns the reusable engineering and is not modified without the owner's explicit approval.",
+   "source": "clarifications 1 and 2"
+  }
+ ],
+ "openItems": [
+  {
+   "id": "OI-1",
+   "text": "How the architecture's visual packages (specifications 01 to 07, 10, 11) fit under Anthropic Frontend Design as the sole creative authority. The engineering is independent of the answer.",
+   "wp": "G6-0"
+  },
+  {
+   "id": "OI-2",
+   "text": "How the Essential, Premium and Cinematic offerings relate to the framework tiers of specification 13 (Foundation, Standard, Advanced). The Phase 8 recommendation to key check strictness by tier conflicts with a single base engineering and is superseded: tiers may key only declared additions and budgets.",
+   "wp": "G6-0"
+  },
+  {
+   "id": "OI-3",
+   "text": "The owner's confirmation of the GitHub-side settings (organisation Actions access, branch protection, CODEOWNERS, secret scanning, Dependabot).",
+   "wp": "G6-7"
+  },
+  {
+   "id": "OI-4",
+   "text": "MONOLITH House & Design details beyond what the owner stated: page list, brand and design direction, media plan and rights, hosting configuration, and whether a Vercel preview is authorised (D-P3-5).",
+   "wp": "G6-8"
+  },
+  {
+   "id": "OI-5",
+   "text": "Framework housekeeping: the README at the pin lists 10 of 15 specifications; two documents are numbered 11 (the layer registry and the proposed search-readiness standard, which is still pending framework review and merge and names Cloudflare Pages in its delivery clause).",
+   "wp": "G6-0"
+  },
+  {
+   "id": "OI-6",
+   "text": "Any Vercel preview or live verification for POC #2 needs its own authorisation; none exists.",
+   "wp": "G6-4"
+  },
+  {
+   "id": "OI-7",
+   "text": "The reviewer evidence bundle: what ChatGPT receives to review evidence and architecture independently (commands, CI run links, hashes, the dry-run report) and how independence is evidenced.",
+   "wp": "G6-0"
   }
  ]
 }

@@ -1,5 +1,7 @@
 # Reconciliation with the master framework's specifications (Gate 5 Phase 8, `APR-JE-036`)
 
+**Phase 8 closed (`APR-JE-037`).** Rulings made by the owner since this was written: builder scope (deterministic static generation is permitted, Lovable is an optional builder) and the creative authority (Anthropic Frontend Design is the *sole* creative authority). The relation of the visual packages in specifications 01 to 07, 10 and 11 to a sole creative authority is not stated and is open item OI-1. Section 5 below is a Phase 9 addendum.
+
 **An assessment. The framework repository was read, not modified.** Source read: `getsimplifiedtech/sts-web-design-framework`, the 15 documents in `architecture/`, identical on `main` (`f05f41f`), at the pin (`d2803c0`) and in the local clone (blob hashes compared). Quotations are exact. **Facts** are statements about what the specifications say or what Jade & Ember does today; **recommendations** are marked R.
 
 Verdict words: **retain** (the specification stands as written and the engineering conforms or can conform), **adapt** (retain, with a stated mapping), **extend** (a proposal to add something, to go through the framework's own review; never an edit made here), **rule** (an owner decision is needed).
@@ -59,3 +61,18 @@ Neither extension is an edit: both are proposals to be put through the framework
 - **R** The framework's own README is out of date (10 specifications listed, 15 present, "do not begin destructive migration"). Updating it is a framework change and belongs to G6-0 under the owner's approval.
 - **R** Spec 14's Framework Release is the natural carrier of the engineering version. Until one exists, clients pin a commit.
 - **Fact** The framework has no engineering code today; it will gain a top-level `engineering/` (proposal D-P8-1) rather than altering any existing document.
+
+## 5. Addendum (Phase 9): the proposed search-readiness standard on another branch
+
+**What was missed.** The Phase 8 reconciliation covered the 15 frozen specifications on `main`. The framework repository has a sixth branch, `feature/sts-core-ai-search-readiness` (tip `08af1a0`, commits of 2026-10-10 by the owner), holding `architecture/11-core-search-ai-discovery-readiness-v1.md` ("Proposed universal engineering standard, pending framework review and merge", 5,794 bytes). This project's Phase 4 audited itself against that standard (`SEARCH-AUDIT-GATE5.md`, `SEARCH-READINESS.md`), but the Phase 8 reconciliation and the Phase 8 report said only that other branches were not enumerated. They have now been enumerated (read-only, GitHub API): `main`, `feature/anthropic-frontend-design-standard` (the pin), `feature/sts-core-ai-search-readiness`, the earlier design-skill branch, `architecture-v2-reconciliation`, `claude/keen-hamilton-vvj11a`. Only the search standard was not already covered.
+
+| Fact in the proposed standard (exact quotation) | Relation to the engineering framework |
+|---|---|
+| Scope: "Every STS website edition (Essential, Premium, Cinematic) ... All three STS website tiers receive the same CORE readiness checks and required output artifacts. The creative layer may vary; compliance does not." | The source of the three offerings named in the owner's clarification 6. It is the same principle: one base engineering. These are "website tiers" in this document and "Foundation, Standard, Advanced" in specification 13: the mapping is open (OI-2) |
+| "Authority: STS engineering framework. Anthropic Frontend Design remains the creative authority. These requirements must not prescribe visual aesthetics." | Matches the boundary adopted in the assessment (R-03) and the owner's clarification 5 |
+| Ten required deliverables (metadata, canonical URLs, sitemap, robots, llms.txt, structured data, social metadata, factual consistency, crawler policy, technical delivery) and a mandatory automated QA list | Implemented in Phase 4 by `check:seo`, `check:links`, `check:html`, `lib/search.mjs`, `crawlers.mjs` (component FM-15); the human review gate is the search-review and crawler-review records |
+| "Verify root and subpath hosting semantics according to the selected Cloudflare Pages deployment." | Host-specific wording; MONOLITH House & Design targets Vercel (D-P8-7), so the delivery clause needs a host-neutral rewrite (OI-5) |
+| "Demo llms.txt, when included, must clearly identify the site as fictional" | Jade & Ember's demonstration publishes no search artifact at all (noindex), which satisfies the intent; MONOLITH, also fictional, falls under the same rule |
+| "This document ... does **not** authorize modifying Jade & Ember, deploying any site, merging this branch, or changing production indexing." | Consistent with the restrictions in force |
+
+**Housekeeping (OI-5).** Two documents are numbered 11 (the frozen layer registry and this proposed standard). The standard is not part of the frozen set; its place in the numbering is for the framework's review to decide.

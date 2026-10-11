@@ -51,6 +51,7 @@
     "check:release-dryrun": "node engineering/checks/release-dryrun.mjs",
     "check:framework-matrix": "node engineering/checks/framework-matrix.mjs",
     "framework:matrix": "node engineering/tools/framework-matrix.mjs",
+    "gate5:closure": "node engineering/tools/gate5-closure.mjs",
     "check:hosting": "node engineering/checks/hosting.mjs",
     "check:phone": "node engineering/checks/phone.mjs",
     "check:d11": "node engineering/checks/d11.mjs",
