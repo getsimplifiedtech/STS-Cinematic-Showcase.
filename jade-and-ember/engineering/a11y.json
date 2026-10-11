@@ -48,6 +48,21 @@
           "height": 900
         },
         {
+          "name": "desktop-1280",
+          "width": 1280,
+          "height": 800
+        },
+        {
+          "name": "desktop-1100",
+          "width": 1100,
+          "height": 800
+        },
+        {
+          "name": "desktop-1024",
+          "width": 1024,
+          "height": 768
+        },
+        {
           "name": "mobile-390",
           "width": 390,
           "height": 844
@@ -56,7 +71,8 @@
       "lineHeight": 1.5,
       "paragraphSpacingEm": 2,
       "letterSpacingEm": 0.12,
-      "wordSpacingEm": 0.16
+      "wordSpacingEm": 0.16,
+      "$comment": "Text spacing (WCAG 1.4.12) is measured at these widths in every engine. 1024, 1100 and 1280 px were added with APR-JE-029 because WebKit showed the Visit hours table overlap there as well as at 1440 px."
     },
     "overlapMinPixels": 24
   },

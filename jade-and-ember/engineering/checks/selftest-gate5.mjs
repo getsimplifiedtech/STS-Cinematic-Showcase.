@@ -9,6 +9,11 @@ import { checkCiFile } from './ci.mjs';
 import { loadPolicy } from '../lib/security.mjs';
 import { reconcile, setEngine } from '../lib/findings.mjs';
 import { engineNoise } from '../lib/engine-noise.mjs';
+import { checkSupports } from './supports.mjs';
+import { approvedStyleDifference } from '../lib/approved-styles.mjs';
+import { assembleCandidate } from '../lib/site.mjs';
+import { readFileSync as rf, writeFileSync, rmSync } from 'node:fs';
+import { projectDir, readJson } from '../lib/git.mjs';
 import { engDir, isMain, repoRoot } from '../lib/git.mjs';
 
 const verifyIds = () => [...readFileSync(join(engDir, 'verify.mjs'), 'utf8').matchAll(/\['(check:[a-z0-9-]+)'/g)].map((m) => m[1]);
@@ -34,6 +39,21 @@ const cases = [
   ['findings: a finding recorded for one engine is not stale in another, and is NEW if it appears there', () => { const k = [{ id: 'F-T', key: 'k', engines: ['webkit'] }]; setEngine('firefox'); const a = reconcile('x', [], k.filter((f) => !f.engines || f.engines.includes('firefox'))); const mine = (e) => { setEngine(e); return reconcile('x', [{ key: 'k', detail: 'seen' }], k.filter((f) => !f.engines || f.engines.includes(e))); }; const wk = mine('webkit'), ff = mine('firefox'); setEngine('chromium'); return [...a.problems.map((x) => 'stale: ' + x), ...wk.problems.map((x) => 'webkit: ' + x), ...ff.problems.filter((x) => /^k: seen/.test(x)).map(() => 'NEW-IN-OTHER-ENGINE')]; }, /NEW-IN-OTHER-ENGINE/],
   ['noise: the Firefox hero-preload warning is recognised in Firefox only', () => { const m = 'Preload of http://127.0.0.1:1/media/hero-wok-m.webp was ignored due to unknown \u201cas\u201d or \u201ctype\u201d values, or non-matching \u201cmedia\u201d attribute'; return ['chromium', 'webkit'].filter((e) => engineNoise(e, m)).map((e) => `${e} filtered the message`).concat(engineNoise('firefox', m) ? [] : ['firefox did not recognise it']); }, null],
   ['noise: any other console message is never filtered', () => ['firefox', 'chromium', 'webkit'].filter((e) => engineNoise(e, 'Preload of http://x/media/other.webp was ignored') || engineNoise(e, 'Refused to apply inline style')).map((e) => `${e} filtered an unrelated message`), null],
+  ['supports: an engine whose answer differs from the record is caught', async () => { const f = clone(readJson(join(engDir, 'engine-features.json')).features); f[0].expected.chromium = true; return (await checkSupports({ features: f })).problems; }, /STOPS applying|APPLIES in/],
+  ['supports: a stylesheet without the approved rule is caught', async () => { const dir = assembleCandidate(projectDir, 'supports-selftest'); try { const p = join(dir, 'styles.css'); writeFileSync(p, rf(p, 'utf8').replace(/@supports \(hanging-punctuation:first\)\{[^}]*\{[^}]*\}\}/, '')); return (await checkSupports({ root: dir })).problems; } finally { rmSync(dir, { recursive: true, force: true }); } }, /missing from the delivered styles\.css/],
+  ['supports: every engine of the matrix has a recorded expectation', () => { const f = readJson(join(engDir, 'engine-features.json')).features; return f.flatMap((x) => ['chromium', 'firefox', 'webkit'].filter((e) => typeof x.expected[e] !== 'boolean').map((e) => `${x.id}: no expectation for ${e}`)); }, null],
+  ['supports: the untouched site passes (must find nothing)', async () => (await checkSupports({})).problems, null],
+  ['approved styles: accepted in the named engine only, with exact values and unchanged geometry', () => {
+    const ok = { entries: [{ id: 'T', engines: ['webkit'], match: { tag: 'th', inHoursTable: true }, properties: ['white-space', 'min-width'], exact: { 'white-space': ['nowrap', 'normal'] } }] };
+    const b = { '[tag]': 'th', '[inHoursTable]': 'true', 'white-space': 'nowrap', 'min-width': 'auto', '[geometry]': '1,2,3,4', color: 'red' }, c = { ...b, 'white-space': 'normal', 'min-width': 'max-content' };
+    const p = [];
+    if (!approvedStyleDifference(ok, 'webkit', b, c)) p.push('the approved difference was refused in webkit');
+    for (const e of ['chromium', 'firefox']) if (approvedStyleDifference(ok, e, b, c)) p.push(`accepted in ${e}`);
+    if (approvedStyleDifference(ok, 'webkit', b, { ...c, '[geometry]': '1,2,9,4' })) p.push('accepted although the geometry changed');
+    if (approvedStyleDifference(ok, 'webkit', b, { ...c, color: 'blue' })) p.push('accepted although another property changed');
+    if (approvedStyleDifference(ok, 'webkit', b, { ...c, 'white-space': 'pre' })) p.push('accepted although the value is not the approved one');
+    if (approvedStyleDifference(ok, 'webkit', { ...b, '[inHoursTable]': 'false' }, { ...c, '[inHoursTable]': 'false' })) p.push('accepted for an element outside the hours table');
+    return p; }, null],
   ['ci: a cross-browser job that may fail but is not named informational is refused', () => checkCiFile(wf.replace('cross-browser: Firefox (informational)', 'cross-browser: Firefox'), { docs: false }).problems, /continue-on-error is only allowed/],
   ['ci: a cross-browser job that installs no browser is refused', () => checkCiFile(wf.replace('npx playwright install --with-deps firefox', 'echo no-browser'), { docs: false }).problems, /does not install firefox/],
   ['ci: the Chromium verify job is unchanged and still blocking', () => checkCiFile(wf.replace('        run: npm run verify\n', '        run: echo skipped\n'), { docs: false }).problems, /must run npm run verify/],

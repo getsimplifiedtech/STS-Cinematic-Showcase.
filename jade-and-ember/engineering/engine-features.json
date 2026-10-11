@@ -1,0 +1,14 @@
+{
+  "$comment": "Engine feature probes the approved K11 correction (APR-JE-029, finding F-G5-04) depends on. check:supports compares each engine's real answer with this record and with what the page actually does, so a browser or Playwright upgrade that changes the answer is reported instead of silently changing the rendering. If an entry changes, review the correction and the normal-appearance comparison against v0.8, then update this file.",
+  "features": [
+    {
+      "id": "hanging-punctuation",
+      "probe": { "property": "hanging-punctuation", "value": "first" },
+      "rule": "@supports (hanging-punctuation:first){.hours th{white-space:normal;min-width:max-content}}",
+      "appliesTo": { "selector": "table.hours th", "page": "visit-us.html" },
+      "expected": { "chromium": false, "firefox": false, "webkit": true },
+      "observed": { "chromium": "141.0.7390.37 (local) and 156 (Actions)", "firefox": "157.0", "webkit": "27.2 (Playwright Linux build)" },
+      "why": "Only WebKit supports hanging-punctuation, so the rule that lets the Visit hours day label wrap (and never be narrower than its text) applies only in WebKit, where a stale table column width let the nowrap label overflow into the hours under a visitor's text spacing."
+    }
+  ]
+}

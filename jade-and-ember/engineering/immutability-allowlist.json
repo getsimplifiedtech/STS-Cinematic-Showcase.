@@ -1,4 +1,19 @@
 {
   "$comment": "The ONLY way a built page, shared asset, media file, font or configuration file may differ from the frozen v0.8 baseline. At Gate 1 the list is empty: the candidate must be byte-identical. An entry needs an id, the file it concerns, a reason, the work package that introduces it, `visual: false` (it changes nothing a visitor or assistive technology perceives), and `normalize` rules (regular expressions applied to the CANDIDATE text before it is compared with the baseline). A `visual: true` entry is refused unless it names an owner approval (APR-JE-nnn) that exists in docs/JADE_AND_EMBER_APPROVALS.md. Pixels, text, computed styles and behaviour are compared regardless of this list.",
-  "entries": []
+  "entries": [
+    {
+      "id": "IMM-1",
+      "file": "styles.css",
+      "reason": "Approved narrowly scoped accessibility correction for the WebKit text-spacing overlap in the Visit hours table (finding F-G5-04): one @supports rule, effective only in engines that support hanging-punctuation. The normal rendering is pixel-identical to v0.8 in Chromium, Firefox and WebKit.",
+      "workPackage": "Gate 5 Phase 1 correction (APR-JE-029)",
+      "visual": true,
+      "approval": "APR-JE-029",
+      "normalize": [
+        {
+          "find": "/\\*\\ Visit\\ hours\\ table\\ \\(APR\\-JE\\-029,\\ finding\\ F\\-G5\\-04\\)\\.\\ WebKit\\ keeps\\ a\\ stale\\ column\\ width\\ when\\ a\\ visitor's\\ text\\ spacing\\ is\\ applied\\ after\\ the\\ page\\ has\\ loaded,\\ so\\ the\\ nowrap\\ day\\ label\\ overflowed\\ into\\ the\\ hours\\.\\ Only\\ engines\\ that\\ support\\ hanging\\-punctuation\\ \\(WebKit\\)\\ get\\ a\\ label\\ that\\ may\\ wrap\\ and\\ is\\ never\\ narrower\\ than\\ its\\ own\\ text;\\ every\\ other\\ engine,\\ and\\ the\\ normal\\ state\\ everywhere,\\ is\\ unchanged\\.\\ \\*/\\\n@supports\\ \\(hanging\\-punctuation:first\\)\\{\\.hours\\ th\\{white\\-space:normal;min\\-width:max\\-content\\}\\}\\\n",
+          "replace": ""
+        }
+      ]
+    }
+  ]
 }

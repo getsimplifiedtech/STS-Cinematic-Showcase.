@@ -15,6 +15,7 @@ import { environment, launchBrowser } from './browser.mjs';
 import { comparePng } from './pixels.mjs';
 import { scenarios } from './scenarios.mjs';
 import { compareSources, loadAllowlist, pagesOf } from './site.mjs';
+import { approvedStyleDifference, loadApprovedStyleDifferences } from './approved-styles.mjs';
 
 const require = createRequire(import.meta.url);
 
@@ -39,6 +40,7 @@ export const stylesDetail = (wanted) => {
   [document.documentElement, ...document.body.querySelectorAll('*')].forEach((el, i) => {
     if (!wanted.includes(i)) return;
     const cs = getComputedStyle(el), o = {}; for (let k = 0; k < cs.length; k++) o[cs[k]] = cs.getPropertyValue(cs[k]);
+    o['[tag]'] = el.tagName.toLowerCase(); o['[inHoursTable]'] = String(!!el.closest('table.hours'));
     const r = el.getBoundingClientRect(); o['[geometry]'] = [r.left + scrollX, r.top + scrollY, r.width, r.height].map((n) => Math.round(n * 100) / 100).join(',');
     out[i] = o;
   });
@@ -63,6 +65,7 @@ export const settle = async (page) => {
 // subset (self-tests only): { pages: [files], viewports: [names], scenarios: RegExp, states: false } narrows a run so a mutation can be checked in seconds.
 export async function runRegression({ baselineRoot, candidateRoot, browserName = 'chromium', reportDir, strictEnv = false, log = console.log, only = null, subset = {}, candidateHeaders = null }) {
   const env = environment();
+  const approvedStyles = loadApprovedStyleDifferences();
   const layers = {};
   const layer = (name) => (layers[name] ??= { problems: [], checked: 0, notes: [] });
   const want = (name) => !only || only.includes(name);
@@ -143,9 +146,20 @@ export async function runRegression({ baselineRoot, candidateRoot, browserName =
           else {
             const bad = sb1.map((e, i) => (e[1] !== sc1[i][1] ? i : -1)).filter((i) => i >= 0);
             if (bad.length) {
-              const [db, dc] = await Promise.all([b, c].map((p) => p.evaluate(stylesDetail, bad.slice(0, 3))));
-              const first = bad[0], props = Object.keys(db[first]).filter((k) => db[first][k] !== dc[first][k]);
-              L.problems.push(`${name}: computed style or geometry differs on ${bad.length} element(s), e.g. ${sb1[first][0]}: ${props.slice(0, 4).map((k) => `${k} ${db[first][k]} -> ${dc[first][k]}`).join('; ')}`);
+              // a few differing elements are inspected one by one so that an APPROVED difference (approved-style-differences.json: engine, element,
+              // properties) is accepted and reported; anything else, or any difference in position or size, is a problem
+              const look = bad.length <= 60 ? bad : bad.slice(0, 3);
+              const [db, dc] = await Promise.all([b, c].map((p) => p.evaluate(stylesDetail, look)));
+              const unapproved = [], approved = new Map();
+              for (const i of bad) {
+                const id = look.includes(i) && bad.length <= 60 ? approvedStyleDifference(approvedStyles, browserName, db[i], dc[i]) : null;
+                if (id) approved.set(id, (approved.get(id) || 0) + 1); else unapproved.push(i);
+              }
+              for (const [id, n] of approved) L.notes.push(`${name}: ${n} element(s) differ only as approved by ${id}`);
+              if (unapproved.length) {
+                const first = unapproved[0], x = db[first] || {}, y = dc[first] || {}, props = Object.keys(x).filter((k) => x[k] !== y[k]);
+                L.problems.push(`${name}: computed style or geometry differs on ${unapproved.length} element(s), e.g. ${sb1[first][0]}: ${props.slice(0, 4).map((k) => `${k} ${x[k]} -> ${y[k]}`).join('; ')}`);
+              }
             }
           }
         }

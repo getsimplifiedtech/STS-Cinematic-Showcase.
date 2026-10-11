@@ -16,6 +16,7 @@ import { checkSeo } from './checks/seo.mjs';
 import { checkPrivacy } from './checks/privacy.mjs';
 import { checkSecurity } from './checks/security.mjs';
 import { checkD11 } from './checks/d11.mjs';
+import { checkSupports } from './checks/supports.mjs';
 import { checkAssets } from './checks/assets.mjs';
 import { checkKeyboard } from './checks/keyboard.mjs';
 import { checkReflow } from './checks/reflow.mjs';
@@ -39,6 +40,7 @@ const RUN = {
   'check:privacy': () => checkPrivacy({ browser: true, browserName: engine }),
   'check:security': () => checkSecurity({ browser: true, browserName: engine }),
   'check:d11': () => checkD11({ browserName: engine }),
+  'check:supports': () => checkSupports({ browserName: engine }),
   'check:assets': () => checkAssets({ browser: true, browserName: engine }),
   'check:keyboard': () => checkKeyboard({ browserName: engine }),
   'check:reflow': () => checkReflow({ browserName: engine }),

@@ -51,6 +51,7 @@
     "check:hosting": "node engineering/checks/hosting.mjs",
     "check:phone": "node engineering/checks/phone.mjs",
     "check:d11": "node engineering/checks/d11.mjs",
+    "check:supports": "node engineering/checks/supports.mjs",
     "check:selftest-gate4": "node engineering/checks/selftest-gate4.mjs",
     "check:selftest-gate5": "node engineering/checks/selftest-gate5.mjs",
     "release:gate": "node engineering/tools/release.mjs gate",

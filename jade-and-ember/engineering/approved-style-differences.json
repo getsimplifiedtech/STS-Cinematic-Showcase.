@@ -1,0 +1,18 @@
+{
+  "$comment": "The ONLY computed-style differences the v0.8 regression harness may accept between the baseline and the candidate, per engine. Each entry needs an owner approval recorded in docs/JADE_AND_EMBER_APPROVALS.md. An entry names the engines it applies to (a difference in any other engine is NOT accepted), the element it concerns, the computed properties that may differ and, optionally, the exact baseline and candidate value of each. Geometry is never listed: the element's position and size must still be identical, which is what makes the rendering pixel-identical. Source files are governed separately by immutability-allowlist.json.",
+  "entries": [
+    {
+      "id": "ASD-1",
+      "approval": "APR-JE-029",
+      "finding": "F-G5-04",
+      "engines": ["webkit"],
+      "match": { "tag": "th", "inHoursTable": true },
+      "properties": ["white-space", "white-space-collapse", "text-wrap", "text-wrap-mode", "min-width", "min-inline-size"],
+      "exact": {
+        "white-space": ["nowrap", "normal"],
+        "text-wrap-mode": ["nowrap", "wrap"]
+      },
+      "reason": "The @supports (hanging-punctuation:first) rule on .hours th applies only in WebKit: the day label may wrap and is never narrower than its own text. In the normal state the label does not wrap and its box does not change, so the rendering is unchanged (geometry and pixels are still compared)."
+    }
+  ]
+}

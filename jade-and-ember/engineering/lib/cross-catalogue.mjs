@@ -24,6 +24,7 @@ export const SCOPE = {
   'check:privacy': ['engine', ''],
   'check:security': ['engine', ''],
   'check:d11': ['engine', ''],
+  'check:supports': ['engine', ''],
   'check:assets': ['engine', ''],
   'check:budgets': ['chromium-only', 'the runtime budgets use Chromium DevTools protocol CPU and network throttling and the Event Timing, Largest Contentful Paint and long-task APIs, which Firefox and WebKit do not provide; the static page-weight part runs in the Chromium job. Performance in the other engines is not measured by automation.'],
   'check:keyboard': ['engine', ''],
