@@ -63,6 +63,97 @@
           "detail": "answered directly"
         }
       ]
+    },
+    {
+      "id": "EXTV-2",
+      "date": "2026-10-11",
+      "runner": {
+        "kind": "github-actions",
+        "description": "GitHub-hosted ubuntu-24.04 runner with open outbound network; TLS is verified against the runner's own certificate store",
+        "run": "https://github.com/getsimplifiedtech/STS-Cinematic-Showcase./actions/runs/38146392918"
+      },
+      "registryDigest": "8bce3ef07b8531301404551eed43e6e5c0e77b41ff22cd8b06a6117d854767bd",
+      "results": [
+        {
+          "url": "https://getsimplifiedtech.com/",
+          "kind": "link",
+          "class": "verified",
+          "finalUrl": "https://www.getsimplifiedtech.com/",
+          "finalStatus": 200,
+          "chain": [
+            {
+              "url": "https://getsimplifiedtech.com/",
+              "status": 308,
+              "method": "HEAD"
+            },
+            {
+              "url": "https://www.getsimplifiedtech.com/",
+              "status": 200,
+              "method": "HEAD"
+            }
+          ],
+          "attempts": 1,
+          "detail": "redirected 1 time(s) to https://www.getsimplifiedtech.com/ (a different host)"
+        },
+        {
+          "url": "http://scripts.sil.org/OFL",
+          "kind": "mention",
+          "class": "verified",
+          "finalUrl": "https://openfontlicense.org/",
+          "finalStatus": 200,
+          "chain": [
+            {
+              "url": "http://scripts.sil.org/OFL",
+              "status": 301,
+              "method": "HEAD"
+            },
+            {
+              "url": "https://scripts.sil.org/OFL",
+              "status": 307,
+              "method": "HEAD"
+            },
+            {
+              "url": "https://openfontlicense.org/",
+              "status": 200,
+              "method": "HEAD"
+            }
+          ],
+          "attempts": 1,
+          "detail": "redirected 2 time(s) to https://openfontlicense.org/ (a different host)"
+        },
+        {
+          "url": "https://github.com/googlefonts/karla",
+          "kind": "mention",
+          "class": "verified",
+          "finalUrl": "https://github.com/googlefonts/karla",
+          "finalStatus": 200,
+          "chain": [
+            {
+              "url": "https://github.com/googlefonts/karla",
+              "status": 200,
+              "method": "HEAD"
+            }
+          ],
+          "attempts": 1,
+          "detail": "answered directly"
+        },
+        {
+          "url": "https://github.com/noirblancrouge/YoungSerif",
+          "kind": "mention",
+          "class": "verified",
+          "finalUrl": "https://github.com/noirblancrouge/YoungSerif",
+          "finalStatus": 200,
+          "chain": [
+            {
+              "url": "https://github.com/noirblancrouge/YoungSerif",
+              "status": 200,
+              "method": "HEAD"
+            }
+          ],
+          "attempts": 1,
+          "detail": "answered directly"
+        }
+      ]
     }
   ]
 }
