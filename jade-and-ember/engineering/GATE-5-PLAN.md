@@ -1,6 +1,6 @@
 # Gate 5 plan: final engineering validation and framework-extraction readiness
 
-**Status: APPROVED by the owner (`APR-JE-027`). Phases 0 to 6 are CLOSED (`APR-JE-030` to `APR-JE-035`; Phase 6 code commit `2ae78d6`). Phase 7 (release readiness dry run) is authorised (`APR-JE-035`) and delivered for owner review in `engineering/RELEASE-DRYRUN-GATE5.md` (verified commit `6133586`, Actions run 38); Phases 8 and 9 are not authorised.** Authorised as planning and assessment only (`APR-JE-026`). No file of the framework repository has been copied or changed; no merge, deployment, design or media change.
+**Status: APPROVED by the owner (`APR-JE-027`). Phases 0 to 7 are CLOSED (`APR-JE-030` to `APR-JE-036`; Phase 7 verified commit `6133586`, Actions run 38). Phase 8 (framework-extraction assessment) is authorised (`APR-JE-036`) and delivered for owner review in `engineering/FRAMEWORK-EXTRACTION-GATE5.md`, `FRAMEWORK-MIGRATION-MATRIX.md`, `FRAMEWORK-RECONCILIATION-GATE5.md` and `GATE-6-IMPLEMENTATION-ORDER.md`; Phase 9 is not authorised.** Authorised as planning and assessment only (`APR-JE-026`). No file of the framework repository has been copied or changed; no merge, deployment, design or media change.
 
 **Owner's words (2026-10-10):** "Gate 5 is the final engineering validation and STS framework-extraction readiness gate. Gate 4 and reconciliation are approved and closed. Do not reopen prior gates unless a genuine defect is discovered. This authorization is for Gate 5 planning and assessment only. Do not begin implementation until the plan is reviewed."
 

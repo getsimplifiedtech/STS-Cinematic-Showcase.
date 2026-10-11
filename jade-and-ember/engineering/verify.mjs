@@ -33,6 +33,7 @@ import { checkLinks } from './checks/links.mjs';
 import { checkSeo } from './checks/seo.mjs';
 import { checkRelease } from './checks/release.mjs';
 import { checkReleaseDryRun } from './checks/release-dryrun.mjs';
+import { checkFrameworkMatrix } from './checks/framework-matrix.mjs';
 import { checkHosting } from './checks/hosting.mjs';
 import { checkSelftestGate4 } from './checks/selftest-gate4.mjs';
 import { checkPhone } from './checks/phone.mjs';
@@ -71,6 +72,7 @@ const checks = [
   ['check:links', 'every internal link, fragment, image, font and video source resolves (exact case); sitemap and canonicals agree', () => checkLinks()],
   ['check:seo', fast ? 'canonical, sitemap, robots and JSON-LD generated from client configuration (static part)' : 'canonical, sitemap, robots and JSON-LD generated from client configuration; demonstration stays noindex; hostile input; served in the browser', () => checkSeo({ browser: !fast, browserName })],
   ['check:release', 'version file, release manifest and the release gate (a client-production build needs recorded approvals and evidence)', () => checkRelease()],
+  ['check:framework-matrix', 'Phase 8: the framework extraction and migration matrix classifies every file of the repository, every reference resolves, the generated Markdown is current (an assessment; nothing is extracted)', () => checkFrameworkMatrix()],
   ['check:evidence', 'human-testing paperwork: procedures equal the specification, templates are unfilled and rejected, complete records accepted, no page disables zoom', () => checkEvidence()],
   ['check:hosting', 'static-folder delivery for Cloudflare Pages: no application or vendor files, _headers within limits, no Vercel dependency', () => checkHosting()],
   ['check:privacy', fast ? 'no storage, cookies, third parties or fingerprinting (static part)' : 'no storage, cookies, third parties or fingerprinting (static and in the browser)', () => checkPrivacy({ browser: !fast, browserName })],

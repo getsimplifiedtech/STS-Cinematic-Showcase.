@@ -1,0 +1,1831 @@
+{
+ "schema": "jade-and-ember/framework-migration-matrix@1",
+ "comment": "Phase 8 (APR-JE-036): the extraction and migration matrix. An ASSESSMENT: nothing here extracts, copies or implements framework code, and the framework repository is not modified. Target locations are architectural recommendations, not facts. check:framework-matrix proves that every file of the repository belongs to exactly one component and that every reference resolves; engineering/FRAMEWORK-MIGRATION-MATRIX.md is generated from this file.",
+ "assessedOn": "2026-10-11",
+ "frameworkReference": {
+  "repository": "getsimplifiedtech/sts-web-design-framework",
+  "pinnedCommit": "d2803c02408c27d4489ccddee0a11478621e26dd",
+  "mainCommit": "f05f41f2e9112397d1b1755117e5b6314853a492",
+  "architectureSpecs": "01 to 15, byte-identical at both commits (blob hashes compared)",
+  "modified": false
+ },
+ "classes": {
+  "universal": "Reusable across all STS client websites with parameterisation only (values move to the project manifest; logic is unchanged).",
+  "universal-redesign": "Reusable only after a design change (a mechanism that encodes a Jade & Ember assumption, or a finding from Phases 5 to 7).",
+  "adapter-industry": "Belongs to one industry (restaurant) and stays with projects of that industry.",
+  "adapter-hosting": "Belongs to one hosting provider or delivery mode.",
+  "project": "A fact about Jade & Ember or its delivered site; stays.",
+  "devtool": "Development and test tooling; kept optional, never a release dependency.",
+  "record": "Project history, decisions and evidence; stays.",
+  "doc": "Documentation that is rewritten into the framework specification."
+ },
+ "components": [
+  {
+   "id": "FM-01",
+   "name": "Core utilities",
+   "summary": "Repository paths, git helpers, JSON-Schema subset validator, HTML tokenizer, media header readers, flash proxy, screenshot comparison, ZIP reader/writer, known-findings register mechanism.",
+   "paths": [
+    "jade-and-ember/engineering/lib/git.mjs",
+    "jade-and-ember/engineering/lib/schema.mjs",
+    "jade-and-ember/engineering/lib/html.mjs",
+    "jade-and-ember/engineering/lib/media.mjs",
+    "jade-and-ember/engineering/lib/flash.mjs",
+    "jade-and-ember/engineering/lib/pixels.mjs",
+    "jade-and-ember/engineering/lib/zip.mjs",
+    "jade-and-ember/engineering/lib/findings.mjs"
+   ],
+   "target": "engineering/core/lib/",
+   "external": [
+    "node >=22.22",
+    "git",
+    "ffmpeg (flash proxy input)"
+   ],
+   "dependsOn": [],
+   "redesign": {
+    "level": "parameterise",
+    "notes": "git.mjs fixes the layout <repo>/jade-and-ember/engineering, the docs path and the v0.8 baseline export; these become values read from the project manifest (sts.engineering.json). The other modules are already free of project names."
+   },
+   "verify": "Unit cases against the generic fixture site; ZIP round trip; schema validator conformance cases; the same 38-check result on Jade & Ember before and after (parity).",
+   "masterSpecs": [
+    "09"
+   ],
+   "workPackage": "G6-5",
+   "priorities": [],
+   "class": "universal"
+  },
+  {
+   "id": "FM-02",
+   "name": "Site assembly and byte-immutability rules",
+   "summary": "assembleCandidate (fresh build into a temp folder), the page registry reader (pagesOf), the SHARED file list, and the immutability allowlist validator that reads the approvals log.",
+   "paths": [
+    "jade-and-ember/engineering/lib/site.mjs"
+   ],
+   "target": "engineering/core/lib/",
+   "external": [
+    "node"
+   ],
+   "dependsOn": [
+    "FM-01"
+   ],
+   "redesign": {
+    "level": "split",
+    "notes": "Splits into generic assembly (page registry, shared and asset folders from the manifest) and the baseline immutability rules (FM-06). SHARED = styles.css, site.js, hero.js, menu.js is Jade-specific; the allowlist validator names docs/JADE_AND_EMBER_APPROVALS.md."
+   },
+   "verify": "Assemble the generic fixture, Jade & Ember and the cinematic template (single page) with identical code paths; byte-identical Jade & Ember output before and after.",
+   "masterSpecs": [
+    "08"
+   ],
+   "workPackage": "G6-5",
+   "priorities": [],
+   "class": "universal-redesign"
+  },
+  {
+   "id": "FM-03",
+   "name": "Verify runner and report",
+   "summary": "npm run verify: ordered checks, one summary, exit code, and the .reports/verify.json report (mode, commit, dirty, assetsTree) the release gate reads.",
+   "paths": [
+    "jade-and-ember/engineering/verify.mjs"
+   ],
+   "target": "engineering/core/verify.mjs",
+   "external": [
+    "node"
+   ],
+   "dependsOn": [
+    "FM-01",
+    "FM-02"
+   ],
+   "redesign": {
+    "level": "parameterise",
+    "notes": "The check list is 38 hard-coded imports and registrations; it becomes a registry (framework checks plus project checks) selected by the manifest. The report is the evidence the release gate trusts (finding RG-08): it must become authentic and bound to the candidate artifact digest."
+   },
+   "verify": "Runs the generic fixture and Jade & Ember with the same runner; the report is rejected when forged or incomplete (Gate 6 dry-run scenarios).",
+   "masterSpecs": [
+    "08",
+    "09",
+    "14"
+   ],
+   "workPackage": "G6-2",
+   "priorities": [
+    3
+   ],
+   "class": "universal"
+  },
+  {
+   "id": "FM-04",
+   "name": "Browser runtime, test server and engine data",
+   "summary": "Pinned browser launch (CHROMIUM_PATH), the shared browser-check runtime, the configurable static test server that models host behaviours, engine console-noise filters, the environment pin.",
+   "paths": [
+    "jade-and-ember/engineering/lib/browser.mjs",
+    "jade-and-ember/engineering/lib/runtime.mjs",
+    "jade-and-ember/engineering/lib/server.mjs",
+    "jade-and-ember/engineering/lib/engine-noise.mjs",
+    "jade-and-ember/engineering/environment.json"
+   ],
+   "target": "engineering/core/runtime/",
+   "external": [
+    "playwright 1.64.0 (exact)",
+    "chromium / firefox / webkit",
+    "node"
+   ],
+   "dependsOn": [
+    "FM-01"
+   ],
+   "redesign": {
+    "level": "parameterise",
+    "notes": "engine-noise.mjs holds the Firefox hero-video preload message (a Jade & Ember fact) and environment.json pins Chromium 141 and tolerances; both become project/framework data. server.mjs host profiles move to the hosting adapters (FM-22)."
+   },
+   "verify": "Fixture runs in Chromium, Firefox and WebKit; noise filters are scoped per engine and per project; version pins are read from data.",
+   "masterSpecs": [
+    "09"
+   ],
+   "workPackage": "G6-5",
+   "priorities": [],
+   "class": "universal"
+  },
+  {
+   "id": "FM-05",
+   "name": "Cross-browser harness",
+   "summary": "Runs the browser checks in Chromium, Firefox or WebKit and prints a matrix in which no check can be silently left out.",
+   "paths": [
+    "jade-and-ember/engineering/cross-browser.mjs",
+    "jade-and-ember/engineering/lib/cross-catalogue.mjs"
+   ],
+   "target": "engineering/core/cross-browser/",
+   "external": [
+    "playwright",
+    "firefox",
+    "webkit"
+   ],
+   "dependsOn": [
+    "FM-03",
+    "FM-04"
+   ],
+   "redesign": {
+    "level": "parameterise",
+    "notes": "The catalogue classifies Jade & Ember's 38 checks by name; classification must come from each check's own declaration so a project check cannot be unclassified (selftest-gate5 refused one in Phase 7)."
+   },
+   "verify": "selftest-gate5 equivalent on the fixture: an unclassified or skipped check is shown as MISSING, never as a pass.",
+   "masterSpecs": [
+    "09"
+   ],
+   "workPackage": "G6-5",
+   "priorities": [],
+   "class": "universal"
+  },
+  {
+   "id": "FM-06",
+   "name": "Baseline immutability and regression mechanism",
+   "summary": "Compares a candidate with a frozen approved reference (git commit) at byte, text, structure, computed-style, pixel and behaviour level, with an owner-approved difference allowlist.",
+   "paths": [
+    "jade-and-ember/engineering/checks/baseline.mjs",
+    "jade-and-ember/engineering/checks/regression.mjs",
+    "jade-and-ember/engineering/lib/regression.mjs",
+    "jade-and-ember/engineering/lib/approved-styles.mjs"
+   ],
+   "target": "engineering/core/baseline/",
+   "external": [
+    "playwright",
+    "git",
+    "node"
+   ],
+   "dependsOn": [
+    "FM-01",
+    "FM-02",
+    "FM-04"
+   ],
+   "redesign": {
+    "level": "redesign",
+    "notes": "A new client has no v0.8. The baseline must become an optional, project-declared approved reference (for example the first owner-approved release), with the approval ids and the allowlist format parameterised. Scenarios (FM-12) are project code."
+   },
+   "verify": "On the fixture: pass with no reference declared (mechanism off), pass against an approved reference, fail on a one-byte change; on Jade & Ember the regression result is identical before and after.",
+   "masterSpecs": [
+    "03",
+    "09"
+   ],
+   "workPackage": "G6-5",
+   "priorities": [],
+   "class": "universal-redesign"
+  },
+  {
+   "id": "FM-07",
+   "name": "Build integrity checks",
+   "summary": "Determinism (two builds equal), delivery (self-contained, no tooling), asset manifest and content-hashed copy. Portability: the delivered folder works from an extracted ZIP, file://, a domain root, a subdirectory, pretty URLs and without byte-range support.",
+   "paths": [
+    "jade-and-ember/engineering/checks/determinism.mjs",
+    "jade-and-ember/engineering/checks/delivery.mjs",
+    "jade-and-ember/engineering/checks/assets.mjs",
+    "jade-and-ember/engineering/lib/hashed.mjs",
+    "jade-and-ember/engineering/tools/asset-manifest.mjs",
+    "jade-and-ember/engineering/tools/hashed-build.mjs",
+    "jade-and-ember/engineering/checks/portability.mjs"
+   ],
+   "target": "engineering/checks/",
+   "external": [
+    "node",
+    "playwright (assets, in-browser part)"
+   ],
+   "dependsOn": [
+    "FM-01",
+    "FM-02",
+    "FM-06"
+   ],
+   "redesign": {
+    "level": "parameterise",
+    "notes": "assets.mjs compares the hashed copy with v0.8 in the browser (baseline optional); file lists and the recorded assets.manifest.json path come from the manifest."
+   },
+   "verify": "Fixture determinism and delivery cases (mutation tests); Jade & Ember tree hash unchanged.",
+   "masterSpecs": [
+    "08",
+    "09",
+    "14"
+   ],
+   "workPackage": "G6-5",
+   "priorities": [],
+   "class": "universal"
+  },
+  {
+   "id": "FM-08",
+   "name": "Configuration validation and component contracts",
+   "summary": "Validates configuration against JSON Schemas before the build; renders every component against contracts; the configuration loader.",
+   "paths": [
+    "jade-and-ember/engineering/lib/config-schema.mjs",
+    "jade-and-ember/engineering/checks/schema.mjs",
+    "jade-and-ember/engineering/checks/contracts.mjs",
+    "jade-and-ember/engineering/schemas/site.schema.json",
+    "jade-and-ember/engineering/schemas/client.schema.json",
+    "jade-and-ember/src/lib/config.mjs",
+    "jade-and-ember/src/lib/util.mjs"
+   ],
+   "target": "engineering/core/config/",
+   "external": [
+    "node"
+   ],
+   "dependsOn": [
+    "FM-01"
+   ],
+   "redesign": {
+    "level": "split",
+    "notes": "client.schema.json carries the restaurant business block (address, hours, ordering); the base client schema (identity, flags, seo, contact) stays in the core and the industry block moves to the adapter. The loader assumes four named files (client, site, copy, menu)."
+   },
+   "verify": "Schema accepts the fixture and Jade & Ember configuration; every forbidden combination (demo flag with indexing, structured data with noindex, demonstration wording in an indexable build) is refused with a message.",
+   "masterSpecs": [
+    "03",
+    "04"
+   ],
+   "workPackage": "G6-5",
+   "priorities": [],
+   "class": "universal-redesign"
+  },
+  {
+   "id": "FM-09",
+   "name": "Restaurant industry adapter",
+   "summary": "Restaurant-shaped components (dish, menu category, hours, owner note, steps), the menu page renderer, the copy and menu schemas and the component contracts they satisfy.",
+   "paths": [
+    "jade-and-ember/src/components/dish.mjs",
+    "jade-and-ember/src/components/menu-category.mjs",
+    "jade-and-ember/src/components/hours.mjs",
+    "jade-and-ember/src/components/owner-note.mjs",
+    "jade-and-ember/src/components/steps.mjs",
+    "jade-and-ember/src/pages/menu.mjs",
+    "jade-and-ember/engineering/schemas/copy.schema.json",
+    "jade-and-ember/engineering/schemas/menu.schema.json",
+    "jade-and-ember/engineering/contracts/components.json"
+   ],
+   "target": "engineering/adapters/industry/restaurant/",
+   "external": [
+    "node"
+   ],
+   "dependsOn": [
+    "FM-08"
+   ],
+   "redesign": {
+    "level": "split",
+    "notes": "Stays with restaurant projects. Also receives, from FM-15, the Restaurant JSON-LD (jsonLdFor, validateRestaurant, hoursSpecs) and the BUSINESS fixtures. Master spec 02 names the industry value site_type.restaurant_hospitality; the adapter id should align with it."
+   },
+   "verify": "The adapter passes its own contract tests on the fixture restaurant; a non-restaurant project loads the core without the adapter present.",
+   "masterSpecs": [
+    "02",
+    "03"
+   ],
+   "workPackage": "G6-5",
+   "priorities": [],
+   "class": "adapter-industry"
+  },
+  {
+   "id": "FM-10",
+   "name": "Accessibility and interaction checks",
+   "summary": "Keyboard order and focus, 320 px reflow and zoom, forced colours, accessibility-tree rules, DOM order against reading order.",
+   "paths": [
+    "jade-and-ember/engineering/checks/keyboard.mjs",
+    "jade-and-ember/engineering/checks/reflow.mjs",
+    "jade-and-ember/engineering/checks/forced-colors.mjs",
+    "jade-and-ember/engineering/checks/a11y-tree.mjs",
+    "jade-and-ember/engineering/checks/order.mjs",
+    "jade-and-ember/engineering/a11y.json"
+   ],
+   "target": "engineering/checks/",
+   "external": [
+    "playwright"
+   ],
+   "dependsOn": [
+    "FM-04",
+    "FM-01"
+   ],
+   "redesign": {
+    "level": "parameterise",
+    "notes": "Selectors (.nav-toggle, .skip/.jump), the Pause-control wording and the five-page walk come from the manifest selector map and page registry."
+   },
+   "verify": "Mutation tests on the fixture (a removed skip link, a keyboard trap, a clipped target) fail for the right reason in three engines; Jade & Ember results identical.",
+   "masterSpecs": [
+    "09"
+   ],
+   "workPackage": "G6-5",
+   "priorities": [],
+   "class": "universal"
+  },
+  {
+   "id": "FM-11",
+   "name": "Key contact-link check",
+   "summary": "Every telephone link at nine mobile widths: readable, inside the viewport, operable.",
+   "paths": [
+    "jade-and-ember/engineering/checks/phone.mjs"
+   ],
+   "target": "engineering/checks/",
+   "external": [
+    "playwright"
+   ],
+   "dependsOn": [
+    "FM-04"
+   ],
+   "redesign": {
+    "level": "redesign",
+    "notes": "Generic in principle (key contact links: phone, email, map, order) but selectors and expectations are restaurant-shaped; owner decision F-G4-01 is specific to Jade & Ember's appearance."
+   },
+   "verify": "Fixture with phone, email and map links at nine widths; Jade & Ember unchanged.",
+   "masterSpecs": [
+    "09"
+   ],
+   "workPackage": "G6-5",
+   "priorities": [],
+   "class": "universal-redesign"
+  },
+  {
+   "id": "FM-12",
+   "name": "Jade & Ember site-specific verification",
+   "summary": "The approved WebKit text-spacing correction check, engine feature records, and the behaviour scenarios keyed to this site's pages and controls.",
+   "paths": [
+    "jade-and-ember/engineering/checks/supports.mjs",
+    "jade-and-ember/engineering/engine-features.json",
+    "jade-and-ember/engineering/lib/scenarios.mjs"
+   ],
+   "target": "stays in Jade & Ember (as a project check registered through the manifest)",
+   "external": [
+    "playwright"
+   ],
+   "dependsOn": [
+    "FM-06"
+   ],
+   "redesign": {
+    "level": "none",
+    "notes": "Not reusable: APR-JE-029 / F-G5-04 and scenario code for this site. It demonstrates the project-check extension point the core must offer."
+   },
+   "verify": "Registered through the manifest and still run by the core runner; results identical.",
+   "masterSpecs": [
+    "09"
+   ],
+   "workPackage": "G6-5",
+   "priorities": [],
+   "class": "project"
+  },
+  {
+   "id": "FM-13",
+   "name": "Security policy engine, CSP and privacy",
+   "summary": "Builds the Content Security Policy and headers from one policy and proves them in three engines; privacy (no storage, cookies, third parties); the style-attribute hash behaviour (D-11).",
+   "paths": [
+    "jade-and-ember/engineering/lib/security.mjs",
+    "jade-and-ember/engineering/checks/security.mjs",
+    "jade-and-ember/engineering/checks/privacy.mjs",
+    "jade-and-ember/engineering/checks/d11.mjs",
+    "jade-and-ember/engineering/security.json",
+    "jade-and-ember/engineering/privacy.json"
+   ],
+   "target": "engineering/security/",
+   "external": [
+    "playwright",
+    "node"
+   ],
+   "dependsOn": [
+    "FM-01",
+    "FM-04"
+   ],
+   "redesign": {
+    "level": "split",
+    "notes": "security.mjs also renders the host files (_headers, nginx, Apache) which belong to the hosting adapters (FM-22); HSTS includeSubDomains default is a known deviation (D-P3-4, D-P4-5); d11 names this site's photograph selectors; noindex headers are keyed to the demonstration channel; defaults (framework) versus tighten-only project overrides (master spec 13)."
+   },
+   "verify": "CSP generated for fixture and Jade & Ember, identical to today for Jade & Ember; header renderers tested per adapter; HSTS default has no includeSubDomains.",
+   "masterSpecs": [
+    "06",
+    "09",
+    "13"
+   ],
+   "workPackage": "G6-4",
+   "priorities": [],
+   "class": "universal-redesign"
+  },
+  {
+   "id": "FM-14",
+   "name": "Dependency, secrets and CI policy checks",
+   "summary": "Dependency pinning, lockfile integrity, licences and advisories; credentials in tree and history; the GitHub Actions workflow policy.",
+   "paths": [
+    "jade-and-ember/engineering/checks/deps.mjs",
+    "jade-and-ember/engineering/checks/secrets.mjs",
+    "jade-and-ember/engineering/checks/ci.mjs",
+    "jade-and-ember/engineering/dependencies.json"
+   ],
+   "target": "engineering/security/supply-chain/",
+   "external": [
+    "npm",
+    "git",
+    "yaml"
+   ],
+   "dependsOn": [
+    "FM-01"
+   ],
+   "redesign": {
+    "level": "redesign",
+    "notes": "check:ci encodes Jade-specific rules (push only to the v0.9 development branch, main forbidden, schedule/workflow_run/release triggers forbidden, only two named actions, must run npm run verify, full fetch for the baseline) and rejects a reusable-workflow uses:. Measured: the cinematic template's workflow fails 12 of its rules, one of them a false positive (the word claude in a branch name). Needs a profile-driven policy, SHA-pinned reusable workflows, an exception register with expiry (D-P6-7), SBOM and provenance checks (D-P6-5)."
+   },
+   "verify": "Fixture workflows (compliant and each violation) judged correctly; template workflow judged with only true findings; advisory exception expiry fails closed.",
+   "masterSpecs": [
+    "09",
+    "14",
+    "15"
+   ],
+   "workPackage": "G6-3",
+   "priorities": [
+    5
+   ],
+   "class": "universal-redesign"
+  },
+  {
+   "id": "FM-15",
+   "name": "Search and AI-discovery generators and validators",
+   "summary": "Canonical URLs, sitemap, robots.txt, llms.txt, crawler classes and review record, structured-data checks, reserved-host test, internal-link and HTML validation.",
+   "paths": [
+    "jade-and-ember/src/lib/seo.mjs",
+    "jade-and-ember/src/lib/crawlers.mjs",
+    "jade-and-ember/engineering/lib/search.mjs",
+    "jade-and-ember/engineering/checks/seo.mjs",
+    "jade-and-ember/engineering/checks/links.mjs",
+    "jade-and-ember/engineering/checks/html.mjs",
+    "jade-and-ember/engineering/htmlvalidate.json"
+   ],
+   "target": "engineering/seo/",
+   "external": [
+    "node",
+    "html-validate"
+   ],
+   "dependsOn": [
+    "FM-08",
+    "FM-09"
+   ],
+   "redesign": {
+    "level": "split",
+    "notes": "Engineering imports project source (seven imports of src/lib/seo.mjs, crawlers.mjs and config.mjs): the generators move into the framework so any builder can call them. Restaurant JSON-LD moves to FM-09; the framework selects a schema type per industry (D-P4-2), supports an approved social image (D-P4-3), evaluates DuckAssistBot and Meta-ExternalFetcher (D-P4-1). isReservedHost is a denylist (12 of 27 sample provider hosts unrecognised): production-domain authorisation becomes positive (priority 4)."
+   },
+   "verify": "Fixture indexable build generates and validates all artifacts; Jade & Ember artifacts byte-identical; domain authorisation scenarios in the dry run.",
+   "masterSpecs": [
+    "02",
+    "03",
+    "09"
+   ],
+   "workPackage": "G6-3",
+   "priorities": [
+    4,
+    5
+   ],
+   "class": "universal-redesign"
+  },
+  {
+   "id": "FM-16",
+   "name": "External-link verification",
+   "summary": "Registry of external destinations, a classified verifier (verified, blocked, unavailable, inconclusive, insecure), an append-only history, an informational CI job.",
+   "paths": [
+    "jade-and-ember/engineering/lib/external.mjs",
+    "jade-and-ember/engineering/tools/external-links.mjs"
+   ],
+   "target": "engineering/links/",
+   "external": [
+    "node (fetch)"
+   ],
+   "dependsOn": [
+    "FM-01"
+   ],
+   "redesign": {
+    "level": "parameterise",
+    "notes": "Becomes a client-production release requirement bound to the registry digest (D-P5-1, finding RG-02). The Jade credit link correction (D-P5-3) is site content."
+   },
+   "verify": "Scripted-network cases (already 36); the release requirement scenarios in the dry run.",
+   "masterSpecs": [
+    "09"
+   ],
+   "workPackage": "G6-3",
+   "priorities": [
+    5
+   ],
+   "class": "universal"
+  },
+  {
+   "id": "FM-17",
+   "name": "Media inspection and rights",
+   "summary": "Media format, dimension, alt-text, flashing, reduced-motion and Pause checks; the rights inventory with a WOFF2 name-table reader and licence-section comparison.",
+   "paths": [
+    "jade-and-ember/engineering/checks/media.mjs",
+    "jade-and-ember/engineering/lib/media-rights.mjs"
+   ],
+   "target": "engineering/media/",
+   "external": [
+    "playwright",
+    "ffmpeg",
+    "node"
+   ],
+   "dependsOn": [
+    "FM-01",
+    "FM-04"
+   ],
+   "redesign": {
+    "level": "redesign",
+    "notes": "The rights approval must bind to the exact asset inventory digest (D-P5-4, RG-03); provider-terms evidence stays open (D-P5-5); asset status vocabulary should map to the master Asset Manifest states (ready, remediation_required, blocked) in spec 03."
+   },
+   "verify": "Inventory scenarios (missing, unverified, wrong digest, negated row) fail; Jade & Ember inventory result unchanged.",
+   "masterSpecs": [
+    "03"
+   ],
+   "workPackage": "G6-3",
+   "priorities": [
+    5
+   ],
+   "class": "universal-redesign"
+  },
+  {
+   "id": "FM-18",
+   "name": "Release gate, manifest and approvals",
+   "summary": "The release policy per channel, the gate, the release manifest and its schema, the approvals parser, the release tool (gate, manifest, prepare, search-digest).",
+   "paths": [
+    "jade-and-ember/engineering/lib/release.mjs",
+    "jade-and-ember/engineering/tools/release.mjs",
+    "jade-and-ember/engineering/checks/release.mjs",
+    "jade-and-ember/engineering/release/policy.json",
+    "jade-and-ember/engineering/release/release-manifest.schema.json",
+    "jade-and-ember/engineering/lib/approvals.mjs"
+   ],
+   "target": "engineering/release/",
+   "external": [
+    "git",
+    "node",
+    "ajv"
+   ],
+   "dependsOn": [
+    "FM-01",
+    "FM-03",
+    "FM-15",
+    "FM-19"
+   ],
+   "redesign": {
+    "level": "redesign",
+    "notes": "The centre of the Gate 6 priorities: approvals and CI evidence bound to an immutable candidate artifact digest (RG-01); structured approval records with explicit statuses, reviewer authorisation and revocation (RG-04..RG-07); authentic verification evidence (RG-08); positive production-domain authorisation; a restricted demonstration channel that cannot masquerade (RG-13); attestation or signing evaluated before the architecture is final (RG-14); the previously approved requirements added (RG-02, RG-03, RG-09..RG-12)."
+   },
+   "verify": "All 112 dry-run scenarios retained and extended; every RG finding becomes a scenario that blocks; manifest deterministic and valid under two validators.",
+   "masterSpecs": [
+    "03",
+    "08",
+    "14",
+    "15"
+   ],
+   "workPackage": "G6-2",
+   "priorities": [
+    1,
+    2,
+    3,
+    4,
+    6,
+    7
+   ],
+   "class": "universal-redesign"
+  },
+  {
+   "id": "FM-19",
+   "name": "Human-evidence tooling",
+   "summary": "Evidence specification, validator, scaffolds, generated tester procedures, the evidence classes E1/E2/E3.",
+   "paths": [
+    "jade-and-ember/engineering/lib/evidence.mjs",
+    "jade-and-ember/engineering/lib/evidence-docs.mjs",
+    "jade-and-ember/engineering/tools/evidence.mjs",
+    "jade-and-ember/engineering/checks/evidence.mjs",
+    "jade-and-ember/engineering/release/evidence-spec.json",
+    "jade-and-ember/engineering/release/evidence/README.md",
+    "jade-and-ember/engineering/release/evidence/files/README.md",
+    "docs/JADE_AND_EMBER_DEVICE_TEST_PROTOCOL.md",
+    "docs/device-testing/"
+   ],
+   "target": "engineering/release/evidence/",
+   "external": [
+    "node",
+    "git"
+   ],
+   "dependsOn": [
+    "FM-01",
+    "FM-18"
+   ],
+   "redesign": {
+    "level": "redesign",
+    "notes": "Records live in the repository and name the commit (RG-01); the attestation is self-declared text (authenticity, priority 3); the page list and device list are Jade-specific data inside the spec."
+   },
+   "verify": "Evidence validator cases (122 today) retained; records bind to the candidate artifact digest; forged or reused records rejected.",
+   "masterSpecs": [
+    "09",
+    "15"
+   ],
+   "workPackage": "G6-2",
+   "priorities": [
+    1,
+    3
+   ],
+   "class": "universal-redesign"
+  },
+  {
+   "id": "FM-20",
+   "name": "Release dry run and package verifier",
+   "summary": "Runs the real release tool against a synthetic client build in a throwaway copy; verifies a prepared package from its own bytes; 112 scenarios and 12 measured probes.",
+   "paths": [
+    "jade-and-ember/engineering/lib/release-dryrun.mjs",
+    "jade-and-ember/engineering/lib/release-dryrun-scenarios.mjs",
+    "jade-and-ember/engineering/lib/release-package.mjs",
+    "jade-and-ember/engineering/tools/release-verify-package.mjs",
+    "jade-and-ember/engineering/checks/release-dryrun.mjs"
+   ],
+   "target": "engineering/release/dryrun/",
+   "external": [
+    "git",
+    "node"
+   ],
+   "dependsOn": [
+    "FM-18",
+    "FM-19",
+    "FM-21"
+   ],
+   "redesign": {
+    "level": "parameterise",
+    "notes": "Retained as a blocking check (priority 8). The sandbox copies the Jade project and the scenarios name Jade files; it moves to the generic fixture and is extended with every RG finding and every Gate 6 requirement."
+   },
+   "verify": "Dry run on the generic fixture and on Jade & Ember; each new requirement has a blocking scenario; probes shrink as gaps close.",
+   "masterSpecs": [
+    "09",
+    "14"
+   ],
+   "workPackage": "G6-2",
+   "priorities": [
+    8
+   ],
+   "class": "universal"
+  },
+  {
+   "id": "FM-21",
+   "name": "Self-test suites and fixtures",
+   "summary": "Mutation and targeted negative tests for every check (Gate 1 to Gate 5), the client fixture and the in-memory evidence fixtures.",
+   "paths": [
+    "jade-and-ember/engineering/checks/selftest.mjs",
+    "jade-and-ember/engineering/checks/selftest-gate2.mjs",
+    "jade-and-ember/engineering/checks/selftest-gate3.mjs",
+    "jade-and-ember/engineering/checks/selftest-gate4.mjs",
+    "jade-and-ember/engineering/checks/selftest-gate5.mjs",
+    "jade-and-ember/engineering/checks/selftest-evidence.mjs",
+    "jade-and-ember/engineering/lib/client-fixture.mjs",
+    "jade-and-ember/engineering/lib/evidence-fixtures.mjs"
+   ],
+   "target": "engineering/fixtures/ and engineering/tests/",
+   "external": [
+    "node"
+   ],
+   "dependsOn": [
+    "FM-01"
+   ],
+   "redesign": {
+    "level": "rewrite",
+    "notes": "About 1,090 lines of self-tests damage copies of Jade & Ember files; client-fixture.mjs holds the restaurant demonstration-to-client text edits. They must run on a generic fixture site so the core proves itself, with Jade & Ember as the reference consumer."
+   },
+   "verify": "Every existing negative case has an equivalent on the generic fixture; counts reconciled (251, 122, 25 and the Gate 1 to 3 cases).",
+   "masterSpecs": [
+    "09"
+   ],
+   "workPackage": "G6-5",
+   "priorities": [],
+   "class": "devtool"
+  },
+  {
+   "id": "FM-22",
+   "name": "Hosting adapters and requirements",
+   "summary": "Host-file generation, the static-folder hosting check (Cloudflare Pages limits), hosting assessment documents, adapter interface, Vercel specification, live verification checklist.",
+   "paths": [
+    "jade-and-ember/engineering/tools/host-files.mjs",
+    "jade-and-ember/engineering/checks/hosting.mjs",
+    "jade-and-ember/engineering/HOSTING.md",
+    "jade-and-ember/engineering/hosting/"
+   ],
+   "target": "engineering/adapters/hosting/{cloudflare-pages,vercel,static}/",
+   "external": [
+    "node"
+   ],
+   "dependsOn": [
+    "FM-13",
+    "FM-04"
+   ],
+   "redesign": {
+    "level": "split",
+    "notes": "Adapters implement one interface (HOSTING-ADAPTER-INTERFACE.md): header rendering, URL style, 404 behaviour, cache rules, bundle manifest. Requirements to carry: a real 404 (D-P3-1), domain-root base URL (D-P3-2), staged-bundle verification (D-P3-3), HSTS opt-in (D-P3-4), provider documentation re-verified (D-P3-6). Live verification needs a separately authorised preview (D-P3-5)."
+   },
+   "verify": "Adapter golden outputs for the fixture; the same delivered folder passes check:portability under both adapters; live checklist items recorded only when performed.",
+   "masterSpecs": [
+    "08",
+    "14"
+   ],
+   "workPackage": "G6-4",
+   "priorities": [
+    5
+   ],
+   "class": "adapter-hosting"
+  },
+  {
+   "id": "FM-23",
+   "name": "CI workflow and CI documentation",
+   "summary": "The seven-job GitHub Actions workflow and the document that specifies the runner.",
+   "paths": [
+    ".github/workflows/jade-and-ember-verify.yml",
+    "jade-and-ember/engineering/CI.md"
+   ],
+   "target": "framework repo: .github/workflows/ (reusable workflows) plus a thin caller in each client repository",
+   "external": [
+    "actions/checkout",
+    "actions/setup-node"
+   ],
+   "dependsOn": [
+    "FM-14"
+   ],
+   "redesign": {
+    "level": "redesign",
+    "notes": "Becomes SHA-pinned reusable workflows (workflow_call) in the framework repository, called from a short workflow in each client repository; Node 24 and verified Action versions (D-P6-2, D-P6-3). The hard-coded Jade branch, job names and Node pin become inputs."
+   },
+   "verify": "A client repository that only contains the caller workflow and the manifest runs the same checks; workflow policy check passes on caller and on the reusable workflow.",
+   "masterSpecs": [
+    "14"
+   ],
+   "workPackage": "G6-7",
+   "priorities": [],
+   "class": "universal-redesign"
+  },
+  {
+   "id": "FM-24",
+   "name": "Creative-authority pin check",
+   "summary": "Records and verifies the design authority (skill path and SHA-256, licence) and the framework reference; reads, never modifies, the framework.",
+   "paths": [
+    "jade-and-ember/engineering/checks/authority.mjs"
+   ],
+   "target": "engineering/core/authority/",
+   "external": [
+    "git",
+    "node"
+   ],
+   "dependsOn": [
+    "FM-01"
+   ],
+   "redesign": {
+    "level": "parameterise",
+    "notes": "Generalised to a per-project creative-authority pin in the manifest; the framework Release (spec 14) does not exist yet (authority.json release is null), so the pin is a commit."
+   },
+   "verify": "Fixture with a correct pin passes, a wrong hash or missing skill fails; Jade & Ember unchanged.",
+   "masterSpecs": [
+    "01",
+    "14"
+   ],
+   "workPackage": "G6-5",
+   "priorities": [],
+   "class": "universal"
+  },
+  {
+   "id": "FM-25",
+   "name": "Design tokens structure check",
+   "summary": "The shared custom properties in styles.css as engineering structure (defined, used, contrast pairs), against a frozen snapshot.",
+   "paths": [
+    "jade-and-ember/engineering/checks/tokens.mjs"
+   ],
+   "target": "engineering/checks/",
+   "external": [
+    "node"
+   ],
+   "dependsOn": [
+    "FM-02"
+   ],
+   "redesign": {
+    "level": "redesign",
+    "notes": "Compares with the frozen v0.8 values (a project fact); the reusable part checks structure and contrast pairs only and must never choose values (see the creative-authority boundary)."
+   },
+   "verify": "Fixture tokens structure cases; Jade & Ember snapshot comparison stays as a project check.",
+   "masterSpecs": [
+    "12"
+   ],
+   "workPackage": "G6-5",
+   "priorities": [],
+   "class": "universal-redesign"
+  },
+  {
+   "id": "FM-26",
+   "name": "Performance budgets",
+   "summary": "Page-weight budgets with growth against a reference and Core Web Vitals under throttling.",
+   "paths": [
+    "jade-and-ember/engineering/checks/budgets.mjs",
+    "jade-and-ember/engineering/budgets.json"
+   ],
+   "target": "engineering/checks/ with defaults in engineering/policies/",
+   "external": [
+    "playwright",
+    "node"
+   ],
+   "dependsOn": [
+    "FM-04",
+    "FM-02"
+   ],
+   "redesign": {
+    "level": "parameterise",
+    "notes": "budgets.json holds measured Jade values; the framework carries tier defaults (master spec 13 refers to versioned CORE performance policy) and a project may only tighten."
+   },
+   "verify": "Budget cases on the fixture; Jade & Ember budgets and results unchanged.",
+   "masterSpecs": [
+    "09",
+    "13"
+   ],
+   "workPackage": "G6-5",
+   "priorities": [],
+   "class": "universal"
+  },
+  {
+   "id": "FM-27",
+   "name": "Jade & Ember project records and policy data",
+   "summary": "Owner-approved records and data files that describe this project, not the mechanism: authority, baseline, allowlists, findings, recorded asset manifest, tokens snapshot, media rights inventory, external destinations and verification history, crawler review, secrets allowlist.",
+   "paths": [
+    "jade-and-ember/engineering/authority.json",
+    "jade-and-ember/engineering/baseline.json",
+    "jade-and-ember/engineering/immutability-allowlist.json",
+    "jade-and-ember/engineering/approved-style-differences.json",
+    "jade-and-ember/engineering/findings.json",
+    "jade-and-ember/engineering/assets.manifest.json",
+    "jade-and-ember/engineering/tokens.json",
+    "jade-and-ember/engineering/media-rights-inventory.json",
+    "jade-and-ember/engineering/external-destinations.json",
+    "jade-and-ember/engineering/external-links-verification.json",
+    "jade-and-ember/engineering/search-crawler-verification.json",
+    "jade-and-ember/engineering/secrets-allow.json"
+   ],
+   "target": "stays in Jade & Ember",
+   "external": [],
+   "dependsOn": [],
+   "redesign": {
+    "level": "none",
+    "notes": "These are facts and decisions of one project. Their shapes (schemas) are reusable and belong with their mechanisms; the contents never move. Under the Gate 6 model, approval and evidence records leave the tracked tree or are bound to the artifact digest (RG-01)."
+   },
+   "verify": "Shapes validated by the framework schemas; the contents unchanged.",
+   "masterSpecs": [
+    "15"
+   ],
+   "workPackage": "G6-5",
+   "priorities": [],
+   "class": "record"
+  },
+  {
+   "id": "FM-28",
+   "name": "Jade & Ember website (delivered site and renderer)",
+   "summary": "Configuration, page and shared renderers, the five delivered pages, styles, scripts, fonts, media, version and package files.",
+   "paths": [
+    "jade-and-ember/build.mjs",
+    "jade-and-ember/config/",
+    "jade-and-ember/src/pages/home.mjs",
+    "jade-and-ember/src/pages/order.mjs",
+    "jade-and-ember/src/pages/story.mjs",
+    "jade-and-ember/src/pages/visit.mjs",
+    "jade-and-ember/src/components/cta-band.mjs",
+    "jade-and-ember/src/components/document.mjs",
+    "jade-and-ember/src/components/frame.mjs",
+    "jade-and-ember/src/components/shared.mjs",
+    "jade-and-ember/index.html",
+    "jade-and-ember/menu.html",
+    "jade-and-ember/order-online.html",
+    "jade-and-ember/our-story.html",
+    "jade-and-ember/visit-us.html",
+    "jade-and-ember/styles.css",
+    "jade-and-ember/site.js",
+    "jade-and-ember/hero.js",
+    "jade-and-ember/menu.js",
+    "jade-and-ember/media/",
+    "jade-and-ember/fonts/",
+    "jade-and-ember/VERSION.json",
+    "jade-and-ember/package.json",
+    "jade-and-ember/package-lock.json",
+    "jade-and-ember/.gitignore"
+   ],
+   "target": "stays in Jade & Ember",
+   "external": [
+    "node"
+   ],
+   "dependsOn": [],
+   "redesign": {
+    "level": "none",
+    "notes": "The approved visual design and its renderer are frozen (v0.8 baseline). Whether a shared static renderer (build.mjs plus generic components) becomes a framework component is an owner decision, not part of the engineering extraction: the engineering verifies the delivered folder, whichever builder produced it."
+   },
+   "verify": "Delivered folder byte-identical before and after every Gate 6 package (tree hash 9061a227…).",
+   "masterSpecs": [
+    "08"
+   ],
+   "workPackage": "G6-5",
+   "priorities": [],
+   "class": "project"
+  },
+  {
+   "id": "FM-29",
+   "name": "Legacy tests and development tools",
+   "summary": "Older axe, contrast and extracted-folder suites, the latency probe, the Gate 5 diagnostic, video QA, the local server, the Lighthouse configuration.",
+   "paths": [
+    "jade-and-ember/tests/",
+    "jade-and-ember/tools/",
+    "jade-and-ember/serve.py",
+    "jade-and-ember/lighthouserc.json",
+    "jade-and-ember/engineering/tools/latency-probe.mjs",
+    "jade-and-ember/engineering/tools/gate5-diagnose.mjs"
+   ],
+   "target": "engineering/tooling/ (kept as optional tools) or stays",
+   "external": [
+    "playwright",
+    "@lhci/cli (17 advisories)",
+    "python3",
+    "ffmpeg"
+   ],
+   "dependsOn": [],
+   "redesign": {
+    "level": "redesign",
+    "notes": "Lighthouse CI is replaced by a tested direct Lighthouse run before client production (D-P6-1); the other tools are optional diagnostics and need no extraction for Gate 6."
+   },
+   "verify": "Direct Lighthouse reproduces the current thresholds (performance 0.8 warn, accessibility 0.95 error, best practices 0.9 warn, SEO 0.6 warn, three runs, median).",
+   "masterSpecs": [],
+   "workPackage": "G6-1",
+   "priorities": [
+    5
+   ],
+   "class": "devtool"
+  },
+  {
+   "id": "FM-30",
+   "name": "Engineering documentation (becomes the framework specification)",
+   "summary": "Engineering README, security, hosting-by-mode and search-readiness documents, and the security and dependency-maintenance policy proposal.",
+   "paths": [
+    "jade-and-ember/engineering/README.md",
+    "jade-and-ember/engineering/ENG-SECURITY.md",
+    "jade-and-ember/engineering/SEARCH-READINESS.md",
+    "jade-and-ember/engineering/SECURITY-DEPENDENCY-POLICY-PROPOSAL.md"
+   ],
+   "target": "architecture/16-engineering-framework-v1.md and engineering/docs/",
+   "external": [],
+   "dependsOn": [],
+   "redesign": {
+    "level": "rewrite",
+    "notes": "Rewritten as framework documentation with the project names removed; the policy proposal already separates mechanism from fact (its section 3)."
+   },
+   "verify": "Every statement traces to a check or a requirement id; reviewed by someone other than the author.",
+   "masterSpecs": [
+    "09"
+   ],
+   "workPackage": "G6-0",
+   "priorities": [],
+   "class": "doc"
+  },
+  {
+   "id": "FM-31",
+   "name": "Jade & Ember governance and history documents",
+   "summary": "Approvals log, build brief, ledger, framework reference, plans, phase reports, QA record, media rights policy and proposal, dependency advisory register.",
+   "paths": [
+    "jade-and-ember/engineering/GATE-5-PLAN.md",
+    "jade-and-ember/engineering/GATE-5-PHASE-1-REVIEW-INVESTIGATION.md",
+    "jade-and-ember/engineering/DEPENDENCIES-SECURITY-GATE5.md",
+    "jade-and-ember/engineering/EXTERNAL-LINKS-GATE5.md",
+    "jade-and-ember/engineering/MEDIA-RIGHTS-GATE5.md",
+    "jade-and-ember/engineering/RELEASE-DRYRUN-GATE5.md",
+    "jade-and-ember/engineering/SEARCH-AUDIT-GATE5.md",
+    "jade-and-ember/engineering/DEPENDENCY-ADVISORIES.md",
+    "jade-and-ember/QA.md",
+    "jade-and-ember/README.md",
+    "docs/JADE_AND_EMBER_APPROVALS.md",
+    "docs/JADE_AND_EMBER_BUILD_BRIEF.md",
+    "docs/JADE_AND_EMBER_ENGINEERING_REQUIREMENTS_LEDGER.md",
+    "docs/JADE_AND_EMBER_FIVE_PAGE_ARCHITECTURE.md",
+    "docs/JADE_AND_EMBER_FRAMEWORK_REFERENCE.md",
+    "docs/JADE_AND_EMBER_GATE_A_PREFLIGHT.md",
+    "docs/JADE_AND_EMBER_GATE_A_RESULT.md",
+    "docs/JADE_AND_EMBER_HERO_VIDEO_PLAN.md",
+    "docs/JADE_AND_EMBER_MEDIA_RIGHTS_POLICY.md",
+    "docs/JADE_AND_EMBER_MEDIA_RIGHTS_PROPOSAL.md",
+    "docs/JADE_AND_EMBER_V0.9_IMPLEMENTATION_PLAN.md"
+   ],
+   "target": "stays in Jade & Ember (generic passages feed FM-30)",
+   "external": [],
+   "dependsOn": [],
+   "redesign": {
+    "level": "none",
+    "notes": "Project history and decisions. The approvals log is the human record; its Markdown-table form is replaced by structured records (priority 2) with the table kept as a rendering."
+   },
+   "verify": "Unchanged; cross-references updated when files move.",
+   "masterSpecs": [
+    "15"
+   ],
+   "workPackage": "G6-5",
+   "priorities": [],
+   "class": "record"
+  },
+  {
+   "id": "FM-32",
+   "name": "Phase evidence artefacts",
+   "summary": "Screenshots, diagnostics and the hero-video gate record kept as evidence for earlier decisions.",
+   "paths": [
+    "jade-and-ember/engineering/evidence/",
+    "docs/hero-video/"
+   ],
+   "target": "stays in Jade & Ember",
+   "external": [],
+   "dependsOn": [],
+   "redesign": {
+    "level": "none",
+    "notes": "Evidence for decisions about this project's appearance and media."
+   },
+   "verify": "Hashes unchanged.",
+   "masterSpecs": [],
+   "workPackage": "G6-5",
+   "priorities": [],
+   "class": "record"
+  },
+  {
+   "id": "FM-33",
+   "name": "Showcase repository root and frozen baseline data",
+   "summary": "The STS Cinematic Showcase hub page and README, and the frozen v0.8 baseline checksums and preview package.",
+   "paths": [
+    "README.md",
+    "index.html",
+    "baselines/"
+   ],
+   "target": "stays",
+   "external": [],
+   "dependsOn": [],
+   "redesign": {
+    "level": "none",
+    "notes": "Repository-level files of the showcase, not of the engineering. The baseline data is a frozen record."
+   },
+   "verify": "Unchanged; check:baseline still passes.",
+   "masterSpecs": [],
+   "workPackage": "G6-5",
+   "priorities": [],
+   "class": "project"
+  },
+  {
+   "id": "FM-34",
+   "name": "Phase 8 assessment artefacts",
+   "summary": "This assessment: the migration matrix data, its checker and generator, and the reports.",
+   "paths": [
+    "jade-and-ember/engineering/framework-migration-matrix.json",
+    "jade-and-ember/engineering/FRAMEWORK-MIGRATION-MATRIX.md",
+    "jade-and-ember/engineering/FRAMEWORK-EXTRACTION-GATE5.md",
+    "jade-and-ember/engineering/FRAMEWORK-RECONCILIATION-GATE5.md",
+    "jade-and-ember/engineering/GATE-6-IMPLEMENTATION-ORDER.md",
+    "jade-and-ember/engineering/checks/framework-matrix.mjs",
+    "jade-and-ember/engineering/tools/framework-matrix.mjs",
+    "jade-and-ember/engineering/lib/framework-matrix.mjs"
+   ],
+   "target": "stays (absorbed by the framework specification at G6-0)",
+   "external": [
+    "node"
+   ],
+   "dependsOn": [
+    "FM-01"
+   ],
+   "redesign": {
+    "level": "none",
+    "notes": "Assessment only: nothing here extracts or implements framework code."
+   },
+   "verify": "check:framework-matrix passes (every file classified, every reference valid, generated Markdown current).",
+   "masterSpecs": [],
+   "workPackage": "G6-0",
+   "priorities": [],
+   "class": "record"
+  }
+ ],
+ "workPackages": [
+  {
+   "id": "G6-0",
+   "title": "Decisions and specification",
+   "summary": "Close the Phase 8 owner decisions; write the engineering framework specification (proposed architecture/16) and the project manifest schema; define what a Framework Release is for engineering and how projects consume it (pinned commit, not a package); decide builder scope. Documents only. Any change to the framework repository needs the owner's explicit approval first.",
+   "dependsOn": [],
+   "priorities": [],
+   "frameworkRepoChange": true,
+   "size": "small",
+   "verification": "Specification reviewed by someone other than its author; every statement traces to a check or a requirement id; the manifest schema validates Jade & Ember's manifest (written by hand, not yet used).",
+   "blocks": [
+    "RB-14"
+   ]
+  },
+  {
+   "id": "G6-1",
+   "title": "Runtime and tooling hygiene",
+   "summary": "Node 24 baseline verified against the full suite; Node 24-compatible pinned Actions; the direct Lighthouse runner replacing @lhci/cli; the parse-cache-control licence evidence. Small, independent, and done early because every later verification runs on this runtime.",
+   "dependsOn": [
+    "G6-0"
+   ],
+   "priorities": [
+    5
+   ],
+   "frameworkRepoChange": false,
+   "size": "small",
+   "verification": "Full verify and the three engines green on Node 24 with the new pins; Lighthouse thresholds reproduced; npm audit reports 0 advisories in the installed tree; check:ci policy updated and passing.",
+   "blocks": [
+    "RB-11"
+   ]
+  },
+  {
+   "id": "G6-2",
+   "title": "Release model v2",
+   "summary": "Design (2a) then implement (2b), in Jade & Ember as the reference consumer: a candidate artifact digest that excludes approvals; separately recorded approvals and CI evidence; structured approval records with statuses, reviewer authorisation and revocation; complete and authentic verification evidence bound to the digest; positive production-domain authorisation; a restricted demonstration channel; and the attestation or signing evaluation completed before the architecture is final. The 112-scenario dry run stays blocking and is extended with one scenario per finding RG-01 to RG-14.",
+   "dependsOn": [
+    "G6-0",
+    "G6-1"
+   ],
+   "priorities": [
+    1,
+    2,
+    3,
+    4,
+    6,
+    7,
+    8
+   ],
+   "frameworkRepoChange": false,
+   "size": "large",
+   "verification": "Every RG finding has a blocking scenario; the committed-ledger flow reaches green; a forged verification report, a rejected or revoked approval and a masquerading demonstration are refused; dry run stays blocking in CI.",
+   "blocks": [
+    "RB-09",
+    "RB-13"
+   ]
+  },
+  {
+   "id": "G6-3",
+   "title": "Requirement completion",
+   "summary": "Add the previously approved requirements to the gate: external links (D-P5-1), media rights bound to the asset inventory digest (D-P5-4) with provider-terms evidence (D-P5-5), dependency and security requirements incl. SBOM, provenance, exception expiry (D-P6-5, D-P6-7), crawler evaluation (D-P4-1), approved social image support (D-P4-3). The credit-link and Noto notice corrections need their own authorisation because they change delivered files.",
+   "dependsOn": [
+    "G6-2"
+   ],
+   "priorities": [
+    5
+   ],
+   "frameworkRepoChange": false,
+   "size": "medium",
+   "verification": "One blocking dry-run scenario per requirement; probes RG-02, RG-03, RG-10 and RG-11 close; delivered folder unchanged except the two separately authorised corrections.",
+   "blocks": [
+    "RB-02",
+    "RB-10",
+    "RB-11"
+   ]
+  },
+  {
+   "id": "G6-4",
+   "title": "Hosting adapters and hosting requirements",
+   "summary": "One adapter interface; Cloudflare Pages first, then Vercel and a plain static adapter; a real 404 (D-P3-1), domain-root base URLs (D-P3-2), staged-bundle manifest and deployed-bytes comparison (D-P3-3), HSTS opt-in (D-P3-4, D-P4-5). Provider documentation must be re-verified by a person before an adapter is built (D-P3-6). Live verification needs a separately authorised preview (D-P3-5).",
+   "dependsOn": [
+    "G6-2",
+    "G6-3"
+   ],
+   "priorities": [
+    5
+   ],
+   "frameworkRepoChange": false,
+   "size": "large",
+   "verification": "Golden outputs per adapter; the same delivered folder passes check:portability under both; RG-12 closes; live checklist items recorded only when performed.",
+   "blocks": [
+    "RB-12"
+   ]
+  },
+  {
+   "id": "G6-5",
+   "title": "De-coupling refactor in Jade & Ember",
+   "summary": "Project manifest, core/adapter split, generic fixture site, project-check extension point, with a parity proof: 38+ checks, byte-identical delivered output, identical reports, dry run unchanged. No move of files to the framework yet.",
+   "dependsOn": [
+    "G6-0",
+    "G6-2",
+    "G6-3",
+    "G6-4"
+   ],
+   "priorities": [],
+   "frameworkRepoChange": false,
+   "size": "large",
+   "verification": "Parity: delivered tree hash 9061a227…, reports identical, 100% of the dry-run scenarios, the self-test case counts reconciled to the generic fixture.",
+   "blocks": []
+  },
+  {
+   "id": "G6-6",
+   "title": "Extraction into the framework repository",
+   "summary": "Add the de-coupled core, adapters and fixtures to the framework repository on a branch (never main), with framework CI running the generic fixture. Needs the owner's explicit approval to modify the framework repository.",
+   "dependsOn": [
+    "G6-5"
+   ],
+   "priorities": [],
+   "frameworkRepoChange": true,
+   "size": "medium",
+   "verification": "Framework CI green on the generic fixture in three engines; independent review; Jade & Ember untouched.",
+   "blocks": [
+    "RB-14"
+   ]
+  },
+  {
+   "id": "G6-7",
+   "title": "Centralised GitHub automation",
+   "summary": "SHA-pinned reusable workflows in the framework repository called from a short workflow in each client repository; per-repository Dependabot configuration generated from a template with human approval and no automatic merging (D-P6-4); scheduled supply-chain, external-link and read-only live-site checks run from GitHub-hosted runners. Nothing is installed on a client's hosting; the client repository holds only a caller workflow and the manifest. The current workflow policy forbids schedule triggers and reusable-workflow calls and must be changed deliberately.",
+   "dependsOn": [
+    "G6-6"
+   ],
+   "priorities": [
+    5
+   ],
+   "frameworkRepoChange": true,
+   "size": "medium",
+   "verification": "A scratch repository with only the caller workflow and manifest runs the checks; the policy check passes on caller and reusable workflows; update PRs never merge themselves.",
+   "blocks": [
+    "RB-11"
+   ]
+  },
+  {
+   "id": "G6-8",
+   "title": "Consumption and independent validation",
+   "summary": "Jade & Ember consumes the framework at a pinned commit (M4); the framework is validated independently by the ladder V1 to V4 (generic fixture, reference consumer parity, a second structure, mutation tests) and a readiness checklist is completed before the first new project, MONOLITH House & Design, uses it (M5).",
+   "dependsOn": [
+    "G6-6",
+    "G6-7"
+   ],
+   "priorities": [],
+   "frameworkRepoChange": false,
+   "size": "medium",
+   "verification": "All four validation levels recorded; readiness checklist signed by the owner; no engine check silently skipped.",
+   "blocks": [
+    "RB-14"
+   ]
+  }
+ ],
+ "priorities": [
+  {
+   "id": "P-1",
+   "text": "Design a release model bound to an immutable candidate artifact digest, with separately recorded approvals and CI evidence.",
+   "wp": "G6-2"
+  },
+  {
+   "id": "P-2",
+   "text": "Replace keyword-based approval interpretation with structured records, explicit statuses, reviewer authorization and revocation handling.",
+   "wp": "G6-2"
+  },
+  {
+   "id": "P-3",
+   "text": "Require complete, authentic verification evidence associated with the candidate artifact.",
+   "wp": "G6-2"
+  },
+  {
+   "id": "P-4",
+   "text": "Add positive production-domain authorization.",
+   "wp": "G6-2"
+  },
+  {
+   "id": "P-5",
+   "text": "Address the previously approved external-link, media-rights, dependency/security and hosting requirements.",
+   "wp": "G6-3"
+  },
+  {
+   "id": "P-6",
+   "text": "Evaluate package attestation or signing before finalizing the release architecture.",
+   "wp": "G6-2"
+  },
+  {
+   "id": "P-7",
+   "text": "Preserve a restricted demonstration channel without permitting it to masquerade as client production.",
+   "wp": "G6-2"
+  },
+  {
+   "id": "P-8",
+   "text": "Retain the blocking release dry run.",
+   "wp": "G6-2"
+  }
+ ],
+ "requirements": [
+  {
+   "id": "RG-01",
+   "source": "APR-JE-036",
+   "summary": "Approval and CI record cannot be bound to a commit from inside the repository",
+   "status": "open",
+   "workPackage": "G6-2",
+   "components": [
+    "FM-18",
+    "FM-19"
+   ]
+  },
+  {
+   "id": "RG-02",
+   "source": "APR-JE-036",
+   "summary": "No external-link requirement in the gate",
+   "status": "open",
+   "workPackage": "G6-3",
+   "components": [
+    "FM-16",
+    "FM-18"
+   ]
+  },
+  {
+   "id": "RG-03",
+   "source": "APR-JE-036",
+   "summary": "Rights approval not bound to the media inventory",
+   "status": "open",
+   "workPackage": "G6-3",
+   "components": [
+    "FM-17",
+    "FM-18"
+   ]
+  },
+  {
+   "id": "RG-04",
+   "source": "APR-JE-036",
+   "summary": "A release-approval row saying REJECTED still counts",
+   "status": "open",
+   "workPackage": "G6-2",
+   "components": [
+    "FM-18"
+   ]
+  },
+  {
+   "id": "RG-05",
+   "source": "APR-JE-036",
+   "summary": "A rights row saying NOT verified still counts",
+   "status": "open",
+   "workPackage": "G6-2",
+   "components": [
+    "FM-18"
+   ]
+  },
+  {
+   "id": "RG-06",
+   "source": "APR-JE-036",
+   "summary": "A release-approval Type saying REVOKED still counts",
+   "status": "open",
+   "workPackage": "G6-2",
+   "components": [
+    "FM-18"
+   ]
+  },
+  {
+   "id": "RG-07",
+   "source": "APR-JE-036",
+   "summary": "A search-review row saying NOT reviewed still counts",
+   "status": "open",
+   "workPackage": "G6-2",
+   "components": [
+    "FM-18"
+   ]
+  },
+  {
+   "id": "RG-08",
+   "source": "APR-JE-036",
+   "summary": "A hand-written verification report satisfies the gate",
+   "status": "open",
+   "workPackage": "G6-2",
+   "components": [
+    "FM-03",
+    "FM-18"
+   ]
+  },
+  {
+   "id": "RG-09",
+   "source": "APR-JE-036",
+   "summary": "A stale recorded asset manifest does not block; only the package verifier notices",
+   "status": "open",
+   "workPackage": "G6-2",
+   "components": [
+    "FM-07",
+    "FM-18"
+   ]
+  },
+  {
+   "id": "RG-10",
+   "source": "APR-JE-036",
+   "summary": "Dependency advisories are not a release requirement",
+   "status": "open",
+   "workPackage": "G6-3",
+   "components": [
+    "FM-14"
+   ]
+  },
+  {
+   "id": "RG-11",
+   "source": "APR-JE-036",
+   "summary": "No SBOM, provenance, Actions or Node-runtime requirement",
+   "status": "open",
+   "workPackage": "G6-3",
+   "components": [
+    "FM-14",
+    "FM-23"
+   ]
+  },
+  {
+   "id": "RG-12",
+   "source": "APR-JE-036",
+   "summary": "No real-404 or HSTS-default requirement",
+   "status": "open",
+   "workPackage": "G6-4",
+   "components": [
+    "FM-22",
+    "FM-13"
+   ]
+  },
+  {
+   "id": "RG-13",
+   "source": "APR-JE-036",
+   "summary": "The demonstration label is self-declared (client-style content passes as a demonstration)",
+   "status": "open",
+   "workPackage": "G6-2",
+   "components": [
+    "FM-18"
+   ]
+  },
+  {
+   "id": "RG-14",
+   "source": "APR-JE-036",
+   "summary": "A fully re-forged package verifies; nothing is signed or anchored",
+   "status": "open",
+   "workPackage": "G6-2",
+   "components": [
+    "FM-20"
+   ]
+  },
+  {
+   "id": "D-P3-1",
+   "source": "APR-JE-032",
+   "summary": "A proper 404 is required before live release",
+   "status": "approved, not implemented",
+   "workPackage": "G6-4",
+   "components": [
+    "FM-22"
+   ]
+  },
+  {
+   "id": "D-P3-2",
+   "source": "APR-JE-032",
+   "summary": "Indexable production sites use a domain or subdomain root",
+   "status": "approved, not implemented",
+   "workPackage": "G6-4",
+   "components": [
+    "FM-22",
+    "FM-15"
+   ]
+  },
+  {
+   "id": "D-P3-3",
+   "source": "APR-JE-032",
+   "summary": "The pipeline verifies the exact staged deployment artifact; GitHub-connected deployment stays the default",
+   "status": "approved, not implemented",
+   "workPackage": "G6-4",
+   "components": [
+    "FM-22",
+    "FM-18"
+   ]
+  },
+  {
+   "id": "D-P3-4",
+   "source": "APR-JE-032",
+   "summary": "HSTS includeSubDomains off by default for clients",
+   "status": "approved, not implemented (known deviation)",
+   "workPackage": "G6-4",
+   "components": [
+    "FM-13",
+    "FM-22"
+   ]
+  },
+  {
+   "id": "D-P3-5",
+   "source": "APR-JE-032",
+   "summary": "No preview deployment is authorised",
+   "status": "prohibition in effect",
+   "workPackage": "G6-4",
+   "components": [
+    "FM-22"
+   ]
+  },
+  {
+   "id": "D-P3-6",
+   "source": "APR-JE-032",
+   "summary": "Provider documentation re-verified before any adapter is implemented",
+   "status": "approved, not done (needs a person)",
+   "workPackage": "G6-4",
+   "components": [
+    "FM-22"
+   ]
+  },
+  {
+   "id": "D-P4-1",
+   "source": "APR-JE-033",
+   "summary": "Evaluate DuckAssistBot and Meta-ExternalFetcher against official crawler documentation",
+   "status": "approved, not implemented",
+   "workPackage": "G6-3",
+   "components": [
+    "FM-15"
+   ]
+  },
+  {
+   "id": "D-P4-2",
+   "source": "APR-JE-033",
+   "summary": "Industry-specific structured-data schemas supported by the framework",
+   "status": "approved, not implemented",
+   "workPackage": "G6-5",
+   "components": [
+    "FM-15",
+    "FM-09"
+   ]
+  },
+  {
+   "id": "D-P4-3",
+   "source": "APR-JE-033",
+   "summary": "Approved social-preview images supported, bound to media rights",
+   "status": "approved, not implemented",
+   "workPackage": "G6-3",
+   "components": [
+    "FM-15",
+    "FM-17"
+   ]
+  },
+  {
+   "id": "D-P4-4",
+   "source": "APR-JE-033",
+   "summary": "Dated human review of crawler documentation before client release",
+   "status": "implemented (enforced by the gate)",
+   "workPackage": "G6-3",
+   "components": [
+    "FM-15"
+   ]
+  },
+  {
+   "id": "D-P4-5",
+   "source": "APR-JE-033",
+   "summary": "Remove HSTS includeSubDomains as a default in the hosting-adapter integration",
+   "status": "approved, not implemented",
+   "workPackage": "G6-4",
+   "components": [
+    "FM-13"
+   ]
+  },
+  {
+   "id": "D-P5-1",
+   "source": "APR-JE-034",
+   "summary": "Client-production external-links release requirement",
+   "status": "approved, not implemented",
+   "workPackage": "G6-3",
+   "components": [
+    "FM-16",
+    "FM-18"
+   ]
+  },
+  {
+   "id": "D-P5-2",
+   "source": "APR-JE-034",
+   "summary": "External-links CI job stays informational during development",
+   "status": "in effect",
+   "workPackage": "G6-3",
+   "components": [
+    "FM-16",
+    "FM-23"
+   ]
+  },
+  {
+   "id": "D-P5-3",
+   "source": "APR-JE-034",
+   "summary": "Canonical www credit link",
+   "status": "approved, not implemented (own authorisation; pages frozen)",
+   "workPackage": "G6-3",
+   "components": [
+    "FM-28"
+   ]
+  },
+  {
+   "id": "D-P5-4",
+   "source": "APR-JE-034",
+   "summary": "Media-rights approval bound to the exact asset inventory (licence or authorised use suffices)",
+   "status": "approved, not implemented",
+   "workPackage": "G6-3",
+   "components": [
+    "FM-17",
+    "FM-18"
+   ]
+  },
+  {
+   "id": "D-P5-5",
+   "source": "APR-JE-034",
+   "summary": "Provider-terms verification stays open until dated authoritative evidence is reviewed",
+   "status": "open (needs a person)",
+   "workPackage": "G6-3",
+   "components": [
+    "FM-17"
+   ]
+  },
+  {
+   "id": "D-P5-6",
+   "source": "APR-JE-034",
+   "summary": "Noto Serif SC notice corrected after upstream comparison",
+   "status": "approved, not implemented (own authorisation; fonts text)",
+   "workPackage": "G6-3",
+   "components": [
+    "FM-28"
+   ]
+  },
+  {
+   "id": "D-P5-7",
+   "source": "APR-JE-034",
+   "summary": "No public demonstration deployment while media-use rights are unverified",
+   "status": "prohibition in effect",
+   "workPackage": "G6-3",
+   "components": [
+    "FM-17"
+   ]
+  },
+  {
+   "id": "D-P6-1",
+   "source": "APR-JE-035",
+   "summary": "Accept 17 development advisories temporarily; replace Lighthouse CI with a tested direct Lighthouse before client production",
+   "status": "accepted temporarily; replacement not implemented",
+   "workPackage": "G6-1",
+   "components": [
+    "FM-29"
+   ]
+  },
+  {
+   "id": "D-P6-2",
+   "source": "APR-JE-035",
+   "summary": "Migrate to verified Node 24-compatible Actions",
+   "status": "approved, not implemented",
+   "workPackage": "G6-1",
+   "components": [
+    "FM-23"
+   ]
+  },
+  {
+   "id": "D-P6-3",
+   "source": "APR-JE-035",
+   "summary": "Node 24 as the proposed framework baseline, subject to full verification",
+   "status": "approved as a proposal, not verified",
+   "workPackage": "G6-1",
+   "components": [
+    "FM-23",
+    "FM-01"
+   ]
+  },
+  {
+   "id": "D-P6-4",
+   "source": "APR-JE-035",
+   "summary": "Centralised dependency-update automation; tests and human approval; no automatic merging",
+   "status": "approved, not implemented",
+   "workPackage": "G6-7",
+   "components": [
+    "FM-23",
+    "FM-14"
+   ]
+  },
+  {
+   "id": "D-P6-5",
+   "source": "APR-JE-035",
+   "summary": "Composite release SBOM and supply-chain verification requirements",
+   "status": "approved, not implemented",
+   "workPackage": "G6-3",
+   "components": [
+    "FM-14",
+    "FM-18"
+   ]
+  },
+  {
+   "id": "D-P6-6",
+   "source": "APR-JE-035",
+   "summary": "Authoritative licence-evidence correction (parse-cache-control)",
+   "status": "approved, not implemented",
+   "workPackage": "G6-1",
+   "components": [
+    "FM-14"
+   ]
+  },
+  {
+   "id": "D-P6-7",
+   "source": "APR-JE-035",
+   "summary": "Response times and exception expiry as provisional STS targets",
+   "status": "accepted as provisional; not enforced",
+   "workPackage": "G6-3",
+   "components": [
+    "FM-14"
+   ]
+  },
+  {
+   "id": "D-P6-8",
+   "source": "APR-JE-035",
+   "summary": "Download hash pinning deferred",
+   "status": "deferred (residual risk open)",
+   "workPackage": "G6-7",
+   "components": [
+    "FM-23"
+   ]
+  }
+ ],
+ "releaseBlockers": [
+  {
+   "id": "RB-01",
+   "kind": "people",
+   "text": "A release approval for the exact build (after the new model exists)",
+   "resolvedBy": "owner, after G6-2"
+  },
+  {
+   "id": "RB-02",
+   "kind": "people",
+   "text": "Rights verification against dated, authoritative provider terms (D-P5-5, D-P5-7); the inventory shows 8 assets unverified and 4 with licence text shipped",
+   "resolvedBy": "owner / counsel; gate binding by G6-3"
+  },
+  {
+   "id": "RB-03",
+   "kind": "people",
+   "text": "A person's search review of facts, structured data and crawler policy",
+   "resolvedBy": "owner"
+  },
+  {
+   "id": "RB-04",
+   "kind": "people",
+   "text": "A person re-reading the crawler documentation (confirmedByPerson is false)",
+   "resolvedBy": "owner"
+  },
+  {
+   "id": "RB-05",
+   "kind": "people",
+   "text": "Real-device testing on an iPhone and an Android phone (0 records)",
+   "resolvedBy": "testers named by the owner"
+  },
+  {
+   "id": "RB-06",
+   "kind": "people",
+   "text": "NVDA, VoiceOver and TalkBack passes on all pages (0 records)",
+   "resolvedBy": "testers named by the owner"
+  },
+  {
+   "id": "RB-07",
+   "kind": "people",
+   "text": "Manual desktop Chrome, Firefox and Safari passes (0 records)",
+   "resolvedBy": "testers named by the owner"
+  },
+  {
+   "id": "RB-08",
+   "kind": "client",
+   "text": "A stable version number, the real production domain and the client's real content and facts",
+   "resolvedBy": "owner / client"
+  },
+  {
+   "id": "RB-09",
+   "kind": "engineering",
+   "text": "Release model v2: artifact-digest binding, structured approvals, authentic verification evidence, domain authorisation, restricted demonstration channel (RG-01, RG-04 to RG-08, RG-13, RG-14)",
+   "resolvedBy": "G6-2"
+  },
+  {
+   "id": "RB-10",
+   "kind": "engineering",
+   "text": "External-link requirement in the gate (RG-02)",
+   "resolvedBy": "G6-3"
+  },
+  {
+   "id": "RB-11",
+   "kind": "engineering",
+   "text": "Security and dependency requirements: no advisory in the installed tree or an unexpired recorded exception, SBOM, provenance, supported Actions and Node (RG-10, RG-11)",
+   "resolvedBy": "G6-1, G6-3, G6-7"
+  },
+  {
+   "id": "RB-12",
+   "kind": "engineering",
+   "text": "Hosting: real 404, HSTS default, domain root, staged-bundle verification, provider documentation re-verified, live verification by an authorised preview (RG-12)",
+   "resolvedBy": "G6-4 (+ a separately authorised preview)"
+  },
+  {
+   "id": "RB-13",
+   "kind": "engineering",
+   "text": "Provenance of CI evidence: the CI record is bound to the candidate artifact digest, not to the commit",
+   "resolvedBy": "G6-2"
+  },
+  {
+   "id": "RB-14",
+   "kind": "engineering",
+   "text": "A client build must pin a Framework Release; none exists (authority.json release is null)",
+   "resolvedBy": "G6-0, G6-6, G6-8"
+  }
+ ]
+}
