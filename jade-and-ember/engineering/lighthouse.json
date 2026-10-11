@@ -20,7 +20,7 @@
     "minimumAggregation": "optimistic"
   },
   "chrome": {
-    "flags": ["--headless=new", "--disable-gpu", "--no-first-run", "--no-default-browser-check", "--disable-extensions", "--disable-background-networking", "--mute-audio"],
-    "noSandboxWhenRoot": true
+    "flags": ["--headless=new", "--no-sandbox", "--disable-gpu", "--no-first-run", "--no-default-browser-check", "--disable-extensions", "--disable-background-networking", "--mute-audio"],
+    "noSandboxReason": "Lighthouse CI used --no-sandbox too, and so does Playwright by default. On the GitHub-hosted Ubuntu 24.04 runner AppArmor blocks the user namespaces Chromium's sandbox needs (seen in run 46: Chromium aborted at start with SIGABRT), and in the development container the user is root. The browser only ever opens pages of this project, served from 127.0.0.1 by the engineering static server, in a throw-away profile."
   }
 }

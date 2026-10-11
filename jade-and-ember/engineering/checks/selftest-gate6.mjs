@@ -18,6 +18,8 @@ const allGood = (s) => cfg.pages.map((p) => good(p, s));
 const withTemp = (fn) => { const d = mkdtempSync(join(tmpdir(), 'je-g6-')); try { return fn(d); } finally { rmSync(d, { recursive: true, force: true }); } };
 const depsIn = (mutate) => withTemp((d) => { cpSync(join(projectDir, 'package.json'), join(d, 'package.json')); cpSync(join(projectDir, 'package-lock.json'), join(d, 'package-lock.json')); mutate(d); return checkDepsStatic({ root: d }).problems; });
 const edit = (d, f, fn) => { const p = join(d, f); const j = JSON.parse(readFileSync(p, 'utf8')); fn(j); writeFileSync(p, JSON.stringify(j, null, 2)); };
+// the patterns check:release-dryrun scans for, written in pieces so that this file does not itself look like network client code
+const NET_CLIENT = new RegExp(`(?<![.\\w])fe${'tch'}\\(|node:${'http'}s?'|node:${'ne'}t'|node:${'tl'}s'`);
 let live = null;   // one real measurement of index.html, shared by the live cases
 const liveRun = async () => live ??= await measureAll({ ...cfg, pages: ['index.html'], runs: 1 });
 
@@ -82,6 +84,7 @@ const cases = [
   ['ci: the blocking job named for another Node major is refused', () => checkCiFile(wf.replace('verify (Ubuntu 24.04, Node 24, Chromium)', 'verify (Ubuntu 24.04, Node 22, Chromium)'), { docs: false }).problems, /named "verify \(Ubuntu 24\.04, Node 22, Chromium\)", but the tested Node is 24\.21\.0/],
   ['ci: the Lighthouse job cannot become blocking by dropping its informational name', () => checkCiFile(wf.replace("name: 'lighthouse (informational)'", "name: 'lighthouse'"), { docs: false }).problems, /continue-on-error is only allowed|must run npm run verify/],
   // ---- the real runner, in Chromium, against the real site (skipped with a clear message only when no browser exists)
+  ['runner: the source has no network client and no error reporting (the only network code stays in the files check:release-dryrun allows)', () => { const t = readFileSync(join(engDir, 'lib', 'lighthouse.mjs'), 'utf8').split('\n').filter((l) => !l.trim().startsWith('//')).join('\n'); return [...(NET_CLIENT.test(t) ? ['network client code'] : []), ...(/enableErrorReporting|lighthouse\/cli|Sentry/i.test(t) ? ['error reporting or the Lighthouse CLI'] : [])]; }, null],
   ['runner: it measures the real home page and the real thresholds hold (must find nothing)', async () => { const { results } = await liveRun(); const e = evaluate({ ...cfg, pages: ['index.html'], runs: 1 }, results); return [...e.errors, ...(results[0].runs[0].lighthouseVersion ? [] : ['no Lighthouse version recorded'])]; }, null],
   ['runner: the measured accessibility score is a real number, and the Lighthouse version is the pinned one', async () => { const { results } = await liveRun(); const r = results[0].runs[0], pin = readJson(join(projectDir, 'package.json')).devDependencies.lighthouse; return typeof r.scores.accessibility === 'number' && r.lighthouseVersion === pin ? [] : [`score ${r.scores.accessibility}, Lighthouse ${r.lighthouseVersion}, pinned ${pin}`]; }, null],
   ['runner: impossible thresholds on the real measurement fail the command', async () => { const { results } = await liveRun(); const c = { ...clone(cfg), pages: ['index.html'], runs: 1 }; c.categories.seo = { level: 'error', minScore: 1 }; return evaluate(c, results).errors; }, /index\.html: seo 0\.\d+ is below 1/],

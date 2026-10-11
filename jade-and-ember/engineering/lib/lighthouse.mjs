@@ -6,8 +6,7 @@
 // is tested without a browser by check:selftest-gate6. The browser part fails closed: a run that errors, reports no score, lands on another URL, or a page
 // that produces fewer runs than configured is a FAILURE, never a skipped assertion.
 import { spawn } from 'node:child_process';
-import { existsSync, mkdirSync, mkdtempSync, readdirSync, rmSync, writeFileSync } from 'node:fs';
-import { createServer } from 'node:net';
+import { existsSync, mkdirSync, mkdtempSync, readdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { engDir, projectDir, readJson } from './git.mjs';
@@ -105,18 +104,25 @@ export async function findChrome() {
   throw new Error('no Chromium found: set CHROMIUM_PATH, or run `npx playwright install chromium`');
 }
 
-const freePort = () => new Promise((res, rej) => { const s = createServer(); s.once('error', rej); s.listen(0, '127.0.0.1', () => { const { port } = s.address(); s.close(() => res(port)); }); });
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 
+// Chromium chooses its own debugging port (--remote-debugging-port=0) and writes it to DevToolsActivePort in the profile folder; reading that file needs
+// no network client code here (the only network code in this repository stays in the files check:release-dryrun allows). Lighthouse itself then talks to the
+// browser over that loopback port.
 async function startChrome(cfg, exe) {
-  const port = await freePort(), dir = mkdtempSync(join(tmpdir(), 'je-lh-'));
-  const noSandbox = cfg.chrome.noSandboxWhenRoot && typeof process.getuid === 'function' && process.getuid() === 0;
-  const args = [...cfg.chrome.flags, ...(noSandbox ? ['--no-sandbox'] : []), `--remote-debugging-port=${port}`, `--user-data-dir=${dir}`, 'about:blank'];
-  const proc = spawn(exe, args, { stdio: 'ignore' });
-  let exited = null; proc.once('exit', (c, s) => { exited = `${c ?? s}`; });
+  const dir = mkdtempSync(join(tmpdir(), 'je-lh-'));
+  const args = [...cfg.chrome.flags, '--remote-debugging-port=0', `--user-data-dir=${dir}`, 'about:blank'];
+  const proc = spawn(exe, args, { stdio: ['ignore', 'ignore', 'pipe'] });
+  let exited = null, tail = '';
+  proc.stderr.on('data', (b) => { tail = (tail + b).slice(-600); });
+  proc.once('exit', (c, sg) => { exited = `${c ?? sg}`; });
+  const file = join(dir, 'DevToolsActivePort');
   for (let i = 0; i < 150; i++) {
-    if (exited !== null) { rmSync(dir, { recursive: true, force: true }); throw new Error(`Chromium exited at start (${exited})`); }
-    try { const r = await fetch(`http://127.0.0.1:${port}/json/version`); if (r.ok) return { port, stop: async () => { proc.kill('SIGKILL'); await sleep(100); rmSync(dir, { recursive: true, force: true }); } }; } catch { /* not listening yet */ }
+    if (exited !== null) { rmSync(dir, { recursive: true, force: true }); throw new Error(`Chromium exited at start (${exited})${tail.trim() ? `: ${tail.trim().split('\n').slice(-2).join(' | ').slice(0, 300)}` : ''}`); }
+    if (existsSync(file)) {
+      const port = Number(readFileSync(file, 'utf8').split('\n')[0]);
+      if (Number.isInteger(port) && port > 0) return { port, stop: async () => { proc.kill('SIGKILL'); await sleep(100); rmSync(dir, { recursive: true, force: true }); } };
+    }
     await sleep(200);
   }
   proc.kill('SIGKILL'); rmSync(dir, { recursive: true, force: true });

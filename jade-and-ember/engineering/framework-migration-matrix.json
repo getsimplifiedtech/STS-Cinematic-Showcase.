@@ -1206,7 +1206,8 @@
      "jade-and-ember/engineering/g6-1-evidence/",
      "jade-and-ember/engineering/lib/node-range.mjs",
      "jade-and-ember/engineering/lib/regression.mjs",
-     "jade-and-ember/README.md"
+     "jade-and-ember/README.md",
+     "jade-and-ember/engineering/checks/selftest-gate3.mjs"
     ],
     "deny": [
      "jade-and-ember/index.html",
@@ -1255,6 +1256,13 @@
        "jade-and-ember/README.md"
       ],
       "reason": "The project README still told a reader to run Lighthouse CI (lighthouserc.json, CHROME_PATH) and 'Node 20+'. Documenting the replaced tool is scope item (7); the file is a document, not a page, style, script or media file."
+     },
+     {
+      "date": "2026-10-11",
+      "added": [
+       "jade-and-ember/engineering/checks/selftest-gate3.mjs"
+      ],
+      "reason": "Found by the full verification (check:selftest-gate3 failed 4 of its cases): its four negative tests of check:ci mutate the workflow text by searching for the retired Action SHAs and for the exact line 'npm ci --ignore-scripts', both of which G6-1 replaced. The fixtures were updated to the new pins and install line; each test still injects the same defect (a tag instead of a SHA, an action not on the list, npm install, install scripts allowed) and expects the same message, so no guard is weakened."
      }
     ]
    }
