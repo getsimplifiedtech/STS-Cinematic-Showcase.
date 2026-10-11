@@ -94,7 +94,7 @@ const cases = [
 
   // ---- binding to the build and the date
   ['a commit that does not exist', () => run('iphone-safari', (r) => { r.build.commit = 'd'.repeat(40); }), /is not a commit of this repository/],
-  ['a commit that is not the release commit or an ancestor of it', () => run('iphone-safari', (r) => { r.build.commit = 'c'.repeat(40); }, { git: { ...fixtureVctx().git, isAncestor: () => false } }), /not the release commit or an ancestor/],
+  ['a commit that is not the release commit or an ancestor of it', () => run('iphone-safari', (r) => { r.build.commit = 'c'.repeat(40); }, { git: { ...fixtureVctx().git, isAncestor: () => false } }), /not the release commit or an earlier commit/],
   ['a commit that is not 40 hex', () => run('iphone-safari', (r) => { r.build.commit = 'abc123'; }), /40-hex commit/],
   ['evidence for different delivered bytes', () => run('iphone-safari', (r) => { r.build.assetsTree = 'e'.repeat(64); }), /different bytes/],
   ['no delivered-files hash', () => run('iphone-safari', (r) => { delete r.build.assetsTree; }), /assetsTree must be the 64-hex/],
@@ -118,7 +118,22 @@ const cases = [
 
   // ---- the CI record
   ['a CI run offered as a human class (E2)', () => run('ci-run', (r) => { r.class = 'E2'; }), /class E2 is wrong for target ci-run/],
-  ['a CI run for another commit', () => run('ci-run', (r) => { r.build.commit = 'c'.repeat(40); }), /not the release commit/],
+  ['a CI run on a commit that is not the release commit or an ancestor', () => run('ci-run', (r) => { r.build.commit = 'c'.repeat(40); }, { git: { ...fixtureVctx().git, isAncestor: () => false } }), /not the release commit or an earlier commit/],
+  ['a CI run for another candidate artifact (G6-2: the binding is the digest, not HEAD)', () => run('ci-run', (r) => { r.build.candidate = '1'.repeat(64); r.verification.candidate = '1'.repeat(64); }), /build\.candidate differs/],
+  ['a CI run whose summary names another candidate', () => run('ci-run', (r) => { r.verification.candidate = '1'.repeat(64); }), /verification\.candidate must equal build\.candidate/],
+  ['a CI run made by other verification code', () => run('ci-run', (r) => { r.verification.engineDigest = '1'.repeat(64); }), /verification\.engineDigest is not the digest of this verification code/],
+  ['a CI run of another set of checks', () => run('ci-run', (r) => { r.verification.registryDigest = '1'.repeat(64); }), /verification\.registryDigest/],
+  ['a CI run that reports fewer checks than the verifier defines', () => run('ci-run', (r) => { r.verification.checks = { total: 12, passed: 12 }; }), /all 40 checks passed/],
+  ['a CI run with a failing check', () => run('ci-run', (r) => { r.verification.checks.passed = 39; }), /all 40 checks passed/],
+  ['a CI "run" on a person\'s machine', () => run('ci-run', (r) => { r.verification.runner = 'local'; }), /must be "github-actions"/],
+  ['a CI run id that is not the URL\'s run', () => run('ci-run', (r) => { r.verification.runId = '999999'; }), /does not match the run URL/],
+  ['a CI run with no run id', () => run('ci-run', (r) => { r.verification.runId = ''; }), /numeric GitHub Actions run id/],
+  ['a CI run with a malformed seal', () => run('ci-run', (r) => { r.verification.seal = 'abc'; }), /verification\.seal/],
+  ['a CI run with no verification summary at all', () => run('ci-run', (r) => { delete r.verification; }), /verification\.candidate must equal build\.candidate/],
+  ['a CI run when the release build has no verification expectation', () => run('ci-run', () => {}, { verification: null }), /no verification expectation/],
+  ['evidence for another candidate artifact', () => run('iphone-safari', (r) => { r.build.candidate = '1'.repeat(64); }), /build\.candidate differs/],
+  ['evidence with no candidate digest', () => run('iphone-safari', (r) => { delete r.build.candidate; }), /build\.candidate must be the 64-hex/],
+  ['a release build whose candidate digest is unknown', () => run('iphone-safari', () => {}, { candidate: '' }), /candidate artifact digest is unknown/],
   ['a CI run that did not succeed', () => run('ci-run', (r) => { r.conclusion = 'failure'; }), /conclusion must be "success"/],
   ['a CI run with no run URL', () => run('ci-run', (r) => { r.url = 'https://example.com/run/1'; }), /GitHub Actions run URL/],
   ['a CI run with no summary', () => run('ci-run', (r) => { r.summary = 'ok'; }), /summary must say/],

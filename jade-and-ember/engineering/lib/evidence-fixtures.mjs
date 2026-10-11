@@ -3,9 +3,15 @@
 // accept a complete record and to reject every way of getting one wrong.
 import { createHash } from 'node:crypto';
 import { loadSpec, scaffold } from './evidence.mjs';
+import { registryDigest } from './verification.mjs';
 
 export const FIXTURE_COMMIT = 'a'.repeat(40);
 export const FIXTURE_TREE = 'b'.repeat(64);
+export const FIXTURE_CANDIDATE = 'd'.repeat(64);
+export const FIXTURE_ENGINE = 'e'.repeat(64);
+export const FIXTURE_CHECKS = 40;
+export const FIXTURE_IDS = Array.from({ length: FIXTURE_CHECKS }, (_, i) => `check:fixture-${String(i).padStart(2, '0')}`);
+export const FIXTURE_REGISTRY = registryDigest(FIXTURE_IDS);
 const sha = (b) => createHash('sha256').update(b).digest('hex');
 
 const ENV = {
@@ -23,12 +29,12 @@ const ENV = {
 };
 
 // A complete, consistent record for a target, and the in-memory files it points at. over: field overrides applied by the caller afterwards.
-export function fixtureRecord(targetId, { commit = FIXTURE_COMMIT, tree = FIXTURE_TREE, date = '2026-10-12', tag = '' } = {}) {
+export function fixtureRecord(targetId, { commit = FIXTURE_COMMIT, tree = FIXTURE_TREE, candidate = FIXTURE_CANDIDATE, engine = FIXTURE_ENGINE, registry = FIXTURE_REGISTRY, checks = FIXTURE_CHECKS, date = '2026-10-12', tag = '' } = {}) {
   const spec = loadSpec();
   const t = spec.targets[targetId];
   const files = new Map();
-  if (t.gateType === 'ci-run') return { record: { ...scaffold(spec, 'ci-run', { commit, assetsTree: tree }), status: 'completed', date, by: 'Repository owner', url: 'https://github.com/example/example/actions/runs/123456', conclusion: 'success', summary: 'verify workflow: all four jobs passed' }, files };
-  const r = scaffold(spec, targetId, { commit, assetsTree: tree });
+  if (t.gateType === 'ci-run') return { record: { ...scaffold(spec, 'ci-run', { commit, candidate }), status: 'completed', date, by: 'Repository owner', url: 'https://github.com/example/example/actions/runs/123456', conclusion: 'success', summary: 'verify workflow: all four jobs passed', verification: { candidate, engineDigest: engine, registryDigest: registry, checks: { total: checks, passed: checks }, seal: '9'.repeat(64), runner: 'github-actions', runId: '123456', node: 'v24.21.0' } }, files };
+  const r = scaffold(spec, targetId, { commit, assetsTree: tree, candidate });
   delete r.guidance;
   r.status = 'completed'; r.build.package = 'preview package built from the commit'; r.date = date;
   r.tester = { name: 'Alex Rivera', role: 'QA tester' };
@@ -50,7 +56,7 @@ export function fixtureRecord(targetId, { commit = FIXTURE_COMMIT, tree = FIXTUR
 // The context the validator needs, with a git and a file system that exist only in memory.
 export function fixtureVctx(files = new Map(), over = {}) {
   return {
-    spec: loadSpec(), releaseCommit: FIXTURE_COMMIT, assetsTree: FIXTURE_TREE, today: '2026-10-13', allowFixture: false,
+    spec: loadSpec(), releaseCommit: FIXTURE_COMMIT, assetsTree: FIXTURE_TREE, candidate: FIXTURE_CANDIDATE, verification: { engineDigest: FIXTURE_ENGINE, registryDigest: FIXTURE_REGISTRY, total: FIXTURE_CHECKS }, today: '2026-10-13', allowFixture: false,
     git: { isCommit: (c) => [FIXTURE_COMMIT, 'c'.repeat(40)].includes(c), isAncestor: (a, b) => a === 'c'.repeat(40) && b === FIXTURE_COMMIT, commitDate: () => '2026-10-01' },
     fs: { exists: (p) => files.has(p), read: (p) => files.get(p) },
     ...over,

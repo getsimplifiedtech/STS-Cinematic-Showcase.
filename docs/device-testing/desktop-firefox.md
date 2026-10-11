@@ -14,7 +14,7 @@
 
 ## Before you start
 
-1. Get the exact build to test. The scaffolded record already names the commit and the delivered-files hash (`build.commit`, `build.assetsTree`); you must test that build. Ask the engineer for the preview package for that commit (`npm run release:prepare` writes it; nothing is deployed), or build it yourself from that commit.
+1. Get the exact build to test. The scaffolded record already names the commit, the delivered-files hash and the **candidate artifact digest** (`build.commit`, `build.assetsTree`, `build.candidate`); you must test that build. The digest is what the release approval is bound to: if anything in the artifact changes, the digest changes and this record stops counting (`npm run release:candidate` prints it). Ask the engineer for the preview package for that commit (`npm run release:prepare` writes it; nothing is deployed), or build it yourself from that commit.
 2. Serve it over HTTP. On the computer that holds the files run `python3 serve.py` (from the `jade-and-ember` folder, or the folder inside the package): it supports the byte-range requests that Safari needs to play video and listens on this computer only. For a phone or tablet on the same trusted Wi-Fi run `python3 serve.py 8766 0.0.0.0` and open `http://<the computer's address>:8766/` on the device. Android can also use USB debugging with `adb reverse tcp:8766 tcp:8766` and open `http://localhost:8766/`. Do not open the pages straight from a folder (`file://`) in Safari: WebKit then shows fallback fonts by design of the browser (known finding F-G5-01), which is not what visitors see.
 3. Scaffold the record: `npm run evidence:new -- desktop-firefox`. It writes an unfilled template to `engineering/release/evidence/`; it never fills in a result.
 

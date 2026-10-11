@@ -578,7 +578,20 @@
     "jade-and-ember/engineering/checks/release.mjs",
     "jade-and-ember/engineering/release/policy.json",
     "jade-and-ember/engineering/release/release-manifest.schema.json",
-    "jade-and-ember/engineering/lib/approvals.mjs"
+    "jade-and-ember/engineering/lib/approvals.mjs",
+    "jade-and-ember/engineering/lib/candidate.mjs",
+    "jade-and-ember/engineering/lib/records.mjs",
+    "jade-and-ember/engineering/lib/verification.mjs",
+    "jade-and-ember/engineering/lib/search-digest.mjs",
+    "jade-and-ember/engineering/lib/release-fixtures.mjs",
+    "jade-and-ember/engineering/lib/release-cases.mjs",
+    "jade-and-ember/engineering/tools/release-audit.mjs",
+    "jade-and-ember/engineering/tools/release-record.mjs",
+    "jade-and-ember/engineering/release/reviewers.json",
+    "jade-and-ember/engineering/release/demonstrations.json",
+    "jade-and-ember/engineering/release/approvals/README.md",
+    "jade-and-ember/engineering/release/deployments/README.md",
+    "jade-and-ember/engineering/G6-2-DESIGN.md"
    ],
    "target": "engineering/release/",
    "external": [
@@ -1115,7 +1128,9 @@
     "jade-and-ember/engineering/lib/wp-scope.mjs",
     "jade-and-ember/engineering/tools/wp-scope.mjs",
     "jade-and-ember/engineering/G6-1-REPORT.md",
-    "jade-and-ember/engineering/g6-1-evidence/"
+    "jade-and-ember/engineering/g6-1-evidence/",
+    "jade-and-ember/engineering/G6-2-REPORT.md",
+    "jade-and-ember/engineering/g6-2-evidence/"
    ],
    "target": "stays (absorbed by the framework specification at G6-0)",
    "external": [

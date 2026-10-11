@@ -48,8 +48,9 @@ import { checkRegression } from './checks/regression.mjs';
 import { checkSelftest } from './checks/selftest.mjs';
 import { engDir, projectDir } from './lib/git.mjs';
 import { gitState } from './lib/release.mjs';
+import { computeCandidate } from './lib/candidate.mjs';
+import { buildVerificationRecord, engineDigest, expectedCheckIds, registryDigest } from './lib/verification.mjs';
 import { assembleCandidate } from './lib/site.mjs';
-import { buildManifest } from './lib/hashed.mjs';
 import { rmSync } from 'node:fs';
 
 const has = (f) => process.argv.includes(f);
@@ -106,6 +107,11 @@ const checks = [
 
 const NOT_YET = ['external link reachability (the online link check cannot run in the sandbox)', 'Firefox and WebKit runs inside this sandbox (their jobs run on GitHub Actions: `node engineering/cross-browser.mjs --engine firefox|webkit`)', 'portability of the tooling on Windows and macOS (a CI job reports it, informational)', 'a human screen-reader pass and real-device testing (release requirements, never automated here)'];
 
+// What this run vouches for is fixed BEFORE any check runs and measured again after: a change to the artifact or to the verifying code while the checks are
+// running would make the record untrue, so it is detected and fails the run.
+const measure = () => { const site = assembleCandidate(projectDir, 'verify-candidate'); try { return { candidate: computeCandidate({ siteDir: site }), engine: engineDigest() }; } finally { rmSync(site, { recursive: true, force: true }); } };
+const startedAt = new Date().toISOString();
+const before = measure();
 const results = [];
 for (const [id, what, run] of checks) {
   const t0 = Date.now();
@@ -124,9 +130,12 @@ for (const r of results) console.log(`  ${r.passed ? 'PASS' : 'FAIL'}  ${r.id.pa
 console.log(`\n  Not covered yet (planned for later gates, or manual): ${NOT_YET.join('; ')}.`);
 const failed = results.filter((r) => !r.passed).length;
 mkdirSync(join(engDir, '.reports'), { recursive: true });
-// The report records which commit and which delivered bytes it vouches for; the release gate accepts only a full run for exactly those.
-const st = gitState(), site = assembleCandidate(projectDir, 'verify-report');
-const assetsTree = buildManifest(site).treeSha256; rmSync(site, { recursive: true, force: true });
-writeFileSync(join(engDir, '.reports', 'verify.json'), JSON.stringify({ mode: fast ? 'fast' : 'full', passed: failed === 0, commit: st.commit, dirty: st.dirty, assetsTree, results }, null, 2));
-console.log(failed ? `\nverify FAILED (${failed} of ${results.length} checks)` : `\nverify passed (${results.length} of ${results.length} checks)`);
-process.exit(failed ? 1 : 0);
+// The verification record (lib/verification.mjs): bound to the candidate artifact digest and the verifying code, complete for the checks this file defines, sealed.
+const after = measure(), st = gitState();
+const moved = before.candidate.digest !== after.candidate.digest || before.engine !== after.engine;
+if (moved) console.log('\n  - the candidate artifact or the verifying code changed while the checks were running: this run does not vouch for either');
+const record = buildVerificationRecord({ mode: fast ? 'fast' : 'full', results: moved ? [...results, { id: 'run:stable-inputs', passed: false, seconds: 0 }] : results, candidate: after.candidate, engine: after.engine, registry: registryDigest(expectedCheckIds()), commit: st.commit, dirty: st.dirty, startedAt, finishedAt: new Date().toISOString() });
+writeFileSync(join(engDir, '.reports', 'verify.json'), JSON.stringify(record, null, 2));
+console.log(`\n  verification record: ${record.mode} run, candidate ${record.candidate}, engine ${record.engineDigest.slice(0, 16)}…, ${record.checks.length} checks, seal ${record.seal}`);
+console.log(failed || moved ? `\nverify FAILED (${failed + (moved ? 1 : 0)} of ${results.length} checks)` : `\nverify passed (${results.length} of ${results.length} checks)`);
+process.exit(failed || moved ? 1 : 0);

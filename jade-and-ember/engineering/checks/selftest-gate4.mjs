@@ -7,7 +7,9 @@ import { validateHtml, probeTelWrapping } from './html.mjs';
 import { scanLinks, checkSearchAgreement } from './links.mjs';
 import { checkPhone, WIDTHS as PHONE_WIDTHS } from './phone.mjs';
 import { checkSeo, checkSeoClient, readSitemap, readRobots } from './seo.mjs';
-import { findSearchReview } from '../lib/approvals.mjs';
+import { fxApprovals, fxRecord } from '../lib/release-fixtures.mjs';
+import { resolve as resolveRecords } from '../lib/records.mjs';
+import { FIXTURE_CANDIDATE } from '../lib/evidence-fixtures.mjs';
 import { searchDigest } from '../lib/release.mjs';
 import { crawlerRecordProblems, crawlerReviewGaps, llmsProblems, readLlms, robotsProblems, urlStrategyProblems, metadataProblems, factsProblems, hostProblems, pageText } from '../lib/search.mjs';
 import { isReservedHost, publicUrl } from '../../src/lib/seo.mjs';
@@ -143,11 +145,11 @@ const cases = [
   // ---- release gate (invented states; the full single-defect matrix is in check:release)
   ['release: the real demonstration cannot be released as client-production', () => blockedBy(gate({ channel: 'client-production', client: (() => { const c = GREEN().client; c.flags.demo = true; c.seo.noindex = true; return c; })() })), /demonstration|noDemoText|productionSeo|channel/i],
   ['release: an indexable demonstration is blocked', () => blockedBy(gate({ channel: 'demonstration', version: { ...GREEN().version, channel: 'demonstration', version: '0.9.0-dev' }, pkg: { ...GREEN().pkg, version: '0.9.0-dev' }, client: (() => { const c = GREEN().client; c.flags.demo = true; c.seo.noindex = false; return c; })() })), /demoStaysNoindex|noindex/i],
-  ['release: no release approval', () => blockedBy(gate({ approvals: GREEN().approvals.filter((a) => a.type !== 'release-approval') })), /releaseApproval/],
-  ['release: an approval for a different commit', () => blockedBy(gate({ approvals: GREEN().approvals.map((a) => (a.type === 'release-approval' ? { ...a, decision: a.decision.replace('a'.repeat(40), 'f'.repeat(40)) } : a)) })), /releaseApproval/],
-  ['release: media rights not verified', () => blockedBy(gate({ approvals: GREEN().approvals.filter((a) => a.type !== 'rights-verification') })), /rightsVerification/],
+  ['release: no release approval', () => blockedBy(gate({ approvalRecords: GREEN().approvalRecords.filter((e) => e.record.type !== 'release-approval') })), /releaseApproval/],
+  ['release: an approval for a different artifact (candidate digest)', () => blockedBy(gate({ approvalRecords: GREEN().approvalRecords.map((e) => (e.record.type === 'release-approval' ? { ...e, record: { ...e.record, candidate: 'f'.repeat(64) } } : e)) })), /releaseApproval/],
+  ['release: media rights not verified', () => blockedBy(gate({ approvalRecords: GREEN().approvalRecords.filter((e) => e.record.type !== 'rights-verification') })), /rightsVerification/],
   ['release: an uncommitted change', () => blockedBy(gate({ git: { ...GREEN().git, dirty: true } })), /cleanTree/],
-  ['release: verification run on other bytes', () => blockedBy(gate({ verify: { ...GREEN().verify, assetsTree: 'OTHER' } })), /verifyPassed/],
+  ['release: verification of another artifact', () => blockedBy(gate({ verify: { ...GREEN().verify, candidate: 'e'.repeat(64) } })), /verifyPassed/],
   ['release: only the fast verification run', () => blockedBy(gate({ verify: { ...GREEN().verify, mode: 'fast' } })), /verifyPassed/],
   ['release: an open Major finding', () => blockedBy(gate({ findings: [{ id: 'F-X', severity: 'Major', visual: false, status: 'open' }] })), /noBlockingFindings/],
   ['release: no real-device evidence', () => blockedBy(gate({ evidence: GREEN().evidence.filter((e) => e.type !== 'real-device') })), /real-device/],
@@ -222,7 +224,7 @@ const cases = [
   // ---- Gate 4 reconciliation: search-review approval and fingerprint
   ['search digest: stable for identical builds, changed by any search artifact (must find nothing)', () => { const a = client(), b = client(); const d0 = searchDigest(a.dir); const out = []; if (d0 !== searchDigest(b.dir)) out.push('two identical builds have different digests'); for (const f of ['llms.txt', 'robots.txt', 'sitemap.xml']) { const c = client(); edit(join(c.dir, f), (t) => t + ' '); if (searchDigest(c.dir) === d0) out.push(`changing ${f} did not change the digest`); } const j = client(); edit(join(j.dir, 'index.html'), (t) => t.replace('"priceRange":"$$"', () => '"priceRange":"$$$"')); if (searchDigest(j.dir) === d0) out.push('changing the JSON-LD did not change the digest'); return out; }, null],
   ['search digest: the demonstration has none (must find nothing)', () => (searchDigest(demoDir()) === null ? [] : ['the demonstration has search artifacts']), null],
-  ['search review: a record for another digest does not count (must find nothing)', () => (findSearchReview([{ type: 'search-review', decision: `Reviewed by Sam on 2026-10-10: business facts, structured data, crawler policy. digest: ${'a'.repeat(64)}` }], 'b'.repeat(64)) ? ['a review of other artifacts was accepted'] : []), null],
+  ['search review: a record for another digest does not count (must find nothing)', () => (resolveRecords(fxApprovals(), 'search-review', { candidate: FIXTURE_CANDIDATE, channel: 'client-production', version: '1.0.0', table: GREEN().reviewers, today: '2026-10-13', baseHost: null, searchDigest: 'b'.repeat(64) }).met ? ['a review of other artifacts was accepted'] : []), null],
 
 
   // ---- F-G4-01: the phone numbers stay readable, operable and inside the viewport

@@ -37,17 +37,17 @@ export function itemsFor(spec, targetId) {
 
 // ---------------------------------------------------------------------------------------------------------------------------------------------------
 // A template: every outcome field empty. It never fills a result.
-export function scaffold(spec, targetId, { commit = '', assetsTree = '' } = {}) {
+export function scaffold(spec, targetId, { commit = '', assetsTree = '', candidate = '' } = {}) {
   const t = spec.targets[targetId];
   if (!t) throw new Error(`unknown target "${targetId}"; known: ${Object.keys(spec.targets).join(', ')}`);
-  if (t.gateType === 'ci-run') return { schema: spec.recordSchema, status: 'template', type: 'ci-run', target: targetId, class: 'E1', build: { commit, assetsTree }, date: '', by: '', url: '', conclusion: null, summary: '' };
+  if (t.gateType === 'ci-run') return { schema: spec.recordSchema, status: 'template', type: 'ci-run', target: targetId, class: 'E1', build: { commit, candidate }, date: '', by: '', url: '', conclusion: null, summary: '', verification: { candidate: '', engineDigest: '', registryDigest: '', checks: { total: null, passed: null }, seal: '', runner: '', runId: '' } };
   const items = itemsFor(spec, targetId);
   const blank = () => ({ outcome: null, note: '' });
   return {
     schema: spec.recordSchema, status: 'template',
     guidance: [`Procedure: docs/device-testing/${targetId}.md. Fill this record yourself after doing the test; leave nothing empty. Set "status" to "completed" only when every field is filled.`, 'Outcomes are "pass", "fail" or "not-applicable" (the last only where the item allows it, with a note of at least 15 characters). Every "fail" needs a finding for that page.', 'Attach evidence under engineering/release/evidence/files/ and record its SHA-256 (npm run evidence:hash -- <file>).', `Classification: ${t.classes.join(' or ')}. ${t.classes.includes('E3') ? 'A physical phone or tablet only; emulators, simulators and device farms do not count.' : 'A real desktop browser on a real computer; emulation does not count.'}`],
     type: t.gateType, target: targetId, class: t.classes.length === 1 ? t.classes[0] : '',
-    build: { commit, assetsTree, package: '' },
+    build: { commit, assetsTree, candidate, package: '' },
     date: '', tester: { name: '', role: '' },
     environment: { device: { kind: '', make: '', model: '', emulated: null }, os: { name: '', version: '' }, browser: { name: '', version: '' }, screenReader: t.environment.screenReaders ? { name: '', version: '' } : null, settings: '' },
     results: { session: Object.fromEntries(items.session.map((i) => [i.id, blank()])), pages: Object.fromEntries(Object.entries(items.pages).filter(([, l]) => l.length).map(([p, l]) => [p, Object.fromEntries(l.map((i) => [i.id, blank()]))])) },
@@ -67,7 +67,9 @@ export const realGit = {
 export const realFs = { exists: (p) => existsSync(join(repoRoot, 'jade-and-ember', p)), read: (p) => readFileSync(join(repoRoot, 'jade-and-ember', p)) };
 
 // ---------------------------------------------------------------------------------------------------------------------------------------------------
-// Validates ONE record. vctx: { spec, releaseCommit, assetsTree, git, fs, today, allowFixture }.
+// Validates ONE record. vctx: { spec, releaseCommit, assetsTree, candidate, verification, git, fs, today, allowFixture }.
+//   candidate     the candidate artifact digest of the release build (lib/candidate.mjs): every record is bound to it, not to the HEAD commit (G6-2, RG-01)
+//   verification  what a CI run of THIS verifier must have produced: { engineDigest, registryDigest, total } (lib/verification.mjs)
 // Returns { problems: [string], success: boolean }. success = valid AND the outcome is a pass with no open Blocker or Major finding.
 export function validateRecord(r, vctx) {
   const { spec } = vctx;
@@ -91,7 +93,10 @@ export function validateRecord(r, vctx) {
   const b = r.build || {};
   if (!HEX40.test(b.commit || '')) bad('build.commit must be a 40-hex commit');
   else if (!vctx.git.isCommit(b.commit)) bad(`build.commit ${b.commit.slice(0, 7)} is not a commit of this repository`);
-  else if (r.type === 'ci-run' ? b.commit !== vctx.releaseCommit : !(b.commit === vctx.releaseCommit || vctx.git.isAncestor(b.commit, vctx.releaseCommit))) bad(`build.commit ${b.commit.slice(0, 7)} is not ${r.type === 'ci-run' ? '' : 'the release commit or an ancestor of '}the release commit ${String(vctx.releaseCommit).slice(0, 7)}`);
+  else if (!(b.commit === vctx.releaseCommit || vctx.git.isAncestor(b.commit, vctx.releaseCommit))) bad(`build.commit ${b.commit.slice(0, 7)} is not the release commit or an earlier commit of it (it records where the work was tested; the binding to the artifact is build.candidate)`);
+  if (!HEX64.test(b.candidate || '')) bad('build.candidate must be the 64-hex candidate artifact digest of the build that was tested');
+  else if (!vctx.candidate) bad('the release build\'s candidate artifact digest is unknown, so the record cannot be bound to it');
+  else if (b.candidate !== vctx.candidate) bad('build.candidate differs from the candidate artifact of the release build: this evidence is for a different artifact');
   if (r.type !== 'ci-run') {
     if (!HEX64.test(b.assetsTree || '')) bad('build.assetsTree must be the 64-hex tree hash of the delivered files that was tested');
     else if (!vctx.assetsTree) bad('the release build\'s delivered-file hash is unknown, so the record cannot be bound to it');
@@ -110,6 +115,19 @@ export function validateRecord(r, vctx) {
     if (!/^https:\/\/github\.com\/[^/\s]+\/[^/\s]+\/actions\/runs\/\d+/.test(r.url || '')) bad('url must be the https GitHub Actions run URL');
     if (r.conclusion !== 'success') bad('conclusion must be "success" for a CI run to count');
     if (!nonEmpty(r.summary, 10)) bad('summary must say what was run and the outcome');
+    // the CI run's own summary of its verification record, compared with what a full run of THIS verifier must produce (G6-2, RG-08)
+    const v = r.verification || {}, ex = vctx.verification;
+    if (!ex) bad('the release build has no verification expectation to compare the CI summary with');
+    if (v.candidate !== b.candidate) bad('verification.candidate must equal build.candidate: the run verified a different artifact');
+    if (v.runner !== 'github-actions') bad('verification.runner must be "github-actions": a run on a person\'s machine is not CI evidence');
+    if (!/^\d{6,}$/.test(String(v.runId || ''))) bad('verification.runId must be the numeric GitHub Actions run id');
+    else if (!new RegExp(`/actions/runs/${v.runId}(/|$)`).test(r.url || '')) bad('verification.runId does not match the run URL');
+    if (!HEX64.test(v.seal || '')) bad('verification.seal must be the seal printed at the end of the CI job log');
+    if (ex) {
+      if (v.engineDigest !== ex.engineDigest) bad('verification.engineDigest is not the digest of this verification code: the run was made by different code');
+      if (v.registryDigest !== ex.registryDigest) bad('verification.registryDigest is not the digest of the checks this verifier defines');
+      if (!(v.checks && v.checks.total === ex.total && v.checks.passed === ex.total)) bad(`verification.checks must report all ${ex.total} checks passed (got ${v.checks ? `${v.checks.passed} of ${v.checks.total}` : 'nothing'})`);
+    }
     return { problems, success: problems.length === 0 && r.conclusion === 'success' };
   }
 
@@ -241,4 +259,4 @@ export function loadEvidenceEntries(dir = join(engDir, 'release', 'evidence')) {
     try { return { file: f, record: JSON.parse(readFileSync(join(dir, f), 'utf8')) }; } catch (e) { return { file: f, record: null, parseError: `not valid JSON (${e.message.slice(0, 60)})` }; }
   });
 }
-export const defaultVctx = (over = {}) => ({ spec: loadSpec(), releaseCommit: '', assetsTree: '', git: realGit, fs: realFs, today: new Date().toISOString().slice(0, 10), allowFixture: false, ...over });
+export const defaultVctx = (over = {}) => ({ spec: loadSpec(), releaseCommit: '', assetsTree: '', candidate: '', verification: null, git: realGit, fs: realFs, today: new Date().toISOString().slice(0, 10), allowFixture: false, ...over });

@@ -21,7 +21,7 @@ import { withSite } from '../lib/runtime.mjs';
 import { assembleCandidate, pagesOf } from '../lib/site.mjs';
 import { engDir, isMain, listFiles, projectDir, readJson, repoRoot } from '../lib/git.mjs';
 import { mediaRightsProblems } from '../lib/media-rights.mjs';
-import { loadApprovals } from '../lib/approvals.mjs';
+import { standingRightsRecords } from '../lib/records.mjs';
 import { rmSync } from 'node:fs';
 
 const attr = (tag, name) => { const m = new RegExp(`(?:^|\\s)${name}(?:="([^"]*)")?(?=[\\s>/])`).exec(tag); return m ? (m[1] ?? '') : null; };
@@ -132,7 +132,7 @@ export function checkMediaStatic(root, cfgRoot = projectDir) {
     const inventory = readJson(join(engDir, 'media-rights-inventory.json'));
     const licenceText = existsSync(join(root, 'fonts', 'LICENSES.txt')) ? readFileSync(join(root, 'fonts', 'LICENSES.txt'), 'utf8') : null;
     if (licenceText === null) bad('rights-inventory', 'fonts/LICENSES.txt', 'fonts/LICENSES.txt is missing: the fonts must travel with their licence text');
-    const r = mediaRightsProblems({ inventory, root, approvals: loadApprovals(), licenceText });
+    const r = mediaRightsProblems({ inventory, root, approvals: standingRightsRecords(), licenceText });
     for (const p of r.problems) bad('rights-inventory', p.key, p.detail);
     for (const n of r.notices) bad('font-notice', n.family, n.detail);
   } catch (e) { bad('rights-inventory', 'inventory', `the media rights inventory cannot be read (${e.message})`); }

@@ -1,18 +1,21 @@
 // node engineering/tools/release.mjs <command>
 //   gate [--channel <name>]     evaluate the release gate for this build; exit 1 unless every requirement of its channel is met
 //   manifest [--out <file>]     print (or write) the release manifest for HEAD; never requires the gate to pass
-//   search-digest               print the fingerprint of the generated search artifacts that a search-review approval must carry
-//   prepare                     if the gate passes: write release/ (package, manifest, SHA256SUMS, host files). Nothing is deployed.
+//   search-digest               print the fingerprint of the generated search artifacts that a search-review record must carry
+//   candidate                   print the candidate artifact digest and its parts (what every record is bound to; see G6-2-DESIGN.md section 3)
+//   prepare                     if the gate passes: write release/ (package, manifest, SHA256SUMS, host files, and the records the approval relies on).
+//                               Nothing is deployed.
 // The channel is read from the CONFIGURATION (flags.demo, seo.noindex): --channel only asserts what you expect, and a mismatch is refused.
-// A client-production build cannot be prepared without a recorded release approval for its exact version and commit, rights verification,
-// real-device, screen-reader, browser-matrix and CI evidence, a stable version and a passing full verification on a clean tree.
-import { mkdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
+// A client-production build cannot be prepared without an in-force release approval bound to its candidate artifact digest and production host, rights
+// verification, real-device, screen-reader, browser-matrix and CI evidence bound to the same digest, a stable version and a complete, sealed full
+// verification on a clean tree.
+import { cpSync, existsSync, mkdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import { join, resolve } from 'node:path';
 import { assembleCandidate, SHARED, pagesOf } from '../lib/site.mjs';
 import { buildManifest, sha256hex } from '../lib/hashed.mjs';
-import { collectContext, buildReleaseManifest, evaluateGate, searchDigest, searchFilesPresent } from '../lib/release.mjs';
+import { attachBuild, collectContext, buildReleaseManifest, evaluateGate, searchDigest, DEMONSTRATION_STATEMENT } from '../lib/release.mjs';
 import { zipBuffer } from '../lib/zip.mjs';
-import { listFiles, projectDir, readJson } from '../lib/git.mjs';
+import { engDir, listFiles, projectDir, readJson } from '../lib/git.mjs';
 import { loadPolicy, renderApache, renderHeadersFile, renderNginx } from '../lib/security.mjs';
 
 const arg = (n) => { const i = process.argv.indexOf(n); return i > -1 ? process.argv[i + 1] : null; };
@@ -24,14 +27,18 @@ try {
   const ctx = collectContext();
   const asked = arg('--channel');
   if (asked && asked !== ctx.channel) { console.error(`REFUSED: this build is a ${ctx.channel} build (configuration: demo ${ctx.client.flags.demo}, noindex ${ctx.client.seo.noindex}); it cannot be released as "${asked}".`); finish(1); }
-  const withAssets = { ...ctx, assetsTree: buildManifest(dir).treeSha256, searchDigest: searchDigest(dir), siteHasSearchFiles: ctx.channel === 'demonstration' ? undefined : searchFilesPresent(dir) };
+  const withAssets = attachBuild(ctx, dir);
   const gate = evaluateGate(withAssets);
-  const show = () => { console.log(`channel: ${gate.channel}   version: ${ctx.version.version}   commit: ${ctx.git.commit.slice(0, 7)}${ctx.git.dirty ? ' (dirty)' : ''}`); for (const r of gate.requirements) console.log(`  ${r.ok ? 'ok  ' : 'FAIL'}  ${r.id}: ${r.detail}`); console.log(`gate: ${gate.allowed ? 'ALLOWED' : 'BLOCKED'}   deployment approved: ${gate.deploymentApproved} (nothing here deploys)`); };
+  const show = () => { console.log(`channel: ${gate.channel}   version: ${ctx.version.version}   candidate: ${withAssets.candidate.digest.slice(0, 16)}…   commit: ${ctx.git.commit.slice(0, 7)}${ctx.git.dirty ? ' (dirty)' : ''}`); for (const r of gate.requirements) console.log(`  ${r.ok ? 'ok  ' : 'FAIL'}  ${r.id}: ${r.detail}`); console.log(`gate: ${gate.allowed ? 'ALLOWED' : 'BLOCKED'}   deployment approved: ${gate.deploymentApproved} (nothing here deploys)`); };
   if (cmd === 'gate') { show(); finish(gate.allowed ? 0 : 1); }
+  if (cmd === 'candidate') {
+    console.log(`candidate artifact digest: ${withAssets.candidate.digest}\nchannel ${withAssets.candidate.channel}, version ${withAssets.candidate.version}\n${JSON.stringify(withAssets.candidate.parts, null, 2)}`);
+    finish(0);
+  }
   if (cmd === 'search-digest') {
     const d = searchDigest(dir);
     if (!d) { console.log('This build has no search artifacts (the fictional demonstration is noindex and publishes none).'); finish(0); }
-    console.log(`digest: ${d}\n\nReview exactly these files before recording a search-review row in docs/JADE_AND_EMBER_APPROVALS.md (Type: search-review; Decision: "Reviewed by <name> on <date>: business facts, structured data, crawler policy. digest: ${d}"):`);
+    console.log(`digest: ${d}\n\nReview exactly these files before an authorised reviewer records a search-review (npm run release:record -- template search-review prints the record with this digest filled in; the decision, the reviewer and the rationale are theirs to write):`);
     for (const f of ['sitemap.xml', 'robots.txt', 'llms.txt']) console.log(`  ${f}`);
     console.log('  the Home page JSON-LD block\nCheck: every fact (name, address, phone, hours, cuisine, ordering link) against the client; the schema.org type; the crawler classes; the production domain.');
     finish(0);
@@ -47,13 +54,18 @@ try {
     const out = resolve(projectDir, 'release'); rmSync(out, { recursive: true, force: true }); mkdirSync(out, { recursive: true });
     const names = [...pagesOf(dir), ...SHARED, ...(ctx.channel === 'client-production' ? ['sitemap.xml', 'robots.txt', 'llms.txt'] : []), ...listFiles(join(dir, 'fonts')).map((f) => `fonts/${f}`), ...listFiles(join(dir, 'media')).map((f) => `media/${f}`)];
     const entries = names.filter((n) => { try { readFileSync(join(dir, n)); return true; } catch { return false; } }).map((name) => ({ name, data: readFileSync(join(dir, name)) }));
-    const start = `Jade & Ember ${ctx.version.version} (${ctx.channel})\nSource commit ${ctx.git.commit}\n\nOpen index.html in a browser: double-click it. Nothing else is needed.\nOptional: python3 serve.py  (then http://localhost:8766/) to serve it with video seeking.\n\n${ctx.channel === 'demonstration' ? 'This is a FICTIONAL demonstration of a website design by Simplified Tech Solutions. It is not approved for public deployment or for client production.\n' : ''}Verify: sha256sum -c SHA256SUMS.txt (next to this package) and compare release-manifest.json.\n`;
+    const start = `Jade & Ember ${ctx.version.version} (${ctx.channel})\nSource commit ${ctx.git.commit}\n\nOpen index.html in a browser: double-click it. Nothing else is needed.\nOptional: python3 serve.py  (then http://localhost:8766/) to serve it with video seeking.\n\n${ctx.channel === 'demonstration' ? `${DEMONSTRATION_STATEMENT}\n` : ''}Candidate artifact digest ${withAssets.candidate.digest}\nVerify: sha256sum -c SHA256SUMS.txt (next to this package) and compare release-manifest.json.\n`;
     entries.push({ name: 'START-HERE.txt', data: Buffer.from(start) }, { name: 'serve.py', data: readFileSync(join(projectDir, 'serve.py')) });
     const zipName = ctx.channel === 'demonstration' ? ctx.version.previewPackage : `jade-and-ember-${ctx.version.version}-site.zip`;
     const zip = zipBuffer(entries);
     writeFileSync(join(out, zipName), zip);
     const manifest = buildReleaseManifest(ctx, { siteDir: dir, packageInfo: { name: zipName, bytes: zip.length, sha256: sha256hex(zip) } });
     writeFileSync(join(out, 'release-manifest.json'), JSON.stringify(manifest, null, 2) + '\n');
+    // the records the approval relies on travel with the package so a recipient can audit them without the repository (G6-2, design section 6)
+    for (const family of ['approvals', 'evidence', 'deployments']) { const from = join(engDir, 'release', family); if (existsSync(from)) cpSync(from, join(out, 'records', family), { recursive: true, filter: (f) => !/README\.md$/.test(f) }); }
+    mkdirSync(join(out, 'records'), { recursive: true });
+    writeFileSync(join(out, 'records', 'verification.json'), JSON.stringify(ctx.verify, null, 2) + '\n');
+    cpSync(join(engDir, 'release', 'reviewers.json'), join(out, 'records', 'reviewers.json')); cpSync(join(engDir, 'release', 'demonstrations.json'), join(out, 'records', 'demonstrations.json'));
     const sums = ['release-manifest.json', zipName].map((n) => `${sha256hex(readFileSync(join(out, n)))}  ${n}`).join('\n') + '\n';
     writeFileSync(join(out, 'SHA256SUMS.txt'), sums);
     const pol = loadPolicy(); mkdirSync(join(out, 'host'), { recursive: true });
@@ -61,6 +73,6 @@ try {
     console.log(`\nprepared ${out}: ${zipName} (${zip.length} bytes), release-manifest.json, SHA256SUMS.txt, host/. Nothing was deployed.`);
     finish(0);
   }
-  console.error('usage: release.mjs gate|manifest|prepare|search-digest [--channel demonstration|client-production]'); finish(2);
+  console.error('usage: release.mjs gate|manifest|prepare|search-digest|candidate [--channel demonstration|client-production]'); finish(2);
 } catch (e) { console.error(e.stack || e.message); finish(2); }
 void readJson;

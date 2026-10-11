@@ -1,13 +1,17 @@
-// check:release-dryrun (Gate 5 Phase 7, APR-JE-035). The release readiness dry run: the REAL release tool, run against a SYNTHETIC client build in a
-// throwaway copy of the project (lib/release-dryrun.mjs). It proves, with the actual commands and the actual approvals parser, evidence validator and
-// git, that:
+// check:release-dryrun (Gate 5 Phase 7, APR-JE-035; release model v2, G6-2, APR-JE-039). The release readiness dry run: the REAL release tool, run against a
+// SYNTHETIC client build in a throwaway copy of the project (lib/release-dryrun.mjs). It proves, with the actual commands and the actual record resolver,
+// evidence validator, verification-record validator and git, that:
 //   * a fully approved synthetic build passes the gate, is prepared into a package, and the package verifies and is reproducible;
 //   * each blocker, taken alone, makes the gate refuse with a message that says what is wrong (about 80 single-defect scenarios);
 //   * the channel comes from the configuration, a mismatched --channel is refused, a deployment approval is only reported, and a blocked build
 //     writes nothing;
 //   * a tampered package is rejected by lib/release-package.mjs;
 //   * nothing in the repository's tools or workflow can deploy, publish or write to a remote system;
-//   * the real approvals log, evidence folder and demonstration are not touched by any of it.
+//   * the real approvals, evidence, deployment and reviewer records, the ledger and the demonstration are not touched by any of it;
+//   * (v2) every finding RG-01, RG-04 to RG-09 and RG-13 has a BLOCKING scenario that fails closed: records are bound to the candidate artifact digest (the
+//     committed-records flow reaches green), a rejected, revoked, unauthorised or malformed record never counts and prose changes nothing, a hand-written,
+//     incomplete, edited or stale verification record is refused, the production host must be positively authorised, an unregistered demonstration is refused,
+//     and the package's ZIP must be the approved artifact.
 // It also MEASURES (does not assert) the places where the gate lets something through that it arguably should refuse (RG-01 to RG-14),
 // so each gap in engineering/RELEASE-DRYRUN-GATE5.md is an observed fact. The probes never fail the check; a scenario that should block and does not does.
 import { existsSync, readFileSync, readdirSync, writeFileSync } from 'node:fs';
@@ -16,25 +20,28 @@ import { createHash } from 'node:crypto';
 import { spawnSync } from 'node:child_process';
 import { parse as parseYaml } from 'yaml';
 import { createSandbox } from '../lib/release-dryrun.mjs';
-import { GATE_SCENARIOS, reservedHostCorpus, runEnvironmentScenarios, runLedgerScenario, runFlavourProbes, runGateProbes, runPackageScenarios } from '../lib/release-dryrun-scenarios.mjs';
+import { GATE_SCENARIOS, reservedHostCorpus, runChannelScenarios, runEnvironmentScenarios, runLedgerScenario, runGateProbes, runPackageScenarios } from '../lib/release-dryrun-scenarios.mjs';
 import { engDir, isMain, listFiles, projectDir, repoRoot } from '../lib/git.mjs';
 import { loadReleasePolicy } from '../lib/release.mjs';
 
 const sha = (b) => createHash('sha256').update(b).digest('hex');
 const exists = (p) => existsSync(p);
 
-// What must be identical before and after: the real ledger, the real evidence folder, the real tree's status and the absence of a release folder.
+// What must be identical before and after: the real ledger, every real record family, the reviewer table, the demonstration registry, the real tree's status
+// and the absence of a release folder.
 function realState() {
-  const ledger = join(repoRoot, 'docs', 'JADE_AND_EMBER_APPROVALS.md'), ev = join(engDir, 'release', 'evidence');
-  const files = exists(ev) ? listFiles(ev).map((f) => `${f}:${sha(readFileSync(join(ev, f)))}`) : [];
+  const ledger = join(repoRoot, 'docs', 'JADE_AND_EMBER_APPROVALS.md');
+  const fam = ['approvals', 'evidence', 'deployments'].flatMap((f) => { const d = join(engDir, 'release', f); return exists(d) ? listFiles(d).map((x) => `${f}/${x}:${sha(readFileSync(join(d, x)))}`) : []; });
+  const loose = ['reviewers.json', 'demonstrations.json'].map((f) => `${f}:${sha(readFileSync(join(engDir, 'release', f)))}`);
   const st = spawnSync('git', ['status', '--porcelain'], { cwd: repoRoot, encoding: 'utf8' }).stdout;
-  return JSON.stringify({ ledger: sha(readFileSync(ledger)), files, status: st, releaseFolder: exists(join(projectDir, 'release')) });
+  return JSON.stringify({ ledger: sha(readFileSync(ledger)), fam, loose, status: st, releaseFolder: exists(join(projectDir, 'release')) });
 }
 
 // The judgement of one gate scenario against what the real tool printed.
 function judge(s, g) {
   if (s.either) { const a = judge({ ...s, either: false, error: undefined }, g), b = judge({ ...s, either: false, mustFail: undefined }, g); return a.ok ? a : b.ok ? b : { ok: false, expected: `${a.expected}, or a refusal`, observed: a.observed }; }
   const first = (g.out.split('\n').find((l) => l.trim()) || '').slice(0, 90);
+  if (s.allow) return { ok: g.allowed && g.status === 0, expected: 'ALLOWED (this must not block)', observed: g.allowed ? 'ALLOWED' : `BLOCKED by ${g.failing.join(', ') || 'nothing listed'}: ${g.reqs.filter((r) => !r.ok).map((r) => r.detail).join(' | ').slice(0, 160)}` };
   if (s.error) return { ok: g.status !== 0 && g.status !== null && !g.allowed && s.error.test(g.out), observed: `tool error, exit ${g.status}: ${first}`, expected: 'the tool stops and nothing is allowed' };
   const must = s.mustFail, may = s.mayFail || [], failing = g.failing;
   const notBlocked = must.filter((m) => !failing.includes(m)), collateral = failing.filter((f) => !must.includes(f) && !may.includes(f));
@@ -81,9 +88,11 @@ export async function checkReleaseDryRun({ report = null, fast = false } = {}) {
   const sb = createSandbox();
   try {
     // 0. the synthetic world is what it says it is
-    const led = sb.readLedger();
-    const synthRows = led.split('\n').filter((l) => /^\| (REL|RIGHTS|SRCH)-JE-901 /.test(l));
-    if (synthRows.length !== 3 || !synthRows.every((l) => /SYNTHETIC DRY-RUN FIXTURE/.test(l))) problems.push('the synthetic approval rows are not all labelled SYNTHETIC');
+    const synthFiles = readdirSync(sb.dir('approvals')).filter((f) => f.endsWith('.json'));
+    const synthRecs = synthFiles.map((f) => JSON.parse(readFileSync(join(sb.dir('approvals'), f), 'utf8')));
+    if (synthRecs.length !== 3 || !synthRecs.every((r) => /SYNTHETIC DRY-RUN FIXTURE/.test(r.rationale))) problems.push('the synthetic approval records are not all labelled SYNTHETIC');
+    if (!/SYNTHETIC DRY-RUN FIXTURE/.test(readFileSync(join(sb.proj, 'engineering/release/reviewers.json'), 'utf8')) || !/SYNTHETIC DRY-RUN FIXTURE/.test(readFileSync(join(sb.proj, 'engineering/.reports/verify.json'), 'utf8'))) problems.push('the synthetic reviewer table or verification record is not labelled SYNTHETIC');
+    if (sb.measure().candidate.digest !== sb.state.candidate.digest) problems.push('the sandbox does not measure to the candidate its records are bound to');
     const green = sb.gate(['--channel', 'client-production']);
     if (!green.allowed) problems.push(`the real gate blocks the fully approved synthetic build: ${green.reqs.filter((r) => !r.ok).map((r) => `${r.id} (${r.detail})`).join('; ')}`);
     rows.push({ g: 'success path', t: 'a fully approved synthetic client-production build passes the real gate', ok: green.allowed, expected: 'ALLOWED', observed: green.allowed ? `ALLOWED (${green.reqs.length} requirements)` : 'BLOCKED' });
@@ -99,7 +108,7 @@ export async function checkReleaseDryRun({ report = null, fast = false } = {}) {
       sb.restore(); s.apply(sb);
       const g = sb.gate(['--channel', 'client-production']);
       const j = judge(s, g);
-      rows.push({ g: s.g, t: s.t, ok: j.ok, expected: j.expected, observed: j.observed });
+      rows.push({ g: s.g, t: s.t, ok: j.ok, rg: s.rg, expected: j.expected, observed: j.observed, allow: Boolean(s.allow) });
       if (!j.ok) problems.push(`scenario "${s.t}": expected ${j.expected}; observed ${j.observed}`);
     }
     sb.restore();
@@ -108,13 +117,14 @@ export async function checkReleaseDryRun({ report = null, fast = false } = {}) {
     // 3. probes (measured, never failing)
     probes.push(...runGateProbes(sb));
   } finally { sb.destroy(); }
-  probes.push(...runFlavourProbes());
+  // channel separation (RG-13) in two more sandboxes: client-style content labelled as a demonstration, and the registered fictional demonstration
+  for (const r of runChannelScenarios()) { rows.push({ ...r, expected: r.expected || 'as stated', observed: r.observed || r.detail }); if (!r.ok) problems.push(`${r.g}: "${r.t}": ${r.detail}`); }
   // 4. deployment safety and separation from the real records
   for (const r of deploymentSafety()) { rows.push({ ...r, expected: 'holds', observed: r.detail }); if (!r.ok) problems.push(`deployment safety: ${r.t} (${r.detail})`); }
   const after = realState();
-  if (before !== after) problems.push('the dry run changed the real approvals log, the real evidence folder, the working tree or created a release folder');
-  rows.push({ g: 'separation', t: 'the real approvals log, evidence folder, working tree and release folder are exactly as they were', ok: before === after, expected: 'unchanged', observed: before === after ? 'unchanged' : 'CHANGED' });
-  const leak = [join(repoRoot, 'docs', 'JADE_AND_EMBER_APPROVALS.md'), ...(exists(join(engDir, 'release', 'evidence')) ? listFiles(join(engDir, 'release', 'evidence')).filter((f) => f.endsWith('.json')).map((f) => join(engDir, 'release', 'evidence', f)) : []), join(engDir, 'search-crawler-verification.json'), join(engDir, 'external-links-verification.json'), join(engDir, 'findings.json')].filter((f) => /Dry-run Persona|SYNTHETIC DRY-RUN FIXTURE|JE-901/.test(readFileSync(f, 'utf8')));
+  if (before !== after) problems.push('the dry run changed the real ledger, a real record family, the reviewer table, the working tree or created a release folder');
+  rows.push({ g: 'separation', t: 'the real ledger, approval, evidence and deployment records, reviewer table, working tree and release folder are exactly as they were', ok: before === after, expected: 'unchanged', observed: before === after ? 'unchanged' : 'CHANGED' });
+  const leak = [join(repoRoot, 'docs', 'JADE_AND_EMBER_APPROVALS.md'), ...(exists(join(engDir, 'release', 'evidence')) ? listFiles(join(engDir, 'release', 'evidence')).filter((f) => f.endsWith('.json')).map((f) => join(engDir, 'release', 'evidence', f)) : []), join(engDir, 'search-crawler-verification.json'), join(engDir, 'external-links-verification.json'), join(engDir, 'findings.json'), join(engDir, 'release', 'reviewers.json'), join(engDir, 'release', 'demonstrations.json'), ...['approvals', 'deployments'].flatMap((fam) => (exists(join(engDir, 'release', fam)) ? listFiles(join(engDir, 'release', fam)).map((f) => join(engDir, 'release', fam, f)) : [])), ...(exists(join(engDir, '.reports', 'verify.json')) ? [join(engDir, '.reports', 'verify.json')] : [])].filter((f) => /Dry-run (Persona|Owner Persona|Rights Persona|Deployer Persona)|SYNTHETIC DRY-RUN FIXTURE|JE-901/.test(readFileSync(f, 'utf8')));
   if (leak.length) problems.push(`synthetic markers found in real records: ${leak.join(', ')}`);
   rows.push({ g: 'separation', t: 'no synthetic approval, persona or marker appears in any real record', ok: !leak.length, expected: 'none', observed: leak.length ? leak.join(', ') : 'none found' });
   const realEvidence = exists(join(engDir, 'release', 'evidence')) ? readdirSync(join(engDir, 'release', 'evidence')).filter((f) => f.endsWith('.json')) : [];
@@ -124,9 +134,14 @@ export async function checkReleaseDryRun({ report = null, fast = false } = {}) {
   for (const r of rows) { (byGroup[r.g] ||= { pass: 0, total: 0 }); byGroup[r.g].total++; if (r.ok) byGroup[r.g].pass++; }
   const total = rows.length, pass = rows.filter((r) => r.ok).length;
   notes.push(`dry run (synthetic, in a throwaway copy; real tool, parser, validator and git): ${pass}/${total} scenarios as expected — ${Object.entries(byGroup).map(([k, v]) => `${k} ${v.pass}/${v.total}`).join(', ')}`);
+  // every finding this work package closes has at least one BLOCKING scenario, and all of its scenarios behave
+  const RG = ['RG-01', 'RG-04', 'RG-05', 'RG-06', 'RG-07', 'RG-08', 'RG-09', 'RG-13'];
+  const byRg = Object.fromEntries(RG.map((id) => [id, rows.filter((r) => r.rg === id)]));
+  for (const id of RG) { const blocking = byRg[id].filter((r) => !r.allow); if (!blocking.length) problems.push(`finding ${id} has no blocking scenario in the dry run`); }
+  notes.push(`findings closed by blocking scenarios (blocking+must-stay-valid / all pass): ${RG.map((id) => `${id} ${byRg[id].filter((r) => !r.allow).length}+${byRg[id].filter((r) => r.allow).length} (${byRg[id].every((r) => r.ok) ? 'all as expected' : 'FAILING'})`).join(', ')}`);
   const open = probes.filter((p) => p.open);
-  notes.push(`measured gaps (not failures): ${probes.length} probes, ${open.length} let something through that should arguably be refused: ${open.map((p) => p.id).join(', ') || 'none'} (see engineering/RELEASE-DRYRUN-GATE5.md)`);
-  notes.push(`took ${Math.round((Date.now() - t0) / 1000)} s; the synthetic folder was deleted; the real ledger, evidence folder and tree are unchanged`);
+  notes.push(`measured gaps (not failures): ${probes.length} probes, ${open.length} let something through that should arguably be refused: ${open.map((p) => p.id).join(', ') || 'none'} (see engineering/RELEASE-DRYRUN-GATE5.md and G6-2-REPORT.md)`);
+  notes.push(`took ${Math.round((Date.now() - t0) / 1000)} s; the synthetic folders were deleted; the real ledger, records, reviewer table and tree are unchanged`);
   if (report) writeFileSync(report, JSON.stringify({ rows, probes, hosts: reservedHostCorpus() }, null, 2) + '\n');
   return { problems, notes, rows, probes };
 }

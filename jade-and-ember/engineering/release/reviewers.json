@@ -1,0 +1,6 @@
+{
+  "$comment": "Who may decide what (G6-2, APR-JE-039; G6-2-DESIGN.md section 5). EMPTY ON PURPOSE: no reviewer has been named by the owner, and this engineering must not invent a person. With an empty table no approval can be authorised, so no client-production release can pass the gate. When the owner names reviewers, a governance record in docs/JADE_AND_EMBER_APPROVALS.md must say so and 'establishedBy' must name it. This file is trust data kept in the repository: it proves who the records SAY made them, not who did (design section 12 lists the options that would prove it, which are the owner's decision).",
+  "schema": "jade-and-ember/reviewers@1",
+  "establishedBy": null,
+  "reviewers": []
+}

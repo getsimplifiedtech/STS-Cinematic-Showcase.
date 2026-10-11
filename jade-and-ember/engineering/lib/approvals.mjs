@@ -1,4 +1,4 @@
-// Reads the approval log (docs/JADE_AND_EMBER_APPROVALS.md, section A table) into records, and finds the release approvals the gate needs.
+// Reads the approval log (docs/JADE_AND_EMBER_APPROVALS.md, section A table): the governance record of the project (APR-JE-nnn). Release decisions are not kept here.
 import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { repoRoot } from './git.mjs';
@@ -16,21 +16,6 @@ export function parseApprovals(text) {
 }
 export const loadApprovals = (root = repoRoot) => parseApprovals(readFileSync(join(root, 'docs', 'JADE_AND_EMBER_APPROVALS.md'), 'utf8'));
 
-// An approval of a kind ("release-approval", "deployment-approval") for exactly this channel, version and commit.
-export function findApproval(rows, kind, { channel, version, commit }) {
-  return rows.find((r) => r.type.toLowerCase().includes(kind)
-    && new RegExp(`channel:\\s*\`?${channel}\`?`).test(r.decision)
-    && (kind === 'deployment-approval' || new RegExp(`version:\\s*\`?${version.replace(/[.+-]/g, '\\$&')}\`?(?![\\w.-])`).test(r.decision))
-    && new RegExp(`commit:\\s*\`?${commit}\`?`).test(r.decision)) || null;
-}
-export const findRightsVerification = (rows) => rows.find((r) => r.type.toLowerCase().includes('rights-verification') && /verified by/i.test(r.decision) && /sources?/i.test(r.decision) && /\d{4}-\d{2}-\d{2}/.test(r.decision)) || null;
-
-// The human search review (facts, structured data, crawler policy) for exactly the generated search artifacts: the Decision text names who
-// reviewed what and carries `digest: <sha256>` of sitemap.xml, robots.txt, llms.txt and the JSON-LD (npm run release:search-digest).
-export function findSearchReview(rows, digest) {
-  if (!digest) return null;
-  return rows.find((r) => r.type.toLowerCase().includes('search-review')
-    && /reviewed by/i.test(r.decision) && /\bfacts?\b/i.test(r.decision) && /structured data/i.test(r.decision) && /crawler/i.test(r.decision)
-    && /\d{4}-\d{2}-\d{2}/.test(r.decision)
-    && new RegExp(`digest:\\s*\`?${digest}\`?`).test(r.decision)) || null;
-}
+// RETIRED (G6-2, APR-JE-039): release approvals, rights verifications, search reviews and deployment approvals were found here by matching English keywords in a
+// Markdown row, so a row saying REJECTED, "NOT verified" or "(REVOKED)" still counted (RG-04 to RG-07), and they had to name the HEAD commit (RG-01). They are
+// structured records now (lib/records.mjs, engineering/release/approvals/) and these rows are not read by the gate. check:release reports any that remain.

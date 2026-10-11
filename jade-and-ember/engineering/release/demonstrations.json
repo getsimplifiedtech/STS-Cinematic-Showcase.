@@ -1,0 +1,12 @@
+{
+  "$comment": "The fictional demonstrations this repository may release on the demonstration channel (G6-2, APR-JE-039; G6-2-DESIGN.md section 9). A configuration with demo and noindex switched on is NOT a demonstration unless its configuration digest (the 'configuration' part of the candidate digest) is registered here; client-style content labelled as a demonstration is therefore refused (RG-13). Changing the demonstration's configuration changes the digest: register the new one deliberately, with its governance record. Registration is a statement of fact about a configuration the owner has called the fictional Jade & Ember demonstration; it approves nothing for release.",
+  "schema": "jade-and-ember/demonstrations@1",
+  "registered": [
+    {
+      "id": "DEMO-JE-001",
+      "configurationDigest": "6516c509bd7278d2e4309974d2c29233fca9ac7ac19d4c299575b26457d1bbdc",
+      "registeredBy": "APR-JE-039",
+      "description": "The fictional Jade & Ember modern Chinese kitchen demonstration (config/*.json as committed at G6-2): demo flag on, noindex on, no production domain."
+    }
+  ]
+}
