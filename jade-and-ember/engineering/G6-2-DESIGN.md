@@ -188,3 +188,24 @@ Written before the implementation and kept blocking in `check:release-dryrun` (t
 * **Package:** the delivered ZIP not matching the approved digest (even with a consistent manifest); embedded records altered, removed or for another digest; a revoked record embedded.
 * **Auditability:** each family is audited on its own; a deployment authorisation does not unblock a release without its approval; a release approval does not imply deployment.
 * **Unchanged:** the 112 scenarios of Phase 7 are ported to the new records (their defects are still injected, their expectations still blocking) and the deployment-safety and separation rows stay.
+
+## 15. Amendments after the independent adversarial review
+
+An independent reviewer (read-only, experiments in a scratch copy) attacked the first G6-2 implementation. It found real gaps, all fixed in the same gate; each has a blocking scenario in `check:release-dryrun` or a test in `check:selftest-gate6`:
+
+| Review finding | What was wrong | What changed |
+|---|---|---|
+| F1 | `serve.py` and `START-HERE.txt` shipped in the ZIP but were outside the digest and unchecked: a recipient who runs `python3 serve.py` could be handed a changed file | the candidate has a `packageExtras` part (hash of `serve.py`, hash of the START-HERE template); the package verifier regenerates `START-HERE.txt` byte for byte |
+| F2 | the ZIP reader accepted containers that other extractors read differently (repeated names, hidden entries, comments, trailing bytes, a local name that differs, special attributes, a bomb) | `lib/zip.mjs` reads only what the writer writes: entries tile the file exactly, one name each (case-folded), local header equals central entry, plain files, bounded inflate, plain names |
+| F3 | a record in the wrong folder, with another extension, in a sub-folder, a symlink, ignored by git or with a repeated JSON key was silently not read, so a rejection could be hidden | a record folder holds README.md and `<PREFIX>-JE-nnn.json` (named for its id, of that family, a regular file, committed, duplicate keys refused); any other entry is an error that blocks. The evidence folder is strict the same way |
+| F4 | the package verifier took the gate's requirement list, the production host, the policy and the verification detail from the manifest | it requires every requirement of the policy to be listed and met, derives the host from the delivered pages, validates the verification record in full, compares policy, evidence specification, security policy, reviewer table and registry with the checkout, and turns a header error into a failed check |
+| F5 | the demonstration registry binds the configuration only | the verifier (and the dry run) check every demonstration page for noindex and for no production host; the residual (content that is not the fictional demonstration but passes those tests) is stated in the report |
+| F6 | the engine digest ignored code the checks import | it now covers `src/lib`, `tests`, `tools`, `build.mjs`, `serve.py`, `package.json` and the CI workflow, and excludes by exact path |
+| F7 | evidence had no negative meaning: a failed test beside a passing one was ignored, garbage never blocked, a CI run of any repository counted | a recorded failure for the candidate stands; an unreadable entry blocks; the CI URL must be this repository's (`ciRepository` in the evidence specification) |
+| F8 | a veto could be lifted by anyone who could revoke; fractional seconds and impossible dates; array values | lifting a rejection needs the power to reject; stamps are strict to the second and compared as instants; strings are checked as strings; file name equals id (ids are unique) |
+| F9 | ledger rows in code fences or comments counted | they do not |
+| F10 | the verification record accepted extra fields | it is a closed schema |
+| F11 | partial reserved-host list | `lib/hosts.mjs` adds provider preview domains and staging words in sub-domain labels, inside the engineering scope (`src/lib/seo.mjs` is unchanged) |
+| F12 | package name from `VERSION.json` used raw | it must be a plain file name |
+
+**Accepted residuals, stated honestly:** a CI record's seal and a verification record's seal cannot be checked against anything outside the repository (authenticity, RG-14); `decidedAt` is self-asserted, so a reviewer's validity window cannot be enforced against backdating; a rejection recorded with a wrong candidate is history, not an error (a revocation is cross-checked, a rejection cannot be); a governance approval in the Markdown ledger has no status (only presence, now outside code fences and comments); the package verifier does not re-check the commit ancestry of evidence records because it has no repository; the demonstration registry binds the configuration, so only the page checks above separate the fictional demonstration from other noindex content.

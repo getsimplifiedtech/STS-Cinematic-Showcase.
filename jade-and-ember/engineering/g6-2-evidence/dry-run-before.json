@@ -1,0 +1,1027 @@
+{
+  "rows": [
+    {
+      "g": "success path",
+      "t": "a fully approved synthetic client-production build passes the real gate",
+      "ok": true,
+      "expected": "ALLOWED",
+      "observed": "ALLOWED (16 requirements)"
+    },
+    {
+      "g": "approvals",
+      "t": "no release approval",
+      "ok": true,
+      "expected": "BLOCKED by releaseApproval",
+      "observed": "BLOCKED by releaseApproval"
+    },
+    {
+      "g": "approvals",
+      "t": "a release approval naming another commit",
+      "ok": true,
+      "expected": "BLOCKED by releaseApproval",
+      "observed": "BLOCKED by releaseApproval"
+    },
+    {
+      "g": "approvals",
+      "t": "a release approval naming a shortened commit (7 hex)",
+      "ok": true,
+      "expected": "BLOCKED by releaseApproval",
+      "observed": "BLOCKED by releaseApproval"
+    },
+    {
+      "g": "approvals",
+      "t": "a release approval for another version",
+      "ok": true,
+      "expected": "BLOCKED by releaseApproval",
+      "observed": "BLOCKED by releaseApproval"
+    },
+    {
+      "g": "approvals",
+      "t": "a release approval for the demonstration channel",
+      "ok": true,
+      "expected": "BLOCKED by releaseApproval",
+      "observed": "BLOCKED by releaseApproval"
+    },
+    {
+      "g": "approvals",
+      "t": "a release approval row with a cell missing (5 cells)",
+      "ok": true,
+      "expected": "BLOCKED by releaseApproval",
+      "observed": "BLOCKED by releaseApproval"
+    },
+    {
+      "g": "approvals",
+      "t": "no rights verification",
+      "ok": true,
+      "expected": "BLOCKED by rightsVerification",
+      "observed": "BLOCKED by rightsVerification"
+    },
+    {
+      "g": "approvals",
+      "t": "a rights verification that names no source",
+      "ok": true,
+      "expected": "BLOCKED by rightsVerification",
+      "observed": "BLOCKED by rightsVerification"
+    },
+    {
+      "g": "approvals",
+      "t": "a rights verification with no date",
+      "ok": true,
+      "expected": "BLOCKED by rightsVerification",
+      "observed": "BLOCKED by rightsVerification"
+    },
+    {
+      "g": "approvals",
+      "t": "a required gate approval (APR-JE-017) missing from the log",
+      "ok": true,
+      "expected": "BLOCKED by requiredApprovalsPresent",
+      "observed": "BLOCKED by requiredApprovalsPresent"
+    },
+    {
+      "g": "approvals",
+      "t": "no search review",
+      "ok": true,
+      "expected": "BLOCKED by searchReadiness",
+      "observed": "BLOCKED by searchReadiness"
+    },
+    {
+      "g": "approvals",
+      "t": "a search review for other search artifacts (digest altered)",
+      "ok": true,
+      "expected": "BLOCKED by searchReadiness",
+      "observed": "BLOCKED by searchReadiness"
+    },
+    {
+      "g": "approvals",
+      "t": "a search review with no reviewer",
+      "ok": true,
+      "expected": "BLOCKED by searchReadiness",
+      "observed": "BLOCKED by searchReadiness"
+    },
+    {
+      "g": "approvals",
+      "t": "a search review that does not name the crawler policy",
+      "ok": true,
+      "expected": "BLOCKED by searchReadiness",
+      "observed": "BLOCKED by searchReadiness"
+    },
+    {
+      "g": "approvals",
+      "t": "a search review that does not name the structured data",
+      "ok": true,
+      "expected": "BLOCKED by searchReadiness",
+      "observed": "BLOCKED by searchReadiness"
+    },
+    {
+      "g": "verification",
+      "t": "no verification report",
+      "ok": true,
+      "expected": "BLOCKED by verifyPassed",
+      "observed": "BLOCKED by verifyPassed"
+    },
+    {
+      "g": "verification",
+      "t": "a fast (partial) verification",
+      "ok": true,
+      "expected": "BLOCKED by verifyPassed",
+      "observed": "BLOCKED by verifyPassed"
+    },
+    {
+      "g": "verification",
+      "t": "a failed verification",
+      "ok": true,
+      "expected": "BLOCKED by verifyPassed",
+      "observed": "BLOCKED by verifyPassed"
+    },
+    {
+      "g": "verification",
+      "t": "a verification of another commit",
+      "ok": true,
+      "expected": "BLOCKED by verifyPassed",
+      "observed": "BLOCKED by verifyPassed"
+    },
+    {
+      "g": "verification",
+      "t": "a verification of different bytes (assets tree differs)",
+      "ok": true,
+      "expected": "BLOCKED by verifyPassed",
+      "observed": "BLOCKED by verifyPassed"
+    },
+    {
+      "g": "verification",
+      "t": "a verification run on a dirty tree",
+      "ok": true,
+      "expected": "BLOCKED by verifyPassed",
+      "observed": "BLOCKED by verifyPassed"
+    },
+    {
+      "g": "verification",
+      "t": "a corrupt verification report (not JSON)",
+      "ok": true,
+      "expected": "the tool stops and nothing is allowed",
+      "observed": "tool error, exit 2: SyntaxError: Expected property name or '}' in JSON at position 1 (line 1 column 2)"
+    },
+    {
+      "g": "tree",
+      "t": "an untracked file in the working tree",
+      "ok": true,
+      "expected": "BLOCKED by cleanTree",
+      "observed": "BLOCKED by cleanTree"
+    },
+    {
+      "g": "tree",
+      "t": "an uncommitted edit to a delivered file after testing",
+      "ok": true,
+      "expected": "BLOCKED by cleanTree, verifyPassed, evidence:real-device, evidence:screen-reader, evidence:browser-matrix",
+      "observed": "BLOCKED by cleanTree, verifyPassed, evidence:real-device, evidence:screen-reader, evidence:browser-matrix"
+    },
+    {
+      "g": "tree",
+      "t": "a committed edit to a delivered file after sign-off (nothing re-recorded)",
+      "ok": true,
+      "expected": "BLOCKED by verifyPassed, releaseApproval, evidence:real-device, evidence:screen-reader, evidence:browser-matrix, evidence:ci-run",
+      "observed": "BLOCKED by verifyPassed, releaseApproval, evidence:real-device, evidence:screen-reader, evidence:browser-matrix, evidence:ci-run"
+    },
+    {
+      "g": "configuration",
+      "t": "an open Blocker finding",
+      "ok": true,
+      "expected": "BLOCKED by noBlockingFindings",
+      "observed": "BLOCKED by noBlockingFindings"
+    },
+    {
+      "g": "configuration",
+      "t": "an open Major finding",
+      "ok": true,
+      "expected": "BLOCKED by noBlockingFindings",
+      "observed": "BLOCKED by noBlockingFindings"
+    },
+    {
+      "g": "configuration",
+      "t": "a finding with an unknown severity",
+      "ok": true,
+      "expected": "BLOCKED by noBlockingFindings",
+      "observed": "BLOCKED by noBlockingFindings"
+    },
+    {
+      "g": "configuration",
+      "t": "a pre-release version (1.0.0-rc.1)",
+      "ok": true,
+      "expected": "BLOCKED by stableVersion",
+      "observed": "BLOCKED by stableVersion"
+    },
+    {
+      "g": "configuration",
+      "t": "VERSION.json and package.json disagree",
+      "ok": true,
+      "expected": "BLOCKED by versionConsistent",
+      "observed": "BLOCKED by versionConsistent"
+    },
+    {
+      "g": "configuration",
+      "t": "a client configuration labelled as a demonstration",
+      "ok": true,
+      "expected": "BLOCKED by versionConsistent, labelMatchesConfiguration",
+      "observed": "BLOCKED by versionConsistent, labelMatchesConfiguration"
+    },
+    {
+      "g": "configuration",
+      "t": "the demonstration flag left on in an indexable build (the build itself refuses)",
+      "ok": true,
+      "expected": "the tool stops and nothing is allowed",
+      "observed": "tool error, exit 1: file:///tmp/je-dryrun-JiMRxJ/jade-and-ember/engineering/lib/site.mjs:17"
+    },
+    {
+      "g": "configuration",
+      "t": "indexing switched off but structured data left on (the build itself refuses)",
+      "ok": true,
+      "expected": "the tool stops and nothing is allowed",
+      "observed": "tool error, exit 1: file:///tmp/je-dryrun-JiMRxJ/jade-and-ember/engineering/lib/site.mjs:17"
+    },
+    {
+      "g": "configuration",
+      "t": "indexing switched off (noindex true, no structured data)",
+      "ok": true,
+      "expected": "BLOCKED by productionSeoComplete, searchReadiness",
+      "observed": "BLOCKED by productionSeoComplete, searchReadiness"
+    },
+    {
+      "g": "configuration",
+      "t": "structured data switched off",
+      "ok": true,
+      "expected": "BLOCKED by productionSeoComplete (may also: searchReadiness)",
+      "observed": "BLOCKED by productionSeoComplete"
+    },
+    {
+      "g": "configuration",
+      "t": "a staging domain (pages.dev)",
+      "ok": true,
+      "expected": "BLOCKED by productionDomain",
+      "observed": "BLOCKED by productionDomain"
+    },
+    {
+      "g": "configuration",
+      "t": "a reserved example domain (.test)",
+      "ok": true,
+      "expected": "BLOCKED by productionDomain",
+      "observed": "BLOCKED by productionDomain"
+    },
+    {
+      "g": "configuration",
+      "t": "a staging label in the host name (staging.)",
+      "ok": true,
+      "expected": "BLOCKED by productionDomain",
+      "observed": "BLOCKED by productionDomain"
+    },
+    {
+      "g": "configuration",
+      "t": "a local address (https://localhost): the build refuses, or the gate does",
+      "ok": true,
+      "expected": "the tool stops and nothing is allowed",
+      "observed": "tool error, exit 1: file:///tmp/je-dryrun-JiMRxJ/jade-and-ember/engineering/lib/site.mjs:17"
+    },
+    {
+      "g": "configuration",
+      "t": "an IP address (https://192.0.2.10): the build refuses, or the gate does",
+      "ok": true,
+      "expected": "BLOCKED by productionDomain",
+      "observed": "BLOCKED by productionDomain"
+    },
+    {
+      "g": "configuration",
+      "t": "the demonstration copy (sample address, phone, \"fictional\" wording) put back into an indexable build (the build itself refuses)",
+      "ok": true,
+      "expected": "the tool stops and nothing is allowed",
+      "observed": "tool error, exit 1: file:///tmp/je-dryrun-JiMRxJ/jade-and-ember/engineering/lib/site.mjs:17"
+    },
+    {
+      "g": "configuration",
+      "t": "no hosting target declared (seo.host)",
+      "ok": true,
+      "expected": "BLOCKED by searchReadiness",
+      "observed": "BLOCKED by searchReadiness"
+    },
+    {
+      "g": "configuration",
+      "t": "a crawler policy never decided (seo.crawlers)",
+      "ok": true,
+      "expected": "BLOCKED by searchReadiness",
+      "observed": "BLOCKED by searchReadiness"
+    },
+    {
+      "g": "configuration",
+      "t": "a crawler policy missing the AI-search decision",
+      "ok": true,
+      "expected": "BLOCKED by searchReadiness",
+      "observed": "BLOCKED by searchReadiness"
+    },
+    {
+      "g": "configuration",
+      "t": "crawler identities no person has re-read (confirmedByPerson false)",
+      "ok": true,
+      "expected": "BLOCKED by searchReadiness",
+      "observed": "BLOCKED by searchReadiness"
+    },
+    {
+      "g": "configuration",
+      "t": "a crawler review older than its age limit",
+      "ok": true,
+      "expected": "BLOCKED by searchReadiness",
+      "observed": "BLOCKED by searchReadiness"
+    },
+    {
+      "g": "configuration",
+      "t": "the crawler verification record deleted",
+      "ok": true,
+      "expected": "the tool stops and nothing is allowed",
+      "observed": "tool error, exit 2: Error: ENOENT: no such file or directory, open '/tmp/je-dryrun-JiMRxJ/jade-and-ember/engin"
+    },
+    {
+      "g": "configuration",
+      "t": "a configuration that does not build",
+      "ok": true,
+      "expected": "the tool stops and nothing is allowed",
+      "observed": "tool error, exit 1: file:///tmp/je-dryrun-JiMRxJ/jade-and-ember/engineering/lib/site.mjs:17"
+    },
+    {
+      "g": "evidence",
+      "t": "no iphone-safari record",
+      "ok": true,
+      "expected": "BLOCKED by evidence:real-device",
+      "observed": "BLOCKED by evidence:real-device"
+    },
+    {
+      "g": "evidence",
+      "t": "no android-chrome record",
+      "ok": true,
+      "expected": "BLOCKED by evidence:real-device",
+      "observed": "BLOCKED by evidence:real-device"
+    },
+    {
+      "g": "evidence",
+      "t": "no sr-nvda-firefox record",
+      "ok": true,
+      "expected": "BLOCKED by evidence:screen-reader",
+      "observed": "BLOCKED by evidence:screen-reader"
+    },
+    {
+      "g": "evidence",
+      "t": "no sr-voiceover-macos-safari record",
+      "ok": true,
+      "expected": "BLOCKED by evidence:screen-reader",
+      "observed": "BLOCKED by evidence:screen-reader"
+    },
+    {
+      "g": "evidence",
+      "t": "no sr-talkback-android-chrome record",
+      "ok": true,
+      "expected": "BLOCKED by evidence:screen-reader",
+      "observed": "BLOCKED by evidence:screen-reader"
+    },
+    {
+      "g": "evidence",
+      "t": "no desktop-chrome record",
+      "ok": true,
+      "expected": "BLOCKED by evidence:browser-matrix",
+      "observed": "BLOCKED by evidence:browser-matrix"
+    },
+    {
+      "g": "evidence",
+      "t": "no desktop-firefox record",
+      "ok": true,
+      "expected": "BLOCKED by evidence:browser-matrix",
+      "observed": "BLOCKED by evidence:browser-matrix"
+    },
+    {
+      "g": "evidence",
+      "t": "no desktop-safari record",
+      "ok": true,
+      "expected": "BLOCKED by evidence:browser-matrix",
+      "observed": "BLOCKED by evidence:browser-matrix"
+    },
+    {
+      "g": "evidence",
+      "t": "no ci-run record",
+      "ok": true,
+      "expected": "BLOCKED by evidence:ci-run",
+      "observed": "BLOCKED by evidence:ci-run"
+    },
+    {
+      "g": "evidence",
+      "t": "emulation offered as a physical device (E1 claimed as E3)",
+      "ok": true,
+      "expected": "BLOCKED by evidence:real-device",
+      "observed": "BLOCKED by evidence:real-device"
+    },
+    {
+      "g": "evidence",
+      "t": "a desktop record offered as a physical device (E2 claimed as E3)",
+      "ok": true,
+      "expected": "BLOCKED by evidence:real-device",
+      "observed": "BLOCKED by evidence:real-device"
+    },
+    {
+      "g": "evidence",
+      "t": "a physical-device record for different bytes (assets tree differs)",
+      "ok": true,
+      "expected": "BLOCKED by evidence:real-device",
+      "observed": "BLOCKED by evidence:real-device"
+    },
+    {
+      "g": "evidence",
+      "t": "a record for a commit that does not exist",
+      "ok": true,
+      "expected": "BLOCKED by evidence:real-device",
+      "observed": "BLOCKED by evidence:real-device"
+    },
+    {
+      "g": "evidence",
+      "t": "an unfilled template",
+      "ok": true,
+      "expected": "BLOCKED by evidence:browser-matrix",
+      "observed": "BLOCKED by evidence:browser-matrix"
+    },
+    {
+      "g": "evidence",
+      "t": "an incomplete record (a result left empty)",
+      "ok": true,
+      "expected": "BLOCKED by evidence:screen-reader",
+      "observed": "BLOCKED by evidence:screen-reader"
+    },
+    {
+      "g": "evidence",
+      "t": "a record signed by no one",
+      "ok": true,
+      "expected": "BLOCKED by evidence:screen-reader",
+      "observed": "BLOCKED by evidence:screen-reader"
+    },
+    {
+      "g": "evidence",
+      "t": "a tester that is a tool (Playwright Bot)",
+      "ok": true,
+      "expected": "BLOCKED by evidence:browser-matrix",
+      "observed": "BLOCKED by evidence:browser-matrix"
+    },
+    {
+      "g": "evidence",
+      "t": "a record dated in the future",
+      "ok": true,
+      "expected": "BLOCKED by evidence:browser-matrix",
+      "observed": "BLOCKED by evidence:browser-matrix"
+    },
+    {
+      "g": "evidence",
+      "t": "a real-device record whose test failed",
+      "ok": true,
+      "expected": "BLOCKED by evidence:real-device",
+      "observed": "BLOCKED by evidence:real-device"
+    },
+    {
+      "g": "evidence",
+      "t": "an attachment that is not on disk",
+      "ok": true,
+      "expected": "BLOCKED by evidence:real-device",
+      "observed": "BLOCKED by evidence:real-device"
+    },
+    {
+      "g": "evidence",
+      "t": "an attachment whose bytes changed after it was hashed",
+      "ok": true,
+      "expected": "BLOCKED by evidence:real-device",
+      "observed": "BLOCKED by evidence:real-device"
+    },
+    {
+      "g": "evidence",
+      "t": "one attachment reused by two records",
+      "ok": true,
+      "expected": "BLOCKED by evidence:real-device",
+      "observed": "BLOCKED by evidence:real-device"
+    },
+    {
+      "g": "evidence",
+      "t": "a record file that is not valid JSON",
+      "ok": true,
+      "expected": "BLOCKED by evidence:browser-matrix",
+      "observed": "BLOCKED by evidence:browser-matrix"
+    },
+    {
+      "g": "evidence",
+      "t": "a CI record for another commit (the parent)",
+      "ok": true,
+      "expected": "BLOCKED by evidence:ci-run",
+      "observed": "BLOCKED by evidence:ci-run"
+    },
+    {
+      "g": "evidence",
+      "t": "a CI record whose run did not succeed",
+      "ok": true,
+      "expected": "BLOCKED by evidence:ci-run",
+      "observed": "BLOCKED by evidence:ci-run"
+    },
+    {
+      "g": "evidence",
+      "t": "a CI record with no GitHub run URL",
+      "ok": true,
+      "expected": "BLOCKED by evidence:ci-run",
+      "observed": "BLOCKED by evidence:ci-run"
+    },
+    {
+      "g": "environment",
+      "t": "gate --channel demonstration on a client-production configuration is refused",
+      "ok": true,
+      "detail": "exit 1: REFUSED: this build is a client-production build (configuration: demo false, noindex false); it cannot be released as \"demonstration\".",
+      "expected": "as stated",
+      "observed": "exit 1: REFUSED: this build is a client-production build (configuration: demo false, noindex false); it cannot be released as \"demonstration\"."
+    },
+    {
+      "g": "environment",
+      "t": "prepare --channel demonstration on a client-production configuration is refused",
+      "ok": true,
+      "detail": "exit 1: REFUSED: this build is a client-production build (configuration: demo false, noindex false); it cannot be released as \"demonstration\".",
+      "expected": "as stated",
+      "observed": "exit 1: REFUSED: this build is a client-production build (configuration: demo false, noindex false); it cannot be released as \"demonstration\"."
+    },
+    {
+      "g": "environment",
+      "t": "manifest --channel demonstration on a client-production configuration is refused",
+      "ok": true,
+      "detail": "exit 1: REFUSED: this build is a client-production build (configuration: demo false, noindex false); it cannot be released as \"demonstration\".",
+      "expected": "as stated",
+      "observed": "exit 1: REFUSED: this build is a client-production build (configuration: demo false, noindex false); it cannot be released as \"demonstration\"."
+    },
+    {
+      "g": "environment",
+      "t": "an unknown command exits 2 and does nothing",
+      "ok": true,
+      "detail": "exit 2",
+      "expected": "as stated",
+      "observed": "exit 2"
+    },
+    {
+      "g": "environment",
+      "t": "a deployment approval for the exact commit is reported, and the tool still only prints",
+      "ok": true,
+      "detail": "allowed true, deployment approved true",
+      "expected": "as stated",
+      "observed": "allowed true, deployment approved true"
+    },
+    {
+      "g": "environment",
+      "t": "a deployment approval does not unblock a build that is missing its release approval",
+      "ok": true,
+      "detail": "failing releaseApproval; deployment approved true",
+      "expected": "as stated",
+      "observed": "failing releaseApproval; deployment approved true"
+    },
+    {
+      "g": "environment",
+      "t": "prepare on a blocked build exits 1, says NOT PREPARED and writes no release folder",
+      "ok": true,
+      "detail": "exit 1; release folder exists: false",
+      "expected": "as stated",
+      "observed": "exit 1; release folder exists: false"
+    },
+    {
+      "g": "ledger",
+      "t": "the approval and the CI record committed to the repository (the documented flow): the gate can never pass",
+      "ok": true,
+      "expected": "RECORDED: BLOCKED by releaseApproval and evidence:ci-run",
+      "observed": "BLOCKED by releaseApproval, evidence:ci-run",
+      "finding": "RG-01",
+      "detail": "releaseApproval: no release-approval record for channel client-production, version 1.0.0, commit d71267c | evidence:ci-run: missing E1 evidence for a successful CI run for the release commit (valid, successful records in engineering/release/evidence/: 0)"
+    },
+    {
+      "g": "package",
+      "t": "prepare on the fully green synthetic build writes a package that verifies",
+      "ok": true,
+      "detail": "ok files, ok checksums, ok manifest, ok package-binding, ok gate-recorded, ok approvals-recorded, ok package-name, ok zip-contents, ok asset-tree, ok search-digest, ok security, ok channel-text",
+      "expected": "as stated",
+      "observed": "ok files, ok checksums, ok manifest, ok package-binding, ok gate-recorded, ok approvals-recorded, ok package-name, ok zip-contents, ok asset-tree, ok search-digest, ok security, ok channel-text"
+    },
+    {
+      "g": "package",
+      "t": "preparing the same commit twice gives byte-identical files (reproducible)",
+      "ok": true,
+      "detail": "6 files compared",
+      "expected": "as stated",
+      "observed": "6 files compared"
+    },
+    {
+      "g": "package",
+      "t": "one byte of the ZIP flipped",
+      "ok": true,
+      "detail": "failing: checksums, package-binding, zip — hash mismatch: jade-and-ember-1.0.0-site.zip",
+      "expected": "as stated",
+      "observed": "failing: checksums, package-binding, zip — hash mismatch: jade-and-ember-1.0.0-site.zip"
+    },
+    {
+      "g": "package",
+      "t": "the manifest edited (version changed)",
+      "ok": true,
+      "detail": "failing: checksums, package-name — hash mismatch: release-manifest.json",
+      "expected": "as stated",
+      "observed": "failing: checksums, package-name — hash mismatch: release-manifest.json"
+    },
+    {
+      "g": "package",
+      "t": "a line deleted from SHA256SUMS.txt",
+      "ok": true,
+      "detail": "failing: checksums — SHA256SUMS.txt lists release-manifest.json; expected jade-and-ember-1.0.0-site.zip, release-manifest.json",
+      "expected": "as stated",
+      "observed": "failing: checksums — SHA256SUMS.txt lists release-manifest.json; expected jade-and-ember-1.0.0-site.zip, release-manifest.json"
+    },
+    {
+      "g": "package",
+      "t": "SHA256SUMS.txt lists an extra file",
+      "ok": true,
+      "detail": "failing: checksums — SHA256SUMS.txt lists extra.bin, jade-and-ember-1.0.0-site.zip, release-manifest.json; expected jade-and-ember-",
+      "expected": "as stated",
+      "observed": "failing: checksums — SHA256SUMS.txt lists extra.bin, jade-and-ember-1.0.0-site.zip, release-manifest.json; expected jade-and-ember-"
+    },
+    {
+      "g": "package",
+      "t": "host/_headers weakened (the CSP removed) — not covered by SHA256SUMS",
+      "ok": true,
+      "detail": "failing: security — host/_headers differs from what the delivered pages require",
+      "expected": "as stated",
+      "observed": "failing: security — host/_headers differs from what the delivered pages require"
+    },
+    {
+      "g": "package",
+      "t": "host/nginx.conf edited",
+      "ok": true,
+      "detail": "failing: security — host/nginx.conf differs from what the delivered pages require",
+      "expected": "as stated",
+      "observed": "failing: security — host/nginx.conf differs from what the delivered pages require"
+    },
+    {
+      "g": "package",
+      "t": "a host file missing",
+      "ok": true,
+      "detail": "failing: files — missing host/htaccess",
+      "expected": "as stated",
+      "observed": "failing: files — missing host/htaccess"
+    },
+    {
+      "g": "package",
+      "t": "the ZIP replaced by another valid ZIP, checksums updated, manifest not",
+      "ok": true,
+      "detail": "failing: package-binding, zip-contents, asset-tree — manifest says 1904808 bytes, the ZIP has 130",
+      "expected": "as stated",
+      "observed": "failing: package-binding, zip-contents, asset-tree — manifest says 1904808 bytes, the ZIP has 130"
+    },
+    {
+      "g": "package",
+      "t": "the manifest says the gate BLOCKED this build",
+      "ok": true,
+      "detail": "failing: gate-recorded — the manifest records a BLOCKED gate",
+      "expected": "as stated",
+      "observed": "failing: gate-recorded — the manifest records a BLOCKED gate"
+    },
+    {
+      "g": "package",
+      "t": "the manifest records a dirty source tree",
+      "ok": true,
+      "detail": "failing: gate-recorded — built from a dirty tree",
+      "expected": "as stated",
+      "observed": "failing: gate-recorded — built from a dirty tree"
+    },
+    {
+      "g": "package",
+      "t": "a script added to the ZIP; manifest package hash and checksums updated (asset tree not)",
+      "ok": true,
+      "detail": "failing: asset-tree — the delivered files hash to a different tree than the manifest records (the ZIP is not what was verified)",
+      "expected": "as stated",
+      "observed": "failing: asset-tree — the delivered files hash to a different tree than the manifest records (the ZIP is not what was verified)"
+    },
+    {
+      "g": "package",
+      "t": "a file that does not belong in a delivered site (config/client.json) added",
+      "ok": true,
+      "detail": "failing: zip-contents — files that do not belong in a delivered site: config/client.json",
+      "expected": "as stated",
+      "observed": "failing: zip-contents — files that do not belong in a delivered site: config/client.json"
+    },
+    {
+      "g": "package",
+      "t": "a ZIP entry that escapes the folder (../evil)",
+      "ok": true,
+      "detail": "failing: zip — unsafe path in ZIP: ../evil",
+      "expected": "as stated",
+      "observed": "failing: zip — unsafe path in ZIP: ../evil"
+    },
+    {
+      "g": "package",
+      "t": "PROBE: a delivered file changed AND the manifest, package hash and checksums rewritten to match",
+      "ok": true,
+      "detail": "verifies: the checks prove consistency, not authorship (no signature, no independent copy of the hashes)",
+      "probe": true,
+      "finding": "RG-14",
+      "observed": "passes",
+      "expected": "recorded"
+    },
+    {
+      "g": "deployment",
+      "t": "the workflow is triggered only by push, pull_request and workflow_dispatch",
+      "ok": true,
+      "detail": "push, pull_request, workflow_dispatch",
+      "expected": "holds",
+      "observed": "push, pull_request, workflow_dispatch"
+    },
+    {
+      "g": "deployment",
+      "t": "workflow permissions are read-only (contents: read) at the top and on every job",
+      "ok": true,
+      "detail": "{\"contents\":\"read\"}",
+      "expected": "holds",
+      "observed": "{\"contents\":\"read\"}"
+    },
+    {
+      "g": "deployment",
+      "t": "no job uses an environment, a deployment, a secret or a token",
+      "ok": true,
+      "detail": "no environment:, no secrets., no GITHUB_TOKEN, no id-token",
+      "expected": "holds",
+      "observed": "no environment:, no secrets., no GITHUB_TOKEN, no id-token"
+    },
+    {
+      "g": "deployment",
+      "t": "the only actions are actions/checkout and actions/setup-node, each pinned to a commit",
+      "ok": true,
+      "detail": "actions/checkout, actions/setup-node",
+      "expected": "holds",
+      "observed": "actions/checkout, actions/setup-node"
+    },
+    {
+      "g": "deployment",
+      "t": "no step runs a deploy, publish, push or upload command",
+      "ok": true,
+      "detail": "scanned every run: block and every uses: line",
+      "expected": "holds",
+      "observed": "scanned every run: block and every uses: line"
+    },
+    {
+      "g": "deployment",
+      "t": "no engineering tool or library starts a deploy, upload or network client program",
+      "ok": true,
+      "detail": "90 files scanned",
+      "expected": "holds",
+      "observed": "90 files scanned"
+    },
+    {
+      "g": "deployment",
+      "t": "no engineering code sends a POST, PUT, PATCH or DELETE request",
+      "ok": true,
+      "detail": "none found",
+      "expected": "holds",
+      "observed": "none found"
+    },
+    {
+      "g": "deployment",
+      "t": "code that can open a network connection is only the external-link verifier, the local server and the search probes",
+      "ok": true,
+      "detail": "lib/external.mjs, lib/search.mjs, lib/server.mjs",
+      "expected": "holds",
+      "observed": "lib/external.mjs, lib/search.mjs, lib/server.mjs"
+    },
+    {
+      "g": "deployment",
+      "t": "deploymentApproved is only produced by the gate and printed or recorded, never acted on",
+      "ok": true,
+      "detail": "checks/release.mjs, lib/release.mjs, tools/release.mjs",
+      "expected": "holds",
+      "observed": "checks/release.mjs, lib/release.mjs, tools/release.mjs"
+    },
+    {
+      "g": "deployment",
+      "t": "the policy states that no channel deploys and nothing acts on a deployment approval",
+      "ok": true,
+      "detail": "allows: demonstration: preview-package/host-files; client-production: site-package/host-files",
+      "expected": "holds",
+      "observed": "allows: demonstration: preview-package/host-files; client-production: site-package/host-files"
+    },
+    {
+      "g": "separation",
+      "t": "the real approvals log, evidence folder, working tree and release folder are exactly as they were",
+      "ok": true,
+      "expected": "unchanged",
+      "observed": "unchanged"
+    },
+    {
+      "g": "separation",
+      "t": "no synthetic approval, persona or marker appears in any real record",
+      "ok": true,
+      "expected": "none",
+      "observed": "none found"
+    },
+    {
+      "g": "separation",
+      "t": "the real evidence folder holds no records (no physical, screen-reader or browser testing has been recorded)",
+      "ok": true,
+      "expected": "recorded",
+      "observed": "0 record(s) in engineering/release/evidence/",
+      "info": true
+    }
+  ],
+  "probes": [
+    {
+      "id": "RG-02",
+      "t": "no external-link verification of any kind (registry and record deleted)",
+      "expectation": "blocked once D-P5-1 is implemented",
+      "observed": "ALLOWED",
+      "open": true
+    },
+    {
+      "id": "RG-03",
+      "t": "a rights-verification row while the media inventory lists no asset as verified",
+      "expectation": "blocked once D-P5-4 binds the row to the inventory",
+      "observed": "ALLOWED",
+      "open": true,
+      "detail": "inventory: 12 assets (8 unverified, 4 licence-text-shipped); the row names no asset and no digest"
+    },
+    {
+      "id": "RG-04",
+      "t": "a release approval row that says the release was REJECTED (it still carries channel, version and commit)",
+      "expectation": "blocked: a rejection is not an approval",
+      "observed": "ALLOWED",
+      "open": true
+    },
+    {
+      "id": "RG-05",
+      "t": "a rights-verification row that says \"NOT verified by\"",
+      "expectation": "blocked: a negative is not a verification",
+      "observed": "ALLOWED",
+      "open": true
+    },
+    {
+      "id": "RG-06",
+      "t": "a release-approval row whose Type column says \"release-approval (REVOKED)\"",
+      "expectation": "blocked: a revoked approval is not an approval",
+      "observed": "ALLOWED",
+      "open": true
+    },
+    {
+      "id": "RG-07",
+      "t": "a search-review row that says \"NOT reviewed by\"",
+      "expectation": "blocked: a negative is not a review",
+      "observed": "ALLOWED",
+      "open": true
+    },
+    {
+      "id": "RG-08",
+      "t": "a verification report with no check results at all (hand-written)",
+      "expectation": "blocked: a report no tool wrote",
+      "observed": "ALLOWED",
+      "open": true
+    },
+    {
+      "id": "RG-09",
+      "t": "the recorded asset manifest left from another build (assets.manifest.json stale)",
+      "expectation": "blocked, or at least refused when the package is verified",
+      "observed": "ALLOWED; prepare exit 0; package verification FAILS (asset-tree)",
+      "open": true
+    },
+    {
+      "id": "RG-10",
+      "t": "a dependency advisory that no one has accepted (the gate relies on a full verification report existing)",
+      "expectation": "blocked by a security requirement",
+      "observed": "ALLOWED",
+      "open": true,
+      "detail": "the accepted-advisory list was emptied; the gate does not look at it"
+    },
+    {
+      "id": "RG-11",
+      "t": "no SBOM, no provenance check, no pinned-action or Node-runtime check",
+      "expectation": "blocked once D-P6-5 and D-P6-2 are implemented",
+      "observed": "ALLOWED",
+      "open": true,
+      "detail": "no such requirement exists in release/policy.json"
+    },
+    {
+      "id": "RG-12",
+      "t": "no real-404 requirement and no HSTS default among the release requirements",
+      "expectation": "blocked once D-P3-1 and D-P3-4 are implemented",
+      "observed": "ALLOWED",
+      "open": true,
+      "detail": "the built site has a 404.html: false; the generated _headers contains includeSubDomains: true; 0 requirement(s) mention a 404, HSTS or hosting"
+    },
+    {
+      "id": "RG-13",
+      "t": "client-style content labelled as a demonstration (demo flag on, noindex on)",
+      "expectation": "the demonstration channel is deliberately light; it must stay noindex and say it is fictional",
+      "observed": "ALLOWED; prepare exit 0; package verification passes",
+      "open": true,
+      "detail": "the demonstration gate has 6 requirements and none asks whether the content is fictional"
+    }
+  ],
+  "hosts": [
+    {
+      "host": "jade.pages.dev",
+      "flagged": true
+    },
+    {
+      "host": "jade.vercel.app",
+      "flagged": true
+    },
+    {
+      "host": "jade.netlify.app",
+      "flagged": true
+    },
+    {
+      "host": "jade.workers.dev",
+      "flagged": true
+    },
+    {
+      "host": "jade.github.io",
+      "flagged": true
+    },
+    {
+      "host": "jade.web.app",
+      "flagged": true
+    },
+    {
+      "host": "jade.onrender.com",
+      "flagged": true
+    },
+    {
+      "host": "jade.fly.dev",
+      "flagged": true
+    },
+    {
+      "host": "staging.jade.com",
+      "flagged": true
+    },
+    {
+      "host": "jade.example.com",
+      "flagged": true
+    },
+    {
+      "host": "jade.test",
+      "flagged": true
+    },
+    {
+      "host": "localhost",
+      "flagged": true
+    },
+    {
+      "host": "10.0.0.5",
+      "flagged": true
+    },
+    {
+      "host": "jade.netlify.com",
+      "flagged": false
+    },
+    {
+      "host": "jade.azurestaticapps.net",
+      "flagged": false
+    },
+    {
+      "host": "jade.cloudfront.net",
+      "flagged": false
+    },
+    {
+      "host": "jade.s3-website-us-east-1.amazonaws.com",
+      "flagged": false
+    },
+    {
+      "host": "jade.appspot.com",
+      "flagged": false
+    },
+    {
+      "host": "jade.repl.co",
+      "flagged": false
+    },
+    {
+      "host": "jade.wixsite.com",
+      "flagged": false
+    },
+    {
+      "host": "jade.webflow.io",
+      "flagged": false
+    },
+    {
+      "host": "jade.framer.website",
+      "flagged": false
+    },
+    {
+      "host": "jade.lovable.app",
+      "flagged": false
+    },
+    {
+      "host": "jade.up.railway.app",
+      "flagged": false
+    },
+    {
+      "host": "jade.deno.dev",
+      "flagged": true
+    },
+    {
+      "host": "jade.pythonanywhere.com",
+      "flagged": false
+    },
+    {
+      "host": "jade-and-ember.com",
+      "flagged": false
+    }
+  ]
+}
