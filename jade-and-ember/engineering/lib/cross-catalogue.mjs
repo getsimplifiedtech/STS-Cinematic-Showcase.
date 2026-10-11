@@ -20,6 +20,7 @@ export const SCOPE = {
   'check:links': ['static', 'internal link resolution over the built files; no browser'],
   'check:seo': ['engine', ''],
   'check:release': ['static', 'release manifest and gate logic; no browser'],
+  'check:release-dryrun': ['static', 'release dry run: the real release tool against a synthetic build in a throwaway copy; no browser'],
   'check:evidence': ['static', 'human-testing procedures, templates and evidence rules, and the viewport tag; no browser'],
   'check:hosting': ['static', 'static-folder and generated-header rules; no browser'],
   'check:privacy': ['engine', ''],

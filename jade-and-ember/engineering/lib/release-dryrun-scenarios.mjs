@@ -136,7 +136,7 @@ export function runLedgerScenario(sb) {
   sb.writeVerify({ commit: sb.head });
   const g = sb.gate(['--channel', 'client-production']);
   const fail = g.failing.join(', ');
-  const row = { g: 'ledger', t: 'the approval and the CI record committed to the repository (the documented flow): the gate can never pass', ok: !g.allowed && g.failing.includes('releaseApproval') && g.failing.includes('evidence:ci-run') && g.failing.length === 2, expected: 'RECORDED: BLOCKED by releaseApproval and evidence:ci-run', observed: g.allowed ? 'ALLOWED' : `BLOCKED by ${fail || 'nothing listed'}`, finding: true, detail: g.reqs.filter((r) => !r.ok).map((r) => `${r.id}: ${r.detail}`).join(' | ') };
+  const row = { g: 'ledger', t: 'the approval and the CI record committed to the repository (the documented flow): the gate can never pass', ok: !g.allowed && g.failing.includes('releaseApproval') && g.failing.includes('evidence:ci-run') && g.failing.length === 2, expected: 'RECORDED: BLOCKED by releaseApproval and evidence:ci-run', observed: g.allowed ? 'ALLOWED' : `BLOCKED by ${fail || 'nothing listed'}`, finding: 'RG-01', detail: g.reqs.filter((r) => !r.ok).map((r) => `${r.id}: ${r.detail}`).join(' | ') };
   sb.restore();
   return [row];
 }
@@ -196,7 +196,7 @@ export function runPackageScenarios(sb) {
     Object.assign(m.package, { bytes: z2.length, sha256: sha(z2) }); Object.assign(m.assets, { treeSha256: am.treeSha256, fileCount: am.fileCount, totalBytes: am.totalBytes });
     wr(d, 'release-manifest.json', JSON.stringify(m, null, 2) + '\n'); sums(d);
     const res = verifyPackage(d);
-    add('PROBE: a delivered file changed AND the manifest, package hash and checksums rewritten to match', true, res.ok ? 'verifies: the checks prove consistency, not authorship (no signature, no independent copy of the hashes)' : `rejected by ${res.checks.filter((c) => !c.ok).map((c) => c.id).join(', ')}`, { probe: true, observed: res.ok ? 'passes' : 'rejected' });
+    add('PROBE: a delivered file changed AND the manifest, package hash and checksums rewritten to match', true, res.ok ? 'verifies: the checks prove consistency, not authorship (no signature, no independent copy of the hashes)' : `rejected by ${res.checks.filter((c) => !c.ok).map((c) => c.id).join(', ')}`, { probe: true, finding: 'RG-14', observed: res.ok ? 'passes' : 'rejected' });
   } finally { rmSync(d, { recursive: true, force: true }); }
   rmSync(good, { recursive: true, force: true });
   sb.restore();
@@ -208,20 +208,21 @@ export function runGateProbes(sb) {
   const out = [], probe = (id, t, expectation, fn) => { sb.restore(); const r = fn(); out.push({ id, t, expectation, ...r }); sb.restore(); };
   const gate = () => sb.gate(['--channel', 'client-production']);
   const verdict = (g) => (g.allowed ? 'ALLOWED' : `BLOCKED by ${g.failing.join(', ')}`);
-  probe('RG-01', 'no external-link verification of any kind (registry and record deleted)', 'blocked once D-P5-1 is implemented', () => { sb.committed(() => { rmSync(join(sb.proj, 'engineering/external-links-verification.json'), { force: true }); rmSync(join(sb.proj, 'engineering/external-destinations.json'), { force: true }); }); const g = gate(); return { observed: verdict(g), open: g.allowed }; });
-  probe('RG-02', 'a rights-verification row while the media inventory lists no asset as verified', 'blocked once D-P5-4 binds the row to the inventory', () => {
+  probe('RG-02', 'no external-link verification of any kind (registry and record deleted)', 'blocked once D-P5-1 is implemented', () => { sb.committed(() => { rmSync(join(sb.proj, 'engineering/external-links-verification.json'), { force: true }); rmSync(join(sb.proj, 'engineering/external-destinations.json'), { force: true }); }); const g = gate(); return { observed: verdict(g), open: g.allowed }; });
+  probe('RG-03', 'a rights-verification row while the media inventory lists no asset as verified', 'blocked once D-P5-4 binds the row to the inventory', () => {
     const inv = JSON.parse(readFileSync(join(sb.proj, 'engineering/media-rights-inventory.json'), 'utf8'));
     const count = {}; for (const a of inv.assets) count[a.rights.status] = (count[a.rights.status] || 0) + 1;
     const g = gate(); return { observed: verdict(g), open: g.allowed, detail: `inventory: ${inv.assets.length} assets (${Object.entries(count).map(([k, v]) => `${v} ${k}`).join(', ')}); the row names no asset and no digest` };
   });
-  probe('RG-03', 'a release approval row that says the release was REJECTED (it still carries channel, version and commit)', 'blocked: a rejection is not an approval', () => { edRow('REL', (l) => l.replace(`${SYNTH}.`, `The owner REJECTED this release and revoked the approval. ${SYNTH}.`))(sb); const g = gate(); return { observed: verdict(g), open: g.allowed }; });
-  probe('RG-04', 'a rights-verification row that says "NOT verified by"', 'blocked: a negative is not a verification', () => { edRow('RIGHTS', (l) => l.replace('Verified by', 'NOT verified by'))(sb); const g = gate(); return { observed: verdict(g), open: g.allowed }; });
-  probe('RG-05', 'a release-approval row whose Type column says "release-approval (REVOKED)"', 'blocked: a revoked approval is not an approval', () => { edRow('REL', (l) => l.replace('| release-approval |', '| release-approval (REVOKED) |'))(sb); const g = gate(); return { observed: verdict(g), open: g.allowed }; });
-  probe('RG-06', 'a verification report with no check results at all (hand-written)', 'blocked: a report no tool wrote', () => { sb.writeVerify({ results: [] }); const g = gate(); return { observed: verdict(g), open: g.allowed }; });
-  probe('RG-07', 'the recorded asset manifest left from another build (assets.manifest.json stale)', 'blocked, or at least refused when the package is verified', () => { sb.committed(() => writeFileSync(join(sb.proj, 'engineering/assets.manifest.json'), sb.git('show', `${sb.parent}:jade-and-ember/engineering/assets.manifest.json`).stdout)); const g = gate(); const p = sb.tool(['prepare']); const v = p.status === 0 ? verifyPackage(join(sb.proj, 'release')) : null; return { observed: `${verdict(g)}; prepare exit ${p.status}; package verification ${v ? (v.ok ? 'passes' : `FAILS (${v.checks.filter((c) => !c.ok).map((c) => c.id).join(', ')})`) : 'not run'}`, open: g.allowed }; });
-  probe('RG-08', 'a dependency advisory that no one has accepted (the gate relies on a full verification report existing)', 'blocked by a security requirement', () => { sb.committed(() => sb.json('engineering/dependencies.json', (o) => { o.acceptedAdvisories.packages = []; })); const g = gate(); return { observed: verdict(g), open: g.allowed, detail: 'the accepted-advisory list was emptied; the gate does not look at it' }; });
-  probe('RG-09', 'no SBOM, no provenance check, no pinned-action or Node-runtime check', 'blocked once D-P6-5 and D-P6-2 are implemented', () => { const g = gate(); return { observed: verdict(g), open: g.allowed, detail: 'no such requirement exists in release/policy.json' }; });
-  probe('RG-10', 'no real-404 requirement and no HSTS default among the release requirements', 'blocked once D-P3-1 and D-P3-4 are implemented', () => {
+  probe('RG-04', 'a release approval row that says the release was REJECTED (it still carries channel, version and commit)', 'blocked: a rejection is not an approval', () => { edRow('REL', (l) => l.replace(`${SYNTH}.`, `The owner REJECTED this release and revoked the approval. ${SYNTH}.`))(sb); const g = gate(); return { observed: verdict(g), open: g.allowed }; });
+  probe('RG-05', 'a rights-verification row that says "NOT verified by"', 'blocked: a negative is not a verification', () => { edRow('RIGHTS', (l) => l.replace('Verified by', 'NOT verified by'))(sb); const g = gate(); return { observed: verdict(g), open: g.allowed }; });
+  probe('RG-06', 'a release-approval row whose Type column says "release-approval (REVOKED)"', 'blocked: a revoked approval is not an approval', () => { edRow('REL', (l) => l.replace('| release-approval |', '| release-approval (REVOKED) |'))(sb); const g = gate(); return { observed: verdict(g), open: g.allowed }; });
+  probe('RG-07', 'a search-review row that says "NOT reviewed by"', 'blocked: a negative is not a review', () => { edRow('SRCH', (l) => l.replace('Reviewed by', 'NOT reviewed by'))(sb); const g = gate(); return { observed: verdict(g), open: g.allowed }; });
+  probe('RG-08', 'a verification report with no check results at all (hand-written)', 'blocked: a report no tool wrote', () => { sb.writeVerify({ results: [] }); const g = gate(); return { observed: verdict(g), open: g.allowed }; });
+  probe('RG-09', 'the recorded asset manifest left from another build (assets.manifest.json stale)', 'blocked, or at least refused when the package is verified', () => { sb.committed(() => writeFileSync(join(sb.proj, 'engineering/assets.manifest.json'), sb.git('show', `${sb.parent}:jade-and-ember/engineering/assets.manifest.json`).stdout)); const g = gate(); const p = sb.tool(['prepare']); const v = p.status === 0 ? verifyPackage(join(sb.proj, 'release')) : null; return { observed: `${verdict(g)}; prepare exit ${p.status}; package verification ${v ? (v.ok ? 'passes' : `FAILS (${v.checks.filter((c) => !c.ok).map((c) => c.id).join(', ')})`) : 'not run'}`, open: g.allowed }; });
+  probe('RG-10', 'a dependency advisory that no one has accepted (the gate relies on a full verification report existing)', 'blocked by a security requirement', () => { sb.committed(() => sb.json('engineering/dependencies.json', (o) => { o.acceptedAdvisories.packages = []; })); const g = gate(); return { observed: verdict(g), open: g.allowed, detail: 'the accepted-advisory list was emptied; the gate does not look at it' }; });
+  probe('RG-11', 'no SBOM, no provenance check, no pinned-action or Node-runtime check', 'blocked once D-P6-5 and D-P6-2 are implemented', () => { const g = gate(); return { observed: verdict(g), open: g.allowed, detail: 'no such requirement exists in release/policy.json' }; });
+  probe('RG-12', 'no real-404 requirement and no HSTS default among the release requirements', 'blocked once D-P3-1 and D-P3-4 are implemented', () => {
     const dir = assembleCandidate(sb.proj, 'dryrun-hosting');
     try {
       const pol = loadSecurityPolicy(), headers = renderHeadersFile(dir, pol, { https: true });
@@ -241,7 +242,7 @@ export function runFlavourProbes() {
       const g = sb.gate(['--channel', 'demonstration']);
       const p = sb.tool(['prepare']);
       const v = p.status === 0 ? verifyPackage(join(sb.proj, 'release')) : null;
-      out.push({ id: 'RG-12', t: 'client-style content labelled as a demonstration (demo flag on, noindex on)', expectation: 'the demonstration channel is deliberately light; it must stay noindex and say it is fictional', observed: `${g.allowed ? 'ALLOWED' : `BLOCKED by ${g.failing.join(', ')}`}; prepare exit ${p.status}; package verification ${v ? (v.ok ? 'passes' : 'FAILS') : 'not run'}`, open: g.allowed, detail: `the demonstration gate has ${g.reqs.length} requirements and none asks whether the content is fictional` });
+      out.push({ id: 'RG-13', t: 'client-style content labelled as a demonstration (demo flag on, noindex on)', expectation: 'the demonstration channel is deliberately light; it must stay noindex and say it is fictional', observed: `${g.allowed ? 'ALLOWED' : `BLOCKED by ${g.failing.join(', ')}`}; prepare exit ${p.status}; package verification ${v ? (v.ok ? 'passes' : 'FAILS') : 'not run'}`, open: g.allowed, detail: `the demonstration gate has ${g.reqs.length} requirements and none asks whether the content is fictional` });
     } finally { sb.destroy(); }
   }
   return out;

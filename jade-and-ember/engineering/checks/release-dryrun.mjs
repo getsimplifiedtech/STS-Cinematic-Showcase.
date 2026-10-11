@@ -8,7 +8,7 @@
 //   * a tampered package is rejected by lib/release-package.mjs;
 //   * nothing in the repository's tools or workflow can deploy, publish or write to a remote system;
 //   * the real approvals log, evidence folder and demonstration are not touched by any of it.
-// It also MEASURES (does not assert) the places where the gate lets something through that it arguably should refuse (probes RG-01 to RG-12),
+// It also MEASURES (does not assert) the places where the gate lets something through that it arguably should refuse (RG-01 to RG-14),
 // so each gap in engineering/RELEASE-DRYRUN-GATE5.md is an observed fact. The probes never fail the check; a scenario that should block and does not does.
 import { existsSync, readFileSync, readdirSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
