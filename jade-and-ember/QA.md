@@ -358,6 +358,24 @@ Genuine engine differences were findings F-G5-01 to F-G5-04 in `engineering/find
 **Final verification: Actions run 24 (`630beec`): all four jobs green** (Chromium `verify` 35 of 35, Firefox 157.0 15 of 15, WebKit 27.2 15 of 15, macOS fast checks); details in `engineering/CI.md`.
 **F-G5-03 closed** (Firefox category-strip Tab stop verified, run 19). Open findings after this correction: F-G2-01, F-G3-01 (Chromium), F-G4-01, F-G5-01 (WebKit file:// fonts, accepted), F-G5-02 (Firefox preload warning, accepted), F-G5-03 (closed, kept in the register as a known behaviour). No open finding is blocking. Safari and iOS Safari remain **[unverified]** (human device testing).
 
+## v0.9 Gate 5, Phase 2: human-testing procedures and evidence control (2026-10-11, `APR-JE-030`)
+**No human, physical-device or screen-reader testing has been done, claimed or recorded.** Phase 2 builds the procedures, the templates, the scaffolding command and the stricter release gate that such testing will use. Phase 3 has not begun.
+
+**Evidence classes** (`engineering/release/evidence-spec.json` is the single source):
+- **E1**: automated or emulated (the CI run only). Never counts as human or device testing.
+- **E2**: a person testing on a real desktop or laptop browser (Chrome, Firefox, Safari on a Mac; NVDA; VoiceOver on macOS).
+- **E3**: a person testing on a physical phone or tablet (iPhone, Android, iPad; VoiceOver on iOS; TalkBack).
+
+**Inventory.** 12 targets (iPhone Safari, Android Chrome, iPad Safari, desktop Chrome, Firefox and Safari, NVDA with Firefox and with Chrome, VoiceOver on macOS and on iOS, TalkBack, CI run); 12 sections (page basics, navigation, home hero, page specific, mobile device, tablet and wide, keyboard, keyboard session, zoom and responsive, reduced motion and media, screen reader, screen-reader session); 16 generated files in `docs/device-testing/` (inventory, 12 per-target procedures, 3 cross-cutting procedures: keyboard only, responsive/zoom/motion/media, screen readers) and the master protocol `docs/JADE_AND_EMBER_DEVICE_TEST_PROTOCOL.md`. Commands: `npm run evidence:new <target>` (an unfilled template; it never fills a result and never overwrites), `evidence:list`, `evidence:docs [--check]`, `evidence:hash`, `evidence:validate`.
+
+**What the release gate rejects** (each with a negative test): a template left unfilled; a class that does not match the target or record type; emulation or automation described as human testing; a tester that is not a person; a build that is not the release commit or asset tree; a date before the commit or in the future; an incomplete environment (device, operating system, browser, version) for the target; missing or non-conforming outcomes; a "not applicable" without a reason; a failed item without a finding; a conclusion that contradicts the outcomes; attachments that are missing, altered (SHA-256), outside the evidence folder or reused by another record; a missing attestation. The viewport check also rejects any page that blocks zoom.
+
+**Verification (Actions run 26, `a3a01ea`, all four jobs green):** Chromium `verify` 37 of 37 checks; `check:selftest-evidence` 122 cases (102 rejections each for the right reason, 20 accepted); `check:release` 53 single-defect cases (18 new evidence cases); `check:evidence` (specification, dry run of complete invented records, gate coverage, generated documents in sync, viewport check); Firefox 15 of 15 and WebKit 15 of 15 unchanged.
+
+**Limits.** The gate checks that a record is complete, classified correctly, bound to the build and verifiable; it cannot prove that a person did the work. That rests on the signed attestation and the owner's release approval. The invented records used by the tests exist only in memory and are never written to the evidence folder.
+
+**Human testing still required before release** (about 6 to 10 hours in total): E3 on a physical iPhone (Safari) and an Android phone (Chrome); E2 on desktop Chrome, Firefox and Safari; screen readers NVDA (Windows), VoiceOver (macOS or iOS) and TalkBack (Android); an iPad or tablet is optional; keyboard-only, zoom and responsive, reduced-motion and media-fallback sections on those devices. Safari and iOS remain **[unverified]**.
+
 ## Remaining issues (honest list)
 1. **[unverified] Real devices.** Also the new CSS masks on Safari and iOS. iPhone, Safari (including whether VP9 WebM plays and is chosen, and Low Power Mode blocking autoplay), Android, Firefox, a high-refresh display, and battery or heat during the loop have not been tested. Safari and iOS are the biggest unknown.
 2. **The MP4 fallback is untested in a browser.** Playwright's Chromium cannot decode H.264, so only the WebM path ran. The MP4 file is valid (ffprobe, frame-accurate QA); the source order and failure logic are tested. If a browser rejects both sources, the page falls back to poster plus push.
