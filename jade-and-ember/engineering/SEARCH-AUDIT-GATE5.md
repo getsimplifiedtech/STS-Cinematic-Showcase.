@@ -1,6 +1,6 @@
 # Gate 5 Phase 4: SEO and AI search readiness audit (`APR-JE-032`)
 
-**Status: delivered for owner review.** Audit of this project against the STS *Search and AI Discovery Readiness* standard (`architecture/11-core-search-ai-discovery-readiness-v1.md`, framework repository, branch `feature/sts-core-ai-search-readiness`, read only through the GitHub API on 2026-10-11; branch head `08af1a0`, file blob `fda7b75`; status of the standard: *proposed, pending framework review and merge*). Nothing in the framework repository was changed, nothing was deployed, no media was created or used, and the approved visual appearance is unchanged (the pages differ from before by no byte: the only additions are host files, a data record, checks and documents).
+**Status: APPROVED and CLOSED by the owner (`APR-JE-033`, code commit `aa38058`, Actions run 31).** Audit of this project against the STS *Search and AI Discovery Readiness* standard (`architecture/11-core-search-ai-discovery-readiness-v1.md`, framework repository, branch `feature/sts-core-ai-search-readiness`, read only through the GitHub API on 2026-10-11; branch head `08af1a0`, file blob `fda7b75`; status of the standard: *proposed, pending framework review and merge*). Nothing in the framework repository was changed, nothing was deployed, no media was created or used, and the approved visual appearance is unchanged (the pages differ from before by no byte: the only additions are host files, a data record, checks and documents).
 
 The standard tests **technical readiness**. Nothing here measures or promises rankings, citations, or inclusion in any search result or AI answer.
 
@@ -168,12 +168,14 @@ Existing coverage was already close to the standard (Gate 4 reconciliation). Gap
 6. `hreflang`, Search Console and Bing submission, rankings and citations: out of scope.
 7. HSTS `includeSubDomains` still appears in the generated host files; D-P3-4 (off by default for clients) is a Gate 6 change.
 
-**Decisions requested (none is taken here):**
+**Owner decisions (`APR-JE-033`, 2026-10-11):**
 
-| # | Decision | Recommendation |
+| # | Decision | Owner's answer |
 |---|---|---|
-| D-P4-1 | Add **DuckAssistBot** and **Meta-ExternalFetcher** to the `aiSearch` class of the crawler policy (changes the `robots.txt` of a client who disallows AI search; no effect when all classes are allowed) | yes, in Gate 6, with a note to clients that user-initiated fetchers may ignore robots.txt |
-| D-P4-2 | Structured data: keep the Restaurant description only; no separate Organization; no BreadcrumbList; WebSite optional | keep as is; add WebSite only if a client asks |
-| D-P4-3 | `og:image`: leave none until media rights are verified and an image is approved (VP-4) | leave none |
-| D-P4-4 | Who re-reads the crawler pages and sets `confirmedByPerson`, and when (together with D-P3-6) | a person, before Gate 6 adapters and before any client release |
-| D-P4-5 | Change the `includeSubDomains` default now (a one-line policy change) or with the Gate 6 adapters | with the adapters, one change for every host |
+| D-P4-1 | DuckAssistBot and Meta-ExternalFetcher | **Evaluate for Gate 6; verify the official crawler documentation before assigning policies.** Not added to the policy now |
+| D-P4-2 | Structured data | **Retain Restaurant JSON-LD for Jade & Ember. The master framework must support industry-specific schemas** |
+| D-P4-3 | `og:image` | **No social-preview image for Jade & Ember until media rights are confirmed. The reusable framework must support approved images** |
+| D-P4-4 | Crawler documentation review | **Require a dated human review of the official crawler documentation before client release** (the release gate already asks for it) |
+| D-P4-5 | HSTS `includeSubDomains` | **Remove it as a default during Gate 6 hosting-adapter integration** |
+
+Requirements for the framework that follow from D-P4-2 and D-P4-3 are listed in `hosting/GATE-6-HOSTING-REQUIREMENTS.md`.

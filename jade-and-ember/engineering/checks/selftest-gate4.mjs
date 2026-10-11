@@ -19,6 +19,8 @@ import { reconcile } from '../lib/findings.mjs';
 import { loadPolicy, noindexState, renderHeadersFile, robotsHeaders } from '../lib/security.mjs';
 import { assembleCandidate, pagesOf } from '../lib/site.mjs';
 import { isMain, projectDir, readJson, tempDir } from '../lib/git.mjs';
+import { collectExternal, recordProblems, registryProblems, verifyUrl } from '../lib/external.mjs';
+import { mediaRightsProblems } from '../lib/media-rights.mjs';
 
 const edit = (file, fn) => { const before = readFileSync(file, 'utf8'), after = fn(before); if (after === before) throw new Error(`the edit changed nothing in ${file}: the test would prove nothing`); writeFileSync(file, after); };
 const clone = (o) => JSON.parse(JSON.stringify(o));
@@ -50,6 +52,22 @@ const wholeSeo = (fx) => checkSeoClient({ fixture: fx }).problems;
 const crawlers = (c) => build((n, o) => { if (n === 'client') o.seo.crawlers = c; });
 const css = (d, rule) => appendFileSync(join(d, 'styles.css'), '\n' + rule + '\n');
 const phoneOf = (d, file = 'visit-us.html') => checkPhone({ root: d, pages: [file], widths: [PHONE_WIDTHS[0], PHONE_WIDTHS[3]] }).then((r) => r.problems);
+
+// ---- helpers for the Gate 5 Phase 5 cases (external destinations, verification classes, the media rights inventory)
+const registryOf = () => readJson(join(projectDir, 'engineering', 'external-destinations.json'));
+const historyOf = () => readJson(join(projectDir, 'engineering', 'external-links-verification.json'));
+const extProblems = (dir, registry = registryOf()) => registryProblems({ registry, found: collectExternal(dir) });
+const resp = (status, headers = {}) => ({ status, headers: new Headers(headers), body: null });
+// a scripted network: url -> list of answers in order (a number is a status, [status, {location}] a redirect, an Error is thrown); nothing leaves the process
+const scripted = (map) => { const seen = {}; return async (url, { method }) => { const key = `${method} ${url}`, alt = `* ${url}`; const list = map[key] || map[alt]; if (!list) throw Object.assign(new Error('unscripted'), { cause: { code: 'ENOTFOUND' } }); const i = seen[key] = (seen[key] ?? -1) + 1; const a = list[Math.min(i, list.length - 1)]; if (a instanceof Error) throw a; return Array.isArray(a) ? resp(a[0], a[1]) : resp(a); }; };
+const certErr = () => Object.assign(new Error('fetch failed'), { cause: { code: 'CERT_HAS_EXPIRED' } });
+const dnsErr = () => Object.assign(new Error('fetch failed'), { cause: { code: 'ENOTFOUND' } });
+const verdict = async (url, map, opts = {}) => { const r = await verifyUrl(url, { fetchImpl: scripted(map), sleep: async () => {}, delayMs: 0, ...opts }); return r.class === 'verified' ? [] : [`${r.class}: ${r.detail}`]; };
+const recBase = () => ({ records: [{ id: 'EXTV-1', date: '2026-10-11', runner: { kind: 'github-actions', description: 'a hosted runner with a network' }, registryDigest: 'a'.repeat(64), results: [{ url: 'https://example.org/', kind: 'link', class: 'verified', finalUrl: 'https://example.org/', finalStatus: 200, chain: [{ url: 'https://example.org/', status: 200, method: 'HEAD' }], attempts: 1, detail: 'answered directly' }] }] });
+const recFile = (mutate) => { const f = recBase(); mutate(f.records[0], f); return recordProblems({ file: f, today: '2026-10-12' }); };
+const invOf = () => clone(readJson(join(projectDir, 'engineering', 'media-rights-inventory.json')));
+const rights = (dir, mutate = () => {}, { approvals = [], licence } = {}) => { const inv = invOf(); mutate(inv); const lic = licence ?? readFileSync(join(dir, 'fonts', 'LICENSES.txt'), 'utf8'); const r = mediaRightsProblems({ inventory: inv, root: dir, approvals, licenceText: typeof lic === 'function' ? lic(readFileSync(join(dir, 'fonts', 'LICENSES.txt'), 'utf8')) : lic }); return r.problems.map((x) => x.detail); };
+const fontNotices = (dir) => mediaRightsProblems({ inventory: invOf(), root: dir, approvals: [], licenceText: readFileSync(join(dir, 'fonts', 'LICENSES.txt'), 'utf8') }).notices.map((x) => x.detail);
 const GREEN = () => greenClientContext();
 const crawlerRecord = () => clone(readJson(join(projectDir, 'engineering', 'search-crawler-verification.json')));
 const recProblems = (fn, over = {}) => { const r = crawlerRecord(); fn(r); return crawlerRecordProblems({ record: r, today: '2026-10-12', ...over }); };
@@ -272,6 +290,65 @@ const cases = [
   ['noindex header: only some pages are noindex', () => { const d = demoDir(); const t = renderHeadersFile(d, loadPolicy()); edit(join(d, 'menu.html'), (h) => h.replace('<meta name="robots" content="noindex, nofollow">\n', '')); return checkHeadersFile(t, { root: d }); }, /only some pages carry the robots noindex meta tag/],
   ['noindex header: a build with mixed pages gets no host file', () => { const d = demoDir(); edit(join(d, 'menu.html'), (h) => h.replace('<meta name="robots" content="noindex, nofollow">\n', '')); try { renderHeadersFile(d, loadPolicy()); return []; } catch (e) { return [e.message]; } }, /some pages carry the robots noindex meta tag and others do not/],
   ['noindex header: the demonstration and the client build are told apart (must find nothing)', () => { const d = demoDir(), fx = client(); const out = []; if (noindexState(d) !== 'all' || !robotsHeaders(d).hasOwnProperty('X-Robots-Tag')) out.push('the demonstration gets no header'); if (noindexState(fx.dir) !== 'none' || Object.keys(robotsHeaders(fx.dir)).length) out.push('the client build gets a header'); return out; }, null],
+  // ---- Gate 5 Phase 5 (APR-JE-033): external destinations, how a network answer is classified, and the media rights inventory
+  ['external: a new link in a page', () => { const d = demoDir(); edit(join(d, 'index.html'), (t) => t.replace('</main>', '<p><a href="https://example.org/offer">offer</a></p></main>')); return extProblems(d); }, /external link https:\/\/example\.org\/offer .* not in the destination registry/],
+  ['external: a new address printed in text', () => { const d = demoDir(); edit(join(d, 'fonts', 'LICENSES.txt'), (t) => t + '\nSee https://licences.example/ofl\n'); return extProblems(d); }, /external address in text https:\/\/licences\.example\/ofl .* not in the destination registry/],
+  ['external: the credit link disappears from one page', () => { const d = demoDir(); edit(join(d, 'menu.html'), (t) => t.replace('<a href="https://getsimplifiedtech.com/">Website concept by Simplified Tech Solutions</a>', '<span>Website concept by Simplified Tech Solutions</span>')); return extProblems(d); }, /registry lists .* but it appears in/],
+  ['external: a registered destination no longer appears', () => { const d = demoDir(); edit(join(d, 'fonts', 'LICENSES.txt'), (t) => t.split('https://github.com/noirblancrouge/YoungSerif').join('the Young Serif project')); return extProblems(d); }, /EXT-05 .* no longer appears/],
+  ['external: the credit link made http', () => linksOf((() => { const d = demoDir(); edit(join(d, 'index.html'), (t) => t.replace('href="https://getsimplifiedtech.com/"', 'href="http://getsimplifiedtech.com/"')); return d; })()), /not https/],
+  ['external: a registry entry for a clickable http link', () => { const r = registryOf(); r.destinations[0].url = 'http://getsimplifiedtech.com/'; return registryProblems({ registry: r, found: [] }); }, /clickable link must be https/],
+  ['external: a registry entry with no reason', () => { const r = registryOf(); r.destinations[1].purpose = ''; return registryProblems({ registry: r, found: [] }); }, /purpose must say why/],
+  ['external: the same registry id twice', () => { const r = registryOf(); r.destinations[1].id = r.destinations[0].id; return registryProblems({ registry: r, found: [] }); }, /listed twice/],
+  ['external: the untouched demonstration matches its registry (must find nothing)', () => extProblems(demoDir()), null],
+  ['external verify: a direct 200 is verified (must find nothing)', () => verdict('https://a.example/', { 'HEAD https://a.example/': [200] }), null],
+  ['external verify: a redirect to an https page that answers 200 is verified (must find nothing)', () => verdict('https://a.example/', { 'HEAD https://a.example/': [[301, { location: '/home' }]], 'HEAD https://a.example/home': [200] }), null],
+  ['external verify: a server that refuses HEAD but answers GET is verified (must find nothing)', () => verdict('https://a.example/', { 'HEAD https://a.example/': [405], 'GET https://a.example/': [200] }), null],
+  ['external verify: a 403 from a site that blocks automated requests is not a pass', () => verdict('https://a.example/', { 'HEAD https://a.example/': [403], 'GET https://a.example/': [403] }), /^blocked/],
+  ['external verify: a 429 is not a pass', () => verdict('https://a.example/', { '* https://a.example/': [429] }), /^blocked/],
+  ['external verify: a 404 is unavailable', () => verdict('https://a.example/', { 'HEAD https://a.example/': [404], 'GET https://a.example/': [404] }), /^unavailable/],
+  ['external verify: a 500 that persists after the retry is unavailable', () => verdict('https://a.example/', { '* https://a.example/': [500] }), /^unavailable/],
+  ['external verify: a redirect loop is unavailable', () => verdict('https://a.example/', { '* https://a.example/': [[302, { location: '/' }]] }), /^unavailable.*redirects/],
+  ['external verify: a redirect that leaves https is insecure', () => verdict('https://a.example/', { 'HEAD https://a.example/': [[301, { location: 'http://a.example/' }]] }), /^insecure/],
+  ['external verify: an expired certificate is insecure', () => verdict('https://a.example/', { '* https://a.example/': [certErr()] }), /^insecure.*certificate/],
+  ['external verify: no DNS answer is inconclusive, not unavailable', () => verdict('https://a.example/', { '* https://a.example/': [dnsErr()] }), /^inconclusive.*ENOTFOUND/],
+  ['external verify: a server error followed by success on the retry is verified (must find nothing)', () => verdict('https://a.example/', { 'HEAD https://a.example/': [503, 200] }), null],
+  ['external verify: an address printed as http that the destination upgrades is verified (must find nothing)', () => verdict('http://a.example/ofl', { 'HEAD http://a.example/ofl': [[301, { location: 'https://a.example/ofl' }]], 'HEAD https://a.example/ofl': [200] }, { allowHttpStart: true }), null],
+  ['external verify: an address printed as http that is not upgraded is insecure', () => verdict('http://a.example/ofl', { 'HEAD http://a.example/ofl': [200] }, { allowHttpStart: true }), /^insecure/],
+  ['external verify: a clickable http address is insecure without any request', () => verdict('http://a.example/', { 'HEAD http://a.example/': [200] }), /^insecure/],
+  ['external record: "verified" with a 404', () => recFile((r) => { r.results[0].finalStatus = 404; }), /needs a 2xx final status/],
+  ['external record: "verified" through an http hop', () => recFile((r) => { r.results[0].chain.push({ url: 'http://example.org/', status: 200, method: 'HEAD' }); }), /http hop/],
+  ['external record: "verified" with no hops recorded', () => recFile((r) => { r.results[0].chain = []; }), /no recorded hops/],
+  ['external record: "blocked" with a 200', () => recFile((r) => { r.results[0].class = 'blocked'; }), /"blocked" needs a 401, 403, 429 or 999/],
+  ['external record: "inconclusive" that carries a status', () => recFile((r) => { r.results[0].class = 'inconclusive'; }), /no answer, yet a status/],
+  ['external record: a class outside the vocabulary', () => recFile((r) => { r.results[0].class = 'ok'; }), /is not one of verified/],
+  ['external record: a date in the future', () => recFile((r) => { r.date = '2027-01-01'; }), /in the future/],
+  ['external record: no runner', () => recFile((r) => { delete r.runner; }), /runner\.kind must be/],
+  ['external record: the destination list digest is missing', () => recFile((r) => { delete r.registryDigest; }), /registryDigest/],
+  ['external record: the same id twice', () => recFile((r, f) => { f.records.push(clone(r)); }), /listed twice/],
+  ['external record: a sandbox run that reports success without a request', () => recFile((r) => { r.runner.kind = 'sandbox'; r.results[0].chain = []; r.results[0].class = 'verified'; }), /sandbox run reports results without any recorded request/],
+  ['external record: the untouched history is accepted (must find nothing)', () => recordProblems({ file: historyOf(), today: '2026-10-12' }), null],
+  ['rights: an image added with no inventory entry', () => { const d = demoDir(); cpSync(join(d, 'media', 'dish-mapo.webp'), join(d, 'media', 'dish-new.webp')); return rights(d); }, /dish-new\.webp is delivered but has no entry/],
+  ['rights: an image that changed after the review', () => { const d = demoDir(); appendFileSync(join(d, 'media', 'dish-mapo.webp'), Buffer.from([0])); return rights(d); }, /has changed since the rights inventory was written/],
+  ['rights: an entry for a file that is not delivered', () => { const d = demoDir(); rmSync(join(d, 'media', 'dish-dandan.webp')); return rights(d); }, /in the rights inventory but is not delivered/],
+  ['rights: the same file listed twice', () => rights(demoDir(), (i) => { i.assets.push(clone(i.assets[0])); }), /listed twice/],
+  ['rights: marked verified with no approval row', () => rights(demoDir(), (i) => { i.assets[0].rights.status = 'verified'; i.assets[0].rights.approval = 'REL-JE-001'; }), /marked verified but no rights-verification approval/],
+  ['rights: marked verified without naming any approval', () => rights(demoDir(), (i) => { i.assets[1].rights.status = 'verified'; }), /\(none named\)/],
+  ['rights: verified with a real rights-verification row (must find nothing)', () => rights(demoDir(), (i) => { i.assets[0].rights.status = 'verified'; i.assets[0].rights.approval = 'REL-JE-009'; }, { approvals: [{ id: 'REL-JE-009', type: 'rights-verification', decision: 'verified by Sam; sources: terms pages; 2026-10-12' }] }), null],
+  ['rights: generated media described as licence-text-shipped', () => rights(demoDir(), (i) => { i.assets[0].rights.status = 'licence-text-shipped'; }), /cannot be "licence-text-shipped"/],
+  ['rights: a status outside the vocabulary', () => rights(demoDir(), (i) => { i.assets[0].rights.status = 'cleared'; }), /rights\.status must be one of/],
+  ['rights: generated media with no origin', () => rights(demoDir(), (i) => { delete i.assets[0].origin; }), /origin\.service and origin\.generatedOn/],
+  ['rights: generated media with no terms to verify', () => rights(demoDir(), (i) => { i.assets[2].termsToVerify = []; }), /termsToVerify must name/],
+  ['rights: terms to verify that do not exist', () => rights(demoDir(), (i) => { i.assets[2].termsToVerify = ['T-NOPE']; }), /not in the terms list/],
+  ['rights: wording that claims a licence', () => rights(demoDir(), (i) => { i.assets[0].description = 'royalty-free hero image'; }), /claims a right/],
+  ['rights: a term that is reviewed but has no reviewer', () => rights(demoDir(), (i) => { i.terms[0].status = 'reviewed'; }), /needs reviewedOn and reviewedBy/],
+  ['rights: a term address over http', () => rights(demoDir(), (i) => { i.terms[0].url = 'http://huggingface.co/terms-of-service'; }), /https address/],
+  ['rights: a font whose licence section is missing', () => rights(demoDir(), (i) => { i.assets.find((a) => a.kind === 'font').licenceSection = 'nope'; }), /has no section "nope"/],
+  ['rights: a font section without the OFL text', () => rights(demoDir(), () => {}, { licence: (t) => t.replace(/SIL OPEN FONT LICENSE Version 1\.1/g, 'A LICENCE') }), /does not contain the SIL Open Font License 1\.1 text/],
+  ['rights: a font described as unverified', () => rights(demoDir(), (i) => { i.assets.find((a) => a.kind === 'font').rights.status = 'unverified'; }), /"licence-text-shipped", not "unverified"/],
+  ['rights: the licence file missing from the fonts folder', () => { const d = demoDir(); const inv = invOf(); return mediaRightsProblems({ inventory: inv, root: d, approvals: [], licenceText: '' }).problems.map((x) => x.detail); }, /has no section/],
+  ['rights: the Noto Serif SC notice differs from the font file (finding F-G5-05)', () => fontNotices(demoDir()), /noto-serif-sc-seal-600\.woff2: the copyright notice inside the font file .* names a different party/],
+  ['rights: the Young Serif and Karla notices agree with their files (must find nothing)', () => fontNotices(demoDir()).filter((m) => !/noto-serif-sc/.test(m)), null],
+  ['rights: the untouched demonstration matches its inventory (must find nothing)', () => rights(demoDir()), null],
 ];
 function assembleCandidateRef() { const d = assembleCandidate(projectDir, 'g4-ref'); sandbox.push(d); return d; }
 

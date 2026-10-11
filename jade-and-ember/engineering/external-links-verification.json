@@ -1,0 +1,68 @@
+{
+  "$comment": "Gate 5 Phase 5 (APR-JE-033). The history of runs of `node engineering/tools/external-links.mjs verify`, oldest first, never edited. Each record says where the run happened, which destination list it covered (registryDigest) and what the network answered, classified as verified, blocked, unavailable, inconclusive or insecure. Only 'verified' is a pass; a sandbox without a network can only produce 'inconclusive'. check:links validates the structure; it does not fail because a record is old (no clock bomb). The proposed release requirement (EXTERNAL-LINKS-GATE5.md) asks for a record newer than 30 days, covering the build's current destination list, run on a networked runner, with every clickable destination verified.",
+  "records": [
+    {
+      "id": "EXTV-1",
+      "date": "2026-10-11",
+      "runner": {
+        "kind": "sandbox",
+        "description": "Development sandbox (cloud container). Outbound traffic is limited by the environment's network policy and goes through an egress proxy that re-signs TLS with its own certificate authority, so a TLS result here says nothing about the destination's own certificate. DNS for getsimplifiedtech.com and scripts.sil.org did not resolve (policy), so those two are inconclusive, not unavailable."
+      },
+      "registryDigest": "8bce3ef07b8531301404551eed43e6e5c0e77b41ff22cd8b06a6117d854767bd",
+      "results": [
+        {
+          "url": "https://getsimplifiedtech.com/",
+          "kind": "link",
+          "class": "inconclusive",
+          "finalUrl": "https://getsimplifiedtech.com/",
+          "finalStatus": null,
+          "chain": [],
+          "attempts": 2,
+          "detail": "no answer (ENOTFOUND)"
+        },
+        {
+          "url": "http://scripts.sil.org/OFL",
+          "kind": "mention",
+          "class": "inconclusive",
+          "finalUrl": "http://scripts.sil.org/OFL",
+          "finalStatus": null,
+          "chain": [],
+          "attempts": 2,
+          "detail": "no answer (ENOTFOUND)"
+        },
+        {
+          "url": "https://github.com/googlefonts/karla",
+          "kind": "mention",
+          "class": "verified",
+          "finalUrl": "https://github.com/googlefonts/karla",
+          "finalStatus": 200,
+          "chain": [
+            {
+              "url": "https://github.com/googlefonts/karla",
+              "status": 200,
+              "method": "HEAD"
+            }
+          ],
+          "attempts": 1,
+          "detail": "answered directly"
+        },
+        {
+          "url": "https://github.com/noirblancrouge/YoungSerif",
+          "kind": "mention",
+          "class": "verified",
+          "finalUrl": "https://github.com/noirblancrouge/YoungSerif",
+          "finalStatus": 200,
+          "chain": [
+            {
+              "url": "https://github.com/noirblancrouge/YoungSerif",
+              "status": 200,
+              "method": "HEAD"
+            }
+          ],
+          "attempts": 1,
+          "detail": "answered directly"
+        }
+      ]
+    }
+  ]
+}

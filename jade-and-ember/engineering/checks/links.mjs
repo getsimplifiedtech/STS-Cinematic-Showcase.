@@ -6,8 +6,10 @@
 //               page links to a page that is not in the registry, no dead ends
 //   protocols   tel: links hold an international number, mailto: a plausible address, external links well-formed https URLs
 //   search      canonical URLs, the sitemap and robots.txt of a client build agree with the files (each canonical path is a delivered page)
-//   external    not fetched by default (the checks run offline); `--online` makes a HEAD request to each external URL of the demonstration
-//               (set NODE_USE_ENV_PROXY=1 behind a proxy) and reports the status
+//   external    offline: every external address in the delivered files is in engineering/external-destinations.json (a new or vanished one is a
+//               finding) and the verification history (external-links-verification.json) is well formed. `--online` also requests each registered
+//               destination (HEAD then GET, redirects followed and recorded, one retry) and classifies it verified | blocked | unavailable |
+//               inconclusive | insecure; only verified is a pass (Gate 5 Phase 5)
 // Run: node engineering/checks/links.mjs [--online]
 import { existsSync, readFileSync, readdirSync, rmSync } from 'node:fs';
 import { join, posix } from 'node:path';
@@ -15,7 +17,8 @@ import { tokenize } from '../lib/html.mjs';
 import { assembleCandidate, pagesOf } from '../lib/site.mjs';
 import { buildClient } from '../lib/client-fixture.mjs';
 import { readSitemap } from './seo.mjs';
-import { isMain, projectDir } from '../lib/git.mjs';
+import { engDir, isMain, projectDir, readJson } from '../lib/git.mjs';
+import { CLASSES, collectExternal, recordProblems, registryProblems, verifyUrl } from '../lib/external.mjs';
 
 // exact-case existence: every path segment must appear in its directory listing as written
 const exactExists = (root, rel) => { let d = root; for (const seg of rel.split('/').filter(Boolean)) { if (!existsSync(d) || !readdirSync(d).includes(seg)) return false; d = join(d, seg); } return true; };
@@ -127,9 +130,18 @@ export async function checkLinks({ root = null, online = false } = {}) {
     if (fc.status !== 0) problems.push(`the clean-URL client fixture failed to build: ${fc.text.slice(0, 200)}`);
     else { const c2 = scanLinks({ root: fc.dir, label: 'clean-URL client build ' }); problems.push(...c2.problems); problems.push(...checkSearchAgreement({ dir: fc.dir, base: 'https://jadeandember.example.test' }).map((m) => `clean-URL client build ${m}`)); }
     const ext = [...new Set([...demo.externals, ...client.externals])];
+    // the destinations the demonstration may carry, and the history of verification runs (structure only: a record being old is not a failure)
+    const registry = readJson(join(engDir, 'external-destinations.json')), history = readJson(join(engDir, 'external-links-verification.json'));
+    problems.push(...registryProblems({ registry, found: collectExternal(dir) }), ...recordProblems({ file: history }));
+    const latest = [...history.records].sort((a, b) => (a.date < b.date ? 1 : -1))[0];
+    notes.push(`external destinations: ${registry.destinations.length} registered (${registry.destinations.filter((d) => d.kind === 'link').length} clickable link, ${registry.destinations.filter((d) => d.kind === 'mention').length} addresses printed in text); none unregistered; ${history.records.length} verification run(s) on record${latest ? `, latest ${latest.id} on ${latest.date} (${latest.runner.kind}): ${CLASSES.map((c) => `${latest.results.filter((r) => r.class === c).length} ${c}`).join(', ')}` : ''}`);
     if (online) {
-      // only the real addresses of the demonstration; the client fixture uses invented .test hosts
-      for (const u of demo.externals) { try { const r = await fetch(u, { method: 'HEAD', redirect: 'follow', signal: AbortSignal.timeout(15000) }); notes.push(`online: ${u} answered ${r.status}`); if (r.status >= 400) problems.push(`external link ${u} answered ${r.status}`); } catch (e) { problems.push(`external link ${u} could not be reached (${e.message})`); } }
+      // a networked run: only "verified" is a pass; blocked and inconclusive answers are reported as unverified, unavailable and insecure ones fail
+      for (const d of registry.destinations.filter((x, i, a) => a.findIndex((y) => y.url === x.url) === i)) {
+        const r = await verifyUrl(d.url, { allowHttpStart: !registry.destinations.some((x) => x.url === d.url && x.kind === 'link') });
+        notes.push(`online: ${d.url} is ${r.class.toUpperCase()}: ${r.detail}${r.class === 'blocked' || r.class === 'inconclusive' ? ' (UNVERIFIED, not a pass)' : ''}`);
+        if (r.class === 'unavailable' || r.class === 'insecure') problems.push(`external destination ${d.url} is ${r.class}: ${r.detail}`);
+      }
     }
     notes.unshift(`internal links: ${demo.pages} demonstration pages and ${client.pages} client-build pages fully cross-linked (${demo.links} and ${client.links} page-to-page links); every href, src, srcset, video source and CSS url() resolves with exact letter case; every #fragment names a unique id; no page is an orphan or a dead end; tel:, mailto: and https URLs well-formed; the client sitemap and canonicals match the delivered pages; ${ext.length} external URL(s) listed, ${online ? 'checked online' : 'not fetched (offline checks; use --online)'}`);
     return { problems, notes, externals: ext };

@@ -1,0 +1,479 @@
+{
+  "$comment": "Gate 5 Phase 5 (APR-JE-033). The media rights inventory of the Jade & Ember demonstration: every image, video and font it delivers, where each came from (from media/PROVENANCE.md and fonts/LICENSES.txt), what is established, what is NOT, and which official terms a person has to read. It asserts no right and no licence over any generated media. check:media fails if a delivered file has no entry or has changed since it was written, if anything is marked verified without a recorded rights-verification approval, if generated media is described as licensed, or if a font's licence text or copyright notice is missing or disagrees with the notice inside the font file. The 'terms' are the documents the OWNER has to read and record; the summaries in them come from search results of 2026-10-11 and are not the texts.",
+  "reviewedOn": "2026-10-11",
+  "policy": "docs/JADE_AND_EMBER_MEDIA_RIGHTS_POLICY.md",
+  "statuses": {
+    "unverified": "nothing established about rights in the output; the generation record exists",
+    "licence-text-shipped": "a licence text and copyright notice are shipped with the file; the upstream source is not confirmed",
+    "verified": "a rights-verification approval row names who verified, the sources and the date for this file"
+  },
+  "terms": [
+    {
+      "id": "T-HF-TOS",
+      "party": "Hugging Face",
+      "title": "Terms of Service (with the Content Policy it incorporates)",
+      "url": "https://huggingface.co/terms-of-service",
+      "establishes": "Who may use, and for what purposes, an image that a signed-in user generated through a Space, as the terms stood on 2026-10-09; any restriction on commercial use or on use of outputs in a client deliverable; any duty to disclose that an image is AI generated. A search summary (2026-10-11) says users own the content they create and that the terms say nothing specific about outputs of Spaces; that is not the text.",
+      "status": "not-reviewed"
+    },
+    {
+      "id": "T-ZIMG-MODEL",
+      "party": "Tongyi-MAI (model authors)",
+      "title": "Z-Image-Turbo model card and licence",
+      "url": "https://huggingface.co/Tongyi-MAI/Z-Image-Turbo",
+      "establishes": "The licence of the model that produced the six images and whether it says anything about generated outputs, in the version in force on 2026-10-09. A search summary (2026-10-11) of the model card header reports 'license: apache-2.0'; this was not read on the live page, and the Space may run a different checkpoint.",
+      "status": "not-reviewed"
+    },
+    {
+      "id": "T-ZIMG-SPACE",
+      "party": "Hugging Face Space owner (mcp-tools)",
+      "title": "Space mcp-tools/Z-Image-Turbo: README, licence and any usage notice",
+      "url": "https://huggingface.co/spaces/mcp-tools/Z-Image-Turbo",
+      "establishes": "Which model and licence the Space actually ran on 2026-10-09, any terms the Space owner adds, and whether using it through a connected account and the free tier changes what may be done with the outputs.",
+      "status": "not-reviewed"
+    },
+    {
+      "id": "T-HIGGS-TOU",
+      "party": "Higgsfield",
+      "title": "Terms of Use and Privacy Policy in force on 2026-10-09, and the Help Center article on ownership of generations",
+      "url": "https://higgsfield.ai/creator-hub/help-center/account/who-owns-my-generations-and-can-i-use-them-commercially",
+      "establishes": "Ownership of the generated clip and the right to use it commercially or to hand it to a client, for the plan used (one paid generation, 5 credits). Search summaries (2026-10-11) report that the help article cites section 4.4 (no claim of ownership of outputs, no restriction on commercial use), that the 2026 terms update took effect on 7 or 27 August 2026 (sources differ) and that an older page describes a broader licence to the platform. The primary text, not these summaries, must be read and the version in force on the generation date identified.",
+      "status": "not-reviewed"
+    },
+    {
+      "id": "T-KLING-TOS",
+      "party": "Kling AI (Kuaishou)",
+      "title": "Kling AI Terms of Service and membership terms for the model used (Kling 3.0 Omni, kling_o3_flf)",
+      "url": "https://kling.ai/docs/community-policy",
+      "establishes": "Whether the model owner's terms apply to a clip generated through Higgsfield, and whether commercial use of outputs depends on a Kling membership. A search summary (2026-10-11) says the Kling membership page lists commercial use as a membership benefit; the Terms of Service text itself was not retrieved. The URL given is the community policy found by search; the Terms of Service address must be captured by the owner.",
+      "status": "not-reviewed"
+    },
+    {
+      "id": "T-OFL",
+      "party": "SIL International / the font authors",
+      "title": "SIL Open Font License 1.1 and its FAQ",
+      "url": "https://openfontlicense.org/",
+      "establishes": "That the licence text shipped in fonts/LICENSES.txt is the unmodified OFL 1.1, what 'sold by itself' and the Reserved Font Name rule mean for a subset (the Noto Serif SC file is a four-glyph subset), and that embedding the fonts in a website is within the licence. The address printed inside the shipped text is http://scripts.sil.org/OFL.",
+      "status": "not-reviewed"
+    },
+    {
+      "id": "T-FONT-UPSTREAM",
+      "party": "Young Serif, Karla and Noto Serif SC projects",
+      "title": "Upstream releases, copyright notices and any Reserved Font Name for each family",
+      "url": "https://github.com/googlefonts/karla",
+      "establishes": "That each font file is a genuine upstream release (or a faithful subset), the exact copyright notice and Reserved Font Name, if any, of each family (Young Serif: github.com/noirblancrouge/YoungSerif; Karla: github.com/googlefonts/karla; Noto Serif SC: the Noto project, source not recorded in the repository), and which notice fonts/LICENSES.txt should carry for Noto Serif SC (finding F-G5-05).",
+      "status": "not-reviewed"
+    },
+    {
+      "id": "T-LEGAL",
+      "party": "The owner (legal advice if wanted)",
+      "title": "Copyright status of AI-generated images and video, and whether public display of the demonstration is a use the terms allow",
+      "url": null,
+      "establishes": "Whether rights exist in the generated outputs under the law that applies to the owner, whether the platform terms can and do assign or license what rights exist, and whether showing the demonstration publicly (a portfolio and promotional use) is permitted by the terms above. This repository cannot answer it and does not guess.",
+      "status": "not-reviewed"
+    }
+  ],
+  "assets": [
+    {
+      "path": "media/hero-wok.webp",
+      "kind": "image",
+      "description": "1920x1080 WebP",
+      "bytes": 61464,
+      "sha256": "82d60c06d902cd3e1ab7db783dcb1ef936987fd51b8cc12fbe0ba9ad0f23ae02",
+      "origin": {
+        "type": "ai-generated",
+        "service": "Hugging Face Space mcp-tools/Z-Image-Turbo (model Z-Image-Turbo, 9 steps, shift 3), via the connected Hugging Face account, free tier",
+        "generatedOn": "2026-10-09",
+        "seed": "2202 (of 1101, 2202, 3303)",
+        "postProcessing": "grade, resize, WebP q74",
+        "recordedIn": "media/PROVENANCE.md",
+        "notStored": "the unselected candidates; the account and plan details of the session"
+      },
+      "rights": {
+        "status": "unverified",
+        "established": [
+          "The generation service, model and date are recorded in media/PROVENANCE.md."
+        ],
+        "notEstablished": [
+          "Any licence or ownership of the output under the service and model terms.",
+          "Whether the free tier or the connected account changes what may be done with the output.",
+          "Whether any attribution or AI-disclosure duty applies."
+        ]
+      },
+      "termsToVerify": [
+        "T-HF-TOS",
+        "T-ZIMG-MODEL",
+        "T-ZIMG-SPACE",
+        "T-LEGAL"
+      ],
+      "useNow": "Fictional Jade & Ember demonstration only, as adopted in docs/JADE_AND_EMBER_MEDIA_RIGHTS_POLICY.md (APR-JE-023). Public deployment of the demonstration is not approved.",
+      "clientUse": "Not permitted. Replace with real photography or footage, or with media whose licence has been verified and recorded in a rights-verification approval."
+    },
+    {
+      "path": "media/hero-wok-m.webp",
+      "kind": "image",
+      "description": "810x1440 WebP",
+      "bytes": 54436,
+      "sha256": "6bf62b85bc9516c2187d820581cd9645a0c27db3a1e4f60626e3c273e179f2ee",
+      "origin": {
+        "type": "ai-generated",
+        "service": "Hugging Face Space mcp-tools/Z-Image-Turbo (model Z-Image-Turbo, 9 steps, shift 3), via the connected Hugging Face account, free tier",
+        "generatedOn": "2026-10-09",
+        "seed": "2202 (of 2202, 3303)",
+        "postProcessing": "grade, resize, WebP q74",
+        "recordedIn": "media/PROVENANCE.md",
+        "notStored": "the unselected candidates; the account and plan details of the session"
+      },
+      "rights": {
+        "status": "unverified",
+        "established": [
+          "The generation service, model and date are recorded in media/PROVENANCE.md."
+        ],
+        "notEstablished": [
+          "Any licence or ownership of the output under the service and model terms.",
+          "Whether the free tier or the connected account changes what may be done with the output.",
+          "Whether any attribution or AI-disclosure duty applies."
+        ]
+      },
+      "termsToVerify": [
+        "T-HF-TOS",
+        "T-ZIMG-MODEL",
+        "T-ZIMG-SPACE",
+        "T-LEGAL"
+      ],
+      "useNow": "Fictional Jade & Ember demonstration only, as adopted in docs/JADE_AND_EMBER_MEDIA_RIGHTS_POLICY.md (APR-JE-023). Public deployment of the demonstration is not approved.",
+      "clientUse": "Not permitted. Replace with real photography or footage, or with media whose licence has been verified and recorded in a rights-verification approval."
+    },
+    {
+      "path": "media/story-jade-bowls.webp",
+      "kind": "image",
+      "description": "1200x757 WebP",
+      "bytes": 24624,
+      "sha256": "4fe042c3aaf68faca98431d3f9125361f9fe10ec5dde2efc4d8adf81d8dd4146",
+      "origin": {
+        "type": "ai-generated",
+        "service": "Hugging Face Space mcp-tools/Z-Image-Turbo (model Z-Image-Turbo, 9 steps, shift 3), via the connected Hugging Face account, free tier",
+        "generatedOn": "2026-10-09",
+        "seed": "4404 (of 4404, 5505)",
+        "postProcessing": "candle flame behind the bowls filled from surrounding slate, crop, grade, WebP q76",
+        "recordedIn": "media/PROVENANCE.md",
+        "notStored": "the unselected candidates; the account and plan details of the session"
+      },
+      "rights": {
+        "status": "unverified",
+        "established": [
+          "The generation service, model and date are recorded in media/PROVENANCE.md."
+        ],
+        "notEstablished": [
+          "Any licence or ownership of the output under the service and model terms.",
+          "Whether the free tier or the connected account changes what may be done with the output.",
+          "Whether any attribution or AI-disclosure duty applies."
+        ]
+      },
+      "termsToVerify": [
+        "T-HF-TOS",
+        "T-ZIMG-MODEL",
+        "T-ZIMG-SPACE",
+        "T-LEGAL"
+      ],
+      "useNow": "Fictional Jade & Ember demonstration only, as adopted in docs/JADE_AND_EMBER_MEDIA_RIGHTS_POLICY.md (APR-JE-023). Public deployment of the demonstration is not approved.",
+      "clientUse": "Not permitted. Replace with real photography or footage, or with media whose licence has been verified and recorded in a rights-verification approval."
+    },
+    {
+      "path": "media/dish-mapo.webp",
+      "kind": "image",
+      "description": "1200x800 WebP",
+      "bytes": 50450,
+      "sha256": "7b9337cd2f8c44b8006244f911ae020dc420148de02dc708885a6c37f7c65f52",
+      "origin": {
+        "type": "ai-generated",
+        "service": "Hugging Face Space mcp-tools/Z-Image-Turbo (model Z-Image-Turbo, 9 steps, shift 3), via the connected Hugging Face account, free tier",
+        "generatedOn": "2026-10-09",
+        "seed": "9904 (of 6601, 6602, 9904, 9905)",
+        "postProcessing": "crop, grade, WebP q76",
+        "recordedIn": "media/PROVENANCE.md",
+        "notStored": "the unselected candidates; the account and plan details of the session"
+      },
+      "rights": {
+        "status": "unverified",
+        "established": [
+          "The generation service, model and date are recorded in media/PROVENANCE.md."
+        ],
+        "notEstablished": [
+          "Any licence or ownership of the output under the service and model terms.",
+          "Whether the free tier or the connected account changes what may be done with the output.",
+          "Whether any attribution or AI-disclosure duty applies."
+        ]
+      },
+      "termsToVerify": [
+        "T-HF-TOS",
+        "T-ZIMG-MODEL",
+        "T-ZIMG-SPACE",
+        "T-LEGAL"
+      ],
+      "useNow": "Fictional Jade & Ember demonstration only, as adopted in docs/JADE_AND_EMBER_MEDIA_RIGHTS_POLICY.md (APR-JE-023). Public deployment of the demonstration is not approved.",
+      "clientUse": "Not permitted. Replace with real photography or footage, or with media whose licence has been verified and recorded in a rights-verification approval."
+    },
+    {
+      "path": "media/dish-charsiu.webp",
+      "kind": "image",
+      "description": "1200x800 WebP",
+      "bytes": 61404,
+      "sha256": "90097aff42724f5e6dfd869d84cccb53108f4b82e8b553a98d9b2fa1db644157",
+      "origin": {
+        "type": "ai-generated",
+        "service": "Hugging Face Space mcp-tools/Z-Image-Turbo (model Z-Image-Turbo, 9 steps, shift 3), via the connected Hugging Face account, free tier",
+        "generatedOn": "2026-10-09",
+        "seed": "9903 (of 7701, 7702, 9903)",
+        "postProcessing": "crop, grade, WebP q76",
+        "recordedIn": "media/PROVENANCE.md",
+        "notStored": "the unselected candidates; the account and plan details of the session"
+      },
+      "rights": {
+        "status": "unverified",
+        "established": [
+          "The generation service, model and date are recorded in media/PROVENANCE.md."
+        ],
+        "notEstablished": [
+          "Any licence or ownership of the output under the service and model terms.",
+          "Whether the free tier or the connected account changes what may be done with the output.",
+          "Whether any attribution or AI-disclosure duty applies."
+        ]
+      },
+      "termsToVerify": [
+        "T-HF-TOS",
+        "T-ZIMG-MODEL",
+        "T-ZIMG-SPACE",
+        "T-LEGAL"
+      ],
+      "useNow": "Fictional Jade & Ember demonstration only, as adopted in docs/JADE_AND_EMBER_MEDIA_RIGHTS_POLICY.md (APR-JE-023). Public deployment of the demonstration is not approved.",
+      "clientUse": "Not permitted. Replace with real photography or footage, or with media whose licence has been verified and recorded in a rights-verification approval."
+    },
+    {
+      "path": "media/dish-dandan.webp",
+      "kind": "image",
+      "description": "1200x800 WebP",
+      "bytes": 54082,
+      "sha256": "79afeaccabae8c80d8c7d98976b0c7f1a147dadbe69f0fe08c7858bffb81bc74",
+      "origin": {
+        "type": "ai-generated",
+        "service": "Hugging Face Space mcp-tools/Z-Image-Turbo (model Z-Image-Turbo, 9 steps, shift 3), via the connected Hugging Face account, free tier",
+        "generatedOn": "2026-10-09",
+        "seed": "9902 (of 8801, 8802, 9901, 9902)",
+        "postProcessing": "crop, grade, WebP q76",
+        "recordedIn": "media/PROVENANCE.md",
+        "notStored": "the unselected candidates; the account and plan details of the session"
+      },
+      "rights": {
+        "status": "unverified",
+        "established": [
+          "The generation service, model and date are recorded in media/PROVENANCE.md."
+        ],
+        "notEstablished": [
+          "Any licence or ownership of the output under the service and model terms.",
+          "Whether the free tier or the connected account changes what may be done with the output.",
+          "Whether any attribution or AI-disclosure duty applies."
+        ]
+      },
+      "termsToVerify": [
+        "T-HF-TOS",
+        "T-ZIMG-MODEL",
+        "T-ZIMG-SPACE",
+        "T-LEGAL"
+      ],
+      "useNow": "Fictional Jade & Ember demonstration only, as adopted in docs/JADE_AND_EMBER_MEDIA_RIGHTS_POLICY.md (APR-JE-023). Public deployment of the demonstration is not approved.",
+      "clientUse": "Not permitted. Replace with real photography or footage, or with media whose licence has been verified and recorded in a rights-verification approval."
+    },
+    {
+      "path": "media/hero-loop.webm",
+      "kind": "video",
+      "description": "VP9 WebM, 1280x720, 24 fps, 5.04 s, silent",
+      "bytes": 598073,
+      "sha256": "fb89d96bb31224070bc2b167a3768ce458c2704ce1e00fd2dc1a73d0a60250fe",
+      "origin": {
+        "type": "ai-generated",
+        "service": "Higgsfield, Kling 3.0 Omni (Frames) kling_o3_flf, std, sound off, 16:9, 5 s; one paid generation, 5.0 credits",
+        "generatedOn": "2026-10-09",
+        "job": "fb505a60-fe0f-4de2-a29a-611174560655",
+        "derivedFrom": "media/hero-wok.webp used as both the start and end frame (so the terms for that image also bear on the clip)",
+        "postProcessing": "encode of the Higgsfield original; no retouch, crossfade, trim, upscale or grade",
+        "recordedIn": "media/PROVENANCE.md",
+        "notStored": "the original 1280x720 H.264 file (kept in the Higgsfield account)"
+      },
+      "rights": {
+        "status": "unverified",
+        "established": [
+          "The platform, model, job id, credits and date are recorded in media/PROVENANCE.md."
+        ],
+        "notEstablished": [
+          "Ownership of the clip and the right to use it commercially, for the plan used.",
+          "Which terms govern the clip: the platform's, the model owner's, or both.",
+          "The effect of the start frame being an output of another service."
+        ]
+      },
+      "termsToVerify": [
+        "T-HIGGS-TOU",
+        "T-KLING-TOS",
+        "T-ZIMG-MODEL",
+        "T-ZIMG-SPACE",
+        "T-LEGAL"
+      ],
+      "useNow": "Fictional Jade & Ember demonstration only, as adopted in docs/JADE_AND_EMBER_MEDIA_RIGHTS_POLICY.md (APR-JE-023). Public deployment of the demonstration is not approved.",
+      "clientUse": "Not permitted. Replace with real photography or footage, or with media whose licence has been verified and recorded in a rights-verification approval."
+    },
+    {
+      "path": "media/hero-loop.mp4",
+      "kind": "video",
+      "description": "H.264 MP4, 1280x720, 24 fps, 5.04 s, silent",
+      "bytes": 913066,
+      "sha256": "2a7d19d836b90962ee70549a1a0006f5106416023a8753458ffe2e1edeff1d6b",
+      "origin": {
+        "type": "ai-generated",
+        "service": "Higgsfield, Kling 3.0 Omni (Frames) kling_o3_flf, std, sound off, 16:9, 5 s; one paid generation, 5.0 credits",
+        "generatedOn": "2026-10-09",
+        "job": "fb505a60-fe0f-4de2-a29a-611174560655",
+        "derivedFrom": "media/hero-wok.webp used as both the start and end frame (so the terms for that image also bear on the clip)",
+        "postProcessing": "encode of the Higgsfield original; no retouch, crossfade, trim, upscale or grade",
+        "recordedIn": "media/PROVENANCE.md",
+        "notStored": "the original 1280x720 H.264 file (kept in the Higgsfield account)"
+      },
+      "rights": {
+        "status": "unverified",
+        "established": [
+          "The platform, model, job id, credits and date are recorded in media/PROVENANCE.md."
+        ],
+        "notEstablished": [
+          "Ownership of the clip and the right to use it commercially, for the plan used.",
+          "Which terms govern the clip: the platform's, the model owner's, or both.",
+          "The effect of the start frame being an output of another service."
+        ]
+      },
+      "termsToVerify": [
+        "T-HIGGS-TOU",
+        "T-KLING-TOS",
+        "T-ZIMG-MODEL",
+        "T-ZIMG-SPACE",
+        "T-LEGAL"
+      ],
+      "useNow": "Fictional Jade & Ember demonstration only, as adopted in docs/JADE_AND_EMBER_MEDIA_RIGHTS_POLICY.md (APR-JE-023). Public deployment of the demonstration is not approved.",
+      "clientUse": "Not permitted. Replace with real photography or footage, or with media whose licence has been verified and recorded in a rights-verification approval."
+    },
+    {
+      "path": "fonts/young-serif-latin-400-normal.woff2",
+      "kind": "font",
+      "description": "Young Serif Regular, Latin subset. Used for display headings.",
+      "bytes": 26992,
+      "sha256": "6ba68b9927ad2a640d32cbea050ffc2b5d0ae6cbaa785afe470da9d6bf0ef39f",
+      "licenceSection": "young-serif",
+      "origin": {
+        "type": "open-font",
+        "licence": "SIL Open Font License 1.1",
+        "recordedIn": "fonts/LICENSES.txt"
+      },
+      "rights": {
+        "status": "licence-text-shipped",
+        "established": [
+          "The full SIL Open Font License 1.1 text and a copyright notice for the family are shipped in fonts/LICENSES.txt."
+        ],
+        "notEstablished": [
+          "That the file is an unmodified upstream release or a faithful subset (no upstream hash is recorded).",
+          "The Reserved Font Name, if any, of the family."
+        ]
+      },
+      "termsToVerify": [
+        "T-OFL",
+        "T-FONT-UPSTREAM"
+      ],
+      "useNow": "Delivered with the website under the licence text shipped alongside it (SIL OFL 1.1: the fonts may not be sold by themselves; the copyright notice and licence travel with them).",
+      "clientUse": "Allowed to continue under the same licence text if the upstream sources are confirmed (T-OFL, T-FONT-UPSTREAM); keep fonts/LICENSES.txt with the fonts."
+    },
+    {
+      "path": "fonts/karla-latin-400-normal.woff2",
+      "kind": "font",
+      "description": "Karla Regular, Latin subset. Used for body text.",
+      "bytes": 13140,
+      "sha256": "250bb48fdea5ba354fa85161f3877121ef679c6f7a1ef3d8f173fb8979628906",
+      "licenceSection": "karla",
+      "origin": {
+        "type": "open-font",
+        "licence": "SIL Open Font License 1.1",
+        "recordedIn": "fonts/LICENSES.txt"
+      },
+      "rights": {
+        "status": "licence-text-shipped",
+        "established": [
+          "The full SIL Open Font License 1.1 text and a copyright notice for the family are shipped in fonts/LICENSES.txt."
+        ],
+        "notEstablished": [
+          "That the file is an unmodified upstream release or a faithful subset (no upstream hash is recorded).",
+          "The Reserved Font Name, if any, of the family."
+        ]
+      },
+      "termsToVerify": [
+        "T-OFL",
+        "T-FONT-UPSTREAM"
+      ],
+      "useNow": "Delivered with the website under the licence text shipped alongside it (SIL OFL 1.1: the fonts may not be sold by themselves; the copyright notice and licence travel with them).",
+      "clientUse": "Allowed to continue under the same licence text if the upstream sources are confirmed (T-OFL, T-FONT-UPSTREAM); keep fonts/LICENSES.txt with the fonts."
+    },
+    {
+      "path": "fonts/karla-latin-600-normal.woff2",
+      "kind": "font",
+      "description": "Karla SemiBold, Latin subset. Used for emphasis and UI text.",
+      "bytes": 13432,
+      "sha256": "2ca9205edf2d9bf34e433d00c966ee63b07c965c01290271df8fc1180d1dd99b",
+      "licenceSection": "karla",
+      "origin": {
+        "type": "open-font",
+        "licence": "SIL Open Font License 1.1",
+        "recordedIn": "fonts/LICENSES.txt"
+      },
+      "rights": {
+        "status": "licence-text-shipped",
+        "established": [
+          "The full SIL Open Font License 1.1 text and a copyright notice for the family are shipped in fonts/LICENSES.txt."
+        ],
+        "notEstablished": [
+          "That the file is an unmodified upstream release or a faithful subset (no upstream hash is recorded).",
+          "The Reserved Font Name, if any, of the family."
+        ]
+      },
+      "termsToVerify": [
+        "T-OFL",
+        "T-FONT-UPSTREAM"
+      ],
+      "useNow": "Delivered with the website under the licence text shipped alongside it (SIL OFL 1.1: the fonts may not be sold by themselves; the copyright notice and licence travel with them).",
+      "clientUse": "Allowed to continue under the same licence text if the upstream sources are confirmed (T-OFL, T-FONT-UPSTREAM); keep fonts/LICENSES.txt with the fonts."
+    },
+    {
+      "path": "fonts/noto-serif-sc-seal-600.woff2",
+      "kind": "font",
+      "description": "Noto Serif SC, a four-glyph subset (the seal characters). Used for the seal mark only.",
+      "bytes": 1016,
+      "sha256": "21668d4577a0302c4c28fb2f24af435abeb052ad826d7b8d11f1b554730e0e7d",
+      "licenceSection": "noto-serif-sc",
+      "origin": {
+        "type": "open-font",
+        "licence": "SIL Open Font License 1.1",
+        "recordedIn": "fonts/LICENSES.txt"
+      },
+      "rights": {
+        "status": "licence-text-shipped",
+        "established": [
+          "The full SIL Open Font License 1.1 text and a copyright notice for the family are shipped in fonts/LICENSES.txt."
+        ],
+        "notEstablished": [
+          "That the file is an unmodified upstream release or a faithful subset (no upstream hash is recorded).",
+          "The Reserved Font Name, if any, of the family.",
+          "The copyright notice shipped in fonts/LICENSES.txt ('Google Inc.') differs from the notice inside the font file ('(c) 2017-2024 Adobe'); finding F-G5-05."
+        ]
+      },
+      "termsToVerify": [
+        "T-OFL",
+        "T-FONT-UPSTREAM"
+      ],
+      "useNow": "Delivered with the website under the licence text shipped alongside it (SIL OFL 1.1: the fonts may not be sold by themselves; the copyright notice and licence travel with them).",
+      "clientUse": "Allowed to continue under the same licence text if the upstream sources are confirmed (T-OFL, T-FONT-UPSTREAM); keep fonts/LICENSES.txt with the fonts."
+    }
+  ]
+}

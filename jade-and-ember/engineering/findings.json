@@ -83,6 +83,17 @@
       "description": "At 390 px the Menu page's category strip (.jump ul, overflow-x:auto) scrolls. Firefox makes any scrollable container a keyboard focus stop, so Tab lands once on the <ul> before its links. The element is not an interactive control and has no focus ring of its own in the v0.8 design; Chromium (141 locally, 156 in CI) and WebKit do not stop there. The check reports the stop instead of hiding it.",
       "proposal": "Recommended: accept. This is Firefox's intended access to scrolled content and it adds one extra Tab stop on one page at phone width. A visible focus ring on the strip would be a visual change and needs the owner's approval; no change was made.",
       "ledger": "ENG-G5-03"
+    },
+    {
+      "id": "F-G5-05",
+      "check": "media",
+      "key": "media:font-notice:noto-serif-sc",
+      "severity": "Minor",
+      "visual": false,
+      "status": "open: proposed correction awaits the owner (Gate 5 Phase 5). Nothing is changed in the delivered fonts folder.",
+      "description": "fonts/LICENSES.txt prints 'Google Inc.' as the copyright notice of the Noto Serif SC section, while the font file noto-serif-sc-seal-600.woff2 carries '(c) 2017-2024 Adobe (http://www.adobe.com/).' in its own name table. The SIL Open Font License requires each copy to carry the copyright notice; the two notices in the delivered folder name different parties. Young Serif and Karla agree with their files.",
+      "proposal": "Replace the Noto Serif SC section of fonts/LICENSES.txt with the upstream licence file for the exact source the subset was cut from, including its copyright line and any Reserved Font Name statement (T-FONT-UPSTREAM in the media rights inventory). It is a text-file change in the delivered folder: it needs an allowlist entry for the v0.8 baseline comparison and the owner's approval, and it changes no pixel. Also record the upstream source and hash of the subset.",
+      "ledger": "ENG-G5-05"
     }
   ]
 }

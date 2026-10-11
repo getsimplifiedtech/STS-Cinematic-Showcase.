@@ -154,3 +154,36 @@ jobs:
           sudo apt-get install -y --no-install-recommends ffmpeg
       - name: Cross-browser verification in WebKit
         run: node engineering/cross-browser.mjs --engine webkit
+
+  # Informational (Gate 5, Phase 5): ask the network about every external destination the demonstration carries (HEAD, then GET; redirects followed and
+  # recorded; TLS verified; one retry) and print the dated, classified result. Only "verified" is a pass: blocked, unavailable and inconclusive answers are
+  # reported as such. It reads the repository and the public internet, writes nothing and never fails the run; a person copies the printed record into
+  # engineering/external-links-verification.json.
+  external-links:
+    name: 'external links (informational)'
+    runs-on: ubuntu-24.04
+    continue-on-error: true
+    timeout-minutes: 15
+    defaults:
+      run:
+        shell: bash
+        working-directory: jade-and-ember
+    steps:
+      - name: Check out the repository
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - name: Set up Node.js
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
+        with:
+          node-version: '22.22.0'
+          cache: npm
+          cache-dependency-path: jade-and-ember/package-lock.json
+      - name: Install the pinned development tools (lockfile only, no install scripts)
+        run: npm ci --ignore-scripts
+      - name: Verify the external destinations (record printed in the log)
+        run: |
+          node engineering/tools/external-links.mjs inventory
+          node engineering/tools/external-links.mjs verify
+          node engineering/tools/external-links.mjs verify --json --runner github-actions --note "GitHub-hosted ubuntu-24.04 runner with open outbound network; TLS is verified against the runner's own certificate store" --run "$GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID"

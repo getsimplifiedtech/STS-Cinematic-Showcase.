@@ -1,0 +1,10 @@
+{
+  "$comment": "Gate 5 Phase 5 (APR-JE-033). Every external address that appears in the files the demonstration delivers: one clickable link and a few addresses printed as plain text. check:links fails on any external address that is not listed here (a new destination needs a recorded decision) and on an entry that no longer appears. 'link' is an attribute value in markup; 'mention' is text a visitor could read but no page links to. XML namespaces and schema.org identifiers are not destinations and are not listed. A client build adds its own destinations (ordering URL, map, social links) from its configuration; those are verified per client (see EXTERNAL-LINKS-GATE5.md for the proposed release requirement). The mentions inside fonts/LICENSES.txt are the licence texts' own printed addresses, copied from the upstream licences and not edited.",
+  "destinations": [
+    { "id": "EXT-01", "url": "https://getsimplifiedtech.com/", "kind": "link", "purpose": "Credit link 'Website concept by Simplified Tech Solutions' in the footer of every page", "files": ["index.html", "menu.html", "order-online.html", "our-story.html", "visit-us.html"] },
+    { "id": "EXT-02", "url": "https://getsimplifiedtech.com/", "kind": "mention", "purpose": "The same address as it is written in the site configuration, the source of the credit link", "files": ["config/site.json"] },
+    { "id": "EXT-03", "url": "http://scripts.sil.org/OFL", "kind": "mention", "purpose": "Address of the SIL Open Font License text and FAQ, printed inside each font licence in fonts/LICENSES.txt (http, as printed by the licence itself)", "files": ["fonts/LICENSES.txt"] },
+    { "id": "EXT-04", "url": "https://github.com/googlefonts/karla", "kind": "mention", "purpose": "Upstream project of the Karla font, printed in its copyright line in fonts/LICENSES.txt", "files": ["fonts/LICENSES.txt"] },
+    { "id": "EXT-05", "url": "https://github.com/noirblancrouge/YoungSerif", "kind": "mention", "purpose": "Upstream project of the Young Serif font, printed in its copyright line in fonts/LICENSES.txt", "files": ["fonts/LICENSES.txt"] }
+  ]
+}

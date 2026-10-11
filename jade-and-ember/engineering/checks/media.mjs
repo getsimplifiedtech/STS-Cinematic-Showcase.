@@ -6,17 +6,22 @@
 //   loading      one fetchpriority=high image per page and never lazy; every other image lazy; preload only the fonts and the priority image
 //   video        muted, looping, inline, no autoplay or controls, hidden from assistive technology and the tab order, not preloaded
 //   provenance   every file in media/ has a row in PROVENANCE.md, and the file states rights (audit finding m-8)
+//   rights       (Gate 5 Phase 5) engineering/media-rights-inventory.json covers every image, video and font, matches their bytes, marks nothing verified
+//                without a recorded rights-verification approval, never calls generated media licensed, and for fonts finds the licence text and a
+//                copyright notice that agrees with the one inside the font file
 //   motion       (browser) reduced motion, Save-Data and a 2g connection load no video and run no animation; every page that moves
 //                offers a Pause control; Pause stops the motion; video loads only at the widths and states where it is meant to
 // Failures are reconciled with engineering/findings.json.
-import { readFileSync, readdirSync } from 'node:fs';
+import { existsSync, readFileSync, readdirSync } from 'node:fs';
 import { join } from 'node:path';
 import { reconcile } from '../lib/findings.mjs';
 import { readMp4, readWebm, readWebp, sniff } from '../lib/media.mjs';
 import { ffmpegAvailable, flashStats } from '../lib/flash.mjs';
 import { withSite } from '../lib/runtime.mjs';
 import { assembleCandidate, pagesOf } from '../lib/site.mjs';
-import { isMain, listFiles, projectDir, readJson, repoRoot } from '../lib/git.mjs';
+import { engDir, isMain, listFiles, projectDir, readJson, repoRoot } from '../lib/git.mjs';
+import { mediaRightsProblems } from '../lib/media-rights.mjs';
+import { loadApprovals } from '../lib/approvals.mjs';
 import { rmSync } from 'node:fs';
 
 const attr = (tag, name) => { const m = new RegExp(`(?:^|\\s)${name}(?:="([^"]*)")?(?=[\\s>/])`).exec(tag); return m ? (m[1] ?? '') : null; };
@@ -122,6 +127,15 @@ export function checkMediaStatic(root, cfgRoot = projectDir) {
   const prov = readFileSync(join(root, 'media', 'PROVENANCE.md'), 'utf8');
   for (const f of files) if (!prov.includes(f)) bad('provenance-row', f, `media/${f} has no entry in media/PROVENANCE.md`);
   if (!/\b(licen[cs]e|rights|copyright|terms of use)\b/i.test(prov)) bad('provenance-rights', 'PROVENANCE.md', 'media/PROVENANCE.md states no licence or rights terms for the generated media (audit finding m-8)');
+  // rights inventory (Gate 5 Phase 5): nothing here asserts a right; it checks that the record of what is and is not established is complete and true to the files
+  try {
+    const inventory = readJson(join(engDir, 'media-rights-inventory.json'));
+    const licenceText = existsSync(join(root, 'fonts', 'LICENSES.txt')) ? readFileSync(join(root, 'fonts', 'LICENSES.txt'), 'utf8') : null;
+    if (licenceText === null) bad('rights-inventory', 'fonts/LICENSES.txt', 'fonts/LICENSES.txt is missing: the fonts must travel with their licence text');
+    const r = mediaRightsProblems({ inventory, root, approvals: loadApprovals(), licenceText });
+    for (const p of r.problems) bad('rights-inventory', p.key, p.detail);
+    for (const n of r.notices) bad('font-notice', n.family, n.detail);
+  } catch (e) { bad('rights-inventory', 'inventory', `the media rights inventory cannot be read (${e.message})`); }
   return { measured, stats: { files: files.length, videos: 2, pages: pagesOf(root).length } };
 }
 

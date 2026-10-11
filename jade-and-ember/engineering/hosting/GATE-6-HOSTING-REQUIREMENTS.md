@@ -38,3 +38,13 @@ The owner closed Phase 3 on 2026-10-11 and decided the six open questions. This 
 4. HSTS `includeSubDomains` is a per-client opt-in (D-P3-4).
 5. Every adapter writes the `X-Robots-Tag: noindex, nofollow` header for the demonstration channel and never for an indexable client build (Phase 4 added it to `_headers`, nginx and Apache; the Vercel rendering must add it).
 6. Provider documentation re-verified and filed before any adapter is implemented (D-P3-6).
+
+## Added by the Phase 4 decisions (`APR-JE-033`)
+
+| ID | Decision | Gate 6 requirement |
+|---|---|---|
+| D-P4-1 | Evaluate DuckAssistBot and Meta-ExternalFetcher | Re-read the providers' official crawler pages first, then decide the class (the evidence record is `engineering/search-crawler-verification.json`); no policy change before that |
+| D-P4-2 | Keep Restaurant JSON-LD for Jade & Ember | The master framework supports industry-specific schemas (Restaurant is one; the framework needs a way to select the schema type per industry, with the same rule: only verified facts) |
+| D-P4-3 | No social-preview image until media rights are confirmed | The master framework supports approved images (a configured, rights-recorded image producing `og:image`, `twitter:card` and dimensions; Jade & Ember configures none) |
+| D-P4-4 | Dated human review of crawler documentation before client release | Already enforced by the release gate (`confirmedByPerson`, under 180 days) |
+| D-P4-5 | Remove HSTS `includeSubDomains` as a default | Done in the hosting-adapter integration, as one change for every host (also D-P3-4) |

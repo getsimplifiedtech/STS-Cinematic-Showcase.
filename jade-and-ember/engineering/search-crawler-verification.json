@@ -158,7 +158,7 @@
       "source": "https://duckduckgo.com/duckduckgo-help-pages/results/duckassistbot",
       "verifiedOn": "2026-10-11",
       "finding": "A separate crawler that fetches pages in real time for DuckDuckGo's AI-assisted answers, which cite sources; publishers opt out by disallowing it in robots.txt (about 72 hours); opting out does not affect organic search ranking.",
-      "recommendation": "Add to the aiSearch class. Not added in Phase 4: it changes the robots.txt a client gets when AI search is disallowed, so it needs the owner's approval (D-P4-1)."
+      "recommendation": "Owner decision D-P4-1 (APR-JE-033): evaluate for Gate 6 and verify the provider's official crawler documentation before assigning a policy class. Not added to the policy now."
     },
     {
       "agent": "Meta-ExternalFetcher",
@@ -167,7 +167,7 @@
       "source": "https://developers.facebook.com/documentation/sharing/webmasters/web-crawlers",
       "verifiedOn": "2026-10-11",
       "finding": "Retrieves individual links when a user asks for them; Meta says it may bypass robots.txt because the fetches are user-initiated.",
-      "recommendation": "Add to the aiSearch class beside the other user-initiated agents, with the same stated limit. Needs the owner's approval (D-P4-1)."
+      "recommendation": "Owner decision D-P4-1 (APR-JE-033): evaluate for Gate 6 and verify the provider's official crawler documentation before assigning a policy class. Not added to the policy now."
     },
     {
       "agent": "OAI-AdsBot",
