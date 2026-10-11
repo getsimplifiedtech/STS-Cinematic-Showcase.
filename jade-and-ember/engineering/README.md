@@ -110,4 +110,6 @@ Firefox and WebKit runs (the harness accepts `--browser firefox|webkit`; those b
 
 Gate 4 added `DEPENDENCY-ADVISORIES.md` (evaluation of the 11 high development-dependency advisories), `HOSTING.md` (static folder, Cloudflare Pages, host-aware URLs and the platform split) and, in the reconciliation, `SEARCH-READINESS.md`. The interaction-latency investigation is in `CI.md`.
 
+Gate 5 Phase 3 added `hosting/` (documents only, `APR-JE-031`): the hosting compatibility matrix, Cloudflare deployment requirements, the Vercel adapter specification, the reusable adapter interface, the unresolved hosting risks and the live-deployment verification checklist. No adapter, deployment or configuration file was created.
+
 Other documents here: `ENG-SECURITY.md` (security by delivery mode, the CSP, decision D-11), `CI.md` (the workflow and runner requirements). See `../../docs/JADE_AND_EMBER_V0.9_IMPLEMENTATION_PLAN.md`.

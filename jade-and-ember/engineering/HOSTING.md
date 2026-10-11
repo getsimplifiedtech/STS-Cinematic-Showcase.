@@ -4,6 +4,8 @@ The deliverable is a **plain static folder**: five HTML pages, `styles.css`, thr
 
 Nothing in this repository deploys anything. Deployment of any build needs a recorded release approval (`APPROVALS`, section B) and, for a client, the release gate below.
 
+**Gate 5 Phase 3 (`APR-JE-031`) assessed this implementation against Cloudflare Pages and Vercel: see [`hosting/`](hosting/README.md)** (compatibility matrix, Cloudflare requirements, Vercel adapter specification, adapter interface, unresolved risks, live-verification checklist). It found, among other things, that the simulations below do not model cache rules, unknown-path behaviour or `.xml` types, and that the folder `check:hosting` inspects is not the folder that would be uploaded. Nothing described there is implemented.
+
 ## Cloudflare Pages settings (the deployment model Gate 4 preserves)
 
 | Setting | Value |
@@ -21,7 +23,7 @@ Pretty URLs (`/menu` for `/menu.html`) are done by Cloudflare Pages itself; the 
 
 | Limit | Value | Where it is checked |
 |---|---|---|
-| Files in a deployment | 20,000 | folder walk (the site has 23 to 27) |
+| Files in a deployment | 20,000 (the Free plan; paid plans allow 100,000 since January 2026 with a project setting, per Cloudflare's changelog; the lower figure is kept on purpose) | folder walk (the site has 27) |
 | Size of one file | 25 MiB | folder walk (the largest file, the hero video, is a small fraction of the limit) |
 | Rules in `_headers` | 100 | generated file (about 7) |
 | Length of one `_headers` line | 2,000 characters | generated file (the CSP line is the longest) |
