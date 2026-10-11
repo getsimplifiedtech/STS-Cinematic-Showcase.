@@ -64,11 +64,14 @@ An independent reviewer attacked the first implementation and found 12 issues (t
 
 ## 6. Full verification and CI
 
-{{VERIFY}}
+* **Local, Node 24.21.0, Chromium 141 (`/opt/pw-browsers/chromium-1194`), `STS_REQUIRE_AUDIT=1`, clean tree at `3ccd0a7`: `npm run verify` passed 40 of 40 checks in 19 min 38 s.** Verification record: candidate `b69fc21a70d610a2827d275a22dc4c14f049767f6fb8dd6db3b03a48955f02ff`, engine `29f780324089d9ac…`, seal `e1e391814cbfe0e0171783a10a479aca02846ca7ed6c65d0a7cb027b6ca8832e`. The delivered-files tree hash is unchanged.
+* **Release dry run:** 253 of 253 scenarios as expected (`g6-2-evidence/dry-run-after.json`); `check:release`: a fully approved client build passes, 113 of 113 single defects each block it, 11 of 11 must-not-block cases do not, 8 of 8 demonstration defects block; `check:selftest-gate6`: 77 tests.
+* **GitHub Actions** (confirmed from the API): run 54, commit `3ccd0a7`, **all seven jobs successful** (Chromium `verify` on Node 24.21.0, Lighthouse informational, Firefox, WebKit, macOS fast checks, external links, supply chain report). Earlier G6-2 runs: 50 cancelled (superseded), 51 success, 52 **failure** (one self-test matched the old wording of an error message; fixed), 53 cancelled (superseded). `CI.md` has the table.
+* Scope: `npm run gate6:scope -- G6-2` reports every change inside the authorised scope; `npm run gate5:closure` still SUPPORTS closure; `check:framework-matrix` is current (295 files).
 
 ## 7. Commit
 
-{{COMMIT}}
+Code and gate: `f16df11` (identical code in `3ccd0a7`, which adds the draft report and evidence). Branch `feature/jade-and-ember-v0.9`; the final documentation commit is the head of that branch. Not merged, not deployed; no pull request opened.
 
 ## 8. Remaining release blockers and open decisions
 
