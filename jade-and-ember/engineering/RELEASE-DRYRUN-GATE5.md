@@ -1,5 +1,7 @@
 # Gate 5 Phase 7: release readiness dry run (`APR-JE-035`)
 
+> **G6-2 update (2026-10-11, `APR-JE-039`).** The model this dry run measured (Markdown rows, `HEAD` binding, a hand-writable report) was replaced in G6-2; findings RG-01 and RG-04 to RG-09 and RG-13 are now blocked by scenarios of the rebuilt dry run (`G6-2-REPORT.md` gives the before-and-after result for each). RG-02, RG-03, RG-10 to RG-12 belong to G6-3 and G6-4, and RG-14 stays open pending the owner's decision on signing or attestation. The text below is the Phase 7 measurement as delivered.
+
 **Status: delivered for owner review.** Nothing was deployed, published, merged or approved. No release policy, gate rule, workflow, dependency, page, style, font or media file changed. The framework repository was not touched. The tooling added is a test harness and a read-only package verifier; the release tool itself (`engineering/tools/release.mjs`), its gate (`lib/release.mjs`), the release policy, the workflow, the lockfile and every delivered file are unchanged since Phase 4 / `c20cc8b` (`git diff` is empty); `package.json` gained two script lines (`check:release-dryrun`, `release:verify-package`).
 
 ## 1. Result in brief

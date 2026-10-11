@@ -1,5 +1,7 @@
 # Gate 5 Phase 5: media rights inventory and outstanding evidence (`APR-JE-033`)
 
+> **G6-2 update (2026-10-11, `APR-JE-039`).** A rights verification is now a structured record (`engineering/release/approvals/`, type `rights-verification`, status `approved`, `subject.sources` and `subject.verifiedOn`) bound to the candidate artifact digest, whose parts include the media-rights inventory. Binding it to individual inventory entries (D-P5-4) remains G6-3. Where this document says "approval row", read "approval record".
+
 **Status: APPROVED and CLOSED for engineering assessment and verification by the owner (`APR-JE-034`).** **No licence or right in any generated image or video has been established, and none is asserted anywhere in this document or in the repository.** This is an inventory of what each asset is, what the repository records about where it came from, what is *not* established, and which official terms a person has to read. It was produced without legal advice and cannot establish legal rights. Nothing was generated, replaced or changed; the approved design and media are untouched.
 
 Machine-readable form: `engineering/media-rights-inventory.json`, validated by `check:media`. Policy: `docs/JADE_AND_EMBER_MEDIA_RIGHTS_POLICY.md` (APR-JE-023): the generated media is for the fictional demonstration only; replace it for any real client; the review "has not yet been performed".

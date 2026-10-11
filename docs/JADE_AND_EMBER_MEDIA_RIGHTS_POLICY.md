@@ -13,7 +13,7 @@
 
 ## How the policy is enforced
 - `check:media` keeps reporting that `PROVENANCE.md` states no licence terms as a **known, accepted finding** (F-G2-01), so the gap stays visible in every run and cannot be mistaken for a pass.
-- The release gate (`check:release`, `npm run release:gate`) requires, for any client-production build, a recorded **media-rights verification** (a `rights-verification` approval row naming the verifier, the sources reviewed and the date) before the build can pass. None exists, so no client-production build can pass today.
+- The release gate (`check:release`, `npm run release:gate`) requires, for any client-production build, a recorded **media-rights verification** (a `rights-verification` approval record (since G6-2 a structured record in `engineering/release/approvals/`, earlier a row in the approvals log) naming the verifier, the sources reviewed and the date) before the build can pass. None exists, so no client-production build can pass today.
 - Nothing in documentation, pages, the manifest or the structured data may state that the media is licensed, owned, free to use or cleared; `check:seo` and `check:release` scan for such wording in generated output.
 
 ## What would change this

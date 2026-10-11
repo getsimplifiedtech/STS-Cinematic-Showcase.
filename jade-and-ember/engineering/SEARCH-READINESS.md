@@ -21,7 +21,7 @@ Maps the STS framework standard `architecture/11-core-search-ai-discovery-readin
 | 9 Crawler policy per client, separating search, AI retrieval and training | `seo.crawlers` | `robotsProblems` | automated; the agent list was re-checked on 2026-10-11 (`search-crawler-verification.json`); a person must re-read the pages before release (below) |
 | 10 Search assets in the deployable output, root and subpath semantics | `build.mjs` | `check:hosting`; a base URL with a path draws a warning because `robots.txt` is only read at the domain root | automated; live check needed |
 | Environment controls: no demo or staging leakage, no secrets or private paths | | `check:seo` (`hostProblems`, internal-path and demo-wording scans of `llms.txt`), release gate `productionDomain` | automated |
-| Human review gate: facts, schema choice, crawler policy | | release gate `searchReadiness` + a `search-review` approval bound to the artifacts' digest | **human** |
+| Human review gate: facts, schema choice, crawler policy | | release gate `searchReadiness` + a `search-review` approval record (G6-2: a structured record in `release/approvals/`) bound to the artifacts' digest and to the candidate artifact | **human** |
 
 ## Configuration (all optional; absent means the previous behaviour)
 
@@ -59,7 +59,7 @@ A client-production release needs, in addition to the release approval and right
 1. `seo.host` declared and every crawler class decided;
 2. `sitemap.xml`, `robots.txt`, `llms.txt` and the Home JSON-LD present in the build;
 3. a production domain: `seo.baseUrl` is not a reserved, example, local or preview/staging name (`*.test`, `example.com`, `localhost`, IP addresses, `*.pages.dev`, `*.vercel.app`, `*.netlify.app`, `*.github.io`, labels such as `staging` or `preview`, and similar);
-4. a **search-review** row in `docs/JADE_AND_EMBER_APPROVALS.md`: *Reviewed by NAME on DATE: business facts, structured data, crawler policy. digest: SHA-256*, where the digest is the output of `npm run release:search-digest` for exactly this build. Changing any fact, URL or crawler rule changes the digest and invalidates the review. The person checks: every fact against the client, the schema.org type, the crawler classes against the client's wishes and the provider pages (and re-reads those pages, recording it in `search-crawler-verification.json`), and the production domain.
+4. a **search-review** record in `engineering/release/approvals/` (G6-2; `npm run release:record -- template search-review` prints it with the digest filled in and no decision): `status: approved`, `subject.searchDigest` equal to the output of `npm run release:search-digest`, `subject.reviewed` listing `business-facts`, `structured-data` and `crawler-policy`, made by a reviewer named in `release/reviewers.json`. (Earlier gates recorded this as a row in the approvals ledger; those rows are no longer read.)
 
 No such row exists, and none may be written for work that was not done.
 
