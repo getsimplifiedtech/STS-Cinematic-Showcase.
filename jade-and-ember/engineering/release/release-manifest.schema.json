@@ -698,6 +698,7 @@
             "securityPolicy",
             "mediaRights",
             "externalDestinations",
+            "packageExtras",
             "framework",
             "engines"
           ],
@@ -798,6 +799,24 @@
                   "type": "string"
                 },
                 "lockfileSha256": {
+                  "type": "string",
+                  "pattern": "^[0-9a-f]{64}$"
+                }
+              }
+            },
+            "packageExtras": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "servePy",
+                "startHereTemplate"
+              ],
+              "properties": {
+                "servePy": {
+                  "type": "string",
+                  "pattern": "^[0-9a-f]{64}$"
+                },
+                "startHereTemplate": {
                   "type": "string",
                   "pattern": "^[0-9a-f]{64}$"
                 }

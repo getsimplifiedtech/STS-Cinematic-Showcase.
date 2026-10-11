@@ -14,10 +14,12 @@
 //
 // What this proves: the records are well formed, bound to the candidate, in force, and made by a NAMED reviewer who the reviewer table authorises.
 // What it cannot prove: that the named person made them. That needs a signature or an external attestation (design section 12, owner decision).
-import { existsSync, readFileSync, readdirSync } from 'node:fs';
+import { existsSync, lstatSync, readFileSync, readdirSync } from 'node:fs';
 import { join } from 'node:path';
+import { spawnSync } from 'node:child_process';
 import { engDir, readJson } from './git.mjs';
-import { isReservedHost } from '../../src/lib/seo.mjs';
+import { parseStrictJson } from './strict-json.mjs';
+import { isReservedHost } from './hosts.mjs';
 
 export const APPROVAL_SCHEMA = 'jade-and-ember/approval-record@1';
 export const DEPLOYMENT_SCHEMA = 'jade-and-ember/deployment-record@1';
@@ -34,17 +36,41 @@ export const TYPES = {
 export const SEARCH_REVIEWED = ['business-facts', 'structured-data', 'crawler-policy'];
 const HEX64 = /^[0-9a-f]{64}$/;
 const isDate = (s) => typeof s === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(s) && new Date(`${s}T00:00:00Z`).toISOString().slice(0, 10) === s;
-const isStamp = (s) => typeof s === 'string' && /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(\.\d+)?Z$/.test(s) && !Number.isNaN(Date.parse(s));
+// a UTC date-time to the second, that is a real instant (2026-02-30 and T24:00:00 are refused, not rolled over)
+const isStamp = (s) => typeof s === 'string' && /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}Z$/.test(s) && new Date(s).toISOString() === s.replace('Z', '.000Z');
+const isStr = (v) => typeof v === 'string';
 const text = (s, n) => typeof s === 'string' && s.trim().length >= n;
 
 export const familyDir = (family, eng = engDir) => join(eng, 'release', family);
 
-// Every *.json file of a family folder: { file, record } or { file, record: null, parseError }.
-export function loadFamily(family, eng = engDir) {
-  const dir = familyDir(family, eng);
+// Every entry of a family folder. The folder holds README.md and `<PREFIX>-JE-nnn.json` record files and NOTHING else: a file the gate does not read is a file
+// that could hide a rejection, so any other entry (a backup, a sub-folder, a symlink, a differently cased name) is itself an error that blocks (G6-2 review, F3).
+// A record file must be named for its own id and belong to this family. `tracked`: every record file must be committed (a file git ignores or has left out of the
+// index is not part of the repository a reviewer sees); the release gate asks for it, the package verifier (which has no repository) does not.
+// Returns { file, record } or { file, record: null, parseError }.
+export function loadFamily(family, eng = engDir, { tracked = false, dir: where = null } = {}) {
+  const dir = where || familyDir(family, eng);
   if (!existsSync(dir)) return [];
-  return readdirSync(dir).filter((f) => f.endsWith('.json')).sort().map((f) => {
-    try { return { file: f, record: JSON.parse(readFileSync(join(dir, f), 'utf8')) }; } catch (e) { return { file: f, record: null, parseError: `not valid JSON (${String(e.message).slice(0, 60)})` }; }
+  const prefixes = Object.values(TYPES).filter((t) => t.family === family).map((t) => t.prefix);
+  const nameRe = new RegExp(`^(${prefixes.join('|')})-JE-\\d{3,}\\.json$`);
+  let committed = null;
+  if (tracked) {
+    const r = spawnSync('git', ['-C', dir, 'ls-files', '-z', '--', '.'], { encoding: 'utf8' });
+    committed = r.status === 0 ? new Set(r.stdout.split('\0').filter(Boolean)) : false;
+  }
+  return readdirSync(dir).sort().flatMap((f) => {
+    if (f === 'README.md' || f === '.gitkeep') return [];
+    const st = lstatSync(join(dir, f));
+    if (!nameRe.test(f) || !st.isFile()) return [{ file: f, record: null, parseError: `unexpected entry in ${family}/: only README.md and ${prefixes.map((x) => `${x}-JE-nnn.json`).join(' / ')} record files are allowed (a symlink, sub-folder, backup or other file is never read, so it is refused)` }];
+    if (tracked && (committed === false || !committed.has(f))) return [{ file: f, record: null, parseError: committed === false ? 'cannot confirm that this record is committed (not a git checkout)' : 'this record file is not committed to the repository (untracked, ignored or removed from the index)' }];
+    try {
+      const record = parseStrictJson(readFileSync(join(dir, f), 'utf8'));
+      if (record && typeof record === 'object' && !Array.isArray(record)) {
+        if (record.id + '.json' !== f) return [{ file: f, record: null, parseError: `the file name must be the record id (${record.id}.json)` }];
+        if (!isStr(record.type) || !Object.hasOwn(TYPES, record.type) || TYPES[record.type].family !== family) return [{ file: f, record: null, parseError: `a ${record.type} record does not belong in ${family}/` }];
+      }
+      return [{ file: f, record }];
+    } catch (e) { return [{ file: f, record: null, parseError: `not valid JSON (${String(e.message).slice(0, 60)})` }]; }
   });
 }
 
@@ -92,25 +118,25 @@ export function authorise(rec, table) {
 
 // ---- one record, on its own ---------------------------------------------------------------------------------------------------------------------------------
 // Structure only: no judgement about the build. Returns [problem].
-export function validateRecordShape(r, { today }) {
+export function validateRecordShape(r, { today, now = null }) {
   const p = [], bad = (m) => p.push(m);
   if (!r || typeof r !== 'object' || Array.isArray(r)) return ['the record is not a JSON object'];
   const dep = r.type === 'deployment-authorisation';
   if (r.schema !== (dep ? DEPLOYMENT_SCHEMA : APPROVAL_SCHEMA)) bad(`schema must be "${dep ? DEPLOYMENT_SCHEMA : APPROVAL_SCHEMA}"`);
-  const ty = TYPES[r.type];
+  const ty = isStr(r.type) && Object.hasOwn(TYPES, r.type) ? TYPES[r.type] : null;
   if (!ty) { bad(`type "${r.type}" is not one of: ${Object.keys(TYPES).join(', ')}`); return p; }
-  if (!new RegExp(`^${ty.prefix}-JE-\\d{3,}$`).test(r.id || '')) bad(`id must look like ${ty.prefix}-JE-001 for a ${r.type}`);
+  if (!isStr(r.id) || !new RegExp(`^${ty.prefix}-JE-\\d{3,}$`).test(r.id)) bad(`id must look like ${ty.prefix}-JE-001 for a ${r.type}`);
   if (!STATUSES.includes(r.status)) bad(`status must be one of ${STATUSES.join(', ')} (got "${r.status}")`);
-  if (!HEX64.test(r.candidate || '')) bad('candidate must be the 64-hex candidate artifact digest');
+  if (!isStr(r.candidate) || !HEX64.test(r.candidate)) bad('candidate must be the 64-hex candidate artifact digest');
   if (!['client-production', 'demonstration'].includes(r.channel)) bad('channel must be client-production or demonstration');
-  if (!/^\d+\.\d+\.\d+(-[0-9A-Za-z.-]+)?$/.test(r.version || '')) bad('version must be x.y.z');
+  if (!isStr(r.version) || !/^\d+\.\d+\.\d+(-[0-9A-Za-z.-]+)?$/.test(r.version)) bad('version must be x.y.z');
   const by = r.decidedBy || {};
   if (!/^R-\d{2,}$/.test(by.reviewer || '') || !text(by.name, 3)) bad('decidedBy must carry the reviewer id (R-nn) and name');
   if (!isStamp(r.decidedAt)) bad('decidedAt must be a UTC date-time (2026-10-12T09:30:00Z)');
-  else if (r.decidedAt.slice(0, 10) > today) bad(`decidedAt ${r.decidedAt} is in the future`);
+  else if (now ? Date.parse(r.decidedAt) > Date.parse(now) : r.decidedAt.slice(0, 10) > today) bad(`decidedAt ${r.decidedAt} is in the future`);
   if (!text(r.rationale, 10)) bad('rationale must say why (at least 10 characters; it is for people and is never read by the gate)');
   const ends = r.status === 'revoked' || r.status === 'superseded';
-  if (ends && !new RegExp(`^${ty.prefix}-JE-\\d{3,}$`).test(r.ends || '')) bad(`a ${r.status} record must name the record it ends in "ends" (${ty.prefix}-JE-nnn)`);
+  if (ends && (!isStr(r.ends) || !new RegExp(`^${ty.prefix}-JE-\\d{3,}$`).test(r.ends))) bad(`a ${r.status} record must name the record it ends in "ends" (${ty.prefix}-JE-nnn)`);
   if (!ends && r.ends !== undefined) bad('"ends" is only allowed on a revoked or superseded record');
   const s = r.subject;
   if (!s || typeof s !== 'object' || Array.isArray(s)) { bad('subject must be an object'); return p; }
@@ -128,7 +154,7 @@ export function validateRecordShape(r, { today }) {
 // Returns { met, detail, errors[], inForce[], rows[] } for ONE record type.
 export function resolve(entries, type, ctx) {
   const rows = [], errors = [];
-  const mine = [], shaped = [];
+  const mine = [], shaped = [], seenIds = new Map();
   for (const e of entries) {
     if (e.parseError || !e.record) { errors.push(`${e.file}: ${e.parseError || 'not readable'}`); rows.push({ file: e.file, id: null, state: `invalid: ${e.parseError || 'not readable'}` }); continue; }
     const r = e.record;
@@ -137,6 +163,8 @@ export function resolve(entries, type, ctx) {
       // a malformed record of unknown type cannot be told from a decision about this one: it blocks, whatever it was meant to be
       errors.push(`${e.file}: ${shape[0]}`); rows.push({ file: e.file, id: r?.id ?? null, state: `invalid: ${shape.join('; ')}` }); continue;
     }
+    if (seenIds.has(r.id)) { errors.push(`${e.file}: the id ${r.id} is used by more than one record (${seenIds.get(r.id)}): ids are unique, an ending names exactly one record`); rows.push({ file: e.file, id: r.id, state: `invalid: duplicate id (also ${seenIds.get(r.id)})` }); continue; }
+    seenIds.set(r.id, e.file);
     shaped.push(r);
     if (r.type !== type) continue;   // a valid record of another type: counted by that type's resolution
     const base = { file: e.file, id: r.id, status: r.status, by: r.decidedBy.name, at: r.decidedAt };
@@ -149,6 +177,9 @@ export function resolve(entries, type, ctx) {
     }
     mine.push({ ...base, r, authorisedAs: auth.why });
   }
+  // both records of a duplicated id are invalid (the first one was read before the second was seen)
+  const dups = new Set(rows.filter((x) => x.state?.startsWith('invalid: duplicate id')).map((x) => x.id));
+  for (const id of dups) { for (const m of [...mine]) if (m.id === id) { mine.splice(mine.indexOf(m), 1); rows.push({ file: m.file, id, state: 'invalid: duplicate id' }); } }
   // an ending that names a record of another candidate, channel or version is a mistake we cannot tell from an attempt: it blocks (fail closed)
   for (const r of shaped) {
     if (r.status !== 'revoked' && r.status !== 'superseded') continue;
@@ -163,7 +194,8 @@ export function resolve(entries, type, ctx) {
     if (!t) { errors.push(`${m.file}: ${m.status} record ends ${m.r.ends}, which is not a ${type} for this candidate`); m.state = 'invalid: ends nothing'; continue; }
     if (t.status === 'revoked' || t.status === 'superseded') { errors.push(`${m.file}: ${m.r.ends} is itself a ${t.status} record; revocation is final, record a new decision instead`); m.state = 'invalid: ends an ending'; continue; }
     if (m.status === 'revoked' && t.status !== 'approved') { errors.push(`${m.file}: a revocation can end only an approval; ${t.id} is ${t.status} (use a superseded record)`); m.state = 'invalid: revokes a non-approval'; continue; }
-    if (m.at < t.at) { errors.push(`${m.file}: ${m.status} record is dated before the decision it ends`); m.state = 'invalid: dated before its target'; continue; }
+    if (Date.parse(m.at) < Date.parse(t.at)) { errors.push(`${m.file}: ${m.status} record is dated before the decision it ends`); m.state = 'invalid: dated before its target'; continue; }
+    if (m.status === 'superseded' && t.status === 'rejected' && !authorise({ ...m.r, status: 'rejected' }, ctx.table).ok) { errors.push(`${m.file}: ${m.r.decidedBy.reviewer} may supersede an approval but is not authorised to reject a ${type}, so cannot lift ${t.id}, a rejection (a veto is lifted only by someone who could have cast it)`); m.state = 'invalid: may not lift a rejection'; continue; }
     if (ended.has(t.id)) { errors.push(`${m.file}: ${t.id} is already ended by ${ended.get(t.id)}`); m.state = 'invalid: already ended'; continue; }
     ended.set(t.id, m.id); m.state = `in force: ends ${t.id}`;
   }

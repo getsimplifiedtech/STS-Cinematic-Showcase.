@@ -29,6 +29,14 @@ export const channelOf = (client) => (client.flags.demo === true && client.seo.n
 
 const fileSha = (p) => sha(readFileSync(p));
 
+export const DEMONSTRATION_STATEMENT = 'FICTIONAL DEMONSTRATION: a design showcase by Simplified Tech Solutions. It is not a client site, is not indexable, and is not approved for public deployment or for client production.';
+
+// START-HERE.txt in the delivered ZIP. It names the source commit and the candidate digest, which are not known until the release is prepared, so the candidate covers
+// its TEMPLATE (the text with those two values as placeholders) and the package verifier regenerates the exact bytes and compares them (G6-2 review, F1).
+export const START_HERE_PLACEHOLDERS = { commit: '<source commit>', candidate: '<candidate digest>' };
+export const startHereText = ({ version, channel, commit, candidate }) => `Jade & Ember ${version} (${channel})\nSource commit ${commit}\n\nOpen index.html in a browser: double-click it. Nothing else is needed.\nOptional: python3 serve.py  (then http://localhost:8766/) to serve it with video seeking.\n\n${channel === 'demonstration' ? `${DEMONSTRATION_STATEMENT}\n` : ''}Candidate artifact digest ${candidate}\nVerify: sha256sum -c SHA256SUMS.txt (next to this package) and compare release-manifest.json.\n`;
+export const startHereTemplateSha = (version, channel) => sha(startHereText({ version, channel, ...START_HERE_PLACEHOLDERS }));
+
 // The configuration part: the hash of every config/*.json, as the release manifest has always listed them.
 export function configurationDigest(root = projectDir) {
   const dir = join(root, 'config');
@@ -55,6 +63,8 @@ export function computeCandidate({ siteDir, root = projectDir, eng = engDir, cha
     mediaRights: fileSha(join(eng, 'media-rights-inventory.json')),
     externalDestinations: fileSha(join(eng, 'external-destinations.json')),
     framework: { commit: authority.framework.commit, skillSha256: authority.creativeAuthority.skillSha256, licenseSha256: authority.creativeAuthority.licenseSha256 },
+    // the two files the ZIP carries besides the delivered site: serve.py (run by the recipient) and the text that tells them to run it
+    packageExtras: { servePy: fileSha(join(root, 'serve.py')), startHereTemplate: startHereTemplateSha(ver, ch) },
     engines: { node: env.nodeBaseline.version, npm: env.nodeBaseline.npm, playwright: env.playwright, lockfileSha256: fileSha(join(root, 'package-lock.json')) },
   };
   return fromParts(ch, ver, parts);

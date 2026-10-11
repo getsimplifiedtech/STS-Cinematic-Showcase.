@@ -13,8 +13,9 @@ import { cpSync, existsSync, mkdirSync, readFileSync, rmSync, writeFileSync } fr
 import { join, resolve } from 'node:path';
 import { assembleCandidate, SHARED, pagesOf } from '../lib/site.mjs';
 import { buildManifest, sha256hex } from '../lib/hashed.mjs';
-import { attachBuild, collectContext, buildReleaseManifest, evaluateGate, searchDigest, DEMONSTRATION_STATEMENT } from '../lib/release.mjs';
+import { attachBuild, collectContext, buildReleaseManifest, evaluateGate, searchDigest } from '../lib/release.mjs';
 import { zipBuffer } from '../lib/zip.mjs';
+import { startHereText } from '../lib/candidate.mjs';
 import { engDir, listFiles, projectDir, readJson } from '../lib/git.mjs';
 import { loadPolicy, renderApache, renderHeadersFile, renderNginx } from '../lib/security.mjs';
 
@@ -54,9 +55,10 @@ try {
     const out = resolve(projectDir, 'release'); rmSync(out, { recursive: true, force: true }); mkdirSync(out, { recursive: true });
     const names = [...pagesOf(dir), ...SHARED, ...(ctx.channel === 'client-production' ? ['sitemap.xml', 'robots.txt', 'llms.txt'] : []), ...listFiles(join(dir, 'fonts')).map((f) => `fonts/${f}`), ...listFiles(join(dir, 'media')).map((f) => `media/${f}`)];
     const entries = names.filter((n) => { try { readFileSync(join(dir, n)); return true; } catch { return false; } }).map((name) => ({ name, data: readFileSync(join(dir, name)) }));
-    const start = `Jade & Ember ${ctx.version.version} (${ctx.channel})\nSource commit ${ctx.git.commit}\n\nOpen index.html in a browser: double-click it. Nothing else is needed.\nOptional: python3 serve.py  (then http://localhost:8766/) to serve it with video seeking.\n\n${ctx.channel === 'demonstration' ? `${DEMONSTRATION_STATEMENT}\n` : ''}Candidate artifact digest ${withAssets.candidate.digest}\nVerify: sha256sum -c SHA256SUMS.txt (next to this package) and compare release-manifest.json.\n`;
+    const start = startHereText({ version: ctx.version.version, channel: ctx.channel, commit: ctx.git.commit, candidate: withAssets.candidate.digest });
     entries.push({ name: 'START-HERE.txt', data: Buffer.from(start) }, { name: 'serve.py', data: readFileSync(join(projectDir, 'serve.py')) });
     const zipName = ctx.channel === 'demonstration' ? ctx.version.previewPackage : `jade-and-ember-${ctx.version.version}-site.zip`;
+    if (!/^[A-Za-z0-9._-]+\.zip$/.test(zipName)) { console.error(`REFUSED: the package name ${JSON.stringify(zipName)} is not a plain file name`); finish(1); }
     const zip = zipBuffer(entries);
     writeFileSync(join(out, zipName), zip);
     const manifest = buildReleaseManifest(ctx, { siteDir: dir, packageInfo: { name: zipName, bytes: zip.length, sha256: sha256hex(zip) } });

@@ -8,10 +8,11 @@
 // What the gate CAN reject: anything incomplete, inconsistent, mislabelled, unbound or unverifiable. What it CANNOT do: prove that a person really did
 // the work. That stays with the named, attesting person and the owner's release approval; the documents say so.
 import { createHash } from 'node:crypto';
-import { existsSync, readFileSync, readdirSync } from 'node:fs';
+import { existsSync, lstatSync, readFileSync, readdirSync } from 'node:fs';
 import { join, posix } from 'node:path';
 import { spawnSync } from 'node:child_process';
 import { engDir, readJson, repoRoot } from './git.mjs';
+import { parseStrictJson } from './strict-json.mjs';
 
 export const loadSpec = () => readJson(join(engDir, 'release', 'evidence-spec.json'));
 const sha256 = (b) => createHash('sha256').update(b).digest('hex');
@@ -77,10 +78,10 @@ export function validateRecord(r, vctx) {
   const bad = (m) => problems.push(m);
   if (!r || typeof r !== 'object' || Array.isArray(r)) return { problems: ['the record is not a JSON object'], success: false };
   if (r.schema !== spec.recordSchema) bad(`schema must be "${spec.recordSchema}"`);
-  const target = spec.targets[r.target];
+  const target = typeof r.target === 'string' && Object.hasOwn(spec.targets, r.target) ? spec.targets[r.target] : null;
   if (!target) { bad(`target "${r.target}" is not one of: ${Object.keys(spec.targets).join(', ')}`); return { problems, success: false }; }
   if (r.type !== target.gateType) bad(`type "${r.type}" does not match target ${r.target}, which is a "${target.gateType}" record`);
-  const cls = spec.classes[r.class];
+  const cls = typeof r.class === 'string' && Object.hasOwn(spec.classes, r.class) ? spec.classes[r.class] : null;
   if (!cls) bad(`class must be E1, E2 or E3 (got "${r.class}")`);
   else {
     if (!target.classes.includes(r.class)) bad(`class ${r.class} is wrong for target ${r.target}: it permits ${target.classes.join(' or ')}`);
@@ -112,7 +113,9 @@ export function validateRecord(r, vctx) {
 
   if (r.type === 'ci-run') {
     if (!nonEmpty(r.by, 2)) bad('by must name who recorded the run');
-    if (!/^https:\/\/github\.com\/[^/\s]+\/[^/\s]+\/actions\/runs\/\d+/.test(r.url || '')) bad('url must be the https GitHub Actions run URL');
+    const ciUrl = /^https:\/\/github\.com\/([^/\s]+\/[^/\s]+)\/actions\/runs\/\d+(\/|$)/.exec(r.url || '');
+    if (!ciUrl) bad('url must be the https GitHub Actions run URL');
+    else if (spec.ciRepository && ciUrl[1].toLowerCase() !== String(spec.ciRepository).toLowerCase()) bad(`url is a run of ${ciUrl[1]}, not of this project's repository (${spec.ciRepository}): a run of another repository verifies nothing here`);
     if (r.conclusion !== 'success') bad('conclusion must be "success" for a CI run to count');
     if (!nonEmpty(r.summary, 10)) bad('summary must say what was run and the outcome');
     // the CI run's own summary of its verification record, compared with what a full run of THIS verifier must produce (G6-2, RG-08)
@@ -229,10 +232,14 @@ export function validateRecord(r, vctx) {
 // Every record of a folder, with the cross-record checks. entries: [{ file, record?, parseError? }].
 export function assessEvidence(entries, vctx) {
   const out = entries.map((e) => {
-    if (e.parseError || !e.record) return { file: e.file, type: 'unreadable', target: null, class: null, commit: '', valid: false, success: false, problems: [e.parseError || 'the file is not readable JSON'], hashes: [] };
+    if (e.parseError || !e.record) return { file: e.file, type: 'unreadable', unreadable: true, target: null, class: null, commit: '', valid: false, success: false, problems: [e.parseError || 'the file is not readable JSON'], hashes: [] };
     const v = validateRecord(e.record, vctx);
     const r = e.record;
-    return { file: e.file, type: r.type || 'unknown', target: r.target || null, class: r.class || null, commit: r.build?.commit || r.commit || '', valid: v.problems.length === 0, success: v.success, problems: v.problems, hashes: (r.attachments || []).map((a) => a.sha256).filter(Boolean) };
+    // A recorded FAILURE for this candidate stands until the candidate changes (a fix is a new artifact): it cannot be walked past by adding a passing record
+    // beside it. A CI run that did not succeed is not evidence of anything and is not recorded, so ci-run is exempt (G6-2 review, F7).
+    const here = r.build?.candidate === vctx.candidate && Boolean(vctx.candidate);
+    const negative = here && r.type !== 'ci-run' && r.status === 'completed' && ((v.problems.length === 0 && !v.success) || (typeof r.conclusion === 'string' && r.conclusion !== 'success'));
+    return { file: e.file, type: typeof r.type === 'string' ? r.type : 'unknown', target: typeof r.target === 'string' ? r.target : null, class: typeof r.class === 'string' ? r.class : null, commit: r.build?.commit || r.commit || '', valid: v.problems.length === 0, success: v.success, negative, problems: v.problems, hashes: (r.attachments || []).map((a) => a.sha256).filter(Boolean) };
   });
   const owner = new Map();
   for (const e of out) for (const h of e.hashes) {
@@ -246,17 +253,36 @@ export function assessEvidence(entries, vctx) {
 export function coverage(spec, gateType, assessed) {
   const g = spec.gate[gateType];
   const good = assessed.filter((e) => e.type === gateType && e.valid && e.success);
+  const failed = assessed.filter((e) => e.type === gateType && e.negative);
+  const unreadable = assessed.filter((e) => e.unreadable);
+  if (failed.length) return { ok: false, detail: `${gateType} evidence records a FAILURE for this candidate (${failed.map((e) => e.file).join(', ')}): it stands until the artifact changes; fix the defect (a new candidate) and test again` };
+  if (unreadable.length) return { ok: false, detail: `an evidence entry cannot be read (${unreadable.slice(0, 2).map((e) => `${e.file}: ${e.problems[0]}`).join('; ')}): it could be a failure record that is hidden, so evidence is not accepted until it is fixed or removed` };
   const parts = g.needs.map((n) => { const hit = good.find((e) => n.targets.includes(e.target)); return { n, hit }; });
   const missing = parts.filter((p) => !p.hit).map((p) => p.n.label);
   const cls = [...new Set(g.needs.flatMap((n) => n.targets.map((t) => spec.targets[t].classes[0])))].join('/');
   return { ok: missing.length === 0, detail: missing.length ? `missing ${cls} evidence for ${missing.join(', ')} (valid, successful records in engineering/release/evidence/: ${good.length})` : parts.map((p) => `${p.n.label}: ${p.hit.file}`).join('; ') };
 }
 
-// Folder reading for the real gate.
-export function loadEvidenceEntries(dir = join(engDir, 'release', 'evidence')) {
+// Folder reading for the real gate. The folder holds README.md, the attachments folder `files/` and record files `<name>.json`; any other entry (a backup, a
+// symlink, a differently cased name, a sub-folder) is never read and so is refused. With `tracked` every record must be committed (see lib/records.mjs).
+export function loadEvidenceEntries(dir = join(engDir, 'release', 'evidence'), { tracked = false } = {}) {
   if (!existsSync(dir)) return [];
-  return readdirSync(dir).filter((f) => f.endsWith('.json')).sort().map((f) => {
-    try { return { file: f, record: JSON.parse(readFileSync(join(dir, f), 'utf8')) }; } catch (e) { return { file: f, record: null, parseError: `not valid JSON (${e.message.slice(0, 60)})` }; }
+  let committed = null;
+  if (tracked) {
+    const r = spawnSync('git', ['-C', dir, 'ls-files', '-z', '--', '.'], { encoding: 'utf8' });
+    committed = r.status === 0 ? new Set(r.stdout.split('\0').filter(Boolean)) : false;
+  }
+  return readdirSync(dir).sort().flatMap((f) => {
+    if (f === 'README.md' || f === '.gitkeep') return [];
+    const st = lstatSync(join(dir, f));
+    if (f === 'files') { if (st.isDirectory() && !st.isSymbolicLink()) return []; return [{ file: f, record: null, parseError: 'files must be a plain folder of attachments' }]; }
+    if (!/^[A-Za-z0-9._-]+\.json$/.test(f) || !st.isFile()) return [{ file: f, record: null, parseError: 'unexpected entry in evidence/: only README.md, the files/ folder and <name>.json records are allowed (a symlink, backup or other file is never read, so it is refused)' }];
+    if (tracked && (committed === false || !committed.has(f))) return [{ file: f, record: null, parseError: committed === false ? 'cannot confirm that this record is committed (not a git checkout)' : 'this record file is not committed to the repository (untracked, ignored or removed from the index)' }];
+    try {
+      const record = parseStrictJson(readFileSync(join(dir, f), 'utf8'));
+      if (!record || typeof record !== 'object' || Array.isArray(record) || record.schema !== loadSpec().recordSchema) return [{ file: f, record: null, parseError: 'not an evidence record (its schema is not the evidence schema): a record of another kind filed here would never be read' }];
+      return [{ file: f, record }];
+    } catch (e) { return [{ file: f, record: null, parseError: `not valid JSON (${String(e.message).slice(0, 60)})` }]; }
   });
 }
 export const defaultVctx = (over = {}) => ({ spec: loadSpec(), releaseCommit: '', assetsTree: '', candidate: '', verification: null, git: realGit, fs: realFs, today: new Date().toISOString().slice(0, 10), allowFixture: false, ...over });

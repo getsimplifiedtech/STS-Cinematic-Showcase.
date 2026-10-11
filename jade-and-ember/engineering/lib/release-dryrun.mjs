@@ -52,7 +52,7 @@ export const reviewerTable = () => ({
 
 export const personaRecord = (id, { commit, tree, candidate, engine, registry, checks, date = TODAY(), tag = '' }) => {
   const { record, files } = fixtureRecord(id, { commit, tree, candidate, engine, registry, checks, date, tag });
-  if (record.type === 'ci-run') return { record: { ...record, by: 'synthetic dry-run (no real run)', summary: 'SYNTHETIC DRY-RUN: no workflow ran and nothing was verified.', url: 'https://github.com/synthetic-dry-run/none/actions/runs/123456', verification: { ...record.verification, runId: '123456', seal: sha('synthetic ci seal').slice(0, 64) } }, files };
+  if (record.type === 'ci-run') return { record: { ...record, by: 'synthetic dry-run (no real run)', summary: 'SYNTHETIC DRY-RUN: no workflow ran and nothing was verified.', url: record.url, verification: { ...record.verification, runId: '123456', seal: sha('synthetic ci seal').slice(0, 64) } }, files };
   record.build.package = 'SYNTHETIC DRY-RUN: no package was tested';
   record.tester = { name: 'Dry-run Persona', role: 'synthetic dry-run persona (not a person)' };
   record.attestation = { ...record.attestation, signedBy: 'Dry-run Persona' };
@@ -172,7 +172,7 @@ export function createSandbox({ flavour = 'client' } = {}) {
   sb.verifyRecord = () => {
     const s = sb.state;
     const r = buildVerificationRecord({ mode: 'full', results: s.ids.map((id) => ({ id, passed: true, seconds: 0 })), candidate: s.candidate, engine: s.engineDigest, registry: s.registry, commit: sb.head || sb.configCommit, dirty: false, startedAt: `${TODAY()}T08:00:00Z`, finishedAt: `${TODAY()}T08:01:00Z`, env: {} });
-    r.synthetic = `${SYNTH}: no check ran; this record was written by the dry-run harness`;
+    r.environment.platform = `${SYNTH}: no check ran; written by the dry-run harness`;   // the record is closed: the marker lives in a field the verifier writes
     r.seal = sealOf(r);
     return r;
   };
@@ -219,6 +219,7 @@ export function createSandbox({ flavour = 'client' } = {}) {
   };
   // put the sandbox back to the fully green state
   sb.restore = () => {
+    writeFileSync(join(root, '.git', 'info', 'exclude'), '');   // (a scenario may have told git to ignore a record)
     g('reset', '-q', '--hard', sb.base); g('clean', '-fdq');
     sb.head = sb.base; sb.state = sb.baseState; sb.rebindError = null;
     mkdirSync(p('engineering/.reports'), { recursive: true }); writeFileSync(p('engineering/.reports/verify.json'), sb.verifyText);

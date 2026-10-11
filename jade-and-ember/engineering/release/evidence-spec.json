@@ -2,6 +2,7 @@
   "$comment": "The evidence specification (Gate 5 Phase 2, APR-JE-030). One source for the procedures (docs/device-testing/*.md are generated from it), the scaffolded evidence records and the release gate's validation. Changing an item here changes the checklists, the templates and what the gate demands.",
   "schema": "jade-and-ember/evidence-spec@1",
   "recordSchema": "jade-and-ember/evidence@1",
+  "ciRepository": "getsimplifiedtech/STS-Cinematic-Showcase.",
   "classes": {
     "E1": {
       "name": "Browser emulation",

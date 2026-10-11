@@ -581,6 +581,8 @@
     "jade-and-ember/engineering/lib/approvals.mjs",
     "jade-and-ember/engineering/lib/candidate.mjs",
     "jade-and-ember/engineering/lib/records.mjs",
+    "jade-and-ember/engineering/lib/strict-json.mjs",
+    "jade-and-ember/engineering/lib/hosts.mjs",
     "jade-and-ember/engineering/lib/verification.mjs",
     "jade-and-ember/engineering/lib/search-digest.mjs",
     "jade-and-ember/engineering/lib/release-fixtures.mjs",

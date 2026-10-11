@@ -12,7 +12,7 @@ import { execFileSync } from 'node:child_process';
 import { createHash } from 'node:crypto';
 import { engDir, projectDir, readJson, repoRoot, sha256 } from './git.mjs';
 import { loadApprovals } from './approvals.mjs';
-import { isReservedHost } from '../../src/lib/seo.mjs';
+import { isReservedHost } from './hosts.mjs';
 import { buildManifest } from './hashed.mjs';
 import { crawlerReviewGaps } from './search.mjs';
 import { buildCsp, loadPolicy as loadSecurityPolicy, inlineItems, robotsHeaders, securityHeaders } from './security.mjs';
@@ -27,7 +27,8 @@ const sha = (s) => createHash('sha256').update(s).digest('hex');
 const git = (args, cwd = repoRoot) => execFileSync('git', args, { cwd, encoding: 'utf8' }).trim();
 
 export const channelOf = channelOfConfig;
-export const DEMONSTRATION_STATEMENT = 'FICTIONAL DEMONSTRATION: a design showcase by Simplified Tech Solutions. It is not a client site, is not indexable, and is not approved for public deployment or for client production.';
+import { DEMONSTRATION_STATEMENT } from './candidate.mjs';
+export { DEMONSTRATION_STATEMENT };
 
 export function gitState(cwd = repoRoot) {
   const commit = git(['rev-parse', 'HEAD'], cwd);
@@ -36,7 +37,7 @@ export function gitState(cwd = repoRoot) {
 
 // Evidence records: files in engineering/release/evidence/*.json, read here and judged by lib/evidence.mjs against the build being released.
 // ctx.evidence is the raw list [{ file, record }]; assessedEvidence(ctx) says which of them count.
-export const loadEvidence = (dir) => loadEvidenceEntries(dir);
+export const loadEvidence = (dir) => loadEvidenceEntries(dir, { tracked: true });
 export function assessedEvidence(ctx) {
   return assessEvidence(ctx.evidence || [], defaultVctx({ releaseCommit: ctx.git.commit, assetsTree: ctx.assetsTree, candidate: ctx.candidate?.digest || '', verification: ctx.engine ? { engineDigest: ctx.engine.engineDigest, registryDigest: ctx.engine.registryDigest, total: ctx.engine.ids.length } : null, ...(ctx.evidenceVctx || {}) }));
 }
@@ -63,9 +64,9 @@ export function collectContext(o = {}) {
     root, channel, client, version, pkg, authority, baseline, findings, approvals, files,
     git: o.git || gitState(), verify: o.verify === undefined ? loadVerifyReport() : o.verify,
     engine: o.engine || { engineDigest: engineDigest(), ids, registryDigest: registryDigest(ids) },
-    approvalRecords: o.approvalRecords || loadFamily('approvals'), deploymentRecords: o.deploymentRecords || loadFamily('deployments'),
+    approvalRecords: o.approvalRecords || loadFamily('approvals', engDir, { tracked: true }), deploymentRecords: o.deploymentRecords || loadFamily('deployments', engDir, { tracked: true }),
     reviewers: o.reviewers || loadReviewers(), demonstrations: o.demonstrations || loadDemonstrations(),
-    today: o.today || new Date().toISOString().slice(0, 10),
+    today: o.today || new Date().toISOString().slice(0, 10), now: o.now || (o.today ? null : new Date().toISOString()),
     assets: o.assets, buildOk: o.buildOk ?? true, siteDir: o.siteDir || null,
     evidence: o.evidence || loadEvidence(), assetsManifestMatches: o.assetsManifestMatches ?? true,
     crawlerRecord: o.crawlerRecord === undefined ? readJson(join(engDir, 'search-crawler-verification.json')) : o.crawlerRecord,
@@ -107,7 +108,7 @@ export function evaluateGate(ctx, policy = loadReleasePolicy()) {
   const sd = ctx.client.seo;
   let baseHost = null; try { baseHost = new URL(sd.baseUrl).hostname; } catch { /* reported below */ }
   const today = ctx.today || new Date().toISOString().slice(0, 10);
-  const rctx = { candidate: cand, channel, version: ver, table: ctx.reviewers, today, baseHost, searchDigest: ctx.searchDigest };
+  const rctx = { candidate: cand, channel, version: ver, table: ctx.reviewers, today, now: ctx.now || null, baseHost, searchDigest: ctx.searchDigest };
   const arec = ctx.approvalRecords || [];
   const rel = resolve(arec, 'release-approval', rctx), rights = resolve(arec, 'rights-verification', rctx), review = resolve(arec, 'search-review', rctx);
   const hostOk = hostAuthorisation(rel, baseHost);
@@ -165,7 +166,7 @@ export function buildReleaseManifest(ctx0, { siteDir, qaReport = ctx0.verify, pa
   const cfg = configurationDigest(ctx.root);
   const vp = qaReport ? validateVerification(qaReport, { candidate: ctx.candidate.digest, engineDigest: ctx.engine.engineDigest, ids: ctx.engine.ids }) : ['no report'];
   const inForce = (r) => r.approved.map((m) => m.id);
-  const embedded = (family) => loadFamily(family).filter((e) => !e.parseError).map((e) => ({ file: e.file, sha256: sha256(readFileSync(join(engDir, 'release', family, e.file))) }));
+  const embedded = (family) => (family === 'evidence' ? loadEvidenceEntries() : loadFamily(family)).filter((e) => !e.parseError).map((e) => ({ file: e.file, sha256: sha256(readFileSync(join(engDir, 'release', family, e.file))) }));
   const registered = (ctx.demonstrations?.registered || []).find((d) => d.configurationDigest === ctx.candidate.parts.configuration);
   return {
     schema: 'jade-and-ember/release-manifest@2', project: ctx.version.name, version: ctx.version.version, channel: ctx.channel,

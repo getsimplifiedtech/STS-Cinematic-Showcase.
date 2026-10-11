@@ -33,7 +33,7 @@ export function fixtureRecord(targetId, { commit = FIXTURE_COMMIT, tree = FIXTUR
   const spec = loadSpec();
   const t = spec.targets[targetId];
   const files = new Map();
-  if (t.gateType === 'ci-run') return { record: { ...scaffold(spec, 'ci-run', { commit, candidate }), status: 'completed', date, by: 'Repository owner', url: 'https://github.com/example/example/actions/runs/123456', conclusion: 'success', summary: 'verify workflow: all four jobs passed', verification: { candidate, engineDigest: engine, registryDigest: registry, checks: { total: checks, passed: checks }, seal: '9'.repeat(64), runner: 'github-actions', runId: '123456', node: 'v24.21.0' } }, files };
+  if (t.gateType === 'ci-run') return { record: { ...scaffold(spec, 'ci-run', { commit, candidate }), status: 'completed', date, by: 'Repository owner', url: `https://github.com/${spec.ciRepository}/actions/runs/123456`, conclusion: 'success', summary: 'verify workflow: all four jobs passed', verification: { candidate, engineDigest: engine, registryDigest: registry, checks: { total: checks, passed: checks }, seal: '9'.repeat(64), runner: 'github-actions', runId: '123456', node: 'v24.21.0' } }, files };
   const r = scaffold(spec, targetId, { commit, assetsTree: tree, candidate });
   delete r.guidance;
   r.status = 'completed'; r.build.package = 'preview package built from the commit'; r.date = date;

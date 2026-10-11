@@ -19,7 +19,7 @@ try {
   const cand = ctx.candidate.digest;
   console.log(`candidate artifact digest ${cand}\nchannel ${ctx.channel}, version ${ctx.version.version}; commit ${ctx.git.commit.slice(0, 7)}${ctx.git.dirty ? ' (dirty)' : ''}`);
   const baseHost = (() => { try { return new URL(ctx.client.seo.baseUrl).hostname; } catch { return null; } })();
-  const rctx = { candidate: cand, channel: ctx.channel, version: ctx.version.version, table: ctx.reviewers, today: ctx.today, baseHost, searchDigest: ctx.searchDigest };
+  const rctx = { candidate: cand, channel: ctx.channel, version: ctx.version.version, table: ctx.reviewers, today: ctx.today, now: ctx.now, baseHost, searchDigest: ctx.searchDigest };
   const reviewerProblems = validateReviewers(ctx.reviewers, { ledgerIds: new Set(ctx.approvals.map((a) => a.id)) });
   console.log(`\nreviewer table: ${ctx.reviewers.reviewers.length} reviewer(s)${reviewerProblems.length ? ` -- PROBLEMS: ${reviewerProblems.join('; ')}` : ''}`);
   bad += reviewerProblems.length;

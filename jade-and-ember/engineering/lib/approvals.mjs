@@ -6,7 +6,14 @@ import { repoRoot } from './git.mjs';
 // Returns [{ id, date, type, decision, concerns, limits }]
 export function parseApprovals(text) {
   const rows = [];
+  // a row inside a code fence or an HTML comment is not a row of the table (it is an example or a retraction a reader does not see as a decision)
+  let fenced = false, commented = false;
   for (const line of text.split('\n')) {
+    if (/^\s*(```|~~~)/.test(line)) { fenced = !fenced; continue; }
+    if (fenced) continue;
+    if (commented) { if (line.includes('-->')) commented = false; continue; }
+    if (line.includes('<!--') && !line.includes('-->')) { commented = true; continue; }
+    if (/<!--.*-->/.test(line) && !/^\|/.test(line)) continue;
     if (!/^\|\s*APR-JE-\d+\s*\|/.test(line) && !/^\|\s*(REL|DEP|RIGHTS|SRCH)-JE-\d+\s*\|/.test(line)) continue;
     const cells = line.split('|').slice(1, -1).map((c) => c.trim());
     if (cells.length < 6) continue;
