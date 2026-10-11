@@ -62,7 +62,7 @@ export function unzipTo(buf, dest, { names = NAME_OK } = {}) {
     if (flags & 0x0009) throw new Error(`entry ${name} is encrypted or uses a data descriptor`);
     if (disk !== 0 || iattr !== 0 || (eattr >>> 16) !== 0 && (eattr >>> 16) !== 0x81a4 || (eattr & 0xffff) !== 0) throw new Error(`entry ${name} is not a plain file (special attributes, symlink or executable bit)`);
     if (method !== 0 && method !== 8) throw new Error(`entry ${name} uses an unsupported method`);
-    if (name.endsWith('/') || !names.test(name)) throw new Error(`unsafe or unexpected path in ZIP: ${JSON.stringify(name)}`);
+    if (name.endsWith('/') || !names.test(name)) throw new Error(`unsafe path in ZIP (or a name outside the plain set): ${JSON.stringify(name)}`);
     const key = name.normalize('NFC').toLowerCase();
     if (seen.has(key)) throw new Error(`the ZIP lists a name twice (or two names that differ only in case): ${name}`);
     seen.add(key);
