@@ -355,6 +355,7 @@ Genuine engine differences were findings F-G5-01 to F-G5-04 in `engineering/find
 - the normal appearance is unchanged: the regression comparison against the frozen v0.8 baseline in WebKit reports 0 problems in text, structure and pixels (39 pixel comparisons), the four hours-table labels differ in computed style only as approved (ASD-1, geometry identical); in Firefox 157.0 and Chromium the rule does not apply and styles and pixels are identical to v0.8;
 - `check:supports` (new) confirms where the rule applies (WebKit yes, Firefox and Chromium no) and fails if a browser or Playwright upgrade changes that; `engine-features.json` records the expectation;
 - CSP enforcement and D-11 pass in Firefox and WebKit (`check:d11`, `check:security`); the other checks are unchanged.
+**Final verification: Actions run 24 (`630beec`): all four jobs green** (Chromium `verify` 35 of 35, Firefox 157.0 15 of 15, WebKit 27.2 15 of 15, macOS fast checks); details in `engineering/CI.md`.
 **F-G5-03 closed** (Firefox category-strip Tab stop verified, run 19). Open findings after this correction: F-G2-01, F-G3-01 (Chromium), F-G4-01, F-G5-01 (WebKit file:// fonts, accepted), F-G5-02 (Firefox preload warning, accepted), F-G5-03 (closed, kept in the register as a known behaviour). No open finding is blocking. Safari and iOS Safari remain **[unverified]** (human device testing).
 
 ## Remaining issues (honest list)
