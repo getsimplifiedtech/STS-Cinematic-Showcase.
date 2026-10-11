@@ -12,6 +12,7 @@ import { createRequire } from 'node:module';
 import { serve } from '../../tests/serve.mjs';
 import { serveSite } from './server.mjs';
 import { environment, launchBrowser } from './browser.mjs';
+import { satisfies } from './node-range.mjs';
 import { comparePng } from './pixels.mjs';
 import { scenarios } from './scenarios.mjs';
 import { compareSources, loadAllowlist, pagesOf } from './site.mjs';
@@ -80,8 +81,7 @@ export async function runRegression({ baselineRoot, candidateRoot, browserName =
   const envNotes = [`Playwright ${pw}`];
   const envProblems = [];
   if (pw !== env.playwright) envProblems.push(`Playwright ${pw} is installed but ${env.playwright} is pinned`);
-  const nodeMajor = Number(process.versions.node.split('.')[0]);
-  if (nodeMajor < 20) envProblems.push(`Node ${process.versions.node}: the harness needs ${env.node}`);
+  if (!satisfies(process.versions.node, env.node)) envProblems.push(`Node ${process.versions.node}: the harness needs ${env.node} (the tested baseline is ${env.nodeBaseline.version})`);
 
   // source layer (no browser needed)
   if (want('source')) {

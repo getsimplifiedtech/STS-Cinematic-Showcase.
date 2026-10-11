@@ -16,13 +16,13 @@ Governance: framework and skill reference `../docs/JADE_AND_EMBER_FRAMEWORK_REFE
 open index.html            # or: python3 serve.py   (http://localhost:8766/, with video Range support)
 node build.mjs             # validates config/ against engineering/schemas/ and the cross-file rules, then rebuilds all five pages (Node 18+, no deps)
 npm i && npm run test:site && npm run test:a11y && npm run test:contrast && npm run test:contrast-sections && npm run test:variants && npm run test:lighthouse
-npm run verify:fast        # v0.9 engineering checks without a browser (baseline, schema, determinism, delivery, authority; Node 20+)
+npm run verify:fast        # v0.9 engineering checks without a browser (baseline, schema, determinism, delivery, authority; Node 24.8 or later, tested on 24.21.0)
 npm run verify             # all v0.9 Gate 1 checks including the regression harness against the frozen v0.8 baseline (about 4 minutes); see engineering/README.md
 node tests/extracted.mjs [folder]   # opens index.html in a browser (file:// and serve.py, desktop and phone) and clicks through all five pages; point it at an extracted preview ZIP
 python3 tools/video-qa.py media/hero-loop.webm --poster media/hero-wok.webp   # numeric checks on the loop (needs ffmpeg, numpy, Pillow)
 npm run test:video-tools   # dry run of that checker on synthetic clips
 ```
-If Playwright cannot find its browser, set `CHROMIUM_PATH` (tests) / `CHROME_PATH` (Lighthouse) to a Chromium binary.
+If Playwright cannot find its browser, set `CHROMIUM_PATH` (tests and Lighthouse; `CHROME_PATH` also works for Lighthouse) to a Chromium binary. `npm run test:lighthouse` is the direct Lighthouse runner (`engineering/tools/lighthouse.mjs`, thresholds in `engineering/lighthouse.json`); it replaced Lighthouse CI in Gate 6 (G6-1).
 
 ## How it is built
 ```
@@ -79,7 +79,7 @@ The loop's first frame is the poster, so the handoff is invisible; its last fram
 ## Files
 `serve.py` local server · `config/` content · `src/` and `build.mjs` generator · the five `*.html` built pages · `styles.css` · `site.js`, `hero.js`, `menu.js` (progressive enhancement only) · `media/` · `fonts/` (OFL licences in `LICENSES.txt`) ·
 `tests/site.mjs` (page registry, navigation, links, titles, facts, and the structure of every page) · `tests/variants.mjs` (invalid configs fail, live ordering URL, a client build with no demonstration text) · `tests/extracted.mjs` (click through the five pages from index.html in a folder or extracted ZIP) · `tests/qa.mjs` (axe on every page, behaviour, every video fallback, the Menu and its print layout) · `tests/contrast.mjs` (hero text over the photo and video frames) ·
-`tests/contrast-sections.mjs` (all other text, every page) · `tests/serve.mjs` · `tools/video-qa.py` and `tools/video-qa-selftest.py` · `lighthouserc.json` (five URLs) · `QA.md` results and critique · `media/PROVENANCE.md`.
+`tests/contrast-sections.mjs` (all other text, every page) · `tests/serve.mjs` · `tools/video-qa.py` and `tools/video-qa-selftest.py` · `engineering/lighthouse.json` (five URLs; replaced `lighthouserc.json`) · `QA.md` results and critique · `media/PROVENANCE.md`.
 
 ## Not done yet
 1. Real-device testing: iPhone, Safari (including WebM VP9 playback, Low Power Mode and sticky behaviour), Android, Firefox **[unverified]**. The H.264 fallback is untested in this build's browser (Playwright's Chromium cannot decode H.264).

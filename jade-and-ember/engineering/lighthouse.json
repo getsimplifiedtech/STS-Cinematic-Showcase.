@@ -1,0 +1,26 @@
+{
+  "$comment": "Lighthouse thresholds (Gate 6, G6-1, APR-JE-038). They reproduce lighthouserc.json of Lighthouse CI exactly (the file this replaces): the same five pages, three runs per page, performance 0.8 (warn), accessibility 0.95 (error), best practices 0.9 (warn), SEO 0.6 (warn), is-crawlable not asserted. They may be raised, never lowered: check:selftest-gate6 holds the floor in 'floor'. 'aggregation' decides how three runs become one score: Lighthouse CI's default was 'optimistic' (a page passed when ANY run reached the minimum), which the Phase 6 documents wrongly described as the median. 'median' is the same as or stricter than 'optimistic' for every set of runs, so it weakens nothing; 'pessimistic' (every run must pass) is stricter still. Only 'error' assertions fail the command; 'warn' assertions are printed.",
+  "pages": ["index.html", "menu.html", "our-story.html", "visit-us.html", "order-online.html"],
+  "runs": 3,
+  "aggregation": "median",
+  "categories": {
+    "performance": { "level": "warn", "minScore": 0.8 },
+    "accessibility": { "level": "error", "minScore": 0.95 },
+    "best-practices": { "level": "warn", "minScore": 0.9 },
+    "seo": { "level": "warn", "minScore": 0.6 }
+  },
+  "audits": {
+    "is-crawlable": { "level": "off", "reason": "The demonstration is deliberately noindex (it is a fictional portfolio demonstration, never a real restaurant). Lighthouse's own audit would fail by design and would hold the SEO category below 1; the category threshold above is the assertion." }
+  },
+  "floor": {
+    "runs": 3,
+    "categories": { "performance": 0.8, "accessibility": 0.95, "best-practices": 0.9, "seo": 0.6 },
+    "errorCategories": ["accessibility"],
+    "aggregationOrder": ["optimistic", "median", "pessimistic"],
+    "minimumAggregation": "optimistic"
+  },
+  "chrome": {
+    "flags": ["--headless=new", "--disable-gpu", "--no-first-run", "--no-default-browser-check", "--disable-extensions", "--disable-background-networking", "--mute-audio"],
+    "noSandboxWhenRoot": true
+  }
+}

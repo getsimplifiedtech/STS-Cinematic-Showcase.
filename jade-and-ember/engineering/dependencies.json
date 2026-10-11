@@ -14,15 +14,10 @@
     "MPL-2.0"
   ],
   "licenseNotes": {
-    "MPL-2.0": "axe-core and @axe-core/playwright: file-level copyleft that applies only if modified files are distributed. They are development tools and are never delivered."
+    "MPL-2.0": "axe-core and @axe-core/playwright: file-level copyleft that applies only if modified files are distributed. They are development tools and are never delivered.",
+    "recordedIn": "G6-1 removed @lhci/cli and with it parse-cache-control, the only package whose licence the lockfile did not record. Every package in the lockfile now records a licence, and licenseExceptions is empty. Any future exception must name the package, say why and carry a status."
   },
-  "licenseExceptions": [
-    {
-      "package": "node_modules/parse-cache-control",
-      "reason": "The lockfile records no licence for this package (a transitive dependency of @lhci/cli, used only by npm run test:lighthouse). The licence is UNVERIFIED and is not asserted here; it is never delivered. Verify at the registry before any redistribution of the tooling.",
-      "status": "unverified"
-    }
-  ],
+  "licenseExceptions": [],
   "verificationPackages": [
     "playwright",
     "playwright-core",
@@ -34,22 +29,46 @@
     "axe-core"
   ],
   "acceptedAdvisories": {
-    "$comment": "High-severity advisories in the development-only tree of @lhci/cli (Lighthouse CI, used by npm run test:lighthouse; it is not part of npm run verify and is never delivered). They are reported on every run so they are not forgotten. Remove the entry when the dependency is updated or dropped.",
-    "viaRoot": "@lhci/cli",
-    "reviewed": "2026-10-10",
-    "reason": "Transitive dependencies of Lighthouse CI (extract-zip, basic-ftp, puppeteer-core and others). The tooling runs only on a developer machine or CI runner against the project's own static pages. No untrusted archive, FTP server or proxy configuration is processed.",
-    "packages": [
-      "@lhci/cli",
-      "@lhci/utils",
-      "@puppeteer/browsers",
-      "basic-ftp",
-      "extract-zip",
-      "get-uri",
-      "lighthouse",
-      "pac-proxy-agent",
-      "proxy-agent",
-      "puppeteer-core",
-      "tmp"
-    ]
-  }
+    "$comment": "Empty since G6-1 (Gate 6, APR-JE-038): the 17 advisories (11 high, 4 moderate, 2 low) were all inside the development-only tree of @lhci/cli (Lighthouse CI), which was replaced by the direct lighthouse package; npm audit reports 0 vulnerabilities for the installed tree. The mechanism stays: any advisory must be reviewed here with a reason, or check:deps fails.",
+    "viaRoot": null,
+    "reviewed": "2026-10-11",
+    "reason": "",
+    "packages": []
+  },
+  "actions": {
+    "$comment": "The GitHub Actions the workflow may use, each pinned to a full commit SHA and verified at the source on the date given (Gate 6, G6-1, APR-JE-038): the tag resolves to the SHA with git ls-remote, the commit is an ancestor of the default branch, and action.yml at that commit declares `runs.using: node24`. check:ci refuses any other action and any other SHA; a change here is a deliberate, reviewed change, never an automatic one.",
+    "actions/checkout": {
+      "version": "v7.0.1",
+      "sha": "3d3c42e5aac5ba805825da76410c181273ba90b1",
+      "runtime": "node24",
+      "committed": "2026-07-17",
+      "verifiedOn": "2026-10-11",
+      "replaces": {
+        "version": "v4.2.2",
+        "sha": "11bd71901bbe5b1630ceea73d27597364c9af683",
+        "runtime": "node20"
+      }
+    },
+    "actions/setup-node": {
+      "version": "v7.0.0",
+      "sha": "820762786026740c76f36085b0efc47a31fe5020",
+      "runtime": "node24",
+      "committed": "2026-07-14",
+      "verifiedOn": "2026-10-11",
+      "replaces": {
+        "version": "v4.4.0",
+        "sha": "49933ea5288caeca8642d1e84afbd3f7d6820020",
+        "runtime": "node20"
+      },
+      "note": "v7.1.0 (949feb2413d6458794dcd2491c4babbbce0c15c1) also exists; v7.0.0 was chosen because it has been public for three months and v7.1.0 for days. Moving to a newer release is a separate reviewed change."
+    }
+  },
+  "retiredPackages": [
+    {
+      "package": "@lhci/cli",
+      "retired": "2026-10-11",
+      "by": "G6-1 (APR-JE-038)",
+      "reason": "Lighthouse CI carried 17 advisories (11 high) in a tree of 221 packages that the verification never ran. It was replaced by the direct lighthouse package and engineering/tools/lighthouse.mjs. Bringing it back needs a reviewed change to this record."
+    }
+  ]
 }

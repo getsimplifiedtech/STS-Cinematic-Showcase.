@@ -1,6 +1,13 @@
 {
   "$comment": "The pinned rendering environment of the regression harness (APR-JE-019 D-9, APR-JE-020). Baseline and candidate are always rendered in the SAME run, in the same browser, so a different browser build still gives a valid comparison; the pins make evidence reproducible and drift visible. Playwright is pinned exactly in package.json and package-lock.json. A browser-build mismatch is reported as a warning, or as a failure with --strict-env.",
-  "node": ">=20",
+  "node": ">=24.8.0 <25",
+  "nodeBaseline": {
+    "version": "24.21.0",
+    "npm": "11.19.0",
+    "line": "Node.js 24 (Krypton), long-term support",
+    "verifiedOn": "2026-10-11",
+    "note": "The exact patch the whole verification was run on (Gate 6, G6-1, APR-JE-038): the SHA-256 of the Linux x64 binary was checked against Node's signed SHASUMS256.txt, and CI pins the same patch. 'node' above is what package.json engines declares: the lower bound 24.8.0 is the oldest Node 24 that html-validate (^22.22.0 || >=24.8.0) supports, the upper bound keeps an untested major out. Raising the patch is a deliberate change that re-runs the suite; check:ci and check:deps refuse a workflow, an engines range or a lockfile that disagrees."
+  },
   "playwright": "1.64.0",
   "browsers": {
     "chromium": {

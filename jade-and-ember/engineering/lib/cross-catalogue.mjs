@@ -43,6 +43,7 @@ export const SCOPE = {
   'check:selftest-gate3': ['chromium-only', 'negative tests of the Gate 3 checks; they run in the Chromium job'],
   'check:selftest-gate4': ['chromium-only', 'negative tests of the Gate 4 checks; they run in the Chromium job'],
   'check:selftest-gate5': ['chromium-only', 'tests of the cross-browser harness itself; they run in the Chromium job'],
+  'check:selftest-gate6': ['chromium-only', 'tests of the G6-1 tooling (the direct Lighthouse runner, the Node baseline, the engines ranges and the pinned Actions); the runner is driven in Chromium, so they run in the Chromium job'],
   'check:selftest-evidence': ['chromium-only', 'negative tests of the evidence validator and scaffolding; they need no browser and run in the Chromium job'],
 };
 export const engineChecks = () => Object.entries(SCOPE).filter(([, [s]]) => s === 'engine').map(([id]) => id);

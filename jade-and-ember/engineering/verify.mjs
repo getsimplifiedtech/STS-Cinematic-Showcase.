@@ -42,6 +42,7 @@ import { checkSupports } from './checks/supports.mjs';
 import { checkEvidence } from './checks/evidence.mjs';
 import { checkSelftestEvidence } from './checks/selftest-evidence.mjs';
 import { checkSelftestGate5 } from './checks/selftest-gate5.mjs';
+import { checkSelftestGate6 } from './checks/selftest-gate6.mjs';
 import { checkSelftestGate3 } from './checks/selftest-gate3.mjs';
 import { checkRegression } from './checks/regression.mjs';
 import { checkSelftest } from './checks/selftest.mjs';
@@ -96,6 +97,7 @@ const checks = [
       ['check:selftest-gate2', 'Gate 2 checks fail when they should (targeted negative tests)', () => checkSelftestGate2()],
       ['check:selftest-gate3', 'Gate 3 checks fail when they should (targeted negative tests)', () => checkSelftestGate3()],
       ['check:selftest-gate5', 'the cross-browser harness cannot skip a check silently, reports engine adaptations, and D-11 detection works', () => checkSelftestGate5()],
+      ['check:selftest-gate6', 'Gate 6 (G6-1): the direct Lighthouse runner, its floor and aggregation, the Node 24 baseline, the engines ranges, the retired Lighthouse CI and the pinned Actions fail when they should; the runner is driven against the real site', () => checkSelftestGate6()],
       ['check:selftest-evidence', 'the evidence validator rejects incomplete, fabricated, mismatched and wrongly classified human-testing evidence (negative tests)', () => checkSelftestEvidence()],
       ['check:selftest-gate4', 'Gate 4 checks fail when they should (HTML, links, SEO and llms.txt, crawler policy, release gate, hosting, phone numbers)', () => checkSelftestGate4()],
     ]),

@@ -1,6 +1,8 @@
 # Jade & Ember engineering verification (v0.9). Read-only: it checks out the repository, installs the pinned development tools, runs
 # `npm run verify` and reports. It deploys nothing, merges nothing, publishes nothing, uses no secrets and calls no paid or AI service.
 # Runner requirements and what each step needs are in jade-and-ember/engineering/CI.md. Approved for the v0.9 development branch (decision D-4).
+# Gate 6 (G6-1, APR-JE-038): Node 24.21.0 (the tested baseline in engineering/environment.json) and Actions on the Node 24 runtime, each pinned to a full
+# commit SHA recorded in engineering/dependencies.json; `npm ci --engine-strict` fails the install if any package does not support the pinned Node.
 name: Jade & Ember verify
 
 on:
@@ -19,7 +21,7 @@ concurrency:
 
 jobs:
   verify:
-    name: verify (Ubuntu 24.04, Node 22, Chromium)
+    name: verify (Ubuntu 24.04, Node 24, Chromium)
     runs-on: ubuntu-24.04
     timeout-minutes: 40
     defaults:
@@ -30,20 +32,20 @@ jobs:
       STS_REQUIRE_AUDIT: '1'
     steps:
       - name: Check out the repository (all branches, because the frozen v0.8 baseline branch is needed)
-        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           fetch-depth: 0
           persist-credentials: false
 
       - name: Set up Node.js
-        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
+        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
         with:
-          node-version: '22.22.0'
+          node-version: '24.21.0'
           cache: npm
           cache-dependency-path: jade-and-ember/package-lock.json
 
       - name: Install the pinned development tools (lockfile only, no install scripts)
-        run: npm ci --ignore-scripts
+        run: npm ci --ignore-scripts --engine-strict
 
       - name: Install Chromium for Playwright, and ffmpeg for the flash check
         run: |
@@ -72,18 +74,18 @@ jobs:
         working-directory: jade-and-ember
     steps:
       - name: Check out the repository
-        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           fetch-depth: 0
           persist-credentials: false
       - name: Set up Node.js
-        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
+        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
         with:
-          node-version: '22.22.0'
+          node-version: '24.21.0'
           cache: npm
           cache-dependency-path: jade-and-ember/package-lock.json
       - name: Install the pinned development tools
-        run: npm ci --ignore-scripts
+        run: npm ci --ignore-scripts --engine-strict
       - name: Fast verification (no browser)
         run: npm run verify:fast
 
@@ -101,18 +103,18 @@ jobs:
         working-directory: jade-and-ember
     steps:
       - name: Check out the repository (all branches, because the frozen v0.8 baseline branch is needed)
-        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           fetch-depth: 0
           persist-credentials: false
       - name: Set up Node.js
-        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
+        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
         with:
-          node-version: '22.22.0'
+          node-version: '24.21.0'
           cache: npm
           cache-dependency-path: jade-and-ember/package-lock.json
       - name: Install the pinned development tools (lockfile only, no install scripts)
-        run: npm ci --ignore-scripts
+        run: npm ci --ignore-scripts --engine-strict
       - name: Install Firefox for Playwright, and ffmpeg for the flash check
         run: |
           npx playwright install --with-deps firefox
@@ -135,18 +137,18 @@ jobs:
         working-directory: jade-and-ember
     steps:
       - name: Check out the repository (all branches, because the frozen v0.8 baseline branch is needed)
-        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           fetch-depth: 0
           persist-credentials: false
       - name: Set up Node.js
-        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
+        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
         with:
-          node-version: '22.22.0'
+          node-version: '24.21.0'
           cache: npm
           cache-dependency-path: jade-and-ember/package-lock.json
       - name: Install the pinned development tools (lockfile only, no install scripts)
-        run: npm ci --ignore-scripts
+        run: npm ci --ignore-scripts --engine-strict
       - name: Install WebKit for Playwright, and ffmpeg for the flash check
         run: |
           npx playwright install --with-deps webkit
@@ -170,23 +172,54 @@ jobs:
         working-directory: jade-and-ember
     steps:
       - name: Check out the repository
-        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           fetch-depth: 0
           persist-credentials: false
       - name: Set up Node.js
-        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
+        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
         with:
-          node-version: '22.22.0'
+          node-version: '24.21.0'
           cache: npm
           cache-dependency-path: jade-and-ember/package-lock.json
       - name: Install the pinned development tools (lockfile only, no install scripts)
-        run: npm ci --ignore-scripts
+        run: npm ci --ignore-scripts --engine-strict
       - name: Verify the external destinations (record printed in the log)
         run: |
           node engineering/tools/external-links.mjs inventory
           node engineering/tools/external-links.mjs verify
           node engineering/tools/external-links.mjs verify --json --runner github-actions --note "GitHub-hosted ubuntu-24.04 runner with open outbound network; TLS is verified against the runner's own certificate store" --run "$GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID"
+
+  # Informational (Gate 6, G6-1): the direct Lighthouse runner that replaced Lighthouse CI. It serves the site folder, measures the five pages three times each
+  # in a fresh Chromium and asserts the thresholds of engineering/lighthouse.json (accessibility fails the step, the others warn). Read-only, writes only to the
+  # job's own workspace, uses no secret and never fails the run: a person reads the printed table.
+  lighthouse:
+    name: 'lighthouse (informational)'
+    runs-on: ubuntu-24.04
+    continue-on-error: true
+    timeout-minutes: 30
+    defaults:
+      run:
+        shell: bash
+        working-directory: jade-and-ember
+    steps:
+      - name: Check out the repository
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - name: Set up Node.js
+        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: '24.21.0'
+          cache: npm
+          cache-dependency-path: jade-and-ember/package-lock.json
+      - name: Install the pinned development tools (lockfile only, no install scripts)
+        run: npm ci --ignore-scripts --engine-strict
+      - name: Install Chromium for Playwright
+        run: npx playwright install --with-deps chromium
+      - name: Lighthouse (five pages, three runs each; the table is printed in the log)
+        run: npm run test:lighthouse
 
   # Informational (Gate 5, Phase 6): a read-only report on the dependency supply chain, from tools that ship with npm: registry signatures and
   # provenance attestations (npm audit signatures), the advisory summary, a software bill of materials (CycloneDX and SPDX), and the versions that are
@@ -202,18 +235,18 @@ jobs:
         working-directory: jade-and-ember
     steps:
       - name: Check out the repository
-        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           fetch-depth: 0
           persist-credentials: false
       - name: Set up Node.js
-        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
+        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
         with:
-          node-version: '22.22.0'
+          node-version: '24.21.0'
           cache: npm
           cache-dependency-path: jade-and-ember/package-lock.json
       - name: Install the pinned development tools (lockfile only, no install scripts)
-        run: npm ci --ignore-scripts
+        run: npm ci --ignore-scripts --engine-strict
       - name: Report (signatures, advisories, SBOM, outdated)
         run: |
           echo "node $(node --version), npm $(npm --version)"

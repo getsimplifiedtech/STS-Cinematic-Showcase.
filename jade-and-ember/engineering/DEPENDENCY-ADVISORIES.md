@@ -1,5 +1,7 @@
 # Development-dependency advisories: evaluation (Gate 4, scope item 7)
 
+> **G6-1 update (2026-10-11, `APR-JE-038`).** This evaluation is historical. G6-1 removed `@lhci/cli` and installed `lighthouse` 13.5.0 directly: `npm audit` now reports **0 vulnerabilities** in the whole installed tree (128 packages, down from 349) and `dependencies.json` accepts none. See `G6-1-REPORT.md`. The text below records what was true on 2026-10-10.
+
 Evaluated 2026-10-10 against `package-lock.json` (npm audit, registry data of that day). **No change to the dependency set has been made.** Every option below was tried in a scratch copy outside the repository, and the options that change the lockfile need the owner's approval.
 
 ## Summary

@@ -7,7 +7,7 @@
     "build": "node build.mjs",
     "serve": "python3 serve.py",
     "test:a11y": "node tests/qa.mjs",
-    "test:lighthouse": "lhci autorun --config=lighthouserc.json",
+    "test:lighthouse": "node engineering/tools/lighthouse.mjs",
     "test:contrast": "node tests/contrast.mjs",
     "test:video-tools": "python3 tools/video-qa-selftest.py",
     "test:contrast-sections": "node tests/contrast-sections.mjs",
@@ -61,6 +61,7 @@
     "check:selftest-evidence": "node engineering/checks/selftest-evidence.mjs",
     "check:selftest-gate4": "node engineering/checks/selftest-gate4.mjs",
     "check:selftest-gate5": "node engineering/checks/selftest-gate5.mjs",
+    "check:selftest-gate6": "node engineering/checks/selftest-gate6.mjs",
     "release:gate": "node engineering/tools/release.mjs gate",
     "release:manifest": "node engineering/tools/release.mjs manifest",
     "release:prepare": "node engineering/tools/release.mjs prepare",
@@ -75,15 +76,15 @@
   },
   "devDependencies": {
     "@axe-core/playwright": "4.13.0",
-    "@lhci/cli": "0.15.1",
     "ajv": "8.20.0",
     "html-validate": "11.16.2",
+    "lighthouse": "13.5.0",
     "pixelmatch": "8.0.0",
     "playwright": "1.64.0",
     "pngjs": "7.0.0",
     "yaml": "2.9.1"
   },
   "engines": {
-    "node": ">=20"
+    "node": ">=24.8.0 <25"
   }
 }

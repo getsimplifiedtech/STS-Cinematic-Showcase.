@@ -4,6 +4,7 @@ import { existsSync, readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { parse } from 'yaml';
 import { engDir, isMain, projectDir, readJson, repoRoot } from '../lib/git.mjs';
+import { satisfies } from '../lib/node-range.mjs';
 
 const FORBIDDEN_TEXT = [
   [/\bgit\s+push\b/, 'git push'], [/\bgh\s+(pr|release|api|workflow|repo)\b/, 'the gh CLI'], [/\bnpm\s+publish\b/, 'npm publish'], [/\bpages\b.*deploy|deploy-pages|upload-pages|gh-pages|peaceiris/i, 'a Pages deployment'],
@@ -28,12 +29,19 @@ export function checkCiFile(text, { docs = true } = {}) {
   const jobs = wf.jobs || {};
   if (!Object.keys(jobs).length) bad('no jobs');
   let steps = 0, uses = 0;
+  const nodeVersions = new Set();
+  const pins = readJson(join(engDir, 'dependencies.json')).actions || {};
+  const baseline = readJson(join(engDir, 'environment.json')).nodeBaseline || {};
+  const engines = readJson(join(projectDir, 'package.json')).engines?.node || '';
   for (const [id, job] of Object.entries(jobs)) {
     if (job.permissions && JSON.stringify(job.permissions) !== JSON.stringify({ contents: 'read' })) bad(`job ${id} widens permissions (${JSON.stringify(job.permissions)})`);
     if (!job['timeout-minutes'] || job['timeout-minutes'] > 60) bad(`job ${id} needs a timeout-minutes of at most 60`);
     const runsFull = (job.steps || []).some((x) => /npm run verify\b/.test(x.run || '') && !/verify:fast/.test(x.run || ''));
     const informational = job['continue-on-error'] === true && /informational/i.test(job.name || '') && !runsFull;   // only a named, fast-checks-only job may be allowed to fail
     const runsOn = JSON.stringify(job['runs-on']);
+    const nameMajor = /\bNode (\d+)\b/.exec(job.name || '');
+    if (nameMajor && baseline.version && nameMajor[1] !== baseline.version.split('.')[0]) bad(`job ${id} is named "${job.name}", but the tested Node is ${baseline.version}`);
+    if (!informational && !nameMajor) bad(`blocking job ${id} must state its Node major in its name (for example "Node ${String(baseline.version).split('.')[0]}")`);
     if (!informational && /latest/.test(runsOn)) bad(`blocking job ${id} runs on a floating image (${runsOn}); pin the runner version`);
     if (!informational && job['continue-on-error'] !== undefined) bad(`job ${id}: continue-on-error is only allowed on a job named "(informational)" that runs the fast checks or the cross-browser runner only`);
     // a job that runs the cross-browser runner for an engine must install that engine (otherwise it would fail for the wrong reason, or pass nothing)
@@ -48,15 +56,26 @@ export function checkCiFile(text, { docs = true } = {}) {
         uses++;
         const [name, ref] = step.uses.split('@');
         if (!SHA.test(ref || '')) bad(`${step.uses} is not pinned to a full commit SHA`);
+        else if (pins[name] && pins[name].sha !== ref) bad(`${name} is pinned to ${ref}, but dependencies.json records the verified Node 24 release ${pins[name].version} (${pins[name].sha})`);
         if (!['actions/checkout', 'actions/setup-node'].includes(name)) bad(`action ${name} is not on the allowed list (actions/checkout, actions/setup-node)`);
         if (name === 'actions/checkout' && step.with?.['persist-credentials'] !== false) bad('checkout must set persist-credentials: false');
         if (name === 'actions/checkout' && step.with?.['fetch-depth'] !== 0) bad('checkout must fetch the full history (fetch-depth: 0): the baseline branch is needed');
-        if (name === 'actions/setup-node' && !/^\d+\.\d+\.\d+$/.test(String(step.with?.['node-version'] || ''))) bad('setup-node must pin an exact Node version');
+        if (name === 'actions/setup-node') {
+          const nv = String(step.with?.['node-version'] || '');
+          if (!/^\d+\.\d+\.\d+$/.test(nv)) bad('setup-node must pin an exact Node version');
+          else {
+            nodeVersions.add(nv);
+            // G6-1: the one tested baseline. environment.json records it; package.json engines must accept it; every job must use it.
+            if (nv !== baseline.version) bad(`setup-node pins Node ${nv}, but environment.json records the tested baseline ${baseline.version}`);
+            try { if (!satisfies(nv, engines)) bad(`setup-node pins Node ${nv}, which package.json engines.node "${engines}" does not accept`); } catch (e) { bad(`engines.node cannot be evaluated: ${e.message}`); }
+          }
+        }
       }
       if (step.run) {
         if (/\$\{\{/.test(step.run)) bad(`a run script contains an expression (script injection risk): ${step.run.slice(0, 50)}`);
         for (const line of step.run.split('\n')) if (/\bnpm\s+(install|i)\b/.test(line) && !/npm\s+(ci)\b/.test(line)) bad(`use npm ci (lockfile), not: ${line.trim()}`);
         if (/\bnpm ci\b/.test(step.run) && !/--ignore-scripts/.test(step.run)) bad('npm ci must use --ignore-scripts');
+        if (/\bnpm ci\b/.test(step.run) && !/--engine-strict/.test(step.run)) bad('npm ci must use --engine-strict (a package that does not support the pinned Node must fail the install, not warn)');
       }
       if (step.env && Object.keys(step.env).some((k) => /key|token|secret|password/i.test(k))) bad(`a step sets a credential-like environment variable: ${Object.keys(step.env).join(', ')}`);
     }
@@ -69,7 +88,8 @@ export function checkCiFile(text, { docs = true } = {}) {
     const pkg = readJson(join(projectDir, 'package.json'));
     for (const s of JSON.stringify(wf).matchAll(/npm run ([a-z:-]+)/g)) if (!pkg.scripts[s[1]]) bad(`the workflow runs "npm run ${s[1]}", which is not a package script`);
   }
-  notes.push(`workflow: ${Object.keys(jobs).length} jobs, ${steps} steps, ${uses} actions all pinned to commit SHAs; permissions contents: read; no secrets, deployment, merge, publish, cloud or AI service; npm ci --ignore-scripts; timeouts set; documented in CI.md`);
+  for (const [name, p] of Object.entries(pins)) if (name.includes('/') && p.runtime !== 'node24') bad(`${name} is recorded with runtime ${p.runtime}, not node24`);
+  notes.push(`workflow: ${Object.keys(jobs).length} jobs, ${steps} steps, ${uses} actions all pinned to commit SHAs; Node ${[...nodeVersions].join(', ')} in every job (tested baseline ${baseline.version}); permissions contents: read; no secrets, deployment, merge, publish, cloud or AI service; npm ci --ignore-scripts; timeouts set; documented in CI.md`);
   return { problems, notes };
 }
 
