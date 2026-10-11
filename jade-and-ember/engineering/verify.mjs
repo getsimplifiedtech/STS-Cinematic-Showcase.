@@ -32,6 +32,7 @@ import { checkHtml } from './checks/html.mjs';
 import { checkLinks } from './checks/links.mjs';
 import { checkSeo } from './checks/seo.mjs';
 import { checkRelease } from './checks/release.mjs';
+import { checkReleaseDryRun } from './checks/release-dryrun.mjs';
 import { checkHosting } from './checks/hosting.mjs';
 import { checkSelftestGate4 } from './checks/selftest-gate4.mjs';
 import { checkPhone } from './checks/phone.mjs';
@@ -86,6 +87,7 @@ const checks = [
     ['check:supports', 'The approved WebKit text-spacing correction (@supports hanging-punctuation) applies exactly where the engine supports it, as recorded, and the rule is in the stylesheet', () => checkSupports({ browserName })],
     ['check:phone', 'phone numbers readable, pressable and inside the viewport at 9 supported mobile widths (F-G4-01)', () => checkPhone({ browserName })],
     ['check:portability', 'the folder works from an extracted ZIP over file://, at a domain root, in a subdirectory, with pretty URLs, without Range', () => checkPortability({ browserName })],
+    ['check:release-dryrun', 'release readiness dry run: the real release tool against a synthetic client build in a throwaway copy (success path, ~100 single blockers, package integrity and tampering, no deployment path); measures the gaps', () => checkReleaseDryRun()],
     ['check:regression', 'candidate against the frozen v0.8 baseline (source, text, structure, styles, pixels, behaviour)', () => checkRegression({ browserName, strictEnv: has('--strict-env') })],
     ...(has('--no-selftest') ? [] : [
       ['check:selftest', 'Gate 1 checks fail when they should (mutation tests)', () => checkSelftest()],
