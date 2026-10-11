@@ -37,6 +37,8 @@ import { checkSelftestGate4 } from './checks/selftest-gate4.mjs';
 import { checkPhone } from './checks/phone.mjs';
 import { checkD11 } from './checks/d11.mjs';
 import { checkSupports } from './checks/supports.mjs';
+import { checkEvidence } from './checks/evidence.mjs';
+import { checkSelftestEvidence } from './checks/selftest-evidence.mjs';
 import { checkSelftestGate5 } from './checks/selftest-gate5.mjs';
 import { checkSelftestGate3 } from './checks/selftest-gate3.mjs';
 import { checkRegression } from './checks/regression.mjs';
@@ -68,6 +70,7 @@ const checks = [
   ['check:links', 'every internal link, fragment, image, font and video source resolves (exact case); sitemap and canonicals agree', () => checkLinks()],
   ['check:seo', fast ? 'canonical, sitemap, robots and JSON-LD generated from client configuration (static part)' : 'canonical, sitemap, robots and JSON-LD generated from client configuration; demonstration stays noindex; hostile input; served in the browser', () => checkSeo({ browser: !fast, browserName })],
   ['check:release', 'version file, release manifest and the release gate (a client-production build needs recorded approvals and evidence)', () => checkRelease()],
+  ['check:evidence', 'human-testing paperwork: procedures equal the specification, templates are unfilled and rejected, complete records accepted, no page disables zoom', () => checkEvidence()],
   ['check:hosting', 'static-folder delivery for Cloudflare Pages: no application or vendor files, _headers within limits, no Vercel dependency', () => checkHosting()],
   ['check:privacy', fast ? 'no storage, cookies, third parties or fingerprinting (static part)' : 'no storage, cookies, third parties or fingerprinting (static and in the browser)', () => checkPrivacy({ browser: !fast, browserName })],
   ['check:security', fast ? 'security headers and Content Security Policy (static part)' : 'security headers and CSP: generated, enforced in the browser, probed, and identical to v0.8 under the headers', () => checkSecurity({ browser: !fast, browserName })],
@@ -89,6 +92,7 @@ const checks = [
       ['check:selftest-gate2', 'Gate 2 checks fail when they should (targeted negative tests)', () => checkSelftestGate2()],
       ['check:selftest-gate3', 'Gate 3 checks fail when they should (targeted negative tests)', () => checkSelftestGate3()],
       ['check:selftest-gate5', 'the cross-browser harness cannot skip a check silently, reports engine adaptations, and D-11 detection works', () => checkSelftestGate5()],
+      ['check:selftest-evidence', 'the evidence validator rejects incomplete, fabricated, mismatched and wrongly classified human-testing evidence (negative tests)', () => checkSelftestEvidence()],
       ['check:selftest-gate4', 'Gate 4 checks fail when they should (HTML, links, SEO and llms.txt, crawler policy, release gate, hosting, phone numbers)', () => checkSelftestGate4()],
     ]),
   ]),

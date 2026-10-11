@@ -20,6 +20,7 @@ export const SCOPE = {
   'check:links': ['static', 'internal link resolution over the built files; no browser'],
   'check:seo': ['engine', ''],
   'check:release': ['static', 'release manifest and gate logic; no browser'],
+  'check:evidence': ['static', 'human-testing procedures, templates and evidence rules, and the viewport tag; no browser'],
   'check:hosting': ['static', 'static-folder and generated-header rules; no browser'],
   'check:privacy': ['engine', ''],
   'check:security': ['engine', ''],
@@ -40,6 +41,7 @@ export const SCOPE = {
   'check:selftest-gate3': ['chromium-only', 'negative tests of the Gate 3 checks; they run in the Chromium job'],
   'check:selftest-gate4': ['chromium-only', 'negative tests of the Gate 4 checks; they run in the Chromium job'],
   'check:selftest-gate5': ['chromium-only', 'tests of the cross-browser harness itself; they run in the Chromium job'],
+  'check:selftest-evidence': ['chromium-only', 'negative tests of the evidence validator and scaffolding; they need no browser and run in the Chromium job'],
 };
 export const engineChecks = () => Object.entries(SCOPE).filter(([, [s]]) => s === 'engine').map(([id]) => id);
 

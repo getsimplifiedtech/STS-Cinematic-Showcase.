@@ -1,5 +1,6 @@
 // The release manifest and the release gate. The gate is a pure function of a context object, so every rule can be tested with invented states.
 // A build is classified by its configuration (channelOf), never by a label: a client configuration cannot be released as a "demonstration".
+import { assessEvidence, coverage, defaultVctx, loadEvidenceEntries, loadSpec as loadEvidenceSpec } from './evidence.mjs';
 import { existsSync, readFileSync, readdirSync } from 'node:fs';
 import { join } from 'node:path';
 import { execFileSync } from 'node:child_process';
@@ -33,15 +34,11 @@ export function gitState(cwd = repoRoot) {
   return { commit, tree: git(['rev-parse', 'HEAD^{tree}'], cwd), branch: git(['rev-parse', '--abbrev-ref', 'HEAD'], cwd), dirty: git(['status', '--porcelain'], cwd) !== '', commitDate: git(['show', '-s', '--format=%cI', 'HEAD'], cwd) };
 }
 
-// Evidence records: files in engineering/release/evidence/*.json. valid = well formed and success.
-export function loadEvidence(dir = join(engDir, 'release', 'evidence')) {
-  if (!existsSync(dir)) return [];
-  return readdirSync(dir).filter((f) => f.endsWith('.json')).sort().map((f) => {
-    let r; try { r = JSON.parse(readFileSync(join(dir, f), 'utf8')); } catch { return { file: f, type: 'unreadable', commit: '', valid: false }; }
-    const policy = loadReleasePolicy();
-    const ok = Boolean(policy.evidence.types[r.type]) && /^[0-9a-f]{40}$/.test(r.commit || '') && /^\d{4}-\d{2}-\d{2}$/.test(r.date || '') && typeof r.by === 'string' && r.by.length > 1 && typeof r.summary === 'string' && r.summary.length > 10 && r.conclusion === 'success' && (r.type !== 'ci-run' || /^https:\/\/github\.com\//.test(r.url || ''));
-    return { file: f, type: r.type || 'unknown', commit: r.commit || '', valid: ok };
-  });
+// Evidence records: files in engineering/release/evidence/*.json, read here and judged by lib/evidence.mjs against the build being released.
+// ctx.evidence is the raw list [{ file, record }]; assessedEvidence(ctx) says which of them count.
+export const loadEvidence = (dir) => loadEvidenceEntries(dir);
+export function assessedEvidence(ctx) {
+  return assessEvidence(ctx.evidence || [], defaultVctx({ releaseCommit: ctx.git.commit, assetsTree: ctx.assetsTree, ...(ctx.evidenceVctx || {}) }));
 }
 
 // Everything the gate and the manifest need, gathered from the working tree unless overridden (tests override).
@@ -83,7 +80,7 @@ export function evaluateGate(ctx, policy = loadReleasePolicy()) {
   const ver = ctx.version.version, c = ctx.git.commit;
   const blocking = ctx.findings.filter((f) => policy.blockingSeverities.includes(f.severity));
   const badSeverity = ctx.findings.filter((f) => !policy.severities.includes(f.severity));
-  const ev = (type) => ctx.evidence.filter((e) => e.type === type && e.valid && (type === 'ci-run' ? e.commit === c : /^[0-9a-f]{40}$/.test(e.commit)));
+  const evSpec = loadEvidenceSpec(), assessed = assessedEvidence(ctx);
   const rel = findApproval(ctx.approvals, 'release-approval', { channel, version: ver, commit: c });
   const rights = findRightsVerification(ctx.approvals);
   const demoText = ctx.buildOk;
@@ -107,7 +104,7 @@ export function evaluateGate(ctx, policy = loadReleasePolicy()) {
     productionDomain: [baseHost && !isReservedHost(baseHost), baseHost ? (isReservedHost(baseHost) ? `${baseHost} is a reserved, example, local or preview/staging address, not the approved production domain` : `${baseHost}`) : 'seo.baseUrl is not set'],
     searchReadiness: [!searchGaps.length, searchGaps.length ? searchGaps.join('; ') : `${review.id}: facts, structured data and crawler policy reviewed for these search artifacts`],
     productionSeoComplete: [seoOk, seoOk ? 'canonical, sitemap, robots and structured data are configured' : 'indexable canonical URLs, sitemap, robots and structured data are not all configured'],
-    ...Object.fromEntries(['real-device', 'screen-reader', 'browser-matrix', 'ci-run'].map((t) => [`evidence:${t}`, [ev(t).length > 0, ev(t).length ? `${ev(t)[0].file}` : `no valid ${t} evidence record in engineering/release/evidence/`]])),
+    ...Object.fromEntries(['real-device', 'screen-reader', 'browser-matrix', 'ci-run'].map((t) => { const cv = coverage(evSpec, t, assessed); return [`evidence:${t}`, [cv.ok, cv.detail]]; })),
   };
   for (const id of need) { const [ok, detail] = checks[id] || [false, 'unknown requirement']; add(id, ok, detail); }
   // a client configuration labelled demonstration is always refused
@@ -141,7 +138,7 @@ export function buildReleaseManifest(ctx, { siteDir, qaReport = ctx.verify, pack
     security: { cspSha256: sha(csp), headers: Object.keys(securityHeaders(siteDir, policy)).sort(), inlineScriptHashes: items.scripts.length, inlineStyleHashes: items.styles.length },
     qa: { verified: Boolean(qaReport && qaReport.passed && qaReport.mode === 'full' && qaReport.commit === c && qaReport.dirty === false), report: qaReport ? { mode: qaReport.mode, passed: qaReport.passed, commit: qaReport.commit ?? null, checks: qaReport.results.map((r) => ({ id: r.id, status: r.passed ? 'pass' : 'fail' })) } : null },
     approvals: { required: [...required].sort(), present: have.filter((a) => required.includes(a.id) || /release|rights|deployment|search/i.test(a.type)).map((a) => ({ id: a.id, date: a.date, type: a.type })), missing: required.filter((r) => !have.some((a) => a.id === r)), releaseApproval: rel?.id || null, rightsVerification: rights?.id || null, deploymentApproval: dep?.id || null },
-    evidence: ctx.evidence.map((e) => ({ file: e.file, type: e.type, commit: e.commit, valid: e.valid })),
+    evidence: assessedEvidence({ ...ctx, assetsTree: am.treeSha256 }).map((e) => ({ file: e.file, type: e.type, commit: e.commit, valid: e.valid, success: e.success, class: e.class, target: e.target })),
     findings: ctx.findings.map((f) => ({ id: f.id, severity: f.severity, visual: f.visual, status: String(f.status).slice(0, 80) })),
     dependencies: { lockfileSha256: sha256(lock), runtimeDependencies: Object.keys(ctx.pkg.dependencies || {}).length, acceptedAdvisoryPackages: deps.acceptedAdvisories.packages.length },
     gate: { channel: gate.channel, allowed: gate.allowed, deploymentApproved: gate.deploymentApproved, requirements: gate.requirements },

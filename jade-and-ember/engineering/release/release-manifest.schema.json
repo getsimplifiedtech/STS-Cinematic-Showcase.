@@ -411,6 +411,21 @@
           },
           "valid": {
             "type": "boolean"
+          },
+          "success": {
+            "type": "boolean"
+          },
+          "class": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "target": {
+            "type": [
+              "string",
+              "null"
+            ]
           }
         }
       }

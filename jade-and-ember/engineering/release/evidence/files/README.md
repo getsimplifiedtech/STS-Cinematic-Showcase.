@@ -1,0 +1,1 @@
+Attachments for evidence records (screenshots, recordings, transcripts). Each file is listed in exactly one record with its SHA-256; the release gate checks the hash and rejects a file used by two records. Nothing here yet: no human testing has been recorded.

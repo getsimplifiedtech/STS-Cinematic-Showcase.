@@ -52,13 +52,20 @@
     "check:phone": "node engineering/checks/phone.mjs",
     "check:d11": "node engineering/checks/d11.mjs",
     "check:supports": "node engineering/checks/supports.mjs",
+    "check:evidence": "node engineering/checks/evidence.mjs",
+    "check:selftest-evidence": "node engineering/checks/selftest-evidence.mjs",
     "check:selftest-gate4": "node engineering/checks/selftest-gate4.mjs",
     "check:selftest-gate5": "node engineering/checks/selftest-gate5.mjs",
     "release:gate": "node engineering/tools/release.mjs gate",
     "release:manifest": "node engineering/tools/release.mjs manifest",
     "release:prepare": "node engineering/tools/release.mjs prepare",
     "release:search-digest": "node engineering/tools/release.mjs search-digest",
-    "verify:cross": "node engineering/cross-browser.mjs"
+    "verify:cross": "node engineering/cross-browser.mjs",
+    "evidence:new": "node engineering/tools/evidence.mjs new",
+    "evidence:list": "node engineering/tools/evidence.mjs list",
+    "evidence:docs": "node engineering/tools/evidence.mjs docs",
+    "evidence:validate": "node engineering/tools/evidence.mjs validate",
+    "evidence:hash": "node engineering/tools/evidence.mjs hash"
   },
   "devDependencies": {
     "@axe-core/playwright": "4.13.0",

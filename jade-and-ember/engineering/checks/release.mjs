@@ -19,6 +19,7 @@ import { buildReleaseManifest, channelOf, collectContext, evaluateGate, loadRele
 import { validateSchema } from '../lib/schema.mjs';
 import { engDir, isMain, projectDir, readJson } from '../lib/git.mjs';
 import { readFileSync } from 'node:fs';
+import { FIXTURE_TREE, fixtureEvidenceSet, fixtureVctx } from '../lib/evidence-fixtures.mjs';
 
 const KNOWN = ['cleanTree', 'verifyPassed', 'noBlockingFindings', 'requiredApprovalsPresent', 'versionConsistent', 'demoStaysNoindex', 'stableVersion', 'releaseApproval', 'rightsVerification', 'noDemoText', 'productionSeoComplete', 'productionDomain', 'searchReadiness', 'evidence:real-device', 'evidence:screen-reader', 'evidence:browser-matrix', 'evidence:ci-run'];
 const C = 'a'.repeat(40);
@@ -29,14 +30,14 @@ export function greenClientContext(over = {}) {
   const client = JSON.parse(JSON.stringify(base.client));
   Object.assign(client.flags, { demo: false }); Object.assign(client.seo, { noindex: false, structuredData: true, baseUrl: 'https://www.jade-and-ember-fixture.com', host: 'cloudflare-pages', urlStyle: 'clean', crawlers: { search: 'allow', aiSearch: 'allow', training: 'disallow' }, business: { x: 1 } });
   const version = { name: 'jade-and-ember', version: '1.0.0', baseline: '0.8', channel: 'client-production', previewPackage: 'x.zip' };
-  const ev = (type) => ({ file: `${type}.json`, type, commit: C, valid: true });
+  const fx = fixtureEvidenceSet(), fv = fixtureVctx(fx.files);   // invented, in-memory records that satisfy the evidence rules; see lib/evidence-fixtures.mjs
   const DIGEST = 'f'.repeat(64);
   const decision = `release-approval for the client. channel: client-production; version: 1.0.0; commit: ${C}`;
   return {
     ...base, client, version, pkg: { ...base.pkg, version: '1.0.0' }, channel: 'client-production', findings: [{ id: 'F-1', severity: 'Minor', visual: false, status: 'open' }],
-    git: { commit: C, tree: C, branch: 'release', dirty: false, commitDate: '2026-10-10T00:00:00Z' }, verify: { mode: 'full', passed: true, commit: C, dirty: false, assetsTree: 'T', results: [] }, assetsTree: 'T', buildOk: true,
+    git: { commit: C, tree: C, branch: 'release', dirty: false, commitDate: '2026-10-10T00:00:00Z' }, verify: { mode: 'full', passed: true, commit: C, dirty: false, assetsTree: FIXTURE_TREE, results: [] }, assetsTree: FIXTURE_TREE, buildOk: true,
     approvals: [...base.authority.records.requiredApprovals.map((id) => ({ id, date: '2026-10-10', type: 'approval', decision: 'x', concerns: '', limits: '' })), { id: 'REL-JE-001', date: '2026-10-10', type: 'release-approval', decision, concerns: '', limits: '' }, { id: 'SRCH-JE-001', date: '2026-10-10', type: 'search-review', decision: `Reviewed by the owner on 2026-10-10: business facts, structured data, crawler policy. digest: ${DIGEST}`, concerns: '', limits: '' }, { id: 'RIGHTS-JE-001', date: '2026-10-10', type: 'rights-verification', decision: 'Verified by the owner against the sources reviewed (generator terms) on 2026-10-10', concerns: '', limits: '' }],
-    evidence: ['real-device', 'screen-reader', 'browser-matrix'].map(ev).concat([ev('ci-run')]), searchDigest: DIGEST, siteHasSearchFiles: true, ...over,
+    evidence: fx.entries.map((e) => ({ ...e, type: e.record.type })), evidenceVctx: { git: fv.git, fs: fv.fs, today: fv.today }, searchDigest: DIGEST, siteHasSearchFiles: true, ...over,
   };
 }
 
@@ -82,6 +83,7 @@ export async function checkRelease({ root = null } = {}) {
     const g = (over) => evaluateGate(greenClientContext(over));
     const green = g({});
     if (!green.allowed) problems.push(`the gate blocks a fully approved client-production build: ${green.requirements.filter((r) => !r.ok).map((r) => `${r.id} (${r.detail})`).join('; ')}`);
+    const mutate = (target, fn) => greenClientContext().evidence.map((e) => (e.record.target === target ? (() => { const r = JSON.parse(JSON.stringify(e.record)); fn(r); return { ...e, record: r }; })() : e));
     const cases = {
       'a missing release approval': { approvals: greenClientContext().approvals.filter((a) => a.type !== 'release-approval') },
       'a release approval for another commit': { approvals: greenClientContext().approvals.map((a) => (a.type === 'release-approval' ? { ...a, decision: a.decision.replace(C, 'b'.repeat(40)) } : a)) },
@@ -106,8 +108,21 @@ export async function checkRelease({ root = null } = {}) {
       'missing real-device evidence': { evidence: greenClientContext().evidence.filter((e) => e.type !== 'real-device') },
       'missing screen-reader evidence': { evidence: greenClientContext().evidence.filter((e) => e.type !== 'screen-reader') },
       'missing browser-matrix evidence': { evidence: greenClientContext().evidence.filter((e) => e.type !== 'browser-matrix') },
-      'CI evidence for another commit': { evidence: greenClientContext().evidence.map((e) => (e.type === 'ci-run' ? { ...e, commit: 'd'.repeat(40) } : e)) },
-      'invalid (not successful) evidence': { evidence: greenClientContext().evidence.map((e) => (e.type === 'real-device' ? { ...e, valid: false } : e)) },
+      'missing CI evidence': { evidence: greenClientContext().evidence.filter((e) => e.type !== 'ci-run') },
+      'CI evidence for another commit': { evidence: mutate('ci-run', (r) => { r.build.commit = 'c'.repeat(40); }) },
+      'no Android phone (only an iPhone)': { evidence: greenClientContext().evidence.filter((e) => e.record.target !== 'android-chrome') },
+      'no iPhone (only an Android phone)': { evidence: greenClientContext().evidence.filter((e) => e.record.target !== 'iphone-safari') },
+      'no TalkBack pass': { evidence: greenClientContext().evidence.filter((e) => e.record.target !== 'sr-talkback-android-chrome') },
+      'no VoiceOver pass': { evidence: greenClientContext().evidence.filter((e) => !e.record.target.startsWith('sr-voiceover')) },
+      'no NVDA pass': { evidence: greenClientContext().evidence.filter((e) => !e.record.target.startsWith('sr-nvda')) },
+      'no desktop Safari pass': { evidence: greenClientContext().evidence.filter((e) => e.record.target !== 'desktop-safari') },
+      'a real-device record whose test failed': { evidence: mutate('iphone-safari', (r) => { r.results.pages['index.html'].loads.outcome = 'fail'; r.conclusion = 'failure'; r.findings.push({ id: 'DEV-1', page: 'index.html', severity: 'Minor', description: 'the page did not load', status: 'open' }); }) },
+      'emulation offered as a physical device (E1 claimed as E3)': { evidence: mutate('iphone-safari', (r) => { r.environment.device.emulated = true; }) },
+      'a desktop record offered as a physical device (E2 claimed as E3)': { evidence: mutate('iphone-safari', (r) => { r.class = 'E2'; }) },
+      'a physical-device record for a different build (assets differ)': { evidence: mutate('android-chrome', (r) => { r.build.assetsTree = 'e'.repeat(64); }) },
+      'an unfilled template': { evidence: mutate('desktop-chrome', (r) => { r.status = 'template'; }) },
+      'an incomplete record (a result left empty)': { evidence: mutate('sr-nvda-firefox', (r) => { r.results.pages['visit-us.html']['sr-headings'].outcome = null; }) },
+      'a record signed by no one': { evidence: mutate('sr-voiceover-macos-safari', (r) => { r.attestation.signedBy = ''; }) },
       'a client configuration that does not build': { buildOk: false },
       'no search review': { approvals: greenClientContext().approvals.filter((a) => a.type !== 'search-review') },
       'a search review of different search artifacts (digest mismatch)': { searchDigest: '0'.repeat(64) },

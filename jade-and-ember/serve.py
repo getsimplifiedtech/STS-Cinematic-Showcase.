@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 """Tiny local server for the Jade & Ember preview. Standard library only. Supports HTTP Range so the hero video can loop and seek.
-Usage: python3 serve.py   (then open http://localhost:8766/)"""
+Usage: python3 serve.py [port] [host]   (then open http://localhost:8766/)
+The host defaults to 127.0.0.1 (this computer only). To reach it from a phone on a trusted network: python3 serve.py 8766 0.0.0.0"""
 import http.server, os, re, sys
 
 class H(http.server.SimpleHTTPRequestHandler):
@@ -37,5 +38,6 @@ class H(http.server.SimpleHTTPRequestHandler):
 if __name__ == '__main__':
     os.chdir(os.path.dirname(os.path.abspath(__file__)))
     port = int(sys.argv[1]) if len(sys.argv) > 1 else 8766
-    print(f'Jade & Ember local preview: http://localhost:{port}/   (Ctrl+C to stop)')
-    http.server.ThreadingHTTPServer(('127.0.0.1', port), H).serve_forever()
+    host = sys.argv[2] if len(sys.argv) > 2 else '127.0.0.1'
+    print(f'Jade & Ember local preview: http://localhost:{port}/   (Ctrl+C to stop)' + ('' if host == '127.0.0.1' else f'   listening on {host}: any device on this network can open it'))
+    http.server.ThreadingHTTPServer((host, port), H).serve_forever()
