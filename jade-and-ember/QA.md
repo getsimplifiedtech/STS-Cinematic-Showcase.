@@ -422,6 +422,7 @@ Delivered for owner review: `engineering/FRAMEWORK-EXTRACTION-GATE5.md` (the ass
 - **Measured:** 9,625 lines of JavaScript in 103 files; 7,090 lines (73.7 percent) are reusable (3,030 with parameterisation only, 4,060 after a redesign); 104 lines are restaurant-specific, 188 hosting-specific, 547 Jade & Ember only, 1,535 development tooling.
 - **Master framework:** `main` is `f05f41f` (architecture only); the pin is `d2803c0`; the 15 specifications are byte-identical on both; the framework has no engineering code and no Framework Release. All 15 specifications can be retained; two extensions (spec 15 statuses and revocation; an engineering namespace) are proposed, never edited; two owner rulings are needed (builder scope; visual packages beside the Frontend Design authority).
 - **Measured on the template:** the framework's own template workflow fails 12 of this repository's CI rules (one a false positive: the word `claude` in a branch name).
+- **Verified:** Actions run 40 on `980344e`, all six jobs passed (Chromium `verify` step 15 min 9 s, Firefox 8 min 52 s, WebKit 7 min 50 s, macOS fast 19 s, external links 6 s, supply chain report 7 s); local `verify:fast` 22 of 22; the master framework clone's working tree and HEAD (`f2a03dc`) are unchanged.
 - **Decisions D-P8-1 to D-P8-10** await the owner; Gate 6 work packages G6-0 to G6-8 are proposed in dependency order.
 
 ## Remaining issues (honest list)
