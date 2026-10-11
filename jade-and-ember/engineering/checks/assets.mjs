@@ -9,7 +9,7 @@
 //              opt-in copy for hosts that want immutable caching
 import { cpSync, existsSync, mkdirSync, readFileSync, rmSync } from 'node:fs';
 import { dirname, join, posix } from 'node:path';
-import { assembleCandidate, pagesOf, SHARED } from '../lib/site.mjs';
+import { assembleCandidate, loadAllowlist, pagesOf, SHARED } from '../lib/site.mjs';
 import { buildHashed, buildManifest, sha256hex, treeHash } from '../lib/hashed.mjs';
 import { runRegression } from '../lib/regression.mjs';
 import { baselineRecord, engDir, exportBaseline, isMain, listFiles, projectDir, readJson, repoRoot, tempDir } from '../lib/git.mjs';
@@ -39,11 +39,21 @@ export function checkAssetsStatic({ root }) {
   // against the baseline's own checksums
   const rec = baselineRecord();
   const sums = Object.fromEntries(readFileSync(join(repoRoot, rec.recordsDir, rec.sourceTreeChecksums.file), 'utf8').split('\n').filter(Boolean).map((l) => [l.slice(66), l.slice(0, 64)]));
-  const changed = Object.entries(fresh.files).filter(([f, e]) => sums[`jade-and-ember/${f}`] && sums[`jade-and-ember/${f}`] !== e.sha256).map(([f]) => f);
+  const allow = loadAllowlist();
+  const explained = (f, e) => {   // a text file may differ from v0.8 only as an approved allowlist entry explains: the candidate, normalised, must hash to the baseline's checksum
+    const entry = allow.entries.find((x) => x.file === f);
+    if (!entry || allow.errors.length) return false;
+    let text = readFileSync(join(root, f), 'utf8');
+    for (const r of entry.normalize) text = text.replace(new RegExp(r.find, 'g'), r.replace);
+    if (sha256hex(text) !== sums[`jade-and-ember/${f}`]) return false;
+    notes.push(`${f} differs from the v0.8 checksum only as approved by ${entry.id} (${entry.approval || entry.workPackage})`);
+    return true;
+  };
+  const changed = Object.entries(fresh.files).filter(([f, e]) => sums[`jade-and-ember/${f}`] && sums[`jade-and-ember/${f}`] !== e.sha256 && !explained(f, e)).map(([f]) => f);
   const missing = Object.keys(fresh.files).filter((f) => !sums[`jade-and-ember/${f}`]);
   if (changed.length) problems.push(`delivered file(s) differ from the v0.8 baseline checksums: ${changed.join(', ')}`);
   if (missing.length) problems.push(`delivered file(s) not in the v0.8 baseline: ${missing.join(', ')}`);
-  if (!changed.length && !missing.length) notes.push('every delivered file equals its v0.8 baseline checksum; names and paths are unchanged');
+  if (!changed.length && !missing.length) notes.push('every delivered file equals its v0.8 baseline checksum, or differs only as an approved allowlist entry explains; names and paths are unchanged');
   return { problems, notes, fresh };
 }
 

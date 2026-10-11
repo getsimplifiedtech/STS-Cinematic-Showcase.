@@ -9,7 +9,7 @@ import { checkDeterminism } from './determinism.mjs';
 import { checkAuthority } from './authority.mjs';
 import { checkDelivery } from './delivery.mjs';
 import { runRegression } from '../lib/regression.mjs';
-import { assembleCandidate, compareSources, validateAllowlist } from '../lib/site.mjs';
+import { assembleCandidate, compareSources, loadAllowlist, validateAllowlist } from '../lib/site.mjs';
 import { baselineRecord, engDir, exportBaseline, isMain, projectDir, repoRoot, tempDir } from '../lib/git.mjs';
 
 const edit = (file, fn) => writeFileSync(file, fn(readFileSync(file, 'utf8')));
@@ -94,11 +94,12 @@ export async function checkSelftest({ quick = false } = {}) {
       const b = exportBaseline('selftest-base'); cleanup.push(join(b, '..'));
       const c = assembleCandidate(projectDir, 'selftest-allow'); cleanup.push(c);
       edit(join(c, 'index.html'), (t) => t.replace('styles.css', 'styles.abc123.css'));
-      const none = compareSources(b, c, { entries: [] });
-      const permitted = compareSources(b, c, { entries: [{ ...ok, normalize: [{ find: 'styles\\.abc123\\.css', replace: 'styles.css' }] }] });
-      const insufficient = compareSources(b, c, { entries: [{ ...ok, normalize: [{ find: 'nothing-matches', replace: 'x' }] }] });
+      const real = loadAllowlist().entries;   // the approved differences of the real tree (the stylesheet correction, APR-JE-029) are part of the starting state
+      const none = compareSources(b, c, { entries: real });
+      const permitted = compareSources(b, c, { entries: [...real, { ...ok, normalize: [{ find: 'styles\\.abc123\\.css', replace: 'styles.css' }] }] });
+      const insufficient = compareSources(b, c, { entries: [...real, { ...ok, normalize: [{ find: 'nothing-matches', replace: 'x' }] }] });
       expect(none.problems.length === 1, 'allowlist: an unlisted difference must be a problem');
-      expect(permitted.problems.length === 0 && permitted.allowed.length === 1, 'allowlist: a difference fully explained by a listed rule must be allowed and reported');
+      expect(permitted.problems.length === 0 && permitted.allowed.length === real.length + 1, 'allowlist: a difference fully explained by a listed rule must be allowed and reported');
       expect(insufficient.problems.length === 1, 'allowlist: a rule that does not explain the difference must not allow it');
       notes.push('allowlist: incomplete or unapproved visual entries are refused; only fully explained differences are allowed and reported');
     }
