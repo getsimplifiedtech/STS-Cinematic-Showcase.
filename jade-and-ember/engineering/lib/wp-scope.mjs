@@ -26,9 +26,11 @@ export function verifyScope(id, { files = null, matrix = loadMatrix() } = {}) {
   const changed = files || changedFiles(scope.baseCommit);
   const denied = changed.filter((f) => scope.deny.some((d) => matches(d, f)));
   const outside = changed.filter((f) => !denied.includes(f) && !scope.allow.some((a) => matches(a, f)));
-  const head = git(['rev-parse', '--abbrev-ref', 'HEAD']);
+  // GitHub Actions checks a branch out detached: the branch is then the one the run was triggered for (GITHUB_REF_NAME), or unknown (not checked)
+  let head = git(['rev-parse', '--abbrev-ref', 'HEAD']);
+  if (head === 'HEAD') head = process.env.GITHUB_REF_NAME || null;
   const problems = [];
-  if (head !== scope.branch) problems.push(`on branch ${head}, the authorised branch is ${scope.branch}`);
+  if (head && head !== scope.branch) problems.push(`on branch ${head}, the authorised branch is ${scope.branch}`);
   for (const f of denied) problems.push(`${f}: explicitly denied for ${id}`);
   for (const f of outside) problems.push(`${f}: outside the authorised scope of ${id}`);
   return { scope, changed, problems, ok: !problems.length };

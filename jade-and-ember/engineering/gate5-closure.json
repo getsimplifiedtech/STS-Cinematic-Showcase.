@@ -25,6 +25,6 @@
     { "n": 6, "name": "Dependencies and security assessment", "authorisedBy": ["APR-JE-034"], "closedBy": "APR-JE-035", "code": { "commit": "2ae78d6", "run": 35 }, "docs": { "commit": "c20cc8b", "run": 36 } },
     { "n": 7, "name": "Release readiness dry run", "authorisedBy": ["APR-JE-035"], "closedBy": "APR-JE-036", "code": { "commit": "6133586", "run": 38 }, "docs": { "commit": "10ce2b2", "run": 39 } },
     { "n": 8, "name": "Framework-extraction assessment", "authorisedBy": ["APR-JE-036"], "closedBy": "APR-JE-037", "code": { "commit": "980344e", "run": 40 }, "docs": { "commit": "9fa5aa4", "run": 41 } },
-    { "n": 9, "name": "Formal Gate 5 closure", "authorisedBy": ["APR-JE-037"], "closedBy": null, "code": { "commit": "3327d96", "run": 42 } }
+    { "n": 9, "name": "Formal Gate 5 closure", "authorisedBy": ["APR-JE-037"], "closedBy": "APR-JE-038", "code": { "commit": "3327d96", "run": 42 }, "docsNote": "Records commit 92a265a: run 43 was cancelled (superseded by the next push) and is not claimed; run 44 for 7b2fd75, which contains it, succeeded (all six jobs)." }
   ]
 }

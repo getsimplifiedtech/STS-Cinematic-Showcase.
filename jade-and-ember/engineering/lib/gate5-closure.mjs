@@ -1,4 +1,4 @@
-// Gate 5 closure verification (Phase 9, APR-JE-037). Read only, offline, reproducible by anyone with the repository: it checks the six things the
+// Gate 5 closure verification (Phase 9, APR-JE-037; closed by APR-JE-038). Read only, offline, reproducible by anyone with the repository: it checks the six things the
 // owner asked to have verified before Gate 5 is closed, against the approvals log, git, CI.md, the migration matrix and the release gate.
 // It approves nothing. Gate 5 is closed by the owner, and this module only reports whether the record supports that.
 import { execFileSync } from 'node:child_process';
@@ -11,6 +11,7 @@ import { assembleCandidate } from './site.mjs';
 import { buildManifest } from './hashed.mjs';
 import { collectContext, evaluateGate, searchDigest, searchFilesPresent } from './release.mjs';
 import { rmSync } from 'node:fs';
+import { verifyScope } from './wp-scope.mjs';
 
 const git = (args, cwd = repoRoot) => execFileSync('git', args, { cwd, encoding: 'utf8', maxBuffer: 1 << 26 }).trim();
 const tryGit = (args, cwd) => { try { return { ok: true, out: git(args, cwd) }; } catch (e) { return { ok: false, out: String(e.stderr || e.message).trim() }; } };
@@ -47,7 +48,7 @@ export function verifyClosure({ framework = process.env.STS_FRAMEWORK_DIR || '/h
     add(`phase ${ph.n}`, !probs.length, `${ph.name}: authorised by ${ph.authorisedBy.join(', ')}; ${closedText}${ph.code ? `; code ${ph.code.commit} run ${ph.code.run}` : ''}${ph.docs ? `, records ${ph.docs.commit} run ${ph.docs.run}` : ''}${probs.length ? ` -- PROBLEMS: ${probs.join('; ')}` : ''}`);
   }
   const plan = readFileSync(join(engDir, 'GATE-5-PLAN.md'), 'utf8');
-  add('plan status', /Phases 0 to 8 are CLOSED/.test(plan) && /Phase 9 .*(authorised|delivered)/.test(plan), 'GATE-5-PLAN.md status line names Phases 0 to 8 as closed and Phase 9 as authorised or delivered, not closed');
+  add('plan status', /Phases 0 to 9 are CLOSED/.test(plan) && /Gate 5 is formally closed/.test(plan) && /G6-0 and G6-2 to G6-8 are not authorised to start/.test(plan), 'GATE-5-PLAN.md status line names Phases 0 to 9 as closed, Gate 5 as formally closed (an engineering assessment), and only G6-1 as authorised');
 
   // 2. the migration matrix and requirement register are complete
   section('2. The migration matrix and the requirement register are complete');
@@ -117,12 +118,13 @@ export function verifyClosure({ framework = process.env.STS_FRAMEWORK_DIR || '/h
   }
   const pri = matrix.priorities.every((p) => matrix.workPackages.find((w) => w.id === p.wp)?.priorities.includes(Number(p.id.slice(2))));
   add('priorities', pri && matrix.priorities.length === 8, 'the eight required Gate 6 priorities of APR-JE-036 are each assigned to a work package that lists them');
-  // G6-1 has not started: the Phase 6 pins are still in force (workflow and lockfile identical to the Phase 6 code commit, devDependencies unchanged) and its decisions are still recorded as not implemented
-  const sameFiles = tryGit(['diff', '--quiet', '2ae78d6', 'HEAD', '--', '.github/workflows', 'jade-and-ember/package-lock.json']);
-  const devDeps = JSON.stringify(readJson(join(projectDir, 'package.json')).devDependencies);
-  const devDeps6 = tryGit(['show', '2ae78d6:jade-and-ember/package.json']);
-  const same6 = devDeps6.ok && JSON.stringify(JSON.parse(devDeps6.out).devDependencies) === devDeps;
-  const g61status = matrix.requirements.filter((r) => ['D-P6-1', 'D-P6-2', 'D-P6-3', 'D-P6-6'].includes(r.id)).map((r) => r.status);
-  add('G6-1 not started', sameFiles.ok && same6 && g61status.length === 4 && g61status.every((x) => /not implemented|not verified|replacement not implemented/i.test(x)), `workflow and lockfile identical to the Phase 6 code commit 2ae78d6: ${sameFiles.ok}; devDependencies identical: ${same6}; D-P6-1, D-P6-2, D-P6-3 and D-P6-6 recorded as not implemented: ${g61status.length === 4}`);
+  // Gate 6 authorisation (APR-JE-038): only G6-1 is authorised, and every change since its base commit lies inside the scope recorded in the matrix
+  const g6 = matrix.workPackages.filter((w) => /^G6-/.test(w.id));
+  const scoped = g6.filter((w) => w.scope).map((w) => w.id);
+  const sc = verifyScope('G6-1', { matrix });
+  const wp1 = matrix.workPackages.find((w) => w.id === 'G6-1');
+  const auth38 = log.find((r) => r.id === 'APR-JE-038');
+  add('only G6-1 authorised', scoped.length === 1 && scoped[0] === 'G6-1' && wp1.scope.authorisedBy === 'APR-JE-038' && Boolean(auth38) && /G6-1/.test(auth38.decision), `work packages with a recorded scope: ${scoped.join(', ')}; G6-1 authorised by ${wp1.scope.authorisedBy}, which ${auth38 ? 'is' : 'is NOT'} in the approvals log`);
+  add('G6-1 scope', sc.ok, `${sc.changed.length} files changed since the G6-1 base commit ${wp1.scope.baseCommit.slice(0, 7)}; ${sc.ok ? 'all inside the authorised scope' : `PROBLEMS: ${sc.problems.slice(0, 3).join('; ')}`}`);
   return { rows, ok: rows.filter((r) => 'ok' in r).every((r) => r.ok) };
 }

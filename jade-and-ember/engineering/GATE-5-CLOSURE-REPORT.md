@@ -1,5 +1,7 @@
 # Gate 5 closure report (Phase 9, `APR-JE-037`)
 
+> **Update (`APR-JE-038`, 2026-10-11):** the owner approved this report and formally closed Gate 5 as an engineering assessment (not a production approval). G6-1 was authorised with the scope recorded in `framework-migration-matrix.json`; G6-0 and G6-2 to G6-8 are not. CI run 43 for the records commit `92a265a` was cancelled by the next push and is not claimed; run 44 for the descendant `7b2fd75` succeeded. The text below is the snapshot delivered for review and is not rewritten.
+
 **Status: delivered for owner review. Gate 5 is closed by the owner, not by this report.** This report states what Gate 5 delivered, whether the record supports closing it, and what remains open. It approves nothing. It is an **engineering closure** document: it does not say that any website is ready for release, deployment or production, and it does not claim any device test, screen-reader pass, licence, legal review or live-hosting result.
 
 Companion: [`GATE-6-READINESS.md`](GATE-6-READINESS.md). Reproduce every verification statement in section 3 with one command: `npm run gate5:closure` (read only, offline).

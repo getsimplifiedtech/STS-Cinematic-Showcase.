@@ -1999,8 +1999,8 @@
   {
    "id": "D-P8-6",
    "text": "Start of G6-1",
-   "ownerWords": "G6-1 is approved in principle, but do not start implementation until the Phase 9 closure report has been reviewed.",
-   "status": "approved in principle; NOT started",
+   "ownerWords": "G6-1 is approved in principle, but do not start implementation until the Phase 9 closure report has been reviewed. (Reviewed; G6-1 authorised by APR-JE-038.)",
+   "status": "G6-1 authorised by APR-JE-038 (scope recorded); G6-2 onward not authorised",
    "workPackages": [
     "G6-1"
    ],
