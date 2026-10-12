@@ -4,8 +4,8 @@ Evidence for [`../G6-3A-DESIGN.md`](../G6-3A-DESIGN.md). It records what was rea
 
 | File | What it is |
 |---|---|
-| `official-sources.json` | The 26 official sources read (GitHub documentation source files, the `actions/attest` README, the GitHub CLI source, the REST OpenAPI description) with byte size and SHA-256, and the 52 quotations used in the design (`Q01` to `Q53`, `Q40` unused), each matched verbatim against its source when the file was built |
-| `platform-observations.json` | Read-only observations of this repository through the GitHub connector and git (`O1` to `O7`), and the list of things that could not be determined from the sandbox |
+| `official-sources.json` | The 33 official sources read (GitHub documentation source files, the `actions/attest` README, the GitHub CLI source, the REST OpenAPI description) with byte size and SHA-256, and the 65 quotations used in the design (`Q01` to `Q66`, `Q40` unused) and a derived permission map (which GitHub App permission gates each release-relevant API operation), each matched verbatim against its source when the file was built |
+| `platform-observations.json` | Read-only observations of this repository through the GitHub connector and git (`O1` to `O12`), and the list of things that could not be determined from the sandbox |
 
 ## How the sources were read, and the limits
 

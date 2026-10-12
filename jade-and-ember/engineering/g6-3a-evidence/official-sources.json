@@ -463,7 +463,7 @@
    "id": "Q38",
    "source": "installed-apps",
    "text": "You can review the permissions that you granted and change the repositories that the {% data variables.product.prodname_github_app %} can access.",
-   "establishes": "owners can review and change an installed GitHub App's permissions and repository access"
+   "establishes": "owners can review the permissions they granted an installed GitHub App and change the repositories it can access (whether permissions can be narrowed is not stated)"
   },
   {
    "id": "Q39",
@@ -576,8 +576,8 @@
   {
    "id": "Q58",
    "source": "actions-settings-repo",
-   "text": "Actions and reusable workflows in your private repositories can be shared with other private repositories",
-   "establishes": "private repositories can share reusable workflows"
+   "text": "Actions and reusable workflows in your private repositories can be shared with other private repositories {% ifversion fpt %}owned by the same user or organization",
+   "establishes": "private repositories can share reusable workflows with other private repositories of the same user or organisation"
   },
   {
    "id": "Q59",
@@ -588,8 +588,8 @@
   {
    "id": "Q60",
    "source": "gated-environments",
-   "text": "For access to environments, environment secrets, and deployment branches in private or internal repositories, you must use",
-   "establishes": "environments in private repositories need a paid plan"
+   "text": "For access to environments, environment secrets, and deployment branches in private or internal repositories, you must use {% data variables.product.prodname_pro %}, {% data variables.product.prodname_team %}, or {% data variables.product.prodname_enterprise %}.",
+   "establishes": "environments in private repositories need Pro, Team or Enterprise"
   },
   {
    "id": "Q61",
