@@ -16,6 +16,7 @@ import { DEFAULT_DATA_FILES, buildView } from '../release-control/lib/view.mjs';
 import { CAPS } from '../release-control/lib/auth.mjs';
 import { RcError, sha256 } from '../release-control/lib/util.mjs';
 import { verifyAuthenticity } from '../lib/authenticity.mjs';
+import { verifyPackage } from '../lib/release-package.mjs';
 import { zipBuffer } from '../lib/zip.mjs';
 
 const HOST_A = 'www.jade-and-ember-fixture.com';
@@ -161,8 +162,12 @@ export async function checkSelftestReleaseControl() {
       A.replace('Hello', 'Hello<textarea>'), A.replace('<h1>Hello</h1>', '<h1>Hello</h1><svg><a xlink:href="x"/></svg>'), A.replace('Hello', 'x'.repeat(5000))];
     material.forEach((m, i) => ok(cls(A, m) === 'material', `hostile change ${i} was not material`));
     ok(editSize('abcdef', 'abXYef') === 4 && blankHtml('<p>a</p>').blank === '<p>\u0001</p>', 'the helpers are wrong');
-    const ex = classifyChange({ prev: new Map([['a.html', Buffer.from('<script><!-- <script></script>')]]), next: new Map([['a.html', Buffer.from('<script><!-- <script></script>x')]]), prevSubjects: {}, nextSubjects: {} });
+    const ex = classifyChange({ prev: new Map([['a.html', Buffer.from('<script><!-- <script></script>a')]]), next: new Map([['a.html', Buffer.from('<script><!-- <script></script>b')]]), prevSubjects: {}, nextSubjects: {} });
     ok(ex.class === 'material', 'a script holding <!-- was treated as ordinary');
+    const css = classifyChange({ prev: new Map([['a.css', Buffer.from('a{color:red}')]]), next: new Map([['a.css', Buffer.from('a{color:blue}')]]), prevSubjects: {}, nextSubjects: {} });
+    ok(css.class === 'material', 'a changed stylesheet was treated as words');
+    const trk = classifyChange({ prev: new Map([['a.html', Buffer.from('<p>a</p>')]]), next: new Map([['a.html', Buffer.from('<p>a</p>')]]), prevSubjects: {}, nextSubjects: {}, prevTracked: { 'findings.json': 'x' }, nextTracked: { 'findings.json': 'y' } });
+    ok(trk.class === 'material', 'a changed tracked project record did not make the change material');
     const sub = classifyChange({ prev: new Map([['a.html', Buffer.from('<p>a</p>')]]), next: new Map([['a.html', Buffer.from('<p>b</p>')]]), prevSubjects: { rights: 'x' }, nextSubjects: { rights: 'y' } });
     ok(sub.class === 'material', 'a changed approval subject did not make the change material');
   });
@@ -396,6 +401,12 @@ export async function checkSelftestReleaseControl() {
       refused('serve-py-mismatch', () => intake({ packageDir: d, tooling: view.eng, hook: pending, siteOut: join(d, '..', `out2-${Date.now()}`), servePySha: '0'.repeat(64) }));
     } finally { view.dispose(); }
   });
+  await test('the verification copy is re-pinned, and a package copy that changes while the verifier runs is refused', () => {
+    const f = clone(base), cf = join(f.dir, 'config.json'), c = JSON.parse(readFileSync(cf, 'utf8')); c.toolingDigest = '0'.repeat(64); writeFileSync(cf, JSON.stringify(c));
+    refused('tooling-changed', () => new ReleaseControl(f.dir, { clock }).makeView(new Map()));
+    const g = mk(); const racing = new ReleaseControl(g.dir, { clock, verify: (d, o) => { const r = verifyPackage(d, o); appendFileSync(join(d, 'records', 'reviewers.json'), ' '); return r; } });
+    refused('artifact-mismatch', () => racing.stage(g.tokens.owner, 'alpha', P0));
+  });
   await test('hosts are mandatory; a client\'s ledger starts with a genesis entry, so a missing ledger is a fault; an older ledger put back is caught by the anchor', () => {
     refused('host-required', () => initRc(tmp('nohost'), { clients: ['alpha'], tooling, hosts: {} }));
     const f = clone(base); const aud = f.rc.audit(f.tokens.owner, 'alpha'); ok(aud.ok && /genesis/.test(aud.timeline[0]), 'no genesis entry');
@@ -415,7 +426,7 @@ export async function checkSelftestReleaseControl() {
     mkdirSync(lock); writeFileSync(join(lock, 'info.json'), JSON.stringify({ pid: 2 ** 22 + 12345, ts: Date.now() }));
     ok(f.rc.stage(f.tokens.owner, 'alpha', PID).class === 'identical', 'a lock whose holder is gone was not broken');
   });
-  await test('an unknown release mode is refused; an interrupted release shows in the status; a crash between the two renames of a deployment is repaired by the next one', () => {
+  await test('an unknown release mode is refused; an interrupted release shows in the status; a release completes after a crash left no live site', () => {
     const f = clone(base); refused('bad-mode', () => f.rc.release(f.tokens.owner, 'alpha', 'x', 'root'));
     const s = f.rc.stage(f.tokens.owner, 'alpha', PID); new Ledger(openRc(f.dir), 'alpha').append({ type: 'release-started', actor: { id: 'owner', role: 'owner' }, data: { stageId: s.stageId, mode: 'owner', preauth: null }, ts: now.toISOString() });
     ok(f.rc.status(f.tokens.owner, 'alpha').interrupted === s.stageId, 'an interrupted release is not visible');
@@ -432,6 +443,7 @@ export async function checkSelftestReleaseControl() {
     appendFileSync(join(g.dir, 'ledger', 'beta.jsonl'), '{}\n');
     refused('ledger-corrupt', () => new ReleaseControl(g.dir, { clock }).adoptTooling(g.tokens.owner), 'a damaged ledger of another client: ');
     ok(JSON.parse(readFileSync(cf, 'utf8')).toolingDigest === '1'.repeat(64), 'the pin moved although an adoption was refused');
+    ok(!new ReleaseControl(g.dir, { clock }).audit(g.tokens.owner, 'alpha').timeline.some((l) => /tooling-adopted/.test(l)), 'a refused adoption was still written to the first client\'s ledger');
     const h = clone(base), cf2 = join(h.dir, 'config.json'), c2 = JSON.parse(readFileSync(cf2, 'utf8')); c2.toolingFiles[first] = '0'.repeat(64); c2.toolingDigest = '1'.repeat(64); writeFileSync(cf2, JSON.stringify(c2));
     const r = new ReleaseControl(h.dir, { clock }).adoptTooling(h.tokens.owner); ok(r.changed.includes(first), 'the adoption did not say which file differs');
     for (const c3 of ['alpha', 'beta']) ok(new ReleaseControl(h.dir, { clock }).audit(h.tokens.owner, c3).timeline.some((l) => /tooling-adopted/.test(l)), `the adoption is not in ${c3}'s ledger`);

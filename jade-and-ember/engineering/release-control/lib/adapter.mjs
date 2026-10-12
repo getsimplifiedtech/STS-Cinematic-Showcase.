@@ -12,7 +12,6 @@ export function deployLocal(rc, client, siteDir, stageId) {
   if (!token || !sameHex(sha256(token), cfg.deployTokenSha256)) throw new RcError('deploy-credential', `the deploy credential of ${client} is missing or does not match`);
   const next = inside(p.deploy, `.next-${stageId.replace(/[^a-z0-9-]/gi, '')}`), live = inside(p.deploy, 'current'), prev = inside(p.deploy, '.prev');
   mkdirSync(p.deploy, { recursive: true });
-  if (!existsSync(live) && existsSync(prev)) renameSync(prev, live);   // a crash between the two renames below left no live site: put the previous one back first
   rmSync(next, { recursive: true, force: true }); rmSync(prev, { recursive: true, force: true });
   cpSync(siteDir, next, { recursive: true });
   const had = existsSync(live);
