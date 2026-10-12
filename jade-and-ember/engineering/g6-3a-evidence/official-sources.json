@@ -166,6 +166,55 @@
    "sha256": "ad8769f87e1f2e4bed83faf61d605ae3c8c6b3001b4aae8d23a29ad4664e7093"
   },
   {
+   "key": "app-user-token",
+   "source": "github/docs content/apps/creating-github-apps/authenticating-with-a-github-app/generating-a-user-access-token-for-a-github-app.md",
+   "kind": "docs",
+   "bytes": 20561,
+   "sha256": "465997b1c9300e3ec49927ca9ece7914f2715dbeae3a8d13953dea617ac93707"
+  },
+  {
+   "key": "transfer",
+   "source": "github/docs content/repositories/creating-and-managing-repositories/transferring-a-repository.md",
+   "kind": "docs",
+   "bytes": 10730,
+   "sha256": "ed316b3fff6ecc09247826cb872df41beeab9088eeeaccbdb73703fedbfcf8ae"
+  },
+  {
+   "key": "actions-settings-repo",
+   "source": "github/docs content/repositories/managing-your-repositorys-settings-and-features/enabling-features-for-your-repository/managing-github-actions-settings-for-a-repository.md",
+   "kind": "docs",
+   "bytes": 16068,
+   "sha256": "43839c9bf6addc6d85d67ec16a77e27bc8a18cc3f9c615253203af747e87af8f"
+  },
+  {
+   "key": "deploy-keys",
+   "source": "github/docs content/authentication/connecting-to-github-with-ssh/managing-deploy-keys.md",
+   "kind": "docs",
+   "bytes": 14844,
+   "sha256": "da891a7d46a4e79dfd31b999ac77aaae5c52d3ef415c250de3337cccacf1e41e"
+  },
+  {
+   "key": "actions-quotas",
+   "source": "github/docs data/reusables/billing/actions-included-quotas.md",
+   "kind": "docs",
+   "bytes": 616,
+   "sha256": "cbeecf86285fc2c38b34fc8fc7c399594b24d00e5ab5cd12cac1b64edf1ae862"
+  },
+  {
+   "key": "sudo-mode",
+   "source": "github/docs content/authentication/keeping-your-account-and-data-secure/sudo-mode.md",
+   "kind": "docs",
+   "bytes": 7184,
+   "sha256": "0f9f15cce5e0aecb43ffa8954c0fc3bf9865ba3191a4e50be1f95fb8e8d2c4ac"
+  },
+  {
+   "key": "app-permission-map",
+   "source": "github/docs src/github-apps/data/fpt-2022-11-28/server-to-server-permissions.json",
+   "kind": "docs data (generated from the REST description)",
+   "bytes": 420581,
+   "sha256": "728bd73356f9cc20b650055b06f9a2cdf4da071c0b54491ce1433e71e4dc9aee"
+  },
+  {
    "key": "attest-readme",
    "source": "actions/attest README.md (main)",
    "kind": "action repository",
@@ -499,7 +548,223 @@
    "source": "attestations-offline",
    "text": "Artifact attestations can be verified without an internet connection.",
    "establishes": "attestations: offline verification"
+  },
+  {
+   "id": "Q54",
+   "source": "app-user-token",
+   "text": "A GitHub App user access token only has permissions that both the user and the app have.",
+   "establishes": "a user-to-server token is the intersection of user and app permissions"
+  },
+  {
+   "id": "Q55",
+   "source": "app-user-token",
+   "text": "a user access token can only access resources that both the user and app can access.",
+   "establishes": "a user-to-server token reaches only repositories in both the installation and the user's access"
+  },
+  {
+   "id": "Q56",
+   "source": "transfer",
+   "text": "If the transferred repository contains webhooks, services, secrets, or deploy keys, they will remain associated after the transfer is complete.",
+   "establishes": "transfer: secrets and deploy keys stay attached"
+  },
+  {
+   "id": "Q57",
+   "source": "transfer",
+   "text": "the repository will lose access to features like protected branches and",
+   "establishes": "transfer of a private repository to a Free account loses protected branches"
+  },
+  {
+   "id": "Q58",
+   "source": "actions-settings-repo",
+   "text": "Actions and reusable workflows in your private repositories can be shared with other private repositories",
+   "establishes": "private repositories can share reusable workflows"
+  },
+  {
+   "id": "Q59",
+   "source": "deploy-keys",
+   "text": "Deploy keys are read-only by default, but you can give them write access when adding them to a repository.",
+   "establishes": "deploy keys: read-only by default"
+  },
+  {
+   "id": "Q60",
+   "source": "gated-environments",
+   "text": "For access to environments, environment secrets, and deployment branches in private or internal repositories, you must use",
+   "establishes": "environments in private repositories need a paid plan"
+  },
+  {
+   "id": "Q61",
+   "source": "env-reference",
+   "text": "environment secrets are only available in public repositories.",
+   "establishes": "environment secrets: Free plan, public repositories only"
+  },
+  {
+   "id": "Q62",
+   "source": "gated-repo-rules",
+   "text": "and in public and private repositories with {% data variables.product.prodname_pro %}, {% data variables.product.prodname_team %}, and {% data variables.product.prodname_ghe_cloud %}.",
+   "establishes": "rulesets in private repositories need Pro, Team or Enterprise Cloud"
+  },
+  {
+   "id": "Q63",
+   "source": "actions-quotas",
+   "text": "| {% data variables.product.prodname_free_user %} | 500 MB | 2,000 |",
+   "establishes": "included Actions minutes, Free"
+  },
+  {
+   "id": "Q64",
+   "source": "actions-quotas",
+   "text": "| {% data variables.product.prodname_team %} | 2 GB | 3,000 |",
+   "establishes": "included Actions minutes, Team"
+  },
+  {
+   "id": "Q65",
+   "source": "sudo-mode",
+   "text": "* **Rulesets**: Creating and modifying rulesets at organization and repository level.",
+   "establishes": "sudo mode covers ruleset changes in the web interface"
+  },
+  {
+   "id": "Q66",
+   "source": "billing-actions",
+   "text": "jobs that run on Windows and macOS runners hosted by {% data variables.product.github %} cost more to run than jobs on Linux runners.",
+   "establishes": "macOS and Windows runner minutes cost more than Linux"
   }
  ],
- "quoteCheck": "every quoted text was matched verbatim against the file whose digest is listed; 52 of 52 matched (identifiers Q01 to Q53; Q40 is unused; Q13 is recorded but not cited)"
+ "quoteCheck": "every quoted text was matched verbatim against the file whose digest is listed; 65 of 65 matched (identifiers Q01 to Q66; Q40 is unused; Q12 and Q13 may be uncited)",
+ "permissionMap": {
+  "source": "github/docs src/github-apps/data/fpt-2022-11-28/server-to-server-permissions.json",
+  "sha256": "728bd73356f9cc20b650055b06f9a2cdf4da071c0b54491ce1433e71e4dc9aee",
+  "meaning": "the GitHub App (or fine-grained) permission that gates each REST operation, and whether a GitHub App user access token can call it; derived by looking each operation up in the file",
+  "rows": [
+   {
+    "operation": "POST /repos/{owner}/{repo}/actions/runs/{run_id}/pending_deployments",
+    "does": "approve a pending deployment",
+    "permissions": [
+     "deployments: write"
+    ],
+    "availableToAppUserTokens": true
+   },
+   {
+    "operation": "POST /repos/{owner}/{repo}/actions/workflows/{workflow_id}/dispatches",
+    "does": "dispatch a workflow",
+    "permissions": [
+     "actions: write"
+    ],
+    "availableToAppUserTokens": true
+   },
+   {
+    "operation": "PUT /repos/{owner}/{repo}/contents/{path}",
+    "does": "write file contents (workflow files also need the workflows permission)",
+    "permissions": [
+     "contents: write",
+     "workflows: write"
+    ],
+    "availableToAppUserTokens": true
+   },
+   {
+    "operation": "PUT /repos/{owner}/{repo}/pulls/{pull_number}/merge",
+    "does": "merge a pull request",
+    "permissions": [
+     "contents: write"
+    ],
+    "availableToAppUserTokens": true
+   },
+   {
+    "operation": "POST /repos/{owner}/{repo}/pulls/{pull_number}/reviews",
+    "does": "review a pull request",
+    "permissions": [
+     "pull_requests: write"
+    ],
+    "availableToAppUserTokens": true
+   },
+   {
+    "operation": "POST /repos/{owner}/{repo}/git/refs",
+    "does": "create a reference (branch or tag)",
+    "permissions": [
+     "contents: write",
+     "workflows: write"
+    ],
+    "availableToAppUserTokens": true
+   },
+   {
+    "operation": "POST /repos/{owner}/{repo}/releases",
+    "does": "create a release",
+    "permissions": [
+     "contents: write",
+     "workflows: write"
+    ],
+    "availableToAppUserTokens": true
+   },
+   {
+    "operation": "PUT /repos/{owner}/{repo}/environments/{environment_name}",
+    "does": "create or update an environment",
+    "permissions": [
+     "administration: write"
+    ],
+    "availableToAppUserTokens": true
+   },
+   {
+    "operation": "PUT /repos/{owner}/{repo}/environments/{environment_name}/secrets/{secret_name}",
+    "does": "write an environment secret",
+    "permissions": [
+     "environments: write"
+    ],
+    "availableToAppUserTokens": true
+   },
+   {
+    "operation": "PUT /repos/{owner}/{repo}/actions/secrets/{secret_name}",
+    "does": "write a repository secret",
+    "permissions": [
+     "secrets: write"
+    ],
+    "availableToAppUserTokens": true
+   },
+   {
+    "operation": "PUT /repos/{owner}/{repo}/actions/permissions",
+    "does": "set the repository Actions permissions",
+    "permissions": [
+     "administration: write"
+    ],
+    "availableToAppUserTokens": true
+   },
+   {
+    "operation": "POST /repos/{owner}/{repo}/rulesets",
+    "does": "create a ruleset",
+    "permissions": [
+     "administration: write"
+    ],
+    "availableToAppUserTokens": true
+   },
+   {
+    "operation": "PUT /repos/{owner}/{repo}/branches/{branch}/protection",
+    "does": "update branch protection",
+    "permissions": [
+     "administration: write"
+    ],
+    "availableToAppUserTokens": true
+   },
+   {
+    "operation": "POST /repos/{owner}/{repo}/keys",
+    "does": "create a deploy key",
+    "permissions": [
+     "administration: write"
+    ],
+    "availableToAppUserTokens": true
+   },
+   {
+    "operation": "PATCH /repos/{owner}/{repo}",
+    "does": "update repository settings (including visibility)",
+    "permissions": [
+     "administration: write"
+    ],
+    "availableToAppUserTokens": true
+   },
+   {
+    "operation": "POST /repos/{owner}/{repo}/transfer",
+    "does": "transfer a repository",
+    "permissions": [
+     "administration: write"
+    ],
+    "availableToAppUserTokens": true
+   }
+  ]
+ }
 }

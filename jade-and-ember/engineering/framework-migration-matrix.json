@@ -1456,17 +1456,18 @@
   },
   {
    "id": "G6-3A",
-   "title": "Release authentication and provenance (design and decision checkpoint)",
-   "summary": "Authenticated client-production release authorisation and independently verifiable build provenance (RG-14, RB-15). Inserted by the owner between G6-3 and G6-4 (APR-JE-041). Authorised for Steps 1 to 3 only: research verified against official GitHub documentation (plan and visibility, rulesets and branch protection, environment approval, artifact attestations, Actions permissions and trust boundaries, whether a Claude session using the carlito3k account could initiate, alter or approve a release) compared with detached owner-controlled signatures; an architecture that separates implementation from owner authorisation, binds approval to the exact candidate digest, authenticates the build and its provenance, rejects forged, revoked, stale or mismatched authorisations, stops untrusted workflows and ordinary write access from manufacturing owner approval, and keeps the hard production-release stop until the mechanism is proven, with approval keys unavailable to coding agents; then a decision checkpoint. No credential-dependent change is implemented before the owner approves it.",
+   "title": "Release authentication and provenance (design and decision checkpoint; multi-client operating model)",
+   "summary": "Authenticated client-production release authorisation and independently verifiable build provenance (RG-14, RB-15), designed around the STS operating model (APR-JE-042): one private repository per client, STS as sole administrator, coding agents that never approve production, no extra owner machine, second GitHub account or manual signing by default. Inserted by the owner between G6-3 and G6-4 (APR-JE-041). Design only: research verified against official GitHub documentation; an evaluation of how to enforce owner approval when an agent uses the same GitHub identity (reachability boundary, a release-control repository outside the coding integration, rather than any identity or in-repository control); the simplest secure workflow; a validation plan; plan and cost; client departure and handover; then a decision checkpoint. No credential-dependent or setting change is made before the owner approves it, and the authenticity hard stop stays until the mechanism is designed and validated.",
    "dependsOn": [
     "G6-3"
    ],
    "priorities": [],
    "frameworkRepoChange": false,
    "size": "medium",
-   "verification": "Every platform statement in the design traces to an official GitHub documentation source (path and digest recorded) or is marked unverified; the six required properties are each mapped to a control and to a rejection test to be built later; the hard authenticity stop (lib/authenticity.mjs) is untouched; the reviewer table stays empty; the owner approves or amends the decision checkpoint before any implementation.",
+   "verification": "Every platform statement traces to an official GitHub documentation source (path and digest recorded) or is marked unverified; the six required properties each map to a control and to a rejection test to be built; the validation plan V1 to V8 is defined but not run; the hard authenticity stop (lib/authenticity.mjs) is untouched; the reviewer table stays empty; the owner approves or amends the decision checkpoint before any implementation.",
    "blocks": [
-    "RB-15"
+    "RB-15",
+    "RB-16"
    ],
    "scope": {
     "repository": "getsimplifiedtech/STS-Cinematic-Showcase.",
@@ -1534,7 +1535,13 @@
      "jade-and-ember/engineering/tools/release.mjs",
      "docs/JADE_AND_EMBER_MEDIA_RIGHTS_POLICY.md"
     ],
-    "amendments": []
+    "amendments": [
+     {
+      "by": "APR-JE-042",
+      "date": "2026-10-12",
+      "text": "Design correction for the multi-client operating model. No path is added to the allowed list: the revised design and its evidence are already inside it. The restrictions are unchanged (no GitHub setting, credential, workflow, deployment or release-control change)."
+     }
+    ]
    },
    "status": "authorised by APR-JE-041 for Steps 1 to 3 (design and decision checkpoint); in progress"
   },
@@ -2177,6 +2184,12 @@
    "kind": "engineering",
    "text": "Authenticated release authorisation and independently verifiable build provenance (RG-14): GitHub artifact attestations, protected environments and owner approval (preferred) or detached owner signatures; the authorised GitHub identities verified; no client-production release path is enabled until this is implemented and independently verified (APR-JE-040)",
    "resolvedBy": "G6-3A (design, then owner approval of the mechanism, then a separately authorised implementation); no client-production release path until implemented and independently verified"
+  },
+  {
+   "id": "RB-16",
+   "kind": "engineering",
+   "text": "Owner approval cannot be enforced by any control inside a client repository while coding agents act under the same GitHub identity. The proposed mechanism (a release-control repository outside the coding integration, G6-3A-DESIGN.md) is designed but not validated: validation V1 to V8 has not run and the preconditions P1 to P5 are procedural. Until it is validated the authenticity hard stop stays and no client-production release path exists (APR-JE-042)",
+   "resolvedBy": "G6-3A (design, then owner approval, then separately authorised validation and implementation)"
   }
  ],
  "decisions": [
@@ -2483,6 +2496,26 @@
    "status": "decided (APR-JE-041); authorised for a later isolated work package; not scheduled, not in G6-3A, delivered files unchanged",
    "workPackages": [],
    "consequences": []
+  },
+  {
+   "id": "D-G63-5",
+   "text": "STS multi-client operating model",
+   "ownerWords": "STS owns and administers the GitHub organization getsimplifiedtech and creates one separate private repository for every managed website client. Clients purchase website services; they do not administer repositories, CI/CD workflows or hosting infrastructure. The STS owner retains administrative authority over all repositories and final production-release decisions. One private repository per client; independent configuration, credentials, deployment and access boundaries; shared engineering standards and reusable GitHub Actions workflows; centralized maintenance and security checks; coding agents may implement and test but must not independently approve production releases; no extra owner machine, separate GitHub account or manual cryptographic signing process by default; client departure and website handover follow the service agreement.",
+   "status": "decided (APR-JE-042); G6-3A is revised around it; the hard authenticity stop stays until a practical approval mechanism is designed and validated",
+   "workPackages": [
+    "G6-3A",
+    "G6-7"
+   ],
+   "consequences": [
+    {
+     "wp": "G6-3A",
+     "mustMention": "operating model"
+    },
+    {
+     "wp": "G6-3A",
+     "mustMention": "same GitHub identity"
+    }
+   ]
   }
  ],
  "operatingPrinciples": [
@@ -2535,8 +2568,8 @@
   },
   {
    "id": "OI-4",
-   "text": "Which work package implements authenticated release authorisation and build provenance (RG-14, RB-15)? Decided by APR-JE-041: G6-3A, inserted between G6-3 and G6-4. Open: the owner's approval of the mechanism recommended in G6-3A-DESIGN.md (decision checkpoint) before any credential-dependent implementation.",
-   "wp": "G6-3A"
+   "text": "MONOLITH House & Design details beyond what the owner stated: page list, brand and design direction, media plan and rights, hosting configuration, and whether a Vercel preview is authorised (D-P3-5).",
+   "wp": "G6-8"
   },
   {
    "id": "OI-5",
@@ -2555,12 +2588,17 @@
   },
   {
    "id": "OI-4",
-   "text": "Which work package implements authenticated release authorisation and build provenance (RG-14, RB-15)? Decided by APR-JE-041: G6-3A, inserted between G6-3 and G6-4. Open: the owner's approval of the mechanism recommended in G6-3A-DESIGN.md (decision checkpoint) before any credential-dependent implementation.",
+   "text": "Which work package implements authenticated release authorisation and build provenance (RG-14, RB-15)? Decided by APR-JE-041: G6-3A, between G6-3 and G6-4. Revised by APR-JE-042 for the multi-client operating model. Open: the owner's decision on the recommended release-control mechanism (G6-3A-DESIGN.md section 9) and the authorisation of its validation (V1 to V8) before any implementation.",
    "wp": "G6-3A"
   },
   {
    "id": "OI-5",
-   "text": "The owner has retained carlito3k as the known owner identity, subject to verified trust boundaries (APR-JE-041). The trust-boundary finding of G6-3A is that this account is also the account Claude sessions push through, so an account-level GitHub control cannot by itself separate the owner from a session (G6-3A-DESIGN.md). Open until the owner decides the mechanism and names the identities to enter in the reviewer table.",
+   "text": "The owner retains carlito3k as the known owner identity, subject to verified trust boundaries (APR-JE-041, APR-JE-042). Finding: coding sessions act through that account, so no in-repository control can prove the owner's personal decision; the proposed boundary is reachability (a release-control repository the coding integration never receives). Open: the organisation plan and the account's passkey/2FA status (not readable from the sandbox), and the owner's confirmation of preconditions P1 to P5.",
+   "wp": "G6-3A"
+  },
+  {
+   "id": "OI-8",
+   "text": "Client departure and handover: the service agreement clauses (ownership of source and content, third-party licences, formats, retention) are needed to finalise the handover runbook in G6-3A-DESIGN.md section 8.",
    "wp": "G6-3A"
   }
  ]

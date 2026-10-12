@@ -115,5 +115,33 @@
   "O5": "commitsTouchingWorkflows (workflow changes pushed from this environment ran)",
   "O6": "connectorCapabilities (tools that initiate and alter; none for settings)",
   "O7": "notDeterminable"
+ },
+ "observations2": {
+  "observedOn": "2026-10-12 (after the owner's operating-model correction)",
+  "O8": {
+   "what": "repositories the session's credential can see (claude-code-remote list_repos, read-only)",
+   "result": "20 repositories, every one with can_push true: 10 owned by the organisation (4 public, 6 private) and 10 owned by the carlito3k personal account (2 public, 8 private)",
+   "meaning": "the session's view of \"repositories the user has access to\" is the whole of both accounts, not a short list; whether a session can attach any of them is decided by the add_repo authorisation (O10), which was not exercised. Repository names are deliberately not recorded here because this repository is public"
+  },
+  "O9": {
+   "what": "channels the sessions' tool set can reach besides GitHub",
+   "result": "mail, file storage, website publishing, store management and an advertising bridge are available as connectors in this session; skills exist for acting in the person's own browser and desktop (computer use, Chrome extension)",
+   "meaning": "an approval channel that one of these can read or operate (an emailed link or code, a file, the owner's signed-in browser) is not independent of a coding session; a website-publishing connector is a possible deploy route"
+  },
+  "O10": {
+   "what": "the add_repo tool exists in the session and, per its description, performs a real authorisation check and returns a structured denial when the repository is not enabled for the workspace or the GitHub App is not installed or linked",
+   "result": "not exercised (attaching a repository mints credentials)",
+   "meaning": "whether a coding session could attach a future release-control repository is unverified and is validation step V1 of the revised design"
+  },
+  "O11": {
+   "what": "session repository scope at start",
+   "result": "the session was scoped to this one repository",
+   "meaning": "a platform scope exists; its enforcement strength is unverified"
+  },
+  "O12": {
+   "what": "runner minutes of one push (Actions run 64, jobs as reported by the API)",
+   "result": "verify 16m01s, Firefox 10m03s, WebKit 9m16s, Lighthouse 2m21s, external links 21s, supply chain 19s on Linux (about 38 minutes in total before any per-job rounding) and the macOS fast-check job 1m31s",
+   "meaning": "in private repositories this draws on the plan's included minutes, and macOS minutes cost more"
+  }
  }
 }
