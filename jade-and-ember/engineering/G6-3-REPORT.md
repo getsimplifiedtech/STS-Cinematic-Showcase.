@@ -74,11 +74,15 @@ Accepted residuals: a verification history is evidence of a run, not proof of wh
 
 ## 6. Full verification and CI
 
-{{VERIFY}}
+* **Local, Node 24.21.0, Chromium 141, `STS_REQUIRE_AUDIT=1`, clean tree at `e1fa7cf`: `npm run verify` passed 40 of 40 checks in 22 min 1 s.** Verification record: candidate `c12ba050ac2cc12266aa32f0902db6a3bdb0fbe43c3dcd30e986bac66be54208`, engine `43ad82b956ca2259…`, seal `1c41b8bf56f45afd0a37e6ad5e2334bb26b283cb820d84a0193bdbb8517747bc`. The delivered-files tree hash is unchanged (`9061a227…`).
+* **Release checks:** `check:release`: a fully approved client build passes; 170 of 170 single defects each block it, for the right requirement and, where it matters, with the right reason; 16 of 16 must-not-block cases do not; 8 of 8 demonstration defects block. `check:selftest-gate6`: 99 tests (reproducible SBOM, exception rules, newest-record-decides, tag forms, social carriers, licence expressions, the supply tool refusing an unrecordable advisory, the authenticity hard stop). **Dry run: 319 of 319 scenarios as expected.**
+* **GitHub Actions (confirmed from the API).** Run 61, commit `e1fa7cf`: **all seven jobs successful**. Earlier G6-3 runs: 57 and 59 success at run level; 58 and 60 cancelled by the next push (not claimed as successes; run 60 has the same code as run 61). Run 56 (`485e513`, the G6-2 documentation head) passed all seven jobs, which confirms CI for the G6-2 documentation commits as the owner asked (the intermediate `0aebcb0`, run 55, was cancelled by the next push). `CI.md` has the table.
+* **Independent reproduction.** `npm run verify` prints the composite SBOM digest. The GitHub runner's log and the local run print the same value, `a1dbdd1255ca2c2d6b733658e044b5e546071c7afce17b77032994a226830e43` (151 components), and the same candidate and engine digests: the artifact and its SBOM regenerate identically on a second machine. (An SBOM is independent evidence only when a second party regenerates it; the CI log is that second party here, and it says nothing about who built what.)
+* Scope: `npm run gate6:scope -- G6-3` reports every change inside the authorised scope; `npm run gate5:closure` still SUPPORTS closure; `check:framework-matrix` is current (306 files).
 
 ## 7. Commit
 
-{{COMMIT}}
+Code and gate: `fa4d57c` (identical code in `e1fa7cf`, which adds this draft and the evidence). Branch `feature/jade-and-ember-v0.9`; the final documentation commit is the head of that branch. Not merged, not deployed; no pull request opened.
 
 ## 8. Remaining release blockers and open decisions
 
