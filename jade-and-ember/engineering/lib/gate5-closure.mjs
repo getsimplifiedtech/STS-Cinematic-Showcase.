@@ -131,6 +131,6 @@ export function verifyClosure({ framework = process.env.STS_FRAMEWORK_DIR || '/h
   const ends = [wp1, wp2, wp3].map((w) => tryGit(['merge-base', '--is-ancestor', w.scope.endCommit, 'HEAD']));
   const scopes = ['G6-1', 'G6-2', 'G6-3', 'G6-3A'].map((id) => verifyScope(id, { matrix }));
   [wp1, wp2, wp3].forEach((w, i) => add(`${w.id} scope`, ends[i].ok && scopes[i].ok, `${scopes[i].changed.length} files changed from the ${w.id} base ${w.scope.baseCommit.slice(0, 7)} to its end ${w.scope.endCommit.slice(0, 7)} (${ends[i].ok ? 'an ancestor of HEAD' : 'NOT an ancestor of HEAD'}); ${scopes[i].ok ? 'all inside the authorised scope' : `PROBLEMS: ${scopes[i].problems.slice(0, 3).join('; ')}`}`));
-  add('G6-3A scope', scopes[3].ok, `${scopes[3].changed.length} files changed since the G6-3A base ${wp3a.scope.baseCommit.slice(0, 7)}; ${scopes[3].ok ? 'all inside the authorised scope (documents, matrix and closure verifier only: nothing implements, enables or weakens a release mechanism)' : `PROBLEMS: ${scopes[3].problems.slice(0, 3).join('; ')}`}`);
+  add('G6-3A scope', scopes[3].ok, `${scopes[3].changed.length} files changed since the G6-3A base ${wp3a.scope.baseCommit.slice(0, 7)}; ${scopes[3].ok ? 'all inside the authorised scope (documents, the matrix, this verifier and the synthetic release-control proof of concept; nothing in the client release tools or gate is changed and no release path is enabled)' : `PROBLEMS: ${scopes[3].problems.slice(0, 3).join('; ')}`}`);
   return { rows, ok: rows.filter((r) => 'ok' in r).every((r) => r.ok) };
 }

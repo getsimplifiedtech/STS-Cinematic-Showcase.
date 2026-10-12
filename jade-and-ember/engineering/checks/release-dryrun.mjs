@@ -23,6 +23,7 @@ import { createSandbox } from '../lib/release-dryrun.mjs';
 import { GATE_SCENARIOS, reservedHostCorpus, runChannelScenarios, runEnvironmentScenarios, runLedgerScenario, runGateProbes, runPackageScenarios } from '../lib/release-dryrun-scenarios.mjs';
 import { engDir, isMain, listFiles, projectDir, repoRoot } from '../lib/git.mjs';
 import { loadReleasePolicy } from '../lib/release.mjs';
+import { checkSelftestReleaseControl } from './selftest-release-control.mjs';
 
 const sha = (b) => createHash('sha256').update(b).digest('hex');
 const exists = (p) => existsSync(p);
@@ -141,6 +142,10 @@ export async function checkReleaseDryRun({ report = null, fast = false } = {}) {
   notes.push(`findings with blocking scenarios (blocking+must-stay-valid / all pass; RG-14 is held shut by the authenticity hard stop, not resolved): ${RG.map((id) => `${id} ${byRg[id].filter((r) => !r.allow).length}+${byRg[id].filter((r) => r.allow).length} (${byRg[id].every((r) => r.ok) ? 'all as expected' : 'FAILING'})`).join(', ')}`);
   const open = probes.filter((p) => p.open);
   notes.push(`measured gaps (not failures): ${probes.length} probes, ${open.length} let something through that should arguably be refused: ${open.map((p) => p.id).join(', ') || 'none'} (see engineering/RELEASE-DRYRUN-GATE5.md and G6-2-REPORT.md)`);
+  // G6-3A (APR-JE-043): the release-control proof of concept is exercised here too, on its own synthetic clients and disposable tokens (it never touches the real records)
+  const rcRun = await checkSelftestReleaseControl();
+  for (const p of rcRun.problems) problems.push(`release-control proof of concept: ${p}`);
+  notes.push(`release-control proof of concept (G6-3A): ${rcRun.notes.filter((n) => n.startsWith('held:')).length} cases held, ${rcRun.problems.length} failed; ${rcRun.notes.at(-1)}`);
   notes.push(`took ${Math.round((Date.now() - t0) / 1000)} s; the synthetic folders were deleted; the real ledger, records, reviewer table and tree are unchanged`);
   if (report) writeFileSync(report, JSON.stringify({ rows, probes, hosts: reservedHostCorpus() }, null, 2) + '\n');
   return { problems, notes, rows, probes };

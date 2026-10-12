@@ -1162,6 +1162,45 @@
    "workPackage": "G6-0",
    "priorities": [],
    "class": "record"
+  },
+  {
+   "id": "FM-35",
+   "name": "Release-control proof of concept",
+   "summary": "The local proof of concept of the release-control repository (G6-3A, APR-JE-043): artifact intake and verification on top of the existing package verifier, a hash-chained audit ledger with runner receipts, role-separated disposable credentials, staging, owner approval with automatic digest matching, preauthorised routine releases, revocation, freezing and per-client isolation; synthetic data only.",
+   "paths": [
+    "jade-and-ember/engineering/release-control/",
+    "jade-and-ember/engineering/checks/selftest-release-control.mjs",
+    "jade-and-ember/engineering/G6-3A-POC-REPORT.md"
+   ],
+   "target": "release-control repository (to be created only after the owner approves activation)",
+   "external": [
+    "node"
+   ],
+   "dependsOn": [
+    "FM-18",
+    "FM-20"
+   ],
+   "redesign": {
+    "level": "parameterise",
+    "notes": "Moves to the separate release-control repository when it is activated; its tooling/data seam (the verification view) is replaced by the G6-5 split of tooling from project data, and the local-directory adapter by the G6-4 hosting adapters."
+   },
+   "verify": "check:selftest-release-control (29 cases, run through check:release-dryrun) and a mutation run in which each of 20 guards, broken in turn, is caught by the tests.",
+   "masterSpecs": [
+    "03",
+    "08",
+    "14",
+    "15"
+   ],
+   "workPackage": "G6-3A",
+   "priorities": [
+    1,
+    2,
+    3,
+    4,
+    6,
+    7
+   ],
+   "class": "universal-redesign"
   }
  ],
  "workPackages": [
@@ -1456,8 +1495,8 @@
   },
   {
    "id": "G6-3A",
-   "title": "Release authentication and provenance (design and decision checkpoint; multi-client operating model)",
-   "summary": "Authenticated client-production release authorisation and independently verifiable build provenance (RG-14, RB-15), designed around the STS operating model (APR-JE-042): one private repository per client, STS as sole administrator, coding agents that never approve production, no extra owner machine, second GitHub account or manual signing by default. Inserted by the owner between G6-3 and G6-4 (APR-JE-041). Design only: research verified against official GitHub documentation; an evaluation of how to enforce owner approval when an agent uses the same GitHub identity (reachability boundary, a release-control repository outside the coding integration, rather than any identity or in-repository control); the simplest secure workflow; a validation plan; plan and cost; client departure and handover; then a decision checkpoint. No credential-dependent or setting change is made before the owner approves it, and the authenticity hard stop stays until the mechanism is designed and validated.",
+   "title": "Release authentication and provenance (design, decision checkpoint and local proof of concept; multi-client operating model)",
+   "summary": "Authenticated client-production release authorisation and independently verifiable build provenance (RG-14, RB-15), designed around the STS operating model (APR-JE-042): one private repository per client, STS as sole administrator, coding agents that never approve production, no extra owner machine, second GitHub account or manual signing by default. Inserted by the owner between G6-3 and G6-4 (APR-JE-041). Design only: research verified against official GitHub documentation; an evaluation of how to enforce owner approval when an agent uses the same GitHub identity (reachability boundary, a release-control repository outside the coding integration, rather than any identity or in-repository control); the simplest secure workflow; a validation plan; plan and cost; client departure and handover; then a decision checkpoint. No credential-dependent or setting change is made before the owner approves it, and the authenticity hard stop stays until the mechanism is designed and validated. APR-JE-043 additionally authorises a local proof of concept of the release-control engine (artifact intake and verification, a hash-chained audit ledger, role-separated credentials, staging, owner approval and automatic digest matching, preauthorised routine releases, revocation, freeze and cross-client isolation) built on the existing package verifier and tested with synthetic clients and disposable credentials only; it creates no repository, credential or deployment.",
    "dependsOn": [
     "G6-3"
    ],
@@ -1477,14 +1516,20 @@
     "note": "Derived from the owner's G6-3A authorisation (APR-JE-041): Steps 1 to 3 only (research, architecture, decision checkpoint). Allowed: the approvals ledger and the documents, matrix and closure verifier needed to record the closure of G6-3, the insertion of G6-3A and the design report with its evidence. Denied: everything that would implement, enable or weaken a release mechanism or change anything delivered: the release gate and its libraries (authenticity, candidate, records, verification, release, package), the release tool, the release folder (policy, reviewers, demonstrations, records), the workflow and every .github file, the package scripts and lockfile, all delivered pages, styles, scripts, fonts, media and configuration, the renderer and sources, the security policy and CSP code, the hosting adapters, the recorded asset manifest, media-rights inventory, crawler record, external-destination registry and histories, the findings register, the baseline records, the master framework repository, the main and baseline branches, and Gate 6 packages G6-4 onward. No credential, key, secret, account or subscription is created.",
     "allow": [
      "docs/JADE_AND_EMBER_APPROVALS.md",
-     "jade-and-ember/engineering/framework-migration-matrix.json",
+     "jade-and-ember/engineering/CI.md",
      "jade-and-ember/engineering/FRAMEWORK-MIGRATION-MATRIX.md",
-     "jade-and-ember/engineering/lib/gate5-closure.mjs",
+     "jade-and-ember/engineering/G6-3A-DESIGN.md",
+     "jade-and-ember/engineering/G6-3A-POC-REPORT.md",
      "jade-and-ember/engineering/GATE-5-PLAN.md",
      "jade-and-ember/engineering/GATE-6-IMPLEMENTATION-ORDER.md",
-     "jade-and-ember/engineering/CI.md",
-     "jade-and-ember/engineering/G6-3A-DESIGN.md",
-     "jade-and-ember/engineering/g6-3a-evidence/"
+     "jade-and-ember/engineering/checks/release-dryrun.mjs",
+     "jade-and-ember/engineering/checks/selftest-release-control.mjs",
+     "jade-and-ember/engineering/framework-migration-matrix.json",
+     "jade-and-ember/engineering/g6-3a-evidence/",
+     "jade-and-ember/engineering/lib/gate5-closure.mjs",
+     "jade-and-ember/engineering/release-control/",
+     "jade-and-ember/engineering/verify.mjs",
+     "jade-and-ember/package.json"
     ],
     "deny": [
      ".github/",
@@ -1524,7 +1569,6 @@
      "jade-and-ember/engineering/release/reviewers.json",
      "jade-and-ember/engineering/external-destinations.json",
      "jade-and-ember/engineering/external-links-verification.json",
-     "jade-and-ember/package.json",
      "jade-and-ember/engineering/release/",
      "jade-and-ember/engineering/lib/authenticity.mjs",
      "jade-and-ember/engineering/lib/release.mjs",
@@ -1540,10 +1584,15 @@
       "by": "APR-JE-042",
       "date": "2026-10-12",
       "text": "Design correction for the multi-client operating model. No path is added to the allowed list: the revised design and its evidence are already inside it. The restrictions are unchanged (no GitHub setting, credential, workflow, deployment or release-control change)."
+     },
+     {
+      "by": "APR-JE-043",
+      "date": "2026-10-12",
+      "text": "Authorises the minimum viable local proof of concept. Added to the allowed list: engineering/release-control/ (new code, README), the new self-test check and its registration in verify.mjs and the package scripts, and the evidence and report files for the proof of concept. Still denied: lib/authenticity.mjs and every other release gate or package library, tools/release.mjs, the release folder, the workflow and .github, every delivered file, GitHub settings, credentials and the master framework repository. No real release-control repository, credential or deployment is created."
      }
     ]
    },
-   "status": "authorised by APR-JE-041 for Steps 1 to 3 (design and decision checkpoint); in progress"
+   "status": "authorised by APR-JE-041 (design) and APR-JE-043 (local proof of concept with synthetic data); in progress"
   },
   {
    "id": "G6-4",
@@ -2514,6 +2563,21 @@
     {
      "wp": "G6-3A",
      "mustMention": "same GitHub identity"
+    }
+   ]
+  },
+  {
+   "id": "D-G63-6",
+   "text": "Routine versus material releases and the accepted isolation results",
+   "ownerWords": "The owner accepts the repository-isolation validation results. Routine, preauthorized low-risk maintenance should ultimately run automatically. Material production changes remain subject to STS owner approval. Clients are not required to approve routine releases. Keep the owner interaction simple: review the staged website and approve a material release. Design automatic digest matching rather than requiring the owner to manually type hashes.",
+   "status": "decided (APR-JE-043); the proof of concept implements the routine/material split and automatic digest matching locally; nothing is enabled for production",
+   "workPackages": [
+    "G6-3A"
+   ],
+   "consequences": [
+    {
+     "wp": "G6-3A",
+     "mustMention": "proof of concept"
     }
    ]
   }
