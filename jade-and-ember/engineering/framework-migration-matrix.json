@@ -1600,12 +1600,12 @@
     "closedBy": "APR-JE-044",
     "closedAs": "local proof of concept only; not production activation approval"
    },
-   "status": "authorised by APR-JE-041 (design) and APR-JE-043 (local proof of concept with synthetic data); in progress"
+   "status": "closed by APR-JE-044 as a local proof of concept only; not production activation approval"
   },
   {
    "id": "G6-4",
    "title": "Hosting adapters and hosting requirements",
-   "summary": "One adapter interface; Cloudflare Pages first, then Vercel and a plain static adapter; a real 404 (D-P3-1), domain-root base URLs (D-P3-2), staged-bundle manifest and deployed-bytes comparison (D-P3-3), HSTS opt-in (D-P3-4, D-P4-5). Provider documentation must be re-verified by a person before an adapter is built (D-P3-6). Live verification needs a separately authorised preview (D-P3-5). MONOLITH House & Design (proof of concept #2) targets Vercel, so the Vercel adapter and its re-verified provider documentation must be complete before that project starts; any Vercel preview needs its own authorisation (D-P3-5). Authorised by APR-JE-044 for portable Cloudflare Pages and Vercel adapters (plus a static wrapper), a real-404 requirement, the HSTS default correction (D-P3-4, D-P4-5), verification of SEO files, response headers, redirects, clean URLs and CSP, provider documentation read and filed with unverified live behaviour marked, and automated and adversarial negative tests; the adapters hold no credential and have no deployment authority, no preview is authorised (D-P3-5), and G6-5 is not authorised.",
+   "summary": "One adapter interface; Cloudflare Pages first, then Vercel and a plain static adapter; a real 404 (D-P3-1), domain-root base URLs (D-P3-2), staged-bundle manifest and deployed-bytes comparison (D-P3-3), HSTS opt-in (D-P3-4, D-P4-5). Provider documentation must be re-verified by a person before an adapter is built (D-P3-6). Live verification needs a separately authorised preview (D-P3-5). MONOLITH House & Design (proof of concept #2) targets Vercel, so the Vercel adapter and its re-verified provider documentation must be complete before that project starts; any Vercel preview needs its own authorisation (D-P3-5). Authorised by APR-JE-044 for portable Cloudflare Pages and Vercel adapters (plus a static wrapper), a real-404 requirement, the HSTS default correction (D-P3-4, D-P4-5), verification of SEO files, response headers, redirects, clean URLs and CSP, provider documentation read and filed with unverified live behaviour marked, and automated and adversarial negative tests; the adapters hold no credential and have no deployment authority, no preview is authorised (D-P3-5). Closed by APR-JE-046.",
    "dependsOn": [
     "G6-2",
     "G6-3",
@@ -1703,13 +1703,17 @@
      "jade-and-ember/engineering/G6-3A-POC-REPORT.md",
      "jade-and-ember/engineering/g6-3a-evidence/"
     ],
-    "amendments": []
-   }
+    "amendments": [],
+    "endCommit": "187f6720e9f109bf71d47e1417a31d63766b5b0b",
+    "closedBy": "APR-JE-046",
+    "closedAs": "engineering milestone; live-host verification not done and no preview authorised"
+   },
+   "status": "closed by APR-JE-046 as an engineering milestone (end commit 187f672; CI run 77 all seven jobs; local verify 40/40); live behaviour of the hosting adapters is unobserved and RB-12 stays open for the separately authorised preview"
   },
   {
    "id": "G6-5",
    "title": "De-coupling refactor in Jade & Ember",
-   "summary": "Project manifest, core/adapter split, generic fixture site, project-check extension point, with a parity proof: 38+ checks, byte-identical delivered output, identical reports, dry run unchanged. No move of files to the framework yet.",
+   "summary": "Project manifest (sts.engineering.json), core/adapter split, generic fixture site, project-check extension point and a registry-driven runner, with a parity proof: all checks, byte-identical delivered output, identical reports, dry run unchanged. No move of files to the framework or any other repository. Authorised by APR-JE-046 with seven priorities: separate reusable engineering from Jade & Ember project data; preserve the release-authentication architecture and its production hard stop; remove project-specific assumptions from reusable components; preserve Cloudflare Pages and Vercel portability; integrate previously approved release-package requirements assigned to G6-5 (D-P4-2: industry-specific structured-data schemas); the same Base Engineering Framework for Essential, Premium and Cinematic; Anthropic Frontend Design stays the sole creative authority. The master framework repository is not modified (frameworkRepoChange is false); any operation that would modify it stops for the owner's approval.",
    "dependsOn": [
     "G6-0",
     "G6-2",
@@ -1721,7 +1725,71 @@
    "frameworkRepoChange": false,
    "size": "large",
    "verification": "Parity: delivered tree hash 9061a227…, reports identical, 100% of the dry-run scenarios, the self-test case counts reconciled to the generic fixture.",
-   "blocks": []
+   "blocks": [],
+   "status": "authorised by APR-JE-046; in progress",
+   "scope": {
+    "repository": "getsimplifiedtech/STS-Cinematic-Showcase.",
+    "branch": "feature/jade-and-ember-v0.9",
+    "baseCommit": "187f6720e9f109bf71d47e1417a31d63766b5b0b",
+    "authorisedBy": "APR-JE-046",
+    "note": "Derived from the owner's G6-5 authorisation (APR-JE-046) and the G6-5 work package (project manifest, core/adapter split, generic fixture, project-check extension point, registry-driven runner, parity proof). Allowed: the approvals ledger and the matrix, closure verifier and documents that record the closure of G6-4 and the G6-5 work; the new project manifest at the project root; the engineering code (lib, checks, tools, adapters, runner, schemas, contracts, hosting data) as a de-coupling refactor with a parity proof; the package scripts; the G6-5 report and evidence. Denied: the delivered website (pages, styles, scripts, fonts, media, configuration), the renderer and its sources (build.mjs, src/), the hard authenticity stop (lib/authenticity.mjs), the release-control proof of concept (frozen as accepted), the reviewer table (stays empty) and the release folder, the project's records and approvals data (asset manifest, media-rights inventory, crawler record, external-destination registry and histories, findings register, baseline record, immutability allowlist, evidence), the workflow and every .github file (centralised automation is G6-7), the package lockfile, the history of closed work packages (reports and evidence of G6-1 to G6-4 and G6-3A), the master framework repository, the main and baseline branches, and G6-0 and G6-6 onward. No file moves to another repository, no credential, hosting account, preview, deployment or client-production release path is created or enabled.",
+    "allow": [
+     "docs/JADE_AND_EMBER_APPROVALS.md",
+     "jade-and-ember/package.json",
+     "jade-and-ember/QA.md",
+     "jade-and-ember/sts.engineering.json",
+     "jade-and-ember/engineering/"
+    ],
+    "deny": [
+     ".github/",
+     "jade-and-ember/index.html",
+     "jade-and-ember/menu.html",
+     "jade-and-ember/order-online.html",
+     "jade-and-ember/our-story.html",
+     "jade-and-ember/visit-us.html",
+     "jade-and-ember/styles.css",
+     "jade-and-ember/site.js",
+     "jade-and-ember/hero.js",
+     "jade-and-ember/menu.js",
+     "jade-and-ember/media/",
+     "jade-and-ember/fonts/",
+     "jade-and-ember/config/",
+     "jade-and-ember/src/",
+     "jade-and-ember/build.mjs",
+     "jade-and-ember/serve.py",
+     "jade-and-ember/package-lock.json",
+     "jade-and-ember/baselines/",
+     "jade-and-ember/README.md",
+     "README.md",
+     "jade-and-ember/engineering/lib/authenticity.mjs",
+     "jade-and-ember/engineering/release-control/",
+     "jade-and-ember/engineering/release/",
+     "jade-and-ember/engineering/assets.manifest.json",
+     "jade-and-ember/engineering/media-rights-inventory.json",
+     "jade-and-ember/engineering/search-crawler-verification.json",
+     "jade-and-ember/engineering/findings.json",
+     "jade-and-ember/engineering/baseline.json",
+     "jade-and-ember/engineering/immutability-allowlist.json",
+     "jade-and-ember/engineering/external-destinations.json",
+     "jade-and-ember/engineering/external-links-verification.json",
+     "jade-and-ember/engineering/evidence/",
+     "jade-and-ember/engineering/G6-1-REPORT.md",
+     "jade-and-ember/engineering/G6-2-REPORT.md",
+     "jade-and-ember/engineering/G6-3-REPORT.md",
+     "jade-and-ember/engineering/G6-4-REPORT.md",
+     "jade-and-ember/engineering/G6-2-DESIGN.md",
+     "jade-and-ember/engineering/G6-3-SCOPE.md",
+     "jade-and-ember/engineering/G6-3A-DESIGN.md",
+     "jade-and-ember/engineering/G6-3A-POC-REPORT.md",
+     "jade-and-ember/engineering/g6-1-evidence/",
+     "jade-and-ember/engineering/g6-2-evidence/",
+     "jade-and-ember/engineering/g6-3-evidence/",
+     "jade-and-ember/engineering/g6-3a-evidence/",
+     "jade-and-ember/engineering/g6-4-evidence/",
+     "docs/JADE_AND_EMBER_MEDIA_RIGHTS_POLICY.md"
+    ],
+    "amendments": []
+   }
   },
   {
    "id": "G6-6",
@@ -2727,6 +2795,55 @@
     {
      "wp": "G6-4",
      "mustMention": "APR-JE-044"
+    }
+   ]
+  },
+  {
+   "id": "D-G65-1",
+   "text": "G6-4 closed as an engineering milestone; release and live-host blockers retained",
+   "ownerWords": "The owner approves formal G6-4 engineering closure. Accepted: commit 187f672; GitHub Actions run 77 with all seven jobs passed; local verification 40/40; the macOS case-sensitive path correction; the WebKit local-HTTP simulation correction; existing security and hosting standards preserved. Record G6-4 closure and retain all outstanding production-release blockers and live-host verification requirements.",
+   "status": "decided (APR-JE-046); G6-4 closed; RB-12 stays open for the separately authorised preview",
+   "workPackages": [
+    "G6-4"
+   ],
+   "consequences": [
+    {
+     "wp": "G6-4",
+     "mustMention": "APR-JE-046"
+    }
+   ]
+  },
+  {
+   "id": "D-G65-2",
+   "text": "G6-5 authorised: de-coupling refactor in Jade & Ember",
+   "ownerWords": "Proceed according to the existing G6-5 work package in GATE-6-IMPLEMENTATION-ORDER.md and the approved migration matrix. Priorities: 1. Separate reusable STS engineering from Jade & Ember-specific project data. 2. Preserve the approved release-authentication architecture and its production hard stop. 3. Remove project-specific assumptions from reusable components. 4. Preserve portability between Cloudflare Pages and Vercel. 5. Integrate previously approved release-package requirements where assigned to G6-5. 6. Maintain the same Base Engineering Framework across Essential, Premium and Cinematic website offerings. 7. Preserve Anthropic Frontend Design as the sole creative authority.",
+   "status": "decided (APR-JE-046); G6-5 authorised within its recorded scope",
+   "workPackages": [
+    "G6-5"
+   ],
+   "consequences": [
+    {
+     "wp": "G6-5",
+     "mustMention": "APR-JE-046"
+    },
+    {
+     "wp": "G6-5",
+     "mustMention": "sole creative authority"
+    }
+   ]
+  },
+  {
+   "id": "D-G65-3",
+   "text": "Master framework repository: stop for approval outside the approved scope",
+   "ownerWords": "Before changing the master framework repository, verify that the specific extraction and branch operations are within the previously approved scope. Stop for approval if they are not. Do not redesign locked STS business processes, deploy websites, enable client-production releases, or begin G6-6. Run independent verification and report the implementation, remaining blockers, exact commits and CI results. Stop for owner review after G6-5.",
+   "status": "decided (APR-JE-046); G6-5 is recorded as frameworkRepoChange false and does not modify the framework repository",
+   "workPackages": [
+    "G6-5"
+   ],
+   "consequences": [
+    {
+     "wp": "G6-5",
+     "mustMention": "master framework repository"
     }
    ]
   }
