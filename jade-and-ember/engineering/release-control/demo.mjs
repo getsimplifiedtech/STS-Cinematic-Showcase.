@@ -1,7 +1,7 @@
 // node engineering/release-control/demo.mjs : a narrated run of the release-control proof of concept through its real command line (G6-3A, APR-JE-043).
 // SYNTHETIC: a throwaway client site is built and prepared by the real release tool in the dry run's throwaway copy; release control runs on a throwaway folder with
 // disposable tokens; "deployment" is a copy into that folder. Nothing touches GitHub, a host, a credential or any real record.
-import { cpSync, existsSync, mkdirSync, readFileSync, readdirSync } from 'node:fs';
+import { cpSync, existsSync, mkdirSync, readFileSync, readdirSync, writeFileSync } from 'node:fs';
 import { spawnSync } from 'node:child_process';
 import { dirname, join, resolve } from 'node:path';
 import { createSandbox } from '../lib/release-dryrun.mjs';
@@ -30,7 +30,7 @@ const as = (who, args) => { const r = spawnSync(process.execPath, [cli, ...args,
 const stageId = (r) => /STAGED (st-\S+):/.exec(r.out)?.[1];
 
 say('# Release control: a local proof of concept (synthetic clients, disposable tokens, a throwaway folder)\n');
-const init = spawnSync(process.execPath, [cli, 'init-demo', '--rc', root, '--clients', 'alpha,beta', '--hosts', 'alpha=www.jade-and-ember-fixture.com', '--tooling', snap.eng], { encoding: 'utf8' });
+const init = spawnSync(process.execPath, [cli, 'init-demo', '--rc', root, '--clients', 'alpha,beta', '--hosts', 'alpha=www.jade-and-ember-fixture.com,beta=www.beta-fixture.example', '--tooling', snap.eng], { encoding: 'utf8' });
 say(`$ rc init-demo --clients alpha,beta\n${init.stdout.trimEnd().split('\n').map((l) => `  ${l}`).join('\n')}\n`);
 
 say('## 1. A coding agent tries to use release control: it has no capability at all\n');
@@ -56,10 +56,30 @@ const r4 = as('scheduler', ['run-scheduled', '--client', 'alpha', '--package', l
 const s4 = /stage (st-\S+) is/.exec(r4.out)?.[1];
 as('scheduler', ['auto-release', '--client', 'alpha', '--stage', s4]);
 as('owner', ['approve', '--client', 'alpha', '--stage', s4]);
-say('The same thing in one command: approve with a note saying what was checked (it records the open subjects for this stage, then releases).\n');
+say('The same thing in one command: approve with a note saying what was checked, naming the subjects (it records exactly those open subjects for this stage, then releases).\n');
+as('owner', ['review', '--client', 'alpha', '--stage', s4]);
+const peek = (args) => JSON.parse(spawnSync(process.execPath, [cli, ...args, '--json', '--rc', join(root, 'rc'), '--credential', join(root, 'operator', 'owner.token')], { encoding: 'utf8' }).stdout);
+const open4 = () => peek(['review', '--client', 'alpha', '--stage', s4]).coverage.filter((c) => !c.covered).map((c) => c.type);
 as('owner', ['approve', '--client', 'alpha', '--stage', s4, '--note', 'looked at the new link (synthetic demo)', '--basis', 'licence']);
+as('owner', ['approve', '--client', 'alpha', '--stage', s4, '--note', 'looked at the new link (synthetic demo)', '--basis', 'licence', '--subjects', open4().join(',')]);
 
-say('## 5. Controls: revoke, freeze, audit\n');
+say('## 5. Things that must not work\n');
+say('A revoked approval stops counting; a package altered after staging is refused; a package for another client is refused; a release cannot be written to another client.\n');
+const s5 = stageId(as('owner', ['stage', '--client', 'alpha', '--package', textEdit]));
+say('(this package goes back to the earlier link, so the judgements the owner recorded for that content still cover it: they are bound to the content, not to the date)\n');
+as('owner', ['review', '--client', 'alpha', '--stage', s5]);
+const cov5 = peek(['review', '--client', 'alpha', '--stage', s5]).coverage.find((c) => c.type === 'search');
+as('owner', ['revoke-approval', '--client', 'alpha', '--approval', String(cov5.by), '--reason', 'demo: I am no longer sure about the search files']);
+as('owner', ['approve', '--client', 'alpha', '--stage', s5]);
+as('owner', ['record-approval', '--client', 'alpha', '--stage', s5, '--type', 'search', '--note', 'looked at it again (synthetic demo)']);
+const zipPath = join(root, 'rc', 'staged', 'alpha', s5, 'package', readdirSync(join(root, 'rc', 'staged', 'alpha', s5, 'package')).find((n) => n.endsWith('.zip')));
+const zb = readFileSync(zipPath); zb[Math.floor(zb.length / 2)] ^= 0xff; writeFileSync(zipPath, zb);
+say('(someone with access to the staging folder flips one byte of the staged ZIP)\n');
+as('owner', ['approve', '--client', 'alpha', '--stage', s5]);
+as('scheduler', ['stage', '--client', 'beta', '--package', first]);
+as('owner', ['revoke', '--client', 'alpha', '--stage', s5, '--reason', 'demo: altered package']);
+
+say('## 6. Controls: freeze, audit, isolation\n');
 as('owner', ['freeze', '--client', 'alpha', '--reason', 'demo: pausing releases']);
 as('scheduler', ['stage', '--client', 'alpha', '--package', textEdit]);
 as('owner', ['unfreeze', '--client', 'alpha', '--reason', 'demo: resuming']);

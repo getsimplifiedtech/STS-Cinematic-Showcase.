@@ -2,7 +2,7 @@
 // SYNTHETIC PROOF OF CONCEPT (G6-3A, APR-JE-043). It runs only on a folder that `init-demo` created, with disposable tokens, and deploys only into that folder.
 //   init-demo --rc <folder> --clients a,b [--hosts a=www.a.com,b=www.b.com] [--tooling <engineering folder>]   create a throwaway release-control folder and write the disposable tokens to <folder>/operator/
 //   stage --client c --package <release folder>          verify, classify and stage a prepared package; prints the review page
-//   review --client c --stage <id>                       print the status, the class and what still needs your decision
+//   review --client c --stage <id> [--json]               print the status, the class and what still needs your decision
 //   record-approval --client c --stage <id> --type rights|search|externalLinks|domain --note "..." [--basis licence|permission|ownership]
 //   approve --client c --stage <id> [--note "what I checked" --subjects rights,search,... [--basis licence]]   release a staged package (the owner); the digest is matched by the engine, never typed.
 //                                                        With --note, the subjects you name (they must be exactly the ones still open for THIS stage) are recorded with that note first
@@ -38,7 +38,11 @@ try {
   const show = (o) => console.log(typeof o === 'string' ? o : JSON.stringify(o, null, 2));
   const run = {
     'stage': () => { const r = rc.stage(token, client, resolve(arg('--package'))); show(`STAGED ${r.stageId}: ${r.class.toUpperCase()}\n${r.reasons.map((x) => `  - ${x}`).join('\n')}\nreview page: ${r.review}\nstill to record: ${r.coverage.filter((c) => !c.covered).map((c) => c.type).join(', ') || 'nothing'}\nexpires: ${r.expires}`); },
-    'review': () => show(rc.review(token, client, stage)),
+    'review': () => {
+      const r = rc.review(token, client, stage);
+      if (argv.includes('--json')) return show(r);
+      show(`STAGE ${r.stageId}: ${r.status.toUpperCase()}, ${r.class.toUpperCase()}\n${r.reasons.map((x) => `  - ${x}`).join('\n')}\nyour decisions:\n${r.coverage.map((c) => `  ${c.type.padEnd(14)} ${c.na ? 'nothing to approve' : c.covered ? `recorded (entry ${c.by})` : 'NOT recorded yet'}`).join('\n')}\nreview page: ${r.page}`);
+    },
     'record-approval': () => { const r = rc.recordApproval(token, client, stage, arg('--type'), { note: arg('--note'), basis: arg('--basis') }); show(`RECORDED ${r.type} for exactly this stage's content (entry ${r.seq}, in force until ${r.validUntil.slice(0, 10)}); the digest was read from the stage, not typed`); },
     'approve': () => { const r = rc.approve(token, client, stage, { note: arg('--note'), basis: arg('--basis'), subjects: (arg('--subjects') || '').split(',').filter(Boolean) }); show(`RELEASED ${r.stageId} (${r.class}) to ${r.target}; deployed digest ${r.deployedDigest.slice(0, 16)}… matched the staged files`); },
     'auto-release': () => { const r = rc.autoRelease(token, client, stage); show(`RELEASED AUTOMATICALLY ${r.stageId} (${r.class}) to ${r.target}; deployed digest ${r.deployedDigest.slice(0, 16)}… matched the staged files`); },
