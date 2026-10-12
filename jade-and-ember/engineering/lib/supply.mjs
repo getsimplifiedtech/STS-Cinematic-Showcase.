@@ -12,6 +12,7 @@ import { existsSync, readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { canonicalJson } from './candidate.mjs';
 import { engDir, listFiles, projectDir, readJson } from './git.mjs';
+import { project } from './project.mjs';
 import { licenceSections } from './media-rights.mjs';
 
 const sha = (b) => createHash('sha256').update(b).digest('hex');
@@ -93,7 +94,7 @@ export function buildCompositeSbom({ siteDir, root = projectDir, eng = engDir, i
   const body = {
     bomFormat: 'CycloneDX', specVersion: '1.5', version: 1,
     metadata: {
-      component: { type: 'application', 'bom-ref': 'jade-and-ember', name: 'jade-and-ember', version: ver },
+      component: { type: 'application', 'bom-ref': project.id, name: project.id, version: ver },
       properties: [
         prop('sts:channel', channel ?? ''), prop('sts:lockfile-sha256', sha(lockText)), prop('sts:node-baseline', env.nodeBaseline?.version ?? ''), prop('sts:npm', env.nodeBaseline?.npm ?? ''),
         prop('sts:playwright', env.playwright ?? ''), prop('sts:framework-commit', authority.framework?.commit ?? ''), prop('sts:tooling-packages', tooling),

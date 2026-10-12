@@ -1,0 +1,63 @@
+{
+  "$schema": "engineering/schemas/sts-engineering.schema.json",
+  "schema": "sts/engineering-project@1",
+  "project": {
+    "id": "jade-and-ember",
+    "name": "Jade & Ember",
+    "summary": "A fictional modern Chinese kitchen: the STS portfolio demonstration, never a real restaurant."
+  },
+  "offering": null,
+  "paths": {
+    "engineering": "engineering",
+    "repositoryRoot": ".."
+  },
+  "governance": {
+    "approvalsLog": "docs/JADE_AND_EMBER_APPROVALS.md",
+    "approvalIdPrefix": "APR-JE",
+    "demonstrationIdPrefix": "DEMO-JE",
+    "recordIdSuffix": "JE",
+    "documents": {
+      "mediaRightsPolicy": "docs/JADE_AND_EMBER_MEDIA_RIGHTS_POLICY.md",
+      "deviceTestProtocol": "docs/JADE_AND_EMBER_DEVICE_TEST_PROTOCOL.md"
+    }
+  },
+  "ci": {
+    "workflow": "jade-and-ember-verify.yml"
+  },
+  "delivery": {
+    "sharedFiles": [
+      "styles.css",
+      "site.js",
+      "hero.js",
+      "menu.js"
+    ],
+    "assetFolders": [
+      "fonts",
+      "media"
+    ],
+    "configDir": "config",
+    "pages": {
+      "registry": "config/site.json",
+      "list": "pages",
+      "key": "file"
+    },
+    "build": {
+      "command": [
+        "node",
+        "build.mjs",
+        "--out",
+        "{out}"
+      ]
+    }
+  },
+  "baseline": {
+    "label": "v0.8",
+    "record": "baseline.json"
+  },
+  "creativeAuthority": {
+    "record": "authority.json"
+  },
+  "checks": {
+    "project": []
+  }
+}

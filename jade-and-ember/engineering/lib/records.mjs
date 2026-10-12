@@ -20,11 +20,13 @@ import { spawnSync } from 'node:child_process';
 import { engDir, readJson } from './git.mjs';
 import { parseStrictJson } from './strict-json.mjs';
 import { isReservedHost } from './hosts.mjs';
+import { project, recordPrefix, schemaId } from './project.mjs';
 
-export const APPROVAL_SCHEMA = 'jade-and-ember/approval-record@1';
-export const DEPLOYMENT_SCHEMA = 'jade-and-ember/deployment-record@1';
-export const REVIEWERS_SCHEMA = 'jade-and-ember/reviewers@1';
-export const DEMONSTRATIONS_SCHEMA = 'jade-and-ember/demonstrations@1';
+export const APPROVAL_SCHEMA = schemaId('approval-record@1');
+export const DEPLOYMENT_SCHEMA = schemaId('deployment-record@1');
+export const REVIEWERS_SCHEMA = schemaId('reviewers@1');
+export const DEMONSTRATIONS_SCHEMA = schemaId('demonstrations@1');
+const APPROVAL_ID = project.governance.approvalIdPrefix, DEMO_ID = project.governance.demonstrationIdPrefix;
 export const STATUSES = ['approved', 'rejected', 'revoked', 'superseded'];
 export const NEGATIVE = ['rejected', 'revoked', 'superseded'];
 export const TYPES = {
@@ -55,7 +57,7 @@ export function loadFamily(family, eng = engDir, { tracked = false, dir: where =
   const dir = where || familyDir(family, eng);
   if (!existsSync(dir)) return [];
   const prefixes = Object.values(TYPES).filter((t) => t.family === family).map((t) => t.prefix);
-  const nameRe = new RegExp(`^(${prefixes.join('|')})-JE-\\d{3,}\\.json$`);
+  const nameRe = new RegExp(`^(${prefixes.map((x) => recordPrefix(x)).join('|')})-\\d{3,}\\.json$`);
   let committed = null;
   if (tracked) {
     const r = spawnSync('git', ['-C', dir, 'ls-files', '-z', '--', '.'], { encoding: 'utf8' });
@@ -64,7 +66,7 @@ export function loadFamily(family, eng = engDir, { tracked = false, dir: where =
   return readdirSync(dir).sort().flatMap((f) => {
     if (f === 'README.md' || f === '.gitkeep') return [];
     const st = lstatSync(join(dir, f));
-    if (!nameRe.test(f) || !st.isFile()) return [{ file: f, record: null, parseError: `unexpected entry in ${family}/: only README.md and ${prefixes.map((x) => `${x}-JE-nnn.json`).join(' / ')} record files are allowed (a symlink, sub-folder, backup or other file is never read, so it is refused)` }];
+    if (!nameRe.test(f) || !st.isFile()) return [{ file: f, record: null, parseError: `unexpected entry in ${family}/: only README.md and ${prefixes.map((x) => `${recordPrefix(x)}-nnn.json`).join(' / ')} record files are allowed (a symlink, sub-folder, backup or other file is never read, so it is refused)` }];
     if (tracked && (committed === false || !committed.has(f))) return [{ file: f, record: null, parseError: committed === false ? 'cannot confirm that this record is committed (not a git checkout)' : 'this record file is not committed to the repository (untracked, ignored or removed from the index)' }];
     try {
       const record = parseStrictJson(readFileSync(join(dir, f), 'utf8'));
@@ -86,7 +88,7 @@ export function validateReviewers(t, { ledgerIds = null } = {}) {
   if (t.schema !== REVIEWERS_SCHEMA) bad(`reviewers.json: schema must be "${REVIEWERS_SCHEMA}"`);
   if (!Array.isArray(t.reviewers)) { bad('reviewers.json: "reviewers" must be a list'); return p; }
   if (t.reviewers.length) {
-    if (!/^APR-JE-\d+$/.test(t.establishedBy || '')) bad('reviewers.json: a table with reviewers must name the governance record that established it (establishedBy: APR-JE-nnn)');
+    if (!new RegExp(`^${APPROVAL_ID}-\\d+$`).test(t.establishedBy || '')) bad(`reviewers.json: a table with reviewers must name the governance record that established it (establishedBy: ${APPROVAL_ID}-nnn)`);
     else if (ledgerIds && !ledgerIds.has(t.establishedBy)) bad(`reviewers.json: ${t.establishedBy} is not in the approvals ledger`);
   }
   const ids = new Set();
@@ -128,7 +130,7 @@ export function validateRecordShape(r, { today, now = null }) {
   if (r.schema !== (dep ? DEPLOYMENT_SCHEMA : APPROVAL_SCHEMA)) bad(`schema must be "${dep ? DEPLOYMENT_SCHEMA : APPROVAL_SCHEMA}"`);
   const ty = isStr(r.type) && Object.hasOwn(TYPES, r.type) ? TYPES[r.type] : null;
   if (!ty) { bad(`type "${r.type}" is not one of: ${Object.keys(TYPES).join(', ')}`); return p; }
-  if (!isStr(r.id) || !new RegExp(`^${ty.prefix}-JE-\\d{3,}$`).test(r.id)) bad(`id must look like ${ty.prefix}-JE-001 for a ${r.type}`);
+  if (!isStr(r.id) || !new RegExp(`^${recordPrefix(ty.prefix)}-\\d{3,}$`).test(r.id)) bad(`id must look like ${recordPrefix(ty.prefix)}-001 for a ${r.type}`);
   if (!STATUSES.includes(r.status)) bad(`status must be one of ${STATUSES.join(', ')} (got "${r.status}")`);
   if (!isStr(r.candidate) || !HEX64.test(r.candidate)) bad('candidate must be the 64-hex candidate artifact digest');
   if (!['client-production', 'demonstration'].includes(r.channel)) bad('channel must be client-production or demonstration');
@@ -139,7 +141,7 @@ export function validateRecordShape(r, { today, now = null }) {
   else if (now ? Date.parse(r.decidedAt) > Date.parse(now) : r.decidedAt.slice(0, 10) > today) bad(`decidedAt ${r.decidedAt} is in the future`);
   if (!text(r.rationale, 10)) bad('rationale must say why (at least 10 characters; it is for people and is never read by the gate)');
   const ends = r.status === 'revoked' || r.status === 'superseded';
-  if (ends && (!isStr(r.ends) || !new RegExp(`^${ty.prefix}-JE-\\d{3,}$`).test(r.ends))) bad(`a ${r.status} record must name the record it ends in "ends" (${ty.prefix}-JE-nnn)`);
+  if (ends && (!isStr(r.ends) || !new RegExp(`^${recordPrefix(ty.prefix)}-\\d{3,}$`).test(r.ends))) bad(`a ${r.status} record must name the record it ends in "ends" (${recordPrefix(ty.prefix)}-nnn)`);
   if (!ends && r.ends !== undefined) bad('"ends" is only allowed on a revoked or superseded record');
   const s = r.subject;
   if (!s || typeof s !== 'object' || Array.isArray(s)) { bad('subject must be an object'); return p; }
@@ -158,7 +160,7 @@ export function validateRecordShape(r, { today, now = null }) {
       if (s.opened !== true) bad('subject.opened must be true: each destination was opened and is the right one (reachability alone is never the approval)');
       if (s.accepted !== undefined && (!Array.isArray(s.accepted) || s.accepted.some((a) => !a || !isStr(a.url) || !text(a.reason, 10)))) bad('subject.accepted must be a list of { url, reason } (a printed mention accepted by name; a clickable link cannot be accepted)');
     }
-    if (dep) { if (!/^REL-JE-\d{3,}$/.test(s.releaseApproval || '')) bad('subject.releaseApproval must name the release approval relied on'); if (!text(s.targetHost, 4)) bad('subject.targetHost must name the host'); }
+    if (dep) { if (!new RegExp(`^${recordPrefix('REL')}-\\d{3,}$`).test(s.releaseApproval || '')) bad('subject.releaseApproval must name the release approval relied on'); if (!text(s.targetHost, 4)) bad('subject.targetHost must name the host'); }
   }
   return p;
 }
@@ -269,9 +271,9 @@ export function validateDemonstrations(d, { ledgerIds = null } = {}) {
   const p = [];
   if (!d || d.schema !== DEMONSTRATIONS_SCHEMA || !Array.isArray(d.registered)) return [`demonstrations.json: schema must be "${DEMONSTRATIONS_SCHEMA}" with a "registered" list`];
   for (const e of d.registered) {
-    if (!/^DEMO-JE-\d{3,}$/.test(e.id || '')) p.push(`demonstration ${e.id}: id must look like DEMO-JE-001`);
+    if (!new RegExp(`^${DEMO_ID}-\\d{3,}$`).test(e.id || '')) p.push(`demonstration ${e.id}: id must look like ${DEMO_ID}-001`);
     if (!HEX64.test(e.configurationDigest || '')) p.push(`demonstration ${e.id}: configurationDigest must be 64 hex`);
-    if (!/^APR-JE-\d+$/.test(e.registeredBy || '')) p.push(`demonstration ${e.id}: registeredBy must name the governance record`);
+    if (!new RegExp(`^${APPROVAL_ID}-\\d+$`).test(e.registeredBy || '')) p.push(`demonstration ${e.id}: registeredBy must name the governance record`);
     else if (ledgerIds && !ledgerIds.has(e.registeredBy)) p.push(`demonstration ${e.id}: ${e.registeredBy} is not in the approvals ledger`);
     if (!text(e.description, 10)) p.push(`demonstration ${e.id}: describe what is registered`);
   }

@@ -11,6 +11,7 @@ import { join } from 'node:path';
 import { execFileSync } from 'node:child_process';
 import { createHash } from 'node:crypto';
 import { engDir, projectDir, readJson, repoRoot, sha256 } from './git.mjs';
+import { project, schemaId } from './project.mjs';
 import { loadApprovals } from './approvals.mjs';
 import { isReservedHost } from './hosts.mjs';
 import { buildManifest } from './hashed.mjs';
@@ -170,7 +171,7 @@ export function evaluateGate(ctx, policy = loadReleasePolicy()) {
     recordsValid: [!recordErrors.length && !reviewerProblems.length, [...reviewerProblems, ...recordErrors].slice(0, 4).join('; ') || 'every approval and deployment record is readable and well formed; the reviewer table is valid'],
     releaseApproval: [rel.met && Boolean(cand), cand ? rel.detail : 'the candidate artifact digest is unknown'],
     productionHostAuthorised: [rel.met && hostOk.ok, rel.met ? hostOk.detail : `no in-force release approval, so no host is authorised (${hostOk.detail})`],
-    rightsVerification: [rights.met && Boolean(cand), cand ? (rights.met ? rights.detail : `${rights.detail}; the generated media rights are unverified (docs/JADE_AND_EMBER_MEDIA_RIGHTS_POLICY.md)`) : 'the candidate artifact digest is unknown'],
+    rightsVerification: [rights.met && Boolean(cand), cand ? (rights.met ? rights.detail : `${rights.detail}; the generated media rights are unverified (${project.governance.documents.mediaRightsPolicy})`) : 'the candidate artifact digest is unknown'],
     noDemoText: [demoText && ctx.client.flags.demo === false, ctx.client.flags.demo ? 'flags.demo is on' : demoText ? 'the client configuration builds with no demonstration text' : 'the client configuration does not validate'],
     productionDomain: [baseHost && !isReservedHost(baseHost), baseHost ? (isReservedHost(baseHost) ? `${baseHost} is a reserved, example, local or preview/staging address, not the approved production domain` : `${baseHost}`) : 'seo.baseUrl is not set'],
     searchReadiness: [!searchGaps.length, searchGaps.length ? searchGaps.join('; ') : `${review.approved.map((m) => m.id).join(', ')}: facts, structured data and crawler policy reviewed for these search artifacts`],
@@ -217,7 +218,7 @@ export function buildReleaseManifest(ctx0, { siteDir, qaReport = ctx0.verify, pa
   const embedded = (family) => (family === 'evidence' ? loadEvidenceEntries() : loadFamily(family)).filter((e) => !e.parseError).map((e) => ({ file: e.file, sha256: sha256(readFileSync(join(engDir, 'release', family, e.file))) }));
   const registered = (ctx.demonstrations?.registered || []).find((d) => d.configurationDigest === ctx.candidate.parts.configuration);
   return {
-    schema: 'jade-and-ember/release-manifest@2', project: ctx.version.name, version: ctx.version.version, channel: ctx.channel,
+    schema: schemaId('release-manifest@2'), project: ctx.version.name, version: ctx.version.version, channel: ctx.channel,
     candidate: { schema: ctx.candidate.schema, digest: ctx.candidate.digest, parts: ctx.candidate.parts },
     source: { commit: c, branch: ctx.git.branch, tree: ctx.git.tree, dirty: ctx.git.dirty, commitDate: ctx.git.commitDate },
     baseline: { branch: ctx.baseline.branch, commit: ctx.baseline.commit, projectTree: ctx.baseline.projectTree },

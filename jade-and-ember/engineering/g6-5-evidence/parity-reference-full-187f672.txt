@@ -1,0 +1,786 @@
+
+> jade-and-ember@0.9.0-dev verify
+> node engineering/verify.mjs
+
+== check:baseline: v0.8 baseline branch, trees, checksums, preview package
+  heads/baseline/jade-and-ember-v0.8 -> 32afde77d29b3a30443c17ad7ea27d7882adcd5d
+  trees match (repository c5ca5e4, project 833b291)
+  60/60 source checksums match
+  preview package 58aca9e24665... matches
+PASS  check:baseline (T s)
+
+== check:schema: configuration schemas and the build refusing bad configuration
+  4 schemas are valid JSON Schema 2020-12 (Ajv strict mode)
+  config/*.json valid under both validators
+  43/43 corpus cases: both validators agree and match the expected verdict
+  the build rejects broken configuration with path-qualified messages and writes nothing
+PASS  check:schema (T s)
+
+== check:determinism: two builds, committed pages, environment independence
+  two builds identical (5 pages, nothing else written)
+  committed pages equal a fresh build
+  identical under another time zone, locale, working directory, project path, file timestamps and NODE_ENV
+  output has no absolute paths, timestamps, machine names, BOM or CR; ends with one newline
+  19 build source files scanned for clock, random, environment and locale calls
+PASS  check:determinism (T s)
+
+== check:delivery: the delivered site is self-contained and free of development tooling
+  delivered set: 23 files, same as the v0.8 preview package (without START-HERE.txt and serve.py)
+  143 references in pages and styles all resolve inside the folder (or are tel:, mailto:, https links or the ../ back-link)
+  no delivered page, script or stylesheet refers to Node.js, npm, node_modules, engineering/, a build step or a module loader
+PASS  check:delivery (T s)
+
+== check:authority: design authority and framework reference
+  authority.json and the framework reference agree (commit, hashes, repository, branch, skill path)
+  required approval records present (APR-JE-016, APR-JE-017, APR-JE-018, APR-JE-019, APR-JE-020, APR-JE-021, APR-JE-022, APR-JE-023, APR-JE-024, APR-JE-025, APR-JE-026, APR-JE-027, APR-JE-028, APR-JE-029, APR-JE-030, APR-JE-031, APR-JE-032, APR-JE-033, APR-JE-034, APR-JE-035, APR-JE-036, APR-JE-037, APR-JE-038, APR-JE-039, APR-JE-040)
+  N text files scanned; 33 mentions of the retired skill, all in allowed historical documents next to a marker
+  framework checkout not provided (--framework <dir> or STS_FRAMEWORK_DIR): the pinned commit and hashes were checked against the written record only
+PASS  check:authority (T s)
+
+== check:contracts: component and page-renderer contracts (interface, markup, escaping, purity)
+  16 component and helper contracts and 5 page renderers checked: interface, markup guarantees, hostile-input escaping, purity, conditional behaviour (170 assertions)
+PASS  check:contracts (T s)
+
+== check:media: media formats, dimensions, alt text, loading, provenance, flashing, reduced motion and Pause
+  static: 8 media files and 5 pages checked (format, dimensions, alt text, loading, video attributes, provenance); video container, codec, size, duration and silence read from the files
+  flash proxy: media/hero-loop.webm 121 frames, at most 0 reversal(s) per second
+  flash proxy: media/hero-loop.mp4 121 frames, at most 0 reversal(s) per second
+  browser: 31 page loads in reduced-motion, Save-Data, 2g, phone, tablet and desktop states (video requests, running animations, Pause)
+  known finding F-G2-01 (accepted (APR-JE-023): Option A adopted as a documentation policy in docs/JADE_AND_EMBER_MEDIA_RIGHTS_POLICY.md; media/PROVENANCE.md deliberately unchanged (frozen); rights remain unverified and are required evidence for any client release): media:provenance-rights:PROVENANCE.md
+  known finding F-G5-05 (open: proposed correction awaits the owner (Gate 5 Phase 5). Nothing is changed in the delivered fonts folder.): media:font-notice:noto-serif-sc
+PASS  check:media (T s)
+
+== check:tokens: design tokens: frozen v0.8 values, defined and used, contrast pairs (structure only)
+  31 tokens equal the frozen v0.8 snapshot; 33 distinct var() references all defined; 42 colour literals outside :root (recorded 42); spacing scale grows; 16 contrast pairs meet their minimum
+PASS  check:tokens (T s)
+
+== check:secrets: no credentials in the working tree or the history
+  N files in the working tree and the added lines of N commits scanned for 11 credential patterns: none found
+PASS  check:secrets (T s)
+
+== check:deps: dependency pinning, lockfile integrity, licences, npm audit
+  Node 24.21.0 (engines ">=24.8.0 <25") satisfies the engines range of every locked package
+  8 development dependencies pinned exactly, no runtime dependencies; 128 locked packages, all from registry.npmjs.org over https with sha512; licences: MPL-2.0 2, MIT 83, Apache-2.0 24, BSD-3-Clause 6, ISC 10, BSD-2-Clause 1, 0BSD 1, (MIT OR CC0-1.0) 1
+  audit: production 0 vulnerabilities; development tree 0 critical, 0 high, 0 moderate, 0 low
+PASS  check:deps (T s)
+
+== check:ci: the GitHub Actions workflow is read-only and keeps its promises
+  workflow: 7 jobs, 32 steps, 14 actions all pinned to commit SHAs; Node 24.21.0 in every job (tested baseline 24.21.0); permissions contents: read; no secrets, deployment, merge, publish, cloud or AI service; npm ci --ignore-scripts; timeouts set; documented in CI.md
+PASS  check:ci (T s)
+
+== check:html: valid HTML5 and accessibility rules for the demonstration and an indexable client build
+  known finding F-G4-01 (accepted (APR-JE-024) without visual change, on condition that the numbers stay readable, operable and free of overflow and clipping at supported mobile widths (enforced by check:phone)): html:tel-non-breaking [measured 6, recorded limit 6]
+  5 demonstration pages and 5 client-build pages pass html-validate (html-validate:recommended, html-validate:document, html-validate:a11y); 4 rules switched off, each with a recorded reason
+PASS  check:html (T s)
+
+== check:links: every internal link, fragment, image, font and video source resolves (exact case); sitemap and canonicals agree
+  internal links: 5 demonstration pages and 5 client-build pages fully cross-linked (25 and 25 page-to-page links); every href, src, srcset, video source and CSS url() resolves with exact letter case; every #fragment names a unique id; no page is an orphan or a dead end; tel:, mailto: and https URLs well-formed; the client sitemap and canonicals match the delivered pages; 3 external URL(s) listed, not fetched (offline checks; use --online)
+  external destinations: 5 registered (1 clickable link, 4 addresses printed in text); none unregistered; 2 verification run(s) on record, latest EXTV-2 on 2026-10-11 (github-actions): 4 verified, 0 blocked, 0 unavailable, 0 inconclusive, 0 insecure
+PASS  check:links (T s)
+
+== check:seo: canonical, sitemap, robots and JSON-LD generated from client configuration; demonstration stays noindex; hostile input; served in the browser
+  crawler identities: 16 agents in the policy each confirmed against the provider's documentation on 2026-10-11 (from search summaries of the official pages; no person has re-read them yet, so the release gate will not accept it); 3 further identities recorded for the owner
+  demonstration: all five pages noindex, nofollow; unique titles and descriptions; no og:url, canonical, JSON-LD, sitemap.xml, robots.txt or llms.txt (it is a fictional concept and is never presented as a real restaurant)
+  client build: 5 canonicals unique and equal to base + file, no robots meta; sitemap.xml lists them (well-formed, dated); robots.txt allows crawling and names the sitemap; Home carries one JSON-LD Restaurant matching the configuration (name, phone, address, cuisine, hours, menu, image), no raw angle brackets, no rights or licence claim; static security and privacy policies pass
+  two client builds are byte-identical (no clock in the output)
+  hostile configuration text (script, tag and attribute breakouts) stays escaped data in the JSON-LD, pages and sitemap
+  a base URL with a path works and the build warns that robots.txt belongs at the domain root
+  validation: 9/9 bad production configurations are refused with readable messages and write nothing
+  staging and example hosts: 15 reserved, preview and local names recognised, 4 real-looking domains not flagged; the fixture's own host jadeandember.example.test is reserved by design
+  host-aware public URLs (simulated, nothing deployed): Cloudflare Pages (extension-less URLs, .html redirected): cloudflare-pages, 17 public URLs answer 200 directly, 54 internal links resolve (25 redirect once to the same final page); Vercel with cleanUrls true: vercel-clean, 17 public URLs answer 200 directly, 54 internal links resolve (25 redirect once to the same final page); Vercel default (no cleanUrls, .html served as named): vercel-default, 17 public URLs answer 200 directly, 54 internal links resolve; a plain static server: static, 17 public URLs answer 200 directly, 54 internal links resolve
+  crawler policy: 4/4 variants (all allowed, AI search blocked, training blocked, both blocked) render exactly the configured groups; search indexing can never be blocked on an indexable build
+  the client Home page loads under the CSP with the JSON-LD block (Restaurant): 0 violations, 0 console messages
+PASS  check:seo (T s)
+
+== check:release: version file, release manifest and the release gate (a client-production build needs recorded approvals and evidence)
+  version 0.9.0-dev (demonstration) consistent with package.json, the configuration and the footer baseline text; policy complete; manifest for COMMIT (candidate 69f9f18fd5e1…) valid under two validators, deterministic, and consistent with the sources
+  gate logic: a fully approved client build passes; 170/170 single defects each block it; 16/16 things that must NOT block (prose in a rationale, history, a re-approval after a revocation) do not; a registered demonstration passes and 8/8 demonstration defects block it; a client configuration labelled demonstration is refused
+  real state: channel demonstration; a client-production release would be BLOCKED by 20 unmet requirement(s): verifyPassed, stableVersion, releaseApproval, productionHostAuthorised, rightsVerification, evidence:real-device, evidence:screen-reader, evidence:browser-matrix, evidence:ci-run, noDemoText, productionSeoComplete, productionDomain, searchReadiness, externalLinks, externalLinksReview, mediaRightsInventory, socialImageRights, dependencySecurity, sbomVerified, authenticity; no deployment authorisation exists (false)
+PASS  check:release (T s)
+
+== check:framework-matrix: Phase 8: the framework extraction and migration matrix classifies every file of the repository, every reference resolves, the generated Markdown is current (an assessment; nothing is extracted)
+  N files in 35 components (10 universal, 13 universal-redesign, 1 adapter-industry, 3 project, 2 devtool, 1 adapter-hosting, 4 record, 1 doc); 10 work packages in dependency order; 40 registered requirements and findings; 16 release blockers; the generated matrix is current
+PASS  check:framework-matrix (T s)
+
+== check:evidence: human-testing paperwork: procedures equal the specification, templates are unfilled and rejected, complete records accepted, no page disables zoom
+  evidence specification: 12 targets (E1: 1, E2: 6, E3: 5), 12 sections, 524 checklist answers across the templates
+  templates: 12/12 unfilled templates are rejected by the validator and none contains a result or a signature; dry run: 12/12 complete invented records are accepted
+  dry run: a complete invented set satisfies every evidence requirement of the gate, and removing a required target breaks it (the full single-defect matrix is in check:release and check:selftest-evidence)
+  procedures: 16 generated documents in docs/device-testing/ equal the specification (12 per-target procedures, 3 cross-cutting procedures, the inventory), plus the protocol
+  records on file: none. No physical-device, screen-reader or desktop-Safari evidence has been recorded: the gate's human requirements stay unmet
+  viewport: all 5 pages leave zoom to the visitor (no user-scalable=no, no maximum-scale below 5)
+PASS  check:evidence (T s)
+
+== check:hosting: static-folder delivery for Cloudflare Pages: no application or vendor files, _headers within limits, no Vercel dependency
+  static folder: demonstration 27 files (5 pages), client build 26 files (5 pages, with robots.txt, sitemap.xml and llms.txt); no application, function, redirect or vendor file; all under the Pages limits
+  _headers: 4 renderings (2 builds x domain root and sub-path) within 100 rules and 2000-character lines; security headers once, in "/*" only; Cache-Control only in narrower rules; no immutable; CSP equals the computed policy
+  noindex defence in depth: the demonstration's host files carry X-Robots-Tag: noindex, nofollow (meta tag on all pages, header in "/*"); the indexable client build carries none
+  adapters: provider facts: 47 filed (31 verbatim from the Cloudflare documentation source, 7 from Vercel's open-source routing code, 9 paraphrases of Vercel pages that could not be fetched); none confirmed by a person or observed live
+  adapters: 3 adapters x 2 channels on the invented fixture bakery: every bundle passes the outside check and the regenerate-and-compare check; 12 bundle/profile walks (pages, .html redirects, slashed path, unknown path, search files, host files not served, cache class per request path, Range, security headers, deployed-bytes comparison); 20 golden files byte-identical; a bundle with no 404.html is accepted for staging and refused for release (D-P3-1)
+  adapters: _headers, nginx.conf, htaccess and vercel.json carry the same security header names and values as security.json, with and without the HSTS opt-in
+  adapters: the real Jade & Ember site (demonstration) and an indexable client build of it, delivered folder unchanged, stage and check under both Cloudflare Pages and Vercel; the only open live blocker is the missing 404.html (D-P3-1: no page is created here; VP-3 is not approved)
+  adapters: the Cloudflare _headers checker and the vercel.json checker, run on their own against damaged text (a stale CSP, a changed HSTS max-age, preload, an unrecorded includeSubDomains), and the policy loader against a default HSTS that carries includeSubDomains or preload
+  adapters: 198 adversarial negative cases refused for the right reason: tampered or extra files, a repaired manifest, symlinks, vendor and secret files, stale CSP, HSTS includeSubDomains/preload slipped in or faked, header injection, duplicate/misspelt/foreign vercel.json keys, routes the site does not use, header-source forms, rule and size limits, wrong channel headers, a missing 404 for release, a missing search file, a base URL with a path
+  adapters: deployed-bytes comparison (C-07, D-P3-3): accepts the staged bytes; refuses a page rewritten by the host, a missing page, an extra served path, a clean-URL host that serves the .html form or /index.html as a second copy, a 404 page with its own address, and a soft 404
+  adapters: case-sensitive file lookup in every profile, proved against a case-folding disk stand-in (a macOS CI finding); the simulation's plain-http transport removes exactly Strict-Transport-Security and upgrade-insecure-requests (a WebKit CI finding)
+  adapters: the release package's host files (_headers, nginx.conf, htaccess) carry Strict-Transport-Security: max-age=31536000 with no includeSubDomains
+  no source, configuration, delivered file or engineering rule depends on Vercel (functionality is vendor independent)
+PASS  check:hosting (T s)
+
+== check:privacy: no storage, cookies, third parties or fingerprinting (static and in the browser)
+  static: 8 scripts scanned for 30 forbidden APIs; 5 outbound link(s) all to allowed hosts (getsimplifiedtech.com); no third-party resource, preconnect or @import
+  browser: 10 page loads (hero, Pause, phone menu): no cookies, no stored data, no service worker, every request to the site's own origin
+PASS  check:privacy (T s)
+
+== check:security: security headers and CSP: generated, enforced in the browser, probed, and identical to v0.8 under the headers
+  policy: 15 CSP directives, no unsafe-inline or unsafe-eval; 1 inline script and 6 inline style values allowed by hash (6 style attributes on 2 pages); 8 headers; three host renderings agree
+  10 page loads under the headers (desktop with video and Pause, phone with menu): 0 CSP violations, 0 console messages, 0 failed requests
+  policy probes over HTTP: an injected inline script, an inline event handler, an external script, an unlisted inline style, an iframe and an external image are all blocked; over file:// the same injected script runs (no headers exist there)
+  candidate served WITH the headers equals v0.8 served plain: 60 comparisons (text, accessibility tree, computed styles, screenshots) at 1440, 820 and 390 px, 0 differences
+PASS  check:security (T s)
+
+== check:assets: asset manifest, content-hashed copy equal to v0.8 in the browser
+  manifest: 23 delivered files, 1977874 bytes, tree 9061a2270196 equal the recorded manifest
+  styles.css differs from the v0.8 checksum only as approved by IMM-1 (APR-JE-029)
+  every delivered file equals its v0.8 baseline checksum, or differs only as an approved allowlist entry explains; names and paths are unchanged
+  hashed copy: 18 files renamed name.<8 hex>.ext, all references rewritten and resolving, assets byte-identical, two builds identical
+  hashed copy in the browser equals v0.8: 63 comparisons (text, accessibility tree, computed styles, screenshots at 1440, 820, 390 px; hero video, reduced motion, requests, and every page opened from the folder over file://), 0 differences
+PASS  check:assets (T s)
+
+== check:budgets: page-weight budgets, growth against v0.8, Core Web Vitals under throttling
+  static: 5 pages measured; delivered 1977874 bytes (+0.02% against the v0.8 baseline of 1977386); largest page initial transfer 232252 bytes gzip
+  runtime (390 px, N ms / 1.6 Mbit/s / CPU x4, median of 3): worst LCP N ms (limit 2500), CLS 0 (limit 0.1), blocking N ms (limit 200), interaction handler time N ms (limit 200; END-TO-END N ms (input delay N ms + handler + presentation N ms; slowest event: keydown) is reported, not gated; N ms is the INP good reference), most requests 10, most bytes 174222
+PASS  check:budgets (T s)
+
+== check:keyboard: Tab order, focus visibility, skip link, phone menu, target sizes (real key presses)
+  172 Tab stops walked on 2 contexts x pages; 172 focus indicators compared by pixels; 162 target sizes measured
+PASS  check:keyboard (T s)
+
+== check:reflow: 320 px reflow, 200 percent zoom, text spacing
+  35 measurements: reflow-320, zoom-200-of-1280 and text spacing at desktop-1440, desktop-1280, desktop-1100, desktop-1024, mobile-390 on every page
+PASS  check:reflow (T s)
+
+== check:forced-colors: text and controls in forced-colours emulation
+  683 lines of text and 162 controls measured in forced-colours emulation on every page at desktop-1440 and mobile-390; 0 element(s) opt out with forced-color-adjust: none (those need a human look)
+PASS  check:forced-colors (T s)
+
+== check:a11y-tree: landmarks, headings, names, ARIA references in the accessibility tree
+  937 accessibility-tree nodes checked on every page at desktop and phone width
+PASS  check:a11y-tree (T s)
+
+== check:order: DOM order against visual reading order
+  234 consecutive pairs of headings and controls compared (DOM order against screen order)
+PASS  check:order (T s)
+
+== check:d11: D-11: the engine honours the style-attribute hashes (photographs keep their crop under the headers) and blocks an unlisted inline style
+  D-11 on chromium 141.0.7390.37: 12 of 12 element states (every style attribute, at desktop and phone width) resolve identically with and without the headers, 0 style violation(s); an unlisted inline style is blocked (style-src-attr)
+PASS  check:d11 (T s)
+
+== check:supports: The approved WebKit text-spacing correction (@supports hanging-punctuation) applies exactly where the engine supports it, as recorded, and the rule is in the stylesheet
+  hanging-punctuation in chromium 141.0.7390.37: the rule does not apply (white-space nowrap, as in v0.8)
+PASS  check:supports (T s)
+
+== check:phone: phone numbers readable, pressable and inside the viewport at 9 supported mobile widths (F-G4-01)
+  27 phone-number measurements over 27 page loads at 9 supported mobile widths (portrait, landscape, tablet): readable, inside the viewport, not clipped, not covered, pressable. No number wraps at any of these widths
+PASS  check:phone (T s)
+
+== check:portability: the folder works from an extracted ZIP over file://, at a domain root, in a subdirectory, with pretty URLs, without Range
+  static: 27 files, names plain ASCII (no spaces), unique ignoring case, no symbolic or hidden files, no <base>, plain relative links
+  the same delivered folder, staged by the Cloudflare Pages and Vercel adapters and served by each adapter's simulation profile (clean URLs and the .html redirect, the generated header rules applied, Range answered as that host documents): every page walked on desktop and phone with real clicks, no failed request, no error (a simulation of documented behaviour, not the live service)
+  serving conventions walked with real clicks on every page, desktop and phone menu, brand and footer links, Back and Forward: extracted ZIP over file:// (path with spaces, &, em dash, #, brackets), domain root, /clients/acme/jade-and-ember/, the directory URL without a trailing slash (host redirect), extension-less URLs, a server without Range support, query strings and fragments
+  known finding F-G3-01 (accepted (APR-JE-023) as a documented limitation: harmless console messages over file://): portability:file://:font-preload-cors [measured 6, recorded limit 6]
+PASS  check:portability (T s)
+
+== check:release-dryrun: release readiness dry run: the real release tool against a synthetic client build in a throwaway copy (success path, ~100 single blockers, package integrity and tampering, no deployment path); measures the gaps
+  dry run (synthetic, in a throwaway copy; real tool, parser, validator and git): 319/319 scenarios as expected — success path 1/1, approvals 42/42, domain 12/12, verification 16/16, candidate 9/9, tree 1/1, stays-valid 11/11, records 15/15, evidence 29/29, configuration 18/18, ci-evidence 11/11, external-links 16/16, rights 10/10, social 4/4, supply 17/17, authenticity 2/2, environment 14/14, ledger 2/2, package 65/65, channel 11/11, deployment 10/10, separation 3/3
+  findings with blocking scenarios (blocking+must-stay-valid / all pass; RG-14 is held shut by the authenticity hard stop, not resolved): RG-01 12+4 (all as expected), RG-02 20+0 (all as expected), RG-03 14+0 (all as expected), RG-04 13+2 (all as expected), RG-05 2+1 (all as expected), RG-06 5+1 (all as expected), RG-07 2+1 (all as expected), RG-08 17+0 (all as expected), RG-09 1+0 (all as expected), RG-10 13+1 (all as expected), RG-11 10+0 (all as expected), RG-13 14+0 (all as expected), RG-14 4+0 (all as expected)
+  measured gaps (not failures): 6 probes, 2 let something through that should arguably be refused: RG-08, RG-12 (see engineering/RELEASE-DRYRUN-GATE5.md and G6-2-REPORT.md)
+  release-control proof of concept (G6-3A): 41 cases held, 0 failed; 41 release-control cases run in 35 s; synthetic clients and disposable tokens only; nothing was deployed anywhere but a throwaway folder
+  took 259 s; the synthetic folders were deleted; the real ledger, records, reviewer table and tree are unchanged
+PASS  check:release-dryrun (T s)
+
+== check:regression: candidate against the frozen v0.8 baseline (source, text, structure, styles, pixels, behaviour)
+  Playwright 1.64.0
+  chromium 141.0.7390.37
+  source: 27 comparison(s), 0 problem(s), 1 note(s)
+    source: styles.css differs only as allowed by IMM-1 (Gate 5 Phase 1 correction (APR-JE-029))
+  text: 35 comparison(s), 0 problem(s)
+  structure: 35 comparison(s), 0 problem(s)
+  styles: 35 comparison(s), 0 problem(s)
+  pixels: 39 comparison(s), 0 problem(s)
+  behaviour: 13 comparison(s), 0 problem(s)
+PASS  check:regression (T s)
+
+== check:selftest: Gate 1 checks fail when they should (mutation tests)
+  baseline: wrong commit, wrong tree, wrong package hash and a tampered checksum are all refused
+  determinism: a random value in the output and a hand-edited page are caught
+  authority: a changed hash, the retired skill as authority (README or unmarked), a missing approval and a framework-modified flag are caught
+  delivery: an absolute path, a missing file, a module import and an unexpected delivered file are caught
+  allowlist: incomplete or unapproved visual entries are refused; only fully explained differences are allowed and reported
+  regression: "one added character of visible text" caught by source, text, structure; behaviour unaffected
+  regression: "a 2 px change to the brand seal width" caught by source, styles, pixels; text, structure unaffected
+  regression: "a one-step change to the ember colour" caught by source, styles; text, structure, behaviour unaffected
+  regression: "the Pause control label changed in hero.js" caught by source, behaviour; text, structure, styles, pixels unaffected
+  regression: "a font file replaced" caught by source; text, structure unaffected
+  regression: "a demonstration config value changed" caught by source
+PASS  check:selftest (T s)
+
+== check:selftest-gate2: Gate 2 checks fail when they should (targeted negative tests)
+  caught: keyboard: a positive tabindex
+  caught: keyboard: a link taken out of the tab order
+  caught: keyboard: focus outlines removed
+  caught: keyboard: a fixed panel covers the focused element
+  caught: keyboard: the skip link removed
+  caught: keyboard: primary buttons shrunk below 44 px
+  caught: reflow: a fixed minimum width
+  caught: reflow: text clipped by fixed-height boxes
+  caught: reflow: text pulled over other text
+  caught: forced-colors: button text made invisible
+  caught: forced-colors: hero text left on the photograph
+  caught: forced-colors: the menu button draws nothing
+  caught: a11y-tree: an image loses its alt text
+  caught: a11y-tree: a heading level is skipped
+  caught: a11y-tree: <main> removed
+  caught: a11y-tree: two navigations with the same name
+  caught: a11y-tree: aria-labelledby points nowhere
+  caught: a11y-tree: a link with no name
+  caught: order: a column reversed with CSS
+  caught: budgets: 30 KB added to the stylesheet
+  caught: budgets: a 120 KB image
+  caught: budgets: a third script
+  caught: budgets: a large inline script
+  caught: budgets: the main thread blocked at load
+  caught: budgets: a slow click handler
+  caught: media: a WebP that is not a WebP
+  caught: media: alt text that is a file name
+  caught: media: width and height that do not match the file
+  caught: media: the hero video autoplays
+  caught: media: a media file without provenance
+  caught: media: the video is made preload=auto
+  caught: media: an endless animation ignores reduced motion
+  caught: contracts: escaping removed from esc()
+  caught: contracts: a frame without alt
+  caught: contracts: a component without a contract
+  caught: contracts: an extra parameter
+  caught: contracts: a section labelled by an id that does not exist
+  caught: contracts: the owner note shown in a client build
+  caught: contracts: the skip link removed from the document
+  caught: contracts: a script injected through a component
+  caught: flash: a 6 Hz strobe (12 reversals per second)
+  caught: findings register: a new finding, a worse finding and a stale entry
+  42 targeted negative tests run in 155 s
+PASS  check:selftest-gate2 (T s)
+
+== check:selftest-gate3: Gate 3 checks fail when they should (targeted negative tests)
+  caught: security: unsafe-inline added to script-src
+  caught: security: default-src opened to self
+  caught: security: an external image host allowed
+  caught: security: frame-ancestors dropped
+  caught: security: data: allowed for scripts
+  caught: security: the style hashes left out of the policy
+  caught: security: a page gains an inline event handler
+  caught: security: a page gains a second inline script
+  caught: security: a page gains a <style> element
+  caught: security: HTTP enforcement without the style hashes breaks the site (browser)
+  caught: privacy: localStorage in a script
+  caught: privacy: a cookie in a script
+  caught: privacy: fetch in a script
+  caught: privacy: a tracking pixel
+  caught: privacy: a web-font host and a preconnect
+  caught: privacy: an outbound link to an unlisted host
+  caught: privacy: a new-tab link without noopener
+  caught: privacy: storage hidden from the static scan is caught in the browser
+  caught: deps: a runtime dependency
+  caught: deps: a version range
+  caught: deps: a lockfile entry without integrity
+  caught: deps: a git-hosted package
+  caught: deps: a disallowed licence
+  caught: deps: lockfile out of step with package.json
+  caught: secrets: an AWS access key
+  caught: secrets: a private key block
+  caught: secrets: a GitHub token
+  caught: secrets: a password assignment
+  caught: secrets: credentials in a URL
+  caught: secrets: a JWT
+  caught: secrets: the secrets context in a workflow
+  caught: secrets: a secret committed and later deleted is found in history
+  caught: secrets: a stale allowlist entry
+  caught: tokens: the ember colour changed
+  caught: tokens: a token removed
+  caught: tokens: a variable that is never defined
+  caught: tokens: a new hard-coded colour
+  caught: tokens: low contrast between a recorded pair
+  caught: tokens: a spacing scale that stops growing
+  caught: assets: a delivered file changed
+  caught: assets: a media file replaced
+  caught: assets: a hashed copy with a missing file
+  caught: assets: a script that names an asset cannot be hashed
+  caught: portability: a file name with a space
+  caught: portability: two names that differ only by case
+  caught: portability: a symbolic link
+  caught: portability: a <base> element
+  caught: portability: a root-absolute stylesheet link breaks a subdirectory deployment (browser)
+  caught: portability: a ZIP with a path that escapes the folder is refused
+  caught: portability: a corrupted ZIP is detected
+  caught: ci: write-all permissions
+  caught: ci: a job that widens permissions
+  caught: ci: an action pinned to a tag instead of a SHA
+  caught: ci: an action that is not on the list
+  caught: ci: the secrets context
+  caught: ci: pull_request_target
+  caught: ci: a deployment step
+  caught: ci: a git push
+  caught: ci: an AI service call
+  caught: ci: no timeout
+  caught: ci: npm install instead of npm ci
+  caught: ci: install scripts allowed
+  caught: ci: an expression in a run script
+  caught: ci: credentials persisted by the checkout
+  caught: ci: pushes from any branch
+  caught: ci: the blocking job may fail silently
+  caught: ci: the verify step removed
+  the real workflow passes the CI check
+  68 targeted negative tests run in 177 s
+PASS  check:selftest-gate3 (T s)
+
+== check:selftest-gate5: the cross-browser harness cannot skip a check silently, reports engine adaptations, and D-11 detection works
+  held: catalogue: every check of verify.mjs is classified
+  held: catalogue: nothing classified that verify.mjs does not run
+  held: catalogue: every browser-driven check has a runner in cross-browser.mjs
+  held: catalogue: the runner runs nothing that is not browser-driven
+  held: catalogue: every not-applicable classification states its reason
+  caught: catalogue: a missing classification would be caught
+  held: matrix: lists every check exactly once
+  caught: matrix: a check the runner forgot is shown as MISSING, never as a pass
+  caught: matrix: a not-applicable engine check is shown with its reason
+  held: adaptation: Firefox cannot honour isMobile, so it is dropped and REPORTED
+  held: adaptation: Chromium and WebKit options are left exactly as given
+  held: adaptation: an option that is false or absent is not reported
+  caught: d11: an engine that ignores the style-attribute hashes is caught
+  caught: findings: a finding recorded for one engine is not stale in another, and is NEW if it appears there
+  held: noise: the Firefox hero-preload warning is recognised in Firefox only
+  held: noise: any other console message is never filtered
+  caught: supports: an engine whose answer differs from the record is caught
+  caught: supports: a stylesheet without the approved rule is caught
+  held: supports: every engine of the matrix has a recorded expectation
+  held: supports: the untouched site passes (must find nothing)
+  held: approved styles: accepted in the named engine only, with exact values and unchanged geometry
+  caught: ci: a cross-browser job that may fail but is not named informational is refused
+  caught: ci: a cross-browser job that installs no browser is refused
+  caught: ci: the Chromium verify job is unchanged and still blocking
+  held: ci: the untouched workflow passes (must find nothing)
+  25 harness tests run in 19 s
+PASS  check:selftest-gate5 (T s)
+
+== check:selftest-gate6: Gate 6 (G6-1): the direct Lighthouse runner, its floor and aggregation, the Node 24 baseline, the engines ranges, the retired Lighthouse CI and the pinned Actions fail when they should; the runner is driven against the real site
+  held: config: the shipped configuration is valid and at or above the floor (must find nothing)
+  held: config: it reproduces the Lighthouse CI thresholds it replaced
+  caught: config: a lowered accessibility threshold is refused
+  caught: config: accessibility demoted from error to warn is refused
+  caught: config: a category switched off is refused
+  caught: config: a category removed is refused
+  caught: config: fewer runs than the floor is refused
+  caught: config: an aggregation weaker than the floor is refused
+  caught: config: a configuration without a recorded floor is refused
+  caught: config: an unknown aggregation is refused
+  caught: config: a score outside 0 to 1 is refused
+  caught: config: an assertion switched off without a reason is refused
+  caught: config: a page name that could escape the folder is refused
+  held: aggregate: optimistic, median and pessimistic of three runs
+  held: aggregate: an even number of runs takes the lower middle value (never the kinder one)
+  held: aggregate: a missing or unusable score gives no aggregate (fails closed)
+  caught: aggregate: an unknown method is an error, not a default
+  held: aggregate: the median is never kinder than the optimistic method Lighthouse CI used
+  held: evaluate: good results produce no error and no warning (must find nothing)
+  caught: evaluate: accessibility below its threshold fails the command
+  caught: evaluate: performance below its threshold is a warning, not an error
+  caught: evaluate: a null score is an error, never a pass
+  caught: evaluate: a failed run is an error whatever its scores
+  caught: evaluate: fewer runs than configured is an error
+  caught: evaluate: a page with no result is an error
+  held: evaluate: one bad run among three decides by the median, as configured
+  caught: evaluate: two bad runs among three fail the median
+  caught: evaluate: the optimistic method would have passed those two bad runs (why the median is the default)
+  held: evaluate: an assertion that is off is not asserted (is-crawlable)
+  caught: evaluate: an audit asserted at error level fails when the score is under the minimum
+  held: node-range: ranges used by the lockfile are evaluated correctly
+  caught: node-range: a range it does not understand is refused, never waved through
+  held: deps: the untouched repository passes the static dependency check (must find nothing)
+  caught: deps: engines.node that differs from environment.json is refused
+  caught: deps: an engines range the tested Node does not satisfy is refused
+  caught: deps: a locked package that needs a newer Node than the baseline is refused
+  caught: deps: an engines range that cannot be evaluated is refused
+  caught: deps: the retired Lighthouse CI package cannot come back in package.json
+  caught: deps: nor in the lockfile
+  caught: deps: a loose version range for lighthouse is refused
+  held: deps: lighthouse is a pinned development dependency and is in the lockfile at that version
+  held: deps: lighthouserc.json is gone and the script runs the direct runner
+  held: ci: the untouched workflow passes (must find nothing)
+  caught: ci: a job still on Node 22 is refused
+  caught: ci: a different Node 24 patch than the tested one is refused
+  caught: ci: a floating Node version is refused
+  caught: ci: the old checkout (Node 20 runtime) is refused
+  caught: ci: the old setup-node (Node 20 runtime) is refused
+  caught: ci: an unrecorded SHA (a moving or unreviewed release) is refused
+  caught: ci: a tag instead of a SHA is refused
+  caught: ci: an install without --engine-strict is refused
+  caught: ci: the blocking job named for another Node major is refused
+  caught: ci: the Lighthouse job cannot become blocking by dropping its informational name
+  held: candidate: key order does not change the digest, a changed value does
+  held: candidate: the parts are exactly the artifact, with nothing about records, commits or dates
+  held: candidate: nothing a record, a reviewer or a report could change is read by the digest
+  held: verification: the engine digest covers the rules and excludes every record family, the reviewer table, the registry and the reports
+  held: verification: the verifier's registry holds every check, including this one and the dry run
+  held: records: the template tool prints a record with NO decision, which is invalid on purpose, and writes nothing
+  held: records: the old Markdown rows are not read (a release-approval row with the right channel, version and commit changes nothing)
+  caught: records: a status written in prose has no meaning (the model has four statuses and nothing is inferred)
+  caught: strict json: a repeated key in one object is refused (JSON.parse would keep the last)
+  held: strict json: the same key in different objects, key-like text in strings and escapes are fine (must find nothing)
+  caught: record folders: a backup, an upper-case extension, a sub-folder, a symlink and a file named for another id are each refused
+  caught: record folders: a deployment record in the approvals family is refused; a rights verification in it is read
+  caught: evidence folder: a non-evidence record, a backup and a symlink are refused; the files/ folder and README are not records
+  caught: ledger: a row inside a code fence or an HTML comment is not an approval
+  caught: zip: a plain archive round-trips (must find nothing); trailing bytes, a comment, a hidden entry and a repeated name are each refused
+  caught: verification: a record with a field the verifier does not write is refused even when resealed
+  caught: verification: a record with a malformed environment is refused even when resealed
+  held: hosts: staging words inside sub-domain labels and more hosting providers are reserved
+  held: hosts: real-looking client domains are not reserved (must find nothing)
+  held: sbom: two builds of the same inputs give byte-identical documents (reproducible), with no timestamp and a content-derived serial number
+  held: sbom: the real document is complete (licences everywhere) and describes the lockfile it claims
+  caught: sbom: a changed file hash, a different lockfile, a missing licence and a timestamp are each found
+  caught: exceptions: an expired, a high, a bare-name, a planless and a too-long exception are each refused; a current planned one is accepted
+  caught: supply: the newest record decides: an older passing record does not rescue a newer failing one (same lockfile, same day, higher id)
+  held: supply: a record that is complete, fresh, for this lockfile and SBOM, from a networked runner, is accepted (must find nothing)
+  caught: supply: negative counts, an advisory count that does not add up and a sandbox run claiming verified signatures are malformed records
+  caught: external: the newest verification for the list decides; a link can never be accepted by name, a printed mention can
+  held: rights: the delivered-media digest changes with any byte of any image, video, font or licence file
+  caught: rights: a revoked or rejected record leaves the clearance empty (negation-proof): no id in force, nothing verified
+  held: rights: with the record in force, closed findings and reviewed terms the clearance is complete (must find nothing)
+  caught: social: what the guard covers (Open Graph, Twitter card, image_src, JSON-LD image) and what it states it does not (other image carriers)
+  caught: authenticity: the real verifier is a hard stop (not implemented, never ok), and the policy check refuses a client-production policy without the requirement
+  held: authenticity: no code path other than a test-only override lets the gate or the package verifier accept an unauthenticated release
+  held: licences: parentheses and precedence are evaluated; what cannot be parsed is not allowed
+  held: external: every form of URL in a tag is a link (unquoted, split over lines, srcset, formaction, meta refresh, protocol-relative, entity-encoded, CSS url()); text stays a mention
+  caught: social: the carriers the first version missed are found (unquoted property, name beside property, itemprop, og:video, icons, ImageObject contentUrl, <img>, srcset), and a bad percent-escape is a finding, not a crash
+  caught: media: an image called a font, a font that is not WOFF2 and an inventory that claims a right in other words are each refused
+  caught: ci: a second workflow file next to the judged one is a finding (the policy would judge nothing about it)
+  caught: demonstrations: a registration that names a governance record not in the ledger is refused
+  caught: tool: supply-chain record refuses an advisory it cannot record faithfully (no GHSA id) instead of dropping it, and never labels a run from one environment variable
+  caught: records: duplicate result urls, a hop without a status and a finalUrl that is not the last hop are malformed verification records
+  held: runner: the source has no network client and no error reporting (the only network code stays in the files check:release-dryrun allows)
+  held: runner: it measures the real home page and the real thresholds hold (must find nothing)
+  held: runner: the measured accessibility score is a real number, and the Lighthouse version is the pinned one
+  caught: runner: impossible thresholds on the real measurement fail the command
+  caught: runner: a page that does not exist is a failed run, not a pass
+  99 Gate 6 (G6-1 to G6-3) tests run in 15 s; aggregations: optimistic, median, pessimistic
+PASS  check:selftest-gate6 (T s)
+
+== check:selftest-evidence: the evidence validator rejects incomplete, fabricated, mismatched and wrongly classified human-testing evidence (negative tests)
+  117 ways of getting evidence wrong are rejected, each for the right reason; 20 correct cases are accepted (137 cases, T s)
+PASS  check:selftest-evidence (T s)
+
+== check:selftest-gate4: Gate 4 checks fail when they should (HTML, links, SEO and llms.txt, crawler policy, release gate, hosting, phone numbers)
+  caught: html: an unclosed <div>
+  caught: html: a duplicate id
+  caught: html: an image without alt text
+  caught: html: a <p> inside a <ul>
+  caught: html: a heading level skipped
+  caught: html: the lang attribute removed
+  caught: html: an invalid attribute value
+  caught: html: a button with no accessible name
+  caught: html: a rule switched off without a recorded reason
+  caught: html: a phone number that can wrap is counted (F-G4-01 cannot grow)
+  caught: links: a link to a page that does not exist
+  caught: links: a link with the wrong letter case
+  caught: links: a fragment that points at no element
+  caught: links: a skip link to a missing id
+  caught: links: a bare # link
+  caught: links: a javascript: link
+  caught: links: an empty href
+  caught: links: a missing image file
+  caught: links: a missing font referenced by the stylesheet
+  caught: links: an http (not https) external link
+  caught: links: a malformed phone link
+  caught: links: a malformed mailto link
+  caught: links: a link that leaves the site folder
+  caught: links: a page that nothing links to (orphan)
+  caught: links: a dead-end page
+  caught: links: a link with stray whitespace
+  caught: links: sitemap lists a page that is not delivered
+  caught: links: a canonical that the sitemap does not list
+  caught: seo config: the demonstration made indexable
+  caught: seo config: structured data on a noindex build
+  caught: seo config: a base URL with http
+  caught: seo config: a base URL on localhost
+  caught: seo config: a base URL with a query
+  caught: seo config: an indexable build with no base URL
+  caught: seo config: structured data without business details
+  caught: seo config: a phone number that is not international
+  caught: seo config: opening hours that cannot be parsed
+  caught: seo config: a business image that does not exist
+  caught: seo config: a sameAs link that is not https
+  caught: seo config: an invalid last-modified date
+  caught: seo output: two pages share a canonical
+  caught: seo output: canonical on the wrong host
+  caught: seo output: a canonical link missing
+  caught: seo output: an indexable page keeps a noindex meta
+  caught: seo output: the sitemap loses a page
+  caught: seo output: the sitemap is not well formed
+  caught: seo output: a sitemap URL with http
+  caught: seo output: robots.txt disallows everything
+  caught: seo output: robots.txt names no sitemap
+  caught: seo output: structured data on a second page
+  caught: seo output: structured data that is not valid JSON
+  caught: seo output: structured data with a raw < (script breakout)
+  caught: seo output: structured data names a phone number that is not the page's
+  caught: seo output: structured data asserts media rights (license)
+  caught: seo output: page text claiming the images are royalty-free
+  caught: seo output: a sitemap with a bad date
+  caught: seo parsers: sitemap and robots readers reject junk
+  caught: seo output: an inline script added to a client page breaks the security policy
+  caught: release: the real demonstration cannot be released as client-production
+  caught: release: an indexable demonstration is blocked
+  caught: release: no release approval
+  caught: release: an approval for a different artifact (candidate digest)
+  caught: release: media rights not verified
+  caught: release: an uncommitted change
+  caught: release: verification of another artifact
+  caught: release: only the fast verification run
+  caught: release: an open Major finding
+  caught: release: no real-device evidence
+  caught: release: a pre-release version
+  caught: release: the policy file loses the release-approval requirement
+  caught: release: the policy names a requirement the gate does not implement
+  caught: release: the demonstration policy loses the noindex requirement
+  caught: llms: the file is missing from an indexable build
+  caught: llms: a page is left out
+  caught: llms: a link to a different host
+  caught: llms: a link that is not in the sitemap
+  caught: llms: the address differs from the pages
+  caught: llms: the phone number differs
+  caught: llms: the opening hours differ
+  caught: llms: an invented fact (an award)
+  caught: llms: the cuisine differs from the structured data configuration
+  caught: llms: the ordering link points elsewhere
+  caught: llms: a byte-order mark
+  caught: llms: carriage returns
+  caught: llms: no trailing newline
+  caught: llms: not a Markdown title
+  caught: llms: a local path leaks in
+  caught: llms: a secret-like word leaks in
+  caught: llms: demonstration wording in a client file
+  caught: llms: a licence claim about the photographs
+  caught: llms: a staging host for a page
+  caught: llms: the fictional demonstration must not publish llms.txt
+  held: llms: a hostile business name stays on one line (must find nothing)
+  caught: crawlers: the policy blocks AI search but the file does not
+  caught: crawlers: a training crawler is blocked although the class is allowed
+  caught: crawlers: an agent outside the reviewed list
+  caught: crawlers: a search engine is blocked
+  caught: crawlers: the whole site disallowed for everyone
+  caught: crawlers: a blocked group with a partial rule
+  caught: crawlers: a policy file that is not valid directives
+  caught: crawlers: search indexing may not be disallowed (build refuses)
+  caught: crawlers: an unknown class (build refuses)
+  caught: crawlers: a value that is not allow or disallow (build refuses)
+  caught: metadata: two pages share a title
+  caught: metadata: two pages share a description
+  caught: metadata: an empty description
+  caught: metadata: a missing og:url
+  caught: metadata: og:url is not the public URL
+  caught: metadata: og:title differs from the title
+  caught: metadata: a noindex page carries og:url
+  caught: facts: the Visit page prints another address
+  caught: facts: the Visit page loses an hours row
+  caught: facts: a page links a different phone number
+  caught: facts: the structured data describes another street (build refuses)
+  caught: facts: the structured data telephone is not on the Visit page
+  caught: facts: the structured data description differs from the Home description
+  caught: hosts: structured data points at a foreign host
+  caught: hosts: the sitemap lists another host
+  caught: urls: Cloudflare Pages with extension URLs (canonicals would redirect)
+  caught: urls: Vercel default with extension-less URLs (they would not be found)
+  caught: urls: Vercel cleanUrls with extension URLs (canonicals would redirect)
+  caught: urls: Cloudflare Pages declared with extension URLs (build refuses)
+  caught: urls: a clean-URL build keeps a .html canonical
+  caught: urls: a clean-URL build keeps a .html sitemap entry
+  caught: urls: structured data still names the .html menu on a clean-URL host
+  held: urls: the public URLs are correct on the hosts they were built for (must find nothing)
+  held: search digest: stable for identical builds, changed by any search artifact (must find nothing)
+  held: search digest: the demonstration has none (must find nothing)
+  held: search review: a record for another digest does not count (must find nothing)
+  caught: phone: a number that makes the page scroll sideways
+  caught: phone: a number clipped by its container
+  caught: phone: a number set in tiny type
+  caught: phone: a number covered by another element
+  caught: phone: a number that cannot be pressed
+  caught: phone: a number that is not focusable
+  caught: phone: a visible number that differs from the link
+  caught: phone: a block-level number with a small target
+  caught: phone: the number hidden from view
+  caught: hosting: a vercel.json in the delivered folder
+  caught: hosting: a functions folder
+  caught: hosting: a _redirects file
+  caught: hosting: a file over the Pages size limit
+  caught: hosting: a reference to Vercel in a page
+  caught: hosting: a script that makes network calls
+  caught: hosting: a missing index.html
+  caught: hosting: the demonstration publishes a sitemap
+  caught: hosting: an indexable build without robots.txt
+  caught: hosting: more than 100 header rules
+  caught: hosting: a header line over 2000 characters
+  caught: hosting: a security header repeated in a second rule
+  caught: hosting: immutable caching for unhashed names
+  caught: hosting: a CSP that no longer matches the built pages
+  caught: hosting: a rule that does not start at /
+  caught: hosting: an invalid header name
+  caught: hosting: the Strict-Transport-Security header missing
+  caught: hosting: Cache-Control placed in the catch-all rule
+  caught: crawler record: an agent of the policy has no entry
+  caught: crawler record: an entry for an agent outside the policy
+  caught: crawler record: an agent listed twice
+  caught: crawler record: an agent recorded in the wrong class
+  caught: crawler record: a source that is not the provider's own page
+  caught: crawler record: a source over http
+  caught: crawler record: a name reported as changed
+  caught: crawler record: a name reported as not found
+  caught: crawler record: a verification date in the future
+  caught: crawler record: no verification date
+  caught: crawler record: the policy was reviewed on another day
+  caught: crawler record: a finding that says nothing
+  caught: crawler record: the method is not stated
+  caught: crawler record: the limits lose the robots.txt statement
+  caught: crawler record: an agent of the policy listed as outside it
+  caught: crawler record: not an object
+  held: crawler record: the untouched record is accepted (must find nothing)
+  caught: crawler review: nobody has re-read the pages (the release gate asks for it)
+  caught: crawler review: a review older than its limit
+  caught: crawler review: no record at all
+  held: crawler review: a person-confirmed, recent review has no gap (must find nothing)
+  caught: release: crawler identities not re-read by a person
+  caught: release: a crawler review that has gone stale
+  caught: release: no crawler record
+  caught: og:image: the demonstration declares a preview image
+  caught: og:image: a client page declares an og:image
+  caught: og:image: a client page declares a twitter:image
+  caught: noindex header: the demonstration host file loses X-Robots-Tag
+  caught: noindex header: the demonstration sends it with another value
+  caught: noindex header: a second rule repeats it
+  caught: noindex header: an indexable client build carries it
+  caught: noindex header: only some pages are noindex
+  caught: noindex header: a build with mixed pages gets no host file
+  held: noindex header: the demonstration and the client build are told apart (must find nothing)
+  caught: external: a new link in a page
+  caught: external: a new address printed in text
+  caught: external: the credit link disappears from one page
+  caught: external: a registered destination no longer appears
+  caught: external: the credit link made http
+  caught: external: a registry entry for a clickable http link
+  caught: external: a registry entry with no reason
+  caught: external: the same registry id twice
+  held: external: the untouched demonstration matches its registry (must find nothing)
+  held: external verify: a direct 200 is verified (must find nothing)
+  held: external verify: a redirect to an https page that answers 200 is verified (must find nothing)
+  held: external verify: a server that refuses HEAD but answers GET is verified (must find nothing)
+  caught: external verify: a 403 from a site that blocks automated requests is not a pass
+  caught: external verify: a 429 is not a pass
+  caught: external verify: a 404 is unavailable
+  caught: external verify: a 500 that persists after the retry is unavailable
+  caught: external verify: a redirect loop is unavailable
+  caught: external verify: a redirect that leaves https is insecure
+  caught: external verify: an expired certificate is insecure
+  caught: external verify: no DNS answer is inconclusive, not unavailable
+  held: external verify: a server error followed by success on the retry is verified (must find nothing)
+  held: external verify: an address printed as http that the destination upgrades is verified (must find nothing)
+  caught: external verify: an address printed as http that is not upgraded is insecure
+  caught: external verify: a clickable http address is insecure without any request
+  caught: external record: "verified" with a 404
+  caught: external record: "verified" through an http hop
+  caught: external record: "verified" with no hops recorded
+  caught: external record: "blocked" with a 200
+  caught: external record: "inconclusive" that carries a status
+  caught: external record: a class outside the vocabulary
+  caught: external record: a date in the future
+  caught: external record: no runner
+  caught: external record: the destination list digest is missing
+  caught: external record: the same id twice
+  caught: external record: a sandbox run that reports success without a request
+  held: external record: the untouched history is accepted (must find nothing)
+  caught: rights: an image added with no inventory entry
+  caught: rights: an image that changed after the review
+  caught: rights: an entry for a file that is not delivered
+  caught: rights: the same file listed twice
+  caught: rights: marked verified with no approval row
+  caught: rights: marked verified without naming any approval
+  held: rights: verified with a real rights-verification row (must find nothing)
+  caught: rights: generated media described as licence-text-shipped
+  caught: rights: a status outside the vocabulary
+  caught: rights: generated media with no origin
+  caught: rights: generated media with no terms to verify
+  caught: rights: terms to verify that do not exist
+  caught: rights: wording that claims a licence
+  caught: rights: a term that is reviewed but has no reviewer
+  caught: rights: a term address over http
+  caught: rights: a font whose licence section is missing
+  caught: rights: a font section without the OFL text
+  caught: rights: a font described as unverified
+  caught: rights: the licence file missing from the fonts folder
+  caught: rights: the Noto Serif SC notice differs from the font file (finding F-G5-05)
+  held: rights: the Young Serif and Karla notices agree with their files (must find nothing)
+  held: rights: the untouched demonstration matches its inventory (must find nothing)
+  the untouched demonstration pages pass html-validate
+  the untouched demonstration and client build pass the link checks
+  the untouched client build passes the SEO and hosting checks
+  251 targeted negative tests run in 26 s
+PASS  check:selftest-gate4 (T s)
+
+== summary
+  PASS  check:baseline T s
+  PASS  check:schema T s
+  PASS  check:determinism T s
+  PASS  check:delivery T s
+  PASS  check:authority T s
+  PASS  check:contracts T s
+  PASS  check:media T s
+  PASS  check:tokens T s
+  PASS  check:secrets T s
+  PASS  check:deps T s
+  PASS  check:ci T s
+  PASS  check:html T s
+  PASS  check:links T s
+  PASS  check:seo T s
+  PASS  check:release T s
+  PASS  check:framework-matrix T s
+  PASS  check:evidence T s
+  PASS  check:hosting T s
+  PASS  check:privacy T s
+  PASS  check:security T s
+  PASS  check:assets T s
+  PASS  check:budgets T s
+  PASS  check:keyboard T s
+  PASS  check:reflow T s
+  PASS  check:forced-colors T s
+  PASS  check:a11y-tree T s
+  PASS  check:order T s
+  PASS  check:d11 T s
+  PASS  check:supports T s
+  PASS  check:phone T s
+  PASS  check:portability T s
+  PASS  check:release-dryrun T s
+  PASS  check:regression T s
+  PASS  check:selftest T s
+  PASS  check:selftest-gate2 T s
+  PASS  check:selftest-gate3 T s
+  PASS  check:selftest-gate5 T s
+  PASS  check:selftest-gate6 T s
+  PASS  check:selftest-evidence T s
+  PASS  check:selftest-gate4 T s
+
+  Not covered yet (planned for later gates, or manual): external link reachability (the online link check cannot run in the sandbox); Firefox and WebKit runs inside this sandbox (their jobs run on GitHub Actions: `node engineering/cross-browser.mjs --engine firefox|webkit`); portability of the tooling on Windows and macOS (a CI job reports it, informational); a human screen-reader pass and real-device testing (release requirements, never automated here).
+
+  composite SBOM digest (reproducible; compare local and CI): a1dbdd1255ca2c2d6b733658e044b5e546071c7afce17b77032994a226830e43, 151 components
+
+  verification record: full run, candidate 69f9f18fd5e119786e512125741fa2bd0c398857d7609c74784051937028f640, engine ENGINE…, 40 checks, seal SEAL
+
+verify passed (40 of 40 checks)
+

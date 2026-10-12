@@ -137,4 +137,4 @@ export function render(matrix, classification) {
   return out.join('\n') + '\n';
 }
 
-export const approvalsText = () => readFileSync(join(repoRoot, 'docs', 'JADE_AND_EMBER_APPROVALS.md'), 'utf8');
+export { approvalsText } from './approvals.mjs';

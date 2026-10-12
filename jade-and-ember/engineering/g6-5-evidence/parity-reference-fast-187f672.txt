@@ -1,0 +1,180 @@
+
+== check:baseline: v0.8 baseline branch, trees, checksums, preview package
+  heads/baseline/jade-and-ember-v0.8 -> 32afde77d29b3a30443c17ad7ea27d7882adcd5d
+  trees match (repository c5ca5e4, project 833b291)
+  60/60 source checksums match
+  preview package 58aca9e24665... matches
+PASS  check:baseline (T s)
+
+== check:schema: configuration schemas and the build refusing bad configuration
+  4 schemas are valid JSON Schema 2020-12 (Ajv strict mode)
+  config/*.json valid under both validators
+  43/43 corpus cases: both validators agree and match the expected verdict
+  the build rejects broken configuration with path-qualified messages and writes nothing
+PASS  check:schema (T s)
+
+== check:determinism: two builds, committed pages, environment independence
+  two builds identical (5 pages, nothing else written)
+  committed pages equal a fresh build
+  identical under another time zone, locale, working directory, project path, file timestamps and NODE_ENV
+  output has no absolute paths, timestamps, machine names, BOM or CR; ends with one newline
+  19 build source files scanned for clock, random, environment and locale calls
+PASS  check:determinism (T s)
+
+== check:delivery: the delivered site is self-contained and free of development tooling
+  delivered set: 23 files, same as the v0.8 preview package (without START-HERE.txt and serve.py)
+  143 references in pages and styles all resolve inside the folder (or are tel:, mailto:, https links or the ../ back-link)
+  no delivered page, script or stylesheet refers to Node.js, npm, node_modules, engineering/, a build step or a module loader
+PASS  check:delivery (T s)
+
+== check:authority: design authority and framework reference
+  authority.json and the framework reference agree (commit, hashes, repository, branch, skill path)
+  required approval records present (APR-JE-016, APR-JE-017, APR-JE-018, APR-JE-019, APR-JE-020, APR-JE-021, APR-JE-022, APR-JE-023, APR-JE-024, APR-JE-025, APR-JE-026, APR-JE-027, APR-JE-028, APR-JE-029, APR-JE-030, APR-JE-031, APR-JE-032, APR-JE-033, APR-JE-034, APR-JE-035, APR-JE-036, APR-JE-037, APR-JE-038, APR-JE-039, APR-JE-040)
+  N text files scanned; 33 mentions of the retired skill, all in allowed historical documents next to a marker
+  framework checkout not provided (--framework <dir> or STS_FRAMEWORK_DIR): the pinned commit and hashes were checked against the written record only
+PASS  check:authority (T s)
+
+== check:contracts: component and page-renderer contracts (interface, markup, escaping, purity)
+  16 component and helper contracts and 5 page renderers checked: interface, markup guarantees, hostile-input escaping, purity, conditional behaviour (170 assertions)
+PASS  check:contracts (T s)
+
+== check:media: media formats, dimensions, alt text, loading, provenance (static part)
+  static: 8 media files and 5 pages checked (format, dimensions, alt text, loading, video attributes, provenance); video container, codec, size, duration and silence read from the files
+  flash proxy: media/hero-loop.webm 121 frames, at most 0 reversal(s) per second
+  flash proxy: media/hero-loop.mp4 121 frames, at most 0 reversal(s) per second
+  browser part skipped (no browser in this tier)
+  known finding F-G2-01 (accepted (APR-JE-023): Option A adopted as a documentation policy in docs/JADE_AND_EMBER_MEDIA_RIGHTS_POLICY.md; media/PROVENANCE.md deliberately unchanged (frozen); rights remain unverified and are required evidence for any client release): media:provenance-rights:PROVENANCE.md
+  known finding F-G5-05 (open: proposed correction awaits the owner (Gate 5 Phase 5). Nothing is changed in the delivered fonts folder.): media:font-notice:noto-serif-sc
+PASS  check:media (T s)
+
+== check:tokens: design tokens: frozen v0.8 values, defined and used, contrast pairs (structure only)
+  31 tokens equal the frozen v0.8 snapshot; 33 distinct var() references all defined; 42 colour literals outside :root (recorded 42); spacing scale grows; 16 contrast pairs meet their minimum
+PASS  check:tokens (T s)
+
+== check:secrets: no credentials in the working tree or the history
+  N files in the working tree and the added lines of N commits scanned for 11 credential patterns: none found
+PASS  check:secrets (T s)
+
+== check:deps: dependency pinning, lockfile integrity, licences, npm audit
+  Node 24.21.0 (engines ">=24.8.0 <25") satisfies the engines range of every locked package
+  8 development dependencies pinned exactly, no runtime dependencies; 128 locked packages, all from registry.npmjs.org over https with sha512; licences: MPL-2.0 2, MIT 83, Apache-2.0 24, BSD-3-Clause 6, ISC 10, BSD-2-Clause 1, 0BSD 1, (MIT OR CC0-1.0) 1
+  audit: production 0 vulnerabilities; development tree 0 critical, 0 high, 0 moderate, 0 low
+PASS  check:deps (T s)
+
+== check:ci: the GitHub Actions workflow is read-only and keeps its promises
+  workflow: 7 jobs, 32 steps, 14 actions all pinned to commit SHAs; Node 24.21.0 in every job (tested baseline 24.21.0); permissions contents: read; no secrets, deployment, merge, publish, cloud or AI service; npm ci --ignore-scripts; timeouts set; documented in CI.md
+PASS  check:ci (T s)
+
+== check:html: valid HTML5 and accessibility rules for the demonstration and an indexable client build
+  known finding F-G4-01 (accepted (APR-JE-024) without visual change, on condition that the numbers stay readable, operable and free of overflow and clipping at supported mobile widths (enforced by check:phone)): html:tel-non-breaking [measured 6, recorded limit 6]
+  5 demonstration pages and 5 client-build pages pass html-validate (html-validate:recommended, html-validate:document, html-validate:a11y); 4 rules switched off, each with a recorded reason
+PASS  check:html (T s)
+
+== check:links: every internal link, fragment, image, font and video source resolves (exact case); sitemap and canonicals agree
+  internal links: 5 demonstration pages and 5 client-build pages fully cross-linked (25 and 25 page-to-page links); every href, src, srcset, video source and CSS url() resolves with exact letter case; every #fragment names a unique id; no page is an orphan or a dead end; tel:, mailto: and https URLs well-formed; the client sitemap and canonicals match the delivered pages; 3 external URL(s) listed, not fetched (offline checks; use --online)
+  external destinations: 5 registered (1 clickable link, 4 addresses printed in text); none unregistered; 2 verification run(s) on record, latest EXTV-2 on 2026-10-11 (github-actions): 4 verified, 0 blocked, 0 unavailable, 0 inconclusive, 0 insecure
+PASS  check:links (T s)
+
+== check:seo: canonical, sitemap, robots and JSON-LD generated from client configuration (static part)
+  crawler identities: 16 agents in the policy each confirmed against the provider's documentation on 2026-10-11 (from search summaries of the official pages; no person has re-read them yet, so the release gate will not accept it); 3 further identities recorded for the owner
+  demonstration: all five pages noindex, nofollow; unique titles and descriptions; no og:url, canonical, JSON-LD, sitemap.xml, robots.txt or llms.txt (it is a fictional concept and is never presented as a real restaurant)
+  client build: 5 canonicals unique and equal to base + file, no robots meta; sitemap.xml lists them (well-formed, dated); robots.txt allows crawling and names the sitemap; Home carries one JSON-LD Restaurant matching the configuration (name, phone, address, cuisine, hours, menu, image), no raw angle brackets, no rights or licence claim; static security and privacy policies pass
+  two client builds are byte-identical (no clock in the output)
+  hostile configuration text (script, tag and attribute breakouts) stays escaped data in the JSON-LD, pages and sitemap
+  a base URL with a path works and the build warns that robots.txt belongs at the domain root
+  validation: 9/9 bad production configurations are refused with readable messages and write nothing
+  staging and example hosts: 15 reserved, preview and local names recognised, 4 real-looking domains not flagged; the fixture's own host jadeandember.example.test is reserved by design
+  host-aware public URLs (simulated, nothing deployed): Cloudflare Pages (extension-less URLs, .html redirected): cloudflare-pages, 17 public URLs answer 200 directly, 54 internal links resolve (25 redirect once to the same final page); Vercel with cleanUrls true: vercel-clean, 17 public URLs answer 200 directly, 54 internal links resolve (25 redirect once to the same final page); Vercel default (no cleanUrls, .html served as named): vercel-default, 17 public URLs answer 200 directly, 54 internal links resolve; a plain static server: static, 17 public URLs answer 200 directly, 54 internal links resolve
+  crawler policy: 4/4 variants (all allowed, AI search blocked, training blocked, both blocked) render exactly the configured groups; search indexing can never be blocked on an indexable build
+PASS  check:seo (T s)
+
+== check:release: version file, release manifest and the release gate (a client-production build needs recorded approvals and evidence)
+  version 0.9.0-dev (demonstration) consistent with package.json, the configuration and the footer baseline text; policy complete; manifest for COMMIT (candidate 69f9f18fd5e1…) valid under two validators, deterministic, and consistent with the sources
+  gate logic: a fully approved client build passes; 170/170 single defects each block it; 16/16 things that must NOT block (prose in a rationale, history, a re-approval after a revocation) do not; a registered demonstration passes and 8/8 demonstration defects block it; a client configuration labelled demonstration is refused
+  real state: channel demonstration; a client-production release would be BLOCKED by 20 unmet requirement(s): verifyPassed, stableVersion, releaseApproval, productionHostAuthorised, rightsVerification, evidence:real-device, evidence:screen-reader, evidence:browser-matrix, evidence:ci-run, noDemoText, productionSeoComplete, productionDomain, searchReadiness, externalLinks, externalLinksReview, mediaRightsInventory, socialImageRights, dependencySecurity, sbomVerified, authenticity; no deployment authorisation exists (false)
+PASS  check:release (T s)
+
+== check:framework-matrix: Phase 8: the framework extraction and migration matrix classifies every file of the repository, every reference resolves, the generated Markdown is current (an assessment; nothing is extracted)
+  N files in 35 components (10 universal, 13 universal-redesign, 1 adapter-industry, 3 project, 2 devtool, 1 adapter-hosting, 4 record, 1 doc); 10 work packages in dependency order; 40 registered requirements and findings; 16 release blockers; the generated matrix is current
+PASS  check:framework-matrix (T s)
+
+== check:evidence: human-testing paperwork: procedures equal the specification, templates are unfilled and rejected, complete records accepted, no page disables zoom
+  evidence specification: 12 targets (E1: 1, E2: 6, E3: 5), 12 sections, 524 checklist answers across the templates
+  templates: 12/12 unfilled templates are rejected by the validator and none contains a result or a signature; dry run: 12/12 complete invented records are accepted
+  dry run: a complete invented set satisfies every evidence requirement of the gate, and removing a required target breaks it (the full single-defect matrix is in check:release and check:selftest-evidence)
+  procedures: 16 generated documents in docs/device-testing/ equal the specification (12 per-target procedures, 3 cross-cutting procedures, the inventory), plus the protocol
+  records on file: none. No physical-device, screen-reader or desktop-Safari evidence has been recorded: the gate's human requirements stay unmet
+  viewport: all 5 pages leave zoom to the visitor (no user-scalable=no, no maximum-scale below 5)
+PASS  check:evidence (T s)
+
+== check:hosting: static-folder delivery for Cloudflare Pages: no application or vendor files, _headers within limits, no Vercel dependency
+  static folder: demonstration 27 files (5 pages), client build 26 files (5 pages, with robots.txt, sitemap.xml and llms.txt); no application, function, redirect or vendor file; all under the Pages limits
+  _headers: 4 renderings (2 builds x domain root and sub-path) within 100 rules and 2000-character lines; security headers once, in "/*" only; Cache-Control only in narrower rules; no immutable; CSP equals the computed policy
+  noindex defence in depth: the demonstration's host files carry X-Robots-Tag: noindex, nofollow (meta tag on all pages, header in "/*"); the indexable client build carries none
+  adapters: provider facts: 47 filed (31 verbatim from the Cloudflare documentation source, 7 from Vercel's open-source routing code, 9 paraphrases of Vercel pages that could not be fetched); none confirmed by a person or observed live
+  adapters: 3 adapters x 2 channels on the invented fixture bakery: every bundle passes the outside check and the regenerate-and-compare check; 12 bundle/profile walks (pages, .html redirects, slashed path, unknown path, search files, host files not served, cache class per request path, Range, security headers, deployed-bytes comparison); 20 golden files byte-identical; a bundle with no 404.html is accepted for staging and refused for release (D-P3-1)
+  adapters: _headers, nginx.conf, htaccess and vercel.json carry the same security header names and values as security.json, with and without the HSTS opt-in
+  adapters: the real Jade & Ember site (demonstration) and an indexable client build of it, delivered folder unchanged, stage and check under both Cloudflare Pages and Vercel; the only open live blocker is the missing 404.html (D-P3-1: no page is created here; VP-3 is not approved)
+  adapters: the Cloudflare _headers checker and the vercel.json checker, run on their own against damaged text (a stale CSP, a changed HSTS max-age, preload, an unrecorded includeSubDomains), and the policy loader against a default HSTS that carries includeSubDomains or preload
+  adapters: 198 adversarial negative cases refused for the right reason: tampered or extra files, a repaired manifest, symlinks, vendor and secret files, stale CSP, HSTS includeSubDomains/preload slipped in or faked, header injection, duplicate/misspelt/foreign vercel.json keys, routes the site does not use, header-source forms, rule and size limits, wrong channel headers, a missing 404 for release, a missing search file, a base URL with a path
+  adapters: deployed-bytes comparison (C-07, D-P3-3): accepts the staged bytes; refuses a page rewritten by the host, a missing page, an extra served path, a clean-URL host that serves the .html form or /index.html as a second copy, a 404 page with its own address, and a soft 404
+  adapters: case-sensitive file lookup in every profile, proved against a case-folding disk stand-in (a macOS CI finding); the simulation's plain-http transport removes exactly Strict-Transport-Security and upgrade-insecure-requests (a WebKit CI finding)
+  adapters: the release package's host files (_headers, nginx.conf, htaccess) carry Strict-Transport-Security: max-age=31536000 with no includeSubDomains
+  no source, configuration, delivered file or engineering rule depends on Vercel (functionality is vendor independent)
+PASS  check:hosting (T s)
+
+== check:privacy: no storage, cookies, third parties or fingerprinting (static part)
+  static: 8 scripts scanned for 30 forbidden APIs; 5 outbound link(s) all to allowed hosts (getsimplifiedtech.com); no third-party resource, preconnect or @import
+  browser part skipped (no browser in this tier)
+PASS  check:privacy (T s)
+
+== check:security: security headers and Content Security Policy (static part)
+  policy: 15 CSP directives, no unsafe-inline or unsafe-eval; 1 inline script and 6 inline style values allowed by hash (6 style attributes on 2 pages); 8 headers; three host renderings agree
+  browser part skipped (no browser in this tier)
+PASS  check:security (T s)
+
+== check:assets: asset manifest and hashed copy (static part)
+  manifest: 23 delivered files, 1977874 bytes, tree 9061a2270196 equal the recorded manifest
+  styles.css differs from the v0.8 checksum only as approved by IMM-1 (APR-JE-029)
+  every delivered file equals its v0.8 baseline checksum, or differs only as an approved allowlist entry explains; names and paths are unchanged
+  hashed copy: 18 files renamed name.<8 hex>.ext, all references rewritten and resolving, assets byte-identical, two builds identical
+  browser comparison of the hashed copy skipped (no browser in this tier)
+PASS  check:assets (T s)
+
+== check:budgets: page-weight budgets and growth against v0.8 (static part)
+  static: 5 pages measured; delivered 1977874 bytes (+0.02% against the v0.8 baseline of 1977386); largest page initial transfer 232252 bytes gzip
+  runtime budgets skipped (no browser in this tier)
+PASS  check:budgets (T s)
+
+== summary
+  PASS  check:baseline T s
+  PASS  check:schema T s
+  PASS  check:determinism T s
+  PASS  check:delivery T s
+  PASS  check:authority T s
+  PASS  check:contracts T s
+  PASS  check:media T s
+  PASS  check:tokens T s
+  PASS  check:secrets T s
+  PASS  check:deps T s
+  PASS  check:ci T s
+  PASS  check:html T s
+  PASS  check:links T s
+  PASS  check:seo T s
+  PASS  check:release T s
+  PASS  check:framework-matrix T s
+  PASS  check:evidence T s
+  PASS  check:hosting T s
+  PASS  check:privacy T s
+  PASS  check:security T s
+  PASS  check:assets T s
+  PASS  check:budgets T s
+
+  Not covered yet (planned for later gates, or manual): external link reachability (the online link check cannot run in the sandbox); Firefox and WebKit runs inside this sandbox (their jobs run on GitHub Actions: `node engineering/cross-browser.mjs --engine firefox|webkit`); portability of the tooling on Windows and macOS (a CI job reports it, informational); a human screen-reader pass and real-device testing (release requirements, never automated here).
+
+  composite SBOM digest (reproducible; compare local and CI): a1dbdd1255ca2c2d6b733658e044b5e546071c7afce17b77032994a226830e43, 151 components
+
+  verification record: fast run, candidate 69f9f18fd5e119786e512125741fa2bd0c398857d7609c74784051937028f640, engine ENGINE…, 22 checks, seal SEAL
+
+verify passed (22 of 22 checks)
+

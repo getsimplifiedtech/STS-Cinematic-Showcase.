@@ -9,11 +9,12 @@ import { createHash } from 'node:crypto';
 import { existsSync, readFileSync, readdirSync } from 'node:fs';
 import { join } from 'node:path';
 import { engDir, projectDir, readJson } from './git.mjs';
+import { project, schemaId } from './project.mjs';
 import { buildManifest } from './hashed.mjs';
 import { searchDigest } from './search-digest.mjs';
 import { buildCsp, loadPolicy as loadSecurityPolicy } from './security.mjs';
 
-export const CANDIDATE_SCHEMA = 'jade-and-ember/candidate@1';
+export const CANDIDATE_SCHEMA = schemaId('candidate@1');
 export const sha = (b) => createHash('sha256').update(b).digest('hex');
 
 // JSON with sorted keys and no whitespace: the same value always gives the same bytes.
@@ -36,7 +37,7 @@ export const DEMONSTRATION_STATEMENT = 'FICTIONAL DEMONSTRATION: a design showca
 // START-HERE.txt in the delivered ZIP. It names the source commit and the candidate digest, which are not known until the release is prepared, so the candidate covers
 // its TEMPLATE (the text with those two values as placeholders) and the package verifier regenerates the exact bytes and compares them (G6-2 review, F1).
 export const START_HERE_PLACEHOLDERS = { commit: '<source commit>', candidate: '<candidate digest>' };
-export const startHereText = ({ version, channel, commit, candidate }) => `Jade & Ember ${version} (${channel})\nSource commit ${commit}\n\nOpen index.html in a browser: double-click it. Nothing else is needed.\nOptional: python3 serve.py  (then http://localhost:8766/) to serve it with video seeking.\n\n${channel === 'demonstration' ? `${DEMONSTRATION_STATEMENT}\n` : ''}Candidate artifact digest ${candidate}\nVerify: sha256sum -c SHA256SUMS.txt (next to this package) and compare release-manifest.json.\n`;
+export const startHereText = ({ version, channel, commit, candidate }) => `${project.name} ${version} (${channel})\nSource commit ${commit}\n\nOpen index.html in a browser: double-click it. Nothing else is needed.\nOptional: python3 serve.py  (then http://localhost:8766/) to serve it with video seeking.\n\n${channel === 'demonstration' ? `${DEMONSTRATION_STATEMENT}\n` : ''}Candidate artifact digest ${candidate}\nVerify: sha256sum -c SHA256SUMS.txt (next to this package) and compare release-manifest.json.\n`;
 export const startHereTemplateSha = (version, channel) => sha(startHereText({ version, channel, ...START_HERE_PLACEHOLDERS }));
 
 // The configuration part: the hash of every config/*.json, as the release manifest has always listed them.

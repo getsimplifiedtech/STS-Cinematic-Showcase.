@@ -32,7 +32,9 @@
     "jade-and-ember/engineering/lib/flash.mjs",
     "jade-and-ember/engineering/lib/pixels.mjs",
     "jade-and-ember/engineering/lib/zip.mjs",
-    "jade-and-ember/engineering/lib/findings.mjs"
+    "jade-and-ember/engineering/lib/findings.mjs",
+    "jade-and-ember/engineering/lib/project.mjs",
+    "jade-and-ember/engineering/schemas/sts-engineering.schema.json"
    ],
    "target": "engineering/core/lib/",
    "external": [
@@ -84,7 +86,8 @@
    "name": "Verify runner and report",
    "summary": "npm run verify: ordered checks, one summary, exit code, and the .reports/verify.json report (mode, commit, dirty, assetsTree) the release gate reads.",
    "paths": [
-    "jade-and-ember/engineering/verify.mjs"
+    "jade-and-ember/engineering/verify.mjs",
+    "jade-and-ember/engineering/tools/parity.mjs"
    ],
    "target": "engineering/core/verify.mjs",
    "external": [
@@ -911,7 +914,8 @@
     "jade-and-ember/engineering/external-destinations.json",
     "jade-and-ember/engineering/external-links-verification.json",
     "jade-and-ember/engineering/search-crawler-verification.json",
-    "jade-and-ember/engineering/secrets-allow.json"
+    "jade-and-ember/engineering/secrets-allow.json",
+    "jade-and-ember/sts.engineering.json"
    ],
    "target": "stays in Jade & Ember",
    "external": [],
@@ -1083,7 +1087,8 @@
    "summary": "Screenshots, diagnostics and the hero-video gate record kept as evidence for earlier decisions.",
    "paths": [
     "jade-and-ember/engineering/evidence/",
-    "docs/hero-video/"
+    "docs/hero-video/",
+    "jade-and-ember/engineering/g6-5-evidence/"
    ],
    "target": "stays in Jade & Ember",
    "external": [],

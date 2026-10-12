@@ -10,6 +10,7 @@ import { existsSync, mkdirSync, readFileSync, readdirSync, rmSync } from 'node:f
 import { join } from 'node:path';
 import { createHash } from 'node:crypto';
 import { engDir, readJson, tempDir } from './git.mjs';
+import { project } from './project.mjs';
 import { SHARED } from './site.mjs';
 import { buildManifest } from './hashed.mjs';
 import { validateSchema } from './schema.mjs';
@@ -78,7 +79,7 @@ export function verifyPackage(dir, { eng = engDir, authenticity = verifyAuthenti
   const prerelease = m.channel === 'client-production' && /-/.test(m.version);
   add('gate-recorded', gate.allowed === true && !failing.length && !unlisted.length && gate.channel === m.channel && m.source.dirty === false && m.qa.verified === true && !m.approvals.missing.length && !blocking.length && !prerelease, gate.allowed !== true ? 'the manifest records a BLOCKED gate' : unlisted.length ? `the recorded gate does not list the policy's requirements for a ${m.channel} release (${unlisted.join(', ')})` : failing.length ? `unmet requirements recorded: ${failing.join(', ')}` : gate.channel !== m.channel ? 'gate channel differs from the build channel' : m.source.dirty ? 'built from a dirty tree' : !m.qa.verified ? 'the full verification is not recorded as passed for this commit' : m.approvals.missing.length ? `required approvals missing: ${m.approvals.missing.join(', ')}` : blocking.length ? `open Blocker or Major finding(s): ${blocking.map((f) => f.id).join(', ')}` : prerelease ? `${m.version} is a pre-release, not a client production version` : `allowed by the gate (all ${needed.length} requirements of the policy listed and met); clean tree; full verification recorded for ${m.source.commit.slice(0, 7)}; ${m.approvals.required.length} required records present`);
   // (the approvals, evidence and reviewer records are re-judged below, once the candidate digest has been recomputed from the ZIP)
-  const expectName = m.channel === 'client-production' ? `jade-and-ember-${m.version}-site.zip` : null;
+  const expectName = m.channel === 'client-production' ? `${project.id}-${m.version}-site.zip` : null;
   add('package-name', expectName ? zipName === expectName : /^[A-Za-z0-9._-]+\.zip$/.test(zipName), expectName ? (zipName === expectName ? zipName : `${zipName} should be ${expectName} for a client production release`) : zipName);
 
   // 4. unpack (CRC checked, unsafe paths refused) and recompute everything the manifest claims

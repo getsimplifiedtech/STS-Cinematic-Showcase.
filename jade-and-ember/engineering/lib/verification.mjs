@@ -8,8 +8,9 @@ import { existsSync, readFileSync, readdirSync, statSync } from 'node:fs';
 import { join } from 'node:path';
 import { canonicalJson, sha } from './candidate.mjs';
 import { engDir } from './git.mjs';
+import { schemaId } from './project.mjs';
 
-export const VERIFY_SCHEMA = 'jade-and-ember/verification@1';
+export const VERIFY_SCHEMA = schemaId('verification@1');
 
 // Everything that decides what a check does or what the gate judges, as POSIX paths: the engineering folder's .mjs and .json (labelled relative to it), and the
 // code those checks import or run outside it (project/ and repo/ labels): the build, the shared source libraries (configuration, search, crawler policy), the browser

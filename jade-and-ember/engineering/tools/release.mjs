@@ -21,6 +21,7 @@ import { zipBuffer } from '../lib/zip.mjs';
 import { startHereText } from '../lib/candidate.mjs';
 import { verifyPackage } from '../lib/release-package.mjs';
 import { engDir, listFiles, projectDir, readJson } from '../lib/git.mjs';
+import { project } from '../lib/project.mjs';
 import { loadPolicy, renderApache, renderHeadersFile, renderNginx } from '../lib/security.mjs';
 
 const arg = (n) => { const i = process.argv.indexOf(n); return i > -1 ? process.argv[i + 1] : null; };
@@ -76,7 +77,7 @@ try {
     const entries = names.filter((n) => { try { readFileSync(join(dir, n)); return true; } catch { return false; } }).map((name) => ({ name, data: readFileSync(join(dir, name)) }));
     const start = startHereText({ version: ctx.version.version, channel: ctx.channel, commit: ctx.git.commit, candidate: withAssets.candidate.digest });
     entries.push({ name: 'START-HERE.txt', data: Buffer.from(start) }, { name: 'serve.py', data: readFileSync(join(projectDir, 'serve.py')) });
-    const zipName = ctx.channel === 'demonstration' ? ctx.version.previewPackage : `jade-and-ember-${ctx.version.version}-site.zip`;
+    const zipName = ctx.channel === 'demonstration' ? ctx.version.previewPackage : `${project.id}-${ctx.version.version}-site.zip`;
     if (!/^[A-Za-z0-9._-]+\.zip$/.test(zipName)) { console.error(`REFUSED: the package name ${JSON.stringify(zipName)} is not a plain file name`); finish(1); }
     const zip = zipBuffer(entries);
     writeFileSync(join(out, zipName), zip);

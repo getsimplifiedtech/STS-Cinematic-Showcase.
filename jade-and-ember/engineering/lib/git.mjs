@@ -1,18 +1,24 @@
-// Helpers shared by the checks: repository paths, git, the frozen v0.8 baseline export, and a few small utilities. No dependencies.
+// Helpers shared by the checks: repository paths, git, the frozen baseline export, and a few small utilities. No dependencies.
 import { execFileSync } from 'node:child_process';
 import { createHash } from 'node:crypto';
 import { readFileSync, mkdtempSync, mkdirSync, readdirSync, statSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { dirname, join, relative, resolve } from 'node:path';
-import { fileURLToPath, pathToFileURL } from 'node:url';
+import { pathToFileURL } from 'node:url';
+import { project } from './project.mjs';
 
-export const projectDir = join(dirname(fileURLToPath(import.meta.url)), '..', '..');   // jade-and-ember/
-export const engDir = join(projectDir, 'engineering');
-export const repoRoot = join(projectDir, '..');
+// Where the project is: read from its manifest (lib/project.mjs), not from the position of this file. projectDir is the project root, engDir the folder of its
+// records and policies, repoRoot the repository root.
+export const projectDir = project.root;
+export const engDir = project.engDir;
+export const repoRoot = project.repoRoot;
 // True when the module is being run directly (node file.mjs) rather than imported. Works on every platform.
 export const isMain = (metaUrl) => Boolean(process.argv[1]) && pathToFileURL(resolve(process.argv[1])).href === metaUrl;
 export const readJson = (p) => JSON.parse(readFileSync(p, 'utf8'));
-export const baselineRecord = () => readJson(join(engDir, 'baseline.json'));
+export const baselineRecord = () => {
+  if (!project.baseline) throw new Error(`${project.name} declares no baseline (sts.engineering.json: baseline)`);
+  return readJson(join(engDir, project.baseline.record));
+};
 export const sha256 = (buf) => createHash('sha256').update(buf).digest('hex');
 export const tempDir = (label) => mkdtempSync(join(tmpdir(), `je-${label}-`));
 

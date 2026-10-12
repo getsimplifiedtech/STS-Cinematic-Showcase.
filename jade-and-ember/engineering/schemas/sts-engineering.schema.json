@@ -1,0 +1,322 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "sts/engineering-project@1",
+  "title": "STS engineering project manifest",
+  "description": "sts.engineering.json at a project's root: everything the reusable STS engineering needs to know about ONE project, as values. The engineering reads it and never the other way round. It can declare facts, additions (project checks, budgets, a baseline) and adapters; it has no key that removes, skips or weakens a check of the base engineering (the same Base Engineering Framework serves the Essential, Premium and Cinematic offerings; differences may only add). It names no aesthetic value: the creative authority is pinned by reference only.",
+  "type": "object",
+  "required": [
+    "schema",
+    "project",
+    "paths",
+    "governance",
+    "delivery",
+    "creativeAuthority",
+    "checks",
+    "ci"
+  ],
+  "additionalProperties": false,
+  "properties": {
+    "$schema": {
+      "type": "string"
+    },
+    "schema": {
+      "const": "sts/engineering-project@1"
+    },
+    "project": {
+      "type": "object",
+      "required": [
+        "id",
+        "name"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^[a-z][a-z0-9-]{1,40}$",
+          "description": "Lower-case id; prefixes the schema identifiers of the records the project writes (for example jade-and-ember/candidate@1) and names the release package."
+        },
+        "name": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 80,
+          "description": "The display name used in generated start-here text and reports."
+        },
+        "summary": {
+          "type": "string",
+          "maxLength": 300
+        }
+      }
+    },
+    "offering": {
+      "enum": [
+        null,
+        "essential",
+        "premium",
+        "cinematic"
+      ],
+      "description": "The STS website offering, declared for information. It selects nothing: the base engineering is the same for every offering (OP-2, D-P8-9). null means not declared (how offerings map to framework tiers is open item OI-2)."
+    },
+    "paths": {
+      "type": "object",
+      "required": [
+        "engineering",
+        "repositoryRoot"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "engineering": {
+          "type": "string",
+          "minLength": 1,
+          "description": "The folder, relative to the project root, that holds the project's records and policies (baseline, findings, security policy, release policy and records)."
+        },
+        "repositoryRoot": {
+          "type": "string",
+          "minLength": 1,
+          "description": "The repository root, relative to the project root (git, the workflows and the governance log live there)."
+        }
+      }
+    },
+    "governance": {
+      "type": "object",
+      "required": [
+        "approvalsLog",
+        "approvalIdPrefix",
+        "demonstrationIdPrefix",
+        "recordIdSuffix",
+        "documents"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "approvalsLog": {
+          "type": "string",
+          "minLength": 1,
+          "description": "The approvals log, relative to the repository root."
+        },
+        "approvalIdPrefix": {
+          "type": "string",
+          "pattern": "^[A-Z]{2,6}(-[A-Z0-9]{2,6})?$",
+          "description": "Governance record ids read APR-JE-nnn: the prefix is APR-JE."
+        },
+        "demonstrationIdPrefix": {
+          "type": "string",
+          "pattern": "^[A-Z]{2,6}(-[A-Z0-9]{2,6})?$"
+        },
+        "recordIdSuffix": {
+          "type": "string",
+          "pattern": "^[A-Z0-9]{2,6}$",
+          "description": "The suffix of the release record ids REL-JE-nnn, DEP-JE-nnn, RIGHTS-JE-nnn and SRCH-JE-nnn."
+        },
+        "documents": {
+          "type": "object",
+          "required": [
+            "mediaRightsPolicy",
+            "deviceTestProtocol"
+          ],
+          "additionalProperties": false,
+          "properties": {
+            "mediaRightsPolicy": {
+              "type": "string",
+              "description": "The media-rights policy document, relative to the repository root."
+            },
+            "deviceTestProtocol": {
+              "type": "string",
+              "description": "The device, browser and screen-reader test protocol document, relative to the repository root."
+            }
+          }
+        }
+      }
+    },
+    "delivery": {
+      "type": "object",
+      "required": [
+        "sharedFiles",
+        "assetFolders",
+        "configDir",
+        "pages"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "sharedFiles": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9._-]+$"
+          },
+          "description": "The shared scripts and styles every page loads, at the root of the delivered folder."
+        },
+        "assetFolders": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9._-]+$"
+          },
+          "description": "Folders of fonts and media delivered next to the pages."
+        },
+        "configDir": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9._-]+$",
+          "description": "The folder of build input (never delivered)."
+        },
+        "pages": {
+          "type": "object",
+          "required": [
+            "registry",
+            "list",
+            "key"
+          ],
+          "additionalProperties": false,
+          "properties": {
+            "registry": {
+              "type": "string",
+              "description": "A JSON file in the project that lists the pages."
+            },
+            "list": {
+              "type": "string",
+              "description": "The property of that file that holds the array."
+            },
+            "key": {
+              "type": "string",
+              "description": "The property of each entry that names the page file."
+            }
+          }
+        },
+        "build": {
+          "type": [
+            "object",
+            "null"
+          ],
+          "required": [
+            "command"
+          ],
+          "additionalProperties": false,
+          "properties": {
+            "command": {
+              "type": "array",
+              "minItems": 1,
+              "items": {
+                "type": "string"
+              },
+              "description": "The builder, run in the project root; {out} is replaced by the output folder. null for a project whose delivered folder is the source."
+            }
+          }
+        }
+      }
+    },
+    "baseline": {
+      "type": [
+        "object",
+        "null"
+      ],
+      "required": [
+        "label",
+        "record"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "label": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 20,
+          "description": "How reports name the frozen owner-approved reference (for example v0.8)."
+        },
+        "record": {
+          "type": "string",
+          "description": "The baseline record, relative to the engineering folder."
+        }
+      }
+    },
+    "creativeAuthority": {
+      "type": "object",
+      "required": [
+        "record"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "record": {
+          "type": "string",
+          "description": "The record that pins the creative authority (Anthropic Frontend Design) by path and hash, relative to the engineering folder. Engineering verifies the pin; it never reads or sets an aesthetic value."
+        }
+      }
+    },
+    "checks": {
+      "type": "object",
+      "required": [
+        "project"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "project": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": [
+              "id",
+              "module",
+              "export",
+              "tier",
+              "after",
+              "description"
+            ],
+            "additionalProperties": false,
+            "properties": {
+              "id": {
+                "type": "string",
+                "pattern": "^check:[a-z0-9-]+$"
+              },
+              "module": {
+                "type": "string",
+                "description": "A module in the project, relative to the project root."
+              },
+              "export": {
+                "type": "string",
+                "pattern": "^[A-Za-z_$][A-Za-z0-9_$]*$"
+              },
+              "tier": {
+                "enum": [
+                  "fast",
+                  "full"
+                ],
+                "description": "fast: runs in verify --fast and in full runs; full: runs only in full runs."
+              },
+              "after": {
+                "type": [
+                  "string",
+                  "null"
+                ],
+                "description": "The id of the check this one follows in the report; null puts it first."
+              },
+              "description": {
+                "type": "string",
+                "minLength": 1
+              },
+              "descriptionFast": {
+                "type": "string",
+                "minLength": 1
+              },
+              "browser": {
+                "type": "boolean",
+                "description": "The check takes the browser name."
+              }
+            }
+          }
+        }
+      }
+    },
+    "ci": {
+      "type": "object",
+      "required": [
+        "workflow"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "workflow": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9._-]+\\.ya?ml$",
+          "description": "The verify workflow, a file name in .github/workflows/ at the repository root."
+        }
+      }
+    }
+  }
+}
