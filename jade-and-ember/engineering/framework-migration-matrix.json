@@ -36,7 +36,8 @@
     "jade-and-ember/engineering/lib/project.mjs",
     "jade-and-ember/engineering/schemas/sts-engineering.schema.json",
     "jade-and-ember/engineering/lib/purity.mjs",
-    "jade-and-ember/engineering/lib/generators.mjs"
+    "jade-and-ember/engineering/lib/generators.mjs",
+    "jade-and-ember/engineering/lib/fixtures.mjs"
    ],
    "target": "engineering/core/lib/",
    "external": [
@@ -298,7 +299,9 @@
     "jade-and-ember/engineering/lib/config-schema.mjs",
     "jade-and-ember/engineering/checks/schema.mjs",
     "jade-and-ember/engineering/checks/contracts.mjs",
-    "jade-and-ember/engineering/adapters/industry/restaurant/adapter.json"
+    "jade-and-ember/engineering/adapters/industry/restaurant/adapter.json",
+    "jade-and-ember/engineering/adapters/industry/restaurant/index.mjs",
+    "jade-and-ember/engineering/adapters/industry/README.md"
    ],
    "target": "engineering/adapters/industry/restaurant/",
    "external": [
@@ -385,7 +388,8 @@
    "paths": [
     "jade-and-ember/engineering/checks/supports.mjs",
     "jade-and-ember/engineering/engine-features.json",
-    "jade-and-ember/engineering/lib/scenarios.mjs"
+    "jade-and-ember/engineering/lib/scenarios.mjs",
+    "jade-and-ember/engineering/project/client-build.mjs"
    ],
    "target": "stays in Jade & Ember (as a project check registered through the manifest)",
    "external": [
@@ -490,7 +494,9 @@
     "jade-and-ember/engineering/checks/seo.mjs",
     "jade-and-ember/engineering/checks/links.mjs",
     "jade-and-ember/engineering/checks/html.mjs",
-    "jade-and-ember/engineering/htmlvalidate.json"
+    "jade-and-ember/engineering/htmlvalidate.json",
+    "jade-and-ember/engineering/lib/industry.mjs",
+    "jade-and-ember/engineering/lib/structured-data.mjs"
    ],
    "target": "engineering/seo/",
    "external": [
@@ -732,7 +738,6 @@
     "jade-and-ember/engineering/checks/selftest-gate5.mjs",
     "jade-and-ember/engineering/checks/selftest-gate6.mjs",
     "jade-and-ember/engineering/checks/selftest-evidence.mjs",
-    "jade-and-ember/engineering/lib/client-fixture.mjs",
     "jade-and-ember/engineering/lib/evidence-fixtures.mjs"
    ],
    "target": "engineering/fixtures/ and engineering/tests/",
@@ -744,7 +749,7 @@
    ],
    "redesign": {
     "level": "rewrite",
-    "notes": "About 1,090 lines of self-tests damage copies of Jade & Ember files; client-fixture.mjs holds the restaurant demonstration-to-client text edits. They must run on a generic fixture site so the core proves itself, with Jade & Ember as the reference consumer."
+    "notes": "About 1,090 lines of self-tests damage copies of Jade & Ember files; the restaurant demonstration-to-client text edits (formerly lib/client-fixture.mjs) are now the project-owned recipe engineering/project/client-build.mjs (FM-12), reached through the manifest (fixtures.clientBuild, lib/fixtures.mjs) as of G6-5. They must run on a generic fixture site so the core proves itself, with Jade & Ember as the reference consumer."
    },
    "verify": "Every existing negative case has an equivalent on the generic fixture; counts reconciled (251, 122, 25 and the Gate 1 to 3 cases).",
    "masterSpecs": [

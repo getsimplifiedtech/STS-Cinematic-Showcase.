@@ -15,7 +15,7 @@ import { crawlerRecordProblems, crawlerReviewGaps, llmsProblems, readLlms, robot
 import { isReservedHost, publicUrl } from '../../src/lib/seo.mjs';
 import { checkFolder, checkHeadersFile } from './hosting.mjs';
 import { greenClientContext, policyProblems } from './release.mjs';
-import { buildClient } from '../lib/client-fixture.mjs';
+import { buildClient } from '../lib/fixtures.mjs';
 import { evaluateGate, loadReleasePolicy } from '../lib/release.mjs';
 import { reconcile } from '../lib/findings.mjs';
 import { loadPolicy, noindexState, renderHeadersFile, robotsHeaders } from '../lib/security.mjs';

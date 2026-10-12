@@ -15,7 +15,7 @@
 import { readdirSync, readFileSync, statSync, rmSync } from 'node:fs';
 import { join, relative, extname } from 'node:path';
 import { assembleCandidate } from '../lib/site.mjs';
-import { buildClient } from '../lib/client-fixture.mjs';
+import { buildClient } from '../lib/fixtures.mjs';
 import { buildCsp, loadPolicy, noindexState, renderHeadersFile, robotsHeaders } from '../lib/security.mjs';
 import { PAGES_LIMITS, checkHeadersFile as cfCheck, parseHeadersFile } from '../adapters/hosting/cloudflare-pages.mjs';
 import { publicPathOf } from '../adapters/hosting/common.mjs';

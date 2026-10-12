@@ -1,11 +1,12 @@
-// A realistic indexable CLIENT build of the site, produced from the demonstration configuration by the same edits tests/variants.mjs uses (demo
+// PROJECT-OWNED (Jade & Ember): the recipe that turns this project's demonstration configuration into an indexable client build. The reusable checks reach it only
+// through the manifest (fixtures.clientBuild, lib/fixtures.mjs). A realistic indexable CLIENT build of the site, produced from the demonstration configuration by the same edits tests/variants.mjs uses (demo
 // wording replaced, live ordering URL, indexing on), plus the production metadata fields. Used by check:seo and the release tests. The
 // folder it returns is a complete delivered site (pages, search files, assets). `edit(name, obj)` may adjust each config file before the build.
 import { cpSync, mkdirSync, readFileSync, writeFileSync, readdirSync } from 'node:fs';
 import { join } from 'node:path';
 import { spawnSync } from 'node:child_process';
-import { projectDir, tempDir } from './git.mjs';
-import { SHARED } from './site.mjs';
+import { projectDir, tempDir } from '../lib/git.mjs';
+import { SHARED } from '../lib/site.mjs';
 
 const FIXES = [
   [/Jade & Ember is a fictional modern Chinese kitchen: a cinematic restaurant website concept by Simplified Tech Solutions\. Sample menu, hours and address\./g, 'Jade & Ember is a modern Chinese kitchen. Menu, hours and address.'],

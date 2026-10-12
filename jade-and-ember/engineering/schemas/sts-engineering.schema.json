@@ -16,7 +16,8 @@
     "markup",
     "engine",
     "generators",
-    "industry"
+    "industry",
+    "fixtures"
   ],
   "additionalProperties": false,
   "properties": {
@@ -562,6 +563,23 @@
       ],
       "pattern": "^[a-z][a-z0-9-]{1,30}$",
       "description": "The industry adapter (engineering/adapters/industry/<id>/): industry-specific structured data, configuration schemas and component contracts. null for a project with none. The adapter only adds; the base engineering is the same for every industry."
+    },
+    "fixtures": {
+      "type": "object",
+      "required": [
+        "clientBuild"
+      ],
+      "additionalProperties": false,
+      "description": "Project-owned recipes the checks use to build test material from the project's own configuration.",
+      "properties": {
+        "clientBuild": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "description": "A module in the project (relative to the project root) that exports buildClient({ edit, base, business, structuredData, label }) and BUSINESS: it turns the project's configuration into an indexable client build in a throwaway folder. null when the project has no builder; checks that need it are not applicable."
+        }
+      }
     }
   }
 }

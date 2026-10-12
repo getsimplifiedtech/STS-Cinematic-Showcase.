@@ -15,7 +15,7 @@ import { existsSync, readFileSync, readdirSync, rmSync } from 'node:fs';
 import { join, posix } from 'node:path';
 import { tokenize } from '../lib/html.mjs';
 import { assembleCandidate, pagesOf } from '../lib/site.mjs';
-import { buildClient } from '../lib/client-fixture.mjs';
+import { buildClient } from '../lib/fixtures.mjs';
 import { readSitemap } from './seo.mjs';
 import { engDir, isMain, projectDir, readJson } from '../lib/git.mjs';
 import { CLASSES, collectExternal, recordProblems, registryProblems, verifyUrl } from '../lib/external.mjs';

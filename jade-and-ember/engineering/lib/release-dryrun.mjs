@@ -18,7 +18,7 @@ import { join, relative, sep } from 'node:path';
 import { spawnSync } from 'node:child_process';
 import { createHash } from 'node:crypto';
 import { projectDir, repoRoot, tempDir } from './git.mjs';
-import { buildClient } from './client-fixture.mjs';
+import { buildClient } from './fixtures.mjs';
 import { fixtureRecord } from './evidence-fixtures.mjs';
 import { loadSpec } from './evidence.mjs';
 import { APPROVAL_SCHEMA, DEPLOYMENT_SCHEMA, REVIEWERS_SCHEMA, SEARCH_REVIEWED } from './records.mjs';

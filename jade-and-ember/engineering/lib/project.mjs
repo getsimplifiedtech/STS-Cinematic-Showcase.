@@ -51,6 +51,7 @@ export function loadProject(root = findProjectRoot()) {
     markup: manifest.markup,
     generators: manifest.generators,
     industry: manifest.industry ?? null,
+    fixtures: manifest.fixtures,
     engine: manifest.engine,
     baseline: manifest.baseline ?? null,
     creativeAuthority: manifest.creativeAuthority,

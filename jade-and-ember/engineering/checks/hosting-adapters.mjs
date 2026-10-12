@@ -6,7 +6,7 @@ import { appendFileSync, cpSync, existsSync, lstatSync, mkdirSync, mkdtempSync, 
 import { tmpdir } from 'node:os';
 import { dirname, join } from 'node:path';
 import { buildCsp, httpsHeaders, loadPolicy, renderApache, renderHeadersFile, renderNginx } from '../lib/security.mjs';
-import { buildClient } from '../lib/client-fixture.mjs';
+import { buildClient } from '../lib/fixtures.mjs';
 import { assembleCandidate } from '../lib/site.mjs';
 import { serveSite, withoutHttpsOnly } from '../lib/server.mjs';
 import { isMain } from '../lib/git.mjs';

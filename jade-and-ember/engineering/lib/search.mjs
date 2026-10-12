@@ -6,6 +6,7 @@ import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { project } from './project.mjs';
 import { generator } from './generators.mjs';
+import { industry } from './industry.mjs';
 import { serveSite } from './server.mjs';
 
 const { CRAWLERS, KNOWN_AGENTS, blockedAgents, policyOf } = generator('crawlers');
@@ -119,12 +120,10 @@ export function llmsProblems({ text, cfg, pagesHtml, sitemapUrls }) {
   const hrs = fact('Opening hours'); if (hrs === null) p.push('llms.txt: no Opening hours line'); else { const wantH = client.hours.rows.map((x) => `${x.days}: ${x.time}`).join('; '); if (hrs !== wantH) p.push(`llms.txt: the opening hours "${hrs}" differ from the configured hours`); for (const row of client.hours.rows) if (!vt.includes(row.days) || !vt.includes(row.time)) p.push(`llms.txt: the hours row "${row.days}: ${row.time}" is not printed on the Visit page`); }
   const ord = fact('Order online'); if (client.ordering.url ? ord !== client.ordering.url : ord !== null) p.push(`llms.txt: the ordering line ${ord === null ? 'is missing' : `"${ord}" differs`} (configured: ${client.ordering.url || 'none'})`);
   // every other fact line must be one the configuration supports: nothing is invented
-  const KNOWN_FACTS = ['Address', 'Phone', 'Email', 'Opening hours', 'Order online', 'Cuisine', 'Price range'];
+  const KNOWN_FACTS = ['Address', 'Phone', 'Email', 'Opening hours', 'Order online', ...(industry ? industry.llmsFacts : [])];
   for (const l of r.sections['Visit and contact'] || []) { const m = /^- ([^:]+): /.exec(l); if (!m || !KNOWN_FACTS.includes(m[1])) p.push(`llms.txt: the line "${l.slice(0, 60)}" is not a fact the configuration supports`); }
   const em = fact('Email'); if (client.contact.email ? em !== client.contact.email : em !== null) p.push(`llms.txt: the email line ${em === null ? 'is missing' : `"${em}" differs`} (configured: ${client.contact.email || 'none'})`);
-  const biz = client.seo.business;
-  const cu = fact('Cuisine'); if (biz ? cu !== biz.servesCuisine.join(', ') : cu !== null) p.push(`llms.txt: the cuisine "${cu}" differs from seo.business.servesCuisine`);
-  const pr = fact('Price range'); if (biz ? pr !== biz.priceRange : pr !== null) p.push(`llms.txt: the price range "${pr}" differs from seo.business.priceRange`);
+  if (industry) p.push(...industry.llmsFactProblems(fact, client.seo.business));   // the facts only this industry has (for a restaurant: cuisine and price range)
   return p;
 }
 

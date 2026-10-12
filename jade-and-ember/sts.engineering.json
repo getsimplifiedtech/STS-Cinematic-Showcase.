@@ -81,6 +81,9 @@
     "config": "src/lib/config.mjs"
   },
   "industry": "restaurant",
+  "fixtures": {
+    "clientBuild": "engineering/project/client-build.mjs"
+  },
   "baseline": {
     "label": "v0.8",
     "record": "baseline.json"

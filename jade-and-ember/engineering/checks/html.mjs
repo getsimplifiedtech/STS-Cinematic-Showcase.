@@ -6,7 +6,7 @@ import { readFileSync, rmSync } from 'node:fs';
 import { join } from 'node:path';
 import { HtmlValidate } from 'html-validate';
 import { assembleCandidate, pagesOf } from '../lib/site.mjs';
-import { buildClient } from '../lib/client-fixture.mjs';
+import { buildClient } from '../lib/fixtures.mjs';
 import { engDir, isMain, projectDir, readJson } from '../lib/git.mjs';
 import { reconcile } from '../lib/findings.mjs';
 

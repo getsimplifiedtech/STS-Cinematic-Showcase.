@@ -18,16 +18,16 @@ import { engineNoise } from '../lib/engine-noise.mjs';
 import { readFileSync, rmSync, readdirSync, existsSync } from 'node:fs';
 import { join } from 'node:path';
 import { assembleCandidate, pagesOf } from '../lib/site.mjs';
-import { BUSINESS, buildClient } from '../lib/client-fixture.mjs';
+import { BUSINESS, buildClient } from '../lib/fixtures.mjs';
 import { treeHash } from '../lib/hashed.mjs';
 import { hoursSpecs, publicUrl, urlStyleOf, isReservedHost } from '../../src/lib/seo.mjs';
 import { RIGHTS_CLAIM, crawlerRecordProblems, factsProblems, hostProblems, llmsProblems, metadataProblems, readLlms, readRobotsGroups, reservedBase, robotsProblems, urlStrategyProblems } from '../lib/search.mjs';
 import { checkSecurityStatic } from './security.mjs';
 import { checkPrivacyStatic } from './privacy.mjs';
 import { engDir, isMain, projectDir, readJson } from '../lib/git.mjs';
+import { requireIndustry } from '../lib/industry.mjs';
+import { validateStructuredData } from '../lib/structured-data.mjs';
 
-const LD_FORBIDDEN_KEYS = ['license', 'copyrightHolder', 'copyrightNotice', 'copyrightYear', 'creditText', 'acquireLicensePage', 'usageInfo', 'isAccessibleForFree'];
-const DAYS = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
 
 // A strict enough reader for the sitemap we write: returns { urls, errors }.
 export function readSitemap(text) {
@@ -57,47 +57,6 @@ export function readRobots(text) {
   return { errors, sitemap: r.sitemaps[0] };
 }
 
-// Validates one JSON-LD Restaurant against the configuration it came from. Returns problems.
-export function validateRestaurant(ld, cfg, root) {
-  const p = [], bad = (m) => p.push(m);
-  const base = cfg.client.seo.baseUrl.replace(/\/+$/, '');
-  const url = (v) => typeof v === 'string' && /^https:\/\/[^\s]+$/.test(v);
-  if (ld['@context'] !== 'https://schema.org') bad('@context must be https://schema.org');
-  if (!['Restaurant', 'FoodEstablishment', 'CafeOrCoffeeShop', 'BarOrPub', 'Bakery', 'FastFoodRestaurant'].includes(ld['@type'])) bad(`unexpected @type ${ld['@type']}`);
-  if (ld.name !== cfg.client.brand.name) bad('name must equal client.brand.name');
-  if (ld.url !== `${base}/`) bad(`url must be ${base}/`);
-  if (!url(ld.image) || !ld.image.startsWith(base + '/') || !existsSync(join(root, ld.image.slice(base.length + 1)))) bad('image must be an https URL under the base URL that exists in the site');
-  if (!/^\+[1-9]\d{6,14}$/.test(ld.telephone || '')) bad('telephone must be international (E.164)');
-  if (ld.telephone !== cfg.client.contact.phone.href.replace(/^tel:/, '')) bad('telephone must equal the configured number');
-  if (!Array.isArray(ld.servesCuisine) || !ld.servesCuisine.length || ld.servesCuisine.some((c) => typeof c !== 'string' || !c)) bad('servesCuisine must be a non-empty list of text');
-  if (typeof ld.priceRange !== 'string' || !ld.priceRange) bad('priceRange is required');
-  const a = ld.address || {};
-  if (a['@type'] !== 'PostalAddress') bad('address must be a PostalAddress');
-  for (const k of ['streetAddress', 'addressLocality', 'postalCode']) if (!a[k]) bad(`address.${k} is required`);
-  if (!/^[A-Z]{2}$/.test(a.addressCountry || '')) bad('address.addressCountry must be a two-letter ISO code');
-  const spec = ld.openingHoursSpecification;
-  if (!Array.isArray(spec) || !spec.length) bad('openingHoursSpecification is required');
-  else {
-    const seen = new Set();
-    for (const s of spec) {
-      if (s['@type'] !== 'OpeningHoursSpecification') bad('each opening-hours entry must be an OpeningHoursSpecification');
-      if (!Array.isArray(s.dayOfWeek) || !s.dayOfWeek.length || s.dayOfWeek.some((d) => !DAYS.includes(d))) bad('dayOfWeek must list valid day names');
-      if (!/^([01]\d|2[0-3]):[0-5]\d$/.test(s.opens) || !/^([01]\d|2[0-3]):[0-5]\d$/.test(s.closes)) bad(`opens and closes must be HH:MM (${s.opens}, ${s.closes})`);
-      for (const d of s.dayOfWeek || []) { if (seen.has(d)) bad(`${d} appears in two opening-hours entries`); seen.add(d); }
-    }
-    // independent oracle: every Closed row's days are absent, every open row's days are present
-    for (const r of cfg.client.hours.rows) {
-      const closed = /^closed$/i.test(r.time.trim());
-      const rowDays = r.days.includes('–') || r.days.includes('-') ? DAYS.slice(DAYS.findIndex((d) => d.toLowerCase().startsWith(r.days.trim().toLowerCase().slice(0, 3))), DAYS.findIndex((d) => d.toLowerCase().startsWith(r.days.split(/[–-]/)[1].trim().toLowerCase().slice(0, 3))) + 1) : [DAYS.find((d) => d.toLowerCase().startsWith(r.days.trim().toLowerCase().slice(0, 3)))];
-      for (const d of rowDays) if (closed === seen.has(d)) bad(`${d} is ${closed ? 'closed' : 'open'} in client.hours but ${seen.has(d) ? 'listed' : 'missing'} in the structured data`);
-    }
-  }
-  const menu = cfg.pages.find((x) => x.id === 'menu');
-  if (ld.hasMenu !== publicUrl({ client: cfg.client, pages: cfg.pages }, menu)) bad('hasMenu must be the menu page\'s public URL');
-  if (ld.sameAs !== undefined && (!Array.isArray(ld.sameAs) || ld.sameAs.some((s) => !url(s)))) bad('sameAs must list https URLs');
-  for (const k of Object.keys(ld)) if (LD_FORBIDDEN_KEYS.includes(k)) bad(`the structured data must not assert ${k}: media rights are unverified (docs/JADE_AND_EMBER_MEDIA_RIGHTS_POLICY.md)`);
-  return p;
-}
 
 const loadCfg = (root, cfgDir) => ({ client: readJson(join(cfgDir, 'client.json')), copy: readJson(join(cfgDir, 'copy.json')), pages: readJson(join(cfgDir, 'site.json')).pages });
 
@@ -124,7 +83,7 @@ export function checkSeoClient({ fixture }) {
       else {
         if (/[<>]/.test(lds[0][1])) problems.push(`${p.file}: JSON-LD contains a raw < or >; it could break out of its script element`);
         let ld; try { ld = JSON.parse(lds[0][1]); } catch (e) { problems.push(`${p.file}: JSON-LD does not parse (${e.message})`); }
-        if (ld) { ldData = ld; validateRestaurant(ld, cfg, dir).forEach((m) => problems.push(`${p.file} JSON-LD: ${m}`)); }
+        if (ld) { ldData = ld; validateStructuredData(ld, cfg, dir).forEach((m) => problems.push(`${p.file} JSON-LD: ${m}`)); }
       }
     } else if (lds.length) problems.push(`${p.file}: only the Home page carries structured data`);
     if (RIGHTS_CLAIM.test(html.replace(/<script[\s\S]*?<\/script>/g, (s) => s))) problems.push(`${p.file}: wording that claims media rights or licences`);
@@ -151,10 +110,11 @@ export function checkSeoClient({ fixture }) {
   // the client build also passes the static security and privacy policies
   checkSecurityStatic({ root: dir }).problems.forEach((m) => problems.push(`client build, security: ${m}`));
   checkPrivacyStatic({ root: dir, cfgRoot: join(cfgDir, '..') }).problems.forEach((m) => problems.push(`client build, privacy: ${m}`));
-  notes.push(`client build: ${cfg.pages.length} canonicals unique and equal to base + file, no robots meta; sitemap.xml lists them (well-formed, dated); robots.txt allows crawling and names the sitemap; Home carries one JSON-LD Restaurant matching the configuration (name, phone, address, cuisine, hours, menu, image), no raw angle brackets, no rights or licence claim; static security and privacy policies pass`);
+  notes.push(`client build: ${cfg.pages.length} canonicals unique and equal to base + file, no robots meta; sitemap.xml lists them (well-formed, dated); robots.txt allows crawling and names the sitemap; Home carries one JSON-LD ${requireIndustry().summary}, no raw angle brackets, no rights or licence claim; static security and privacy policies pass`);
   return { problems, notes };
 }
 const pages_ = (cfg) => cfg.pages;
+const NUMBER_WORDS = ['no', 'one', 'two', 'three', 'four', 'five', 'six', 'seven', 'eight', 'nine', 'ten'];
 
 export async function checkSeo({ root = null, browser = true, browserName = 'chromium' } = {}) {
   const own = !root;
@@ -180,7 +140,7 @@ export async function checkSeo({ root = null, browser = true, browserName = 'chr
       problems.push(...cp.map((m) => `crawler record: ${m}`));
       if (!cp.length) notes.push(`crawler identities: ${rec.agents.length} agents in the policy each confirmed against the provider's documentation on ${rec.verifiedOn} (${rec.confirmedByPerson ? 'a person re-read the pages' : 'from search summaries of the official pages; no person has re-read them yet, so the release gate will not accept it'}); ${rec.identitiesNotInPolicy.length} further identities recorded for the owner`);
     } catch (e) { problems.push(`crawler record: cannot be read (${e.message})`); }
-    notes.push('demonstration: all five pages noindex, nofollow; unique titles and descriptions; no og:url, canonical, JSON-LD, sitemap.xml, robots.txt or llms.txt (it is a fictional concept and is never presented as a real restaurant)');
+    notes.push(`demonstration: all ${NUMBER_WORDS[pagesOf(dir).length] || pagesOf(dir).length} pages noindex, nofollow; unique titles and descriptions; no og:url, canonical, JSON-LD, sitemap.xml, robots.txt or llms.txt (it is a fictional concept and is never presented as a real ${requireIndustry().businessNoun})`);
 
     // client build
     const ok = fx({});
