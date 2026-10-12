@@ -29,8 +29,9 @@
     "Strict-Transport-Security": "max-age=31536000"
   },
   "hstsOptions": {
-    "$comment": "G6-4 (APR-JE-044; owner decisions D-P3-4 and D-P4-5). The default Strict-Transport-Security value above has NO includeSubDomains: on a client's domain it would bind every subdomain (mail, a shop, a staging host) for a year. includeSubDomains is a per-client opt-in that needs a recorded authorisation (an approvals reference); the renderers refuse it without one. preload is never added by this tooling.",
+    "$comment": "G6-4 (APR-JE-044; owner decisions D-P3-4 and D-P4-5). The default Strict-Transport-Security value above has NO includeSubDomains: on a client's domain it would bind every subdomain (mail, a shop, a staging host) for a year. includeSubDomains is a per-client opt-in: the reference of the owner's recorded authorisation for THIS client must be listed in \"authorisations\" below (a reviewed change to this file in the client's repository), and the renderers refuse it for any reference that is not listed. The list is empty: no client has one. preload is never added by this tooling.",
     "includeSubDomains": { "default": false, "requiresAuthorisation": true },
+    "authorisations": [],
     "preload": { "default": false, "supported": false }
   },
   "cache": {

@@ -31,9 +31,8 @@ export async function main() {
     }
     if (arg('--verify-served')) {
       const dir = resolve(arg('--verify-served')), manifest = readManifest(resolve(arg('--bundle') || fail('--bundle <bundle> is required')));
-      const served = new Map(walkFiles(dir).map((f) => [f === 'index.html' ? '/' : `/${f}`, readFileSync(join(dir, f))]));
-      // a page saved as menu.html answers for both /menu.html and /menu
-      for (const [u, b] of [...served]) if (u.endsWith('.html') && manifest.urlStyle === 'clean') served.set(u.slice(0, -5), b), served.delete(u);
+      // a file saved as menu.html stands for the page at its public address (/menu on a clean-URL host); 404.html has no address of its own and is skipped
+      const served = new Map(walkFiles(dir).filter((f) => f !== '404.html').map((f) => [f === 'index.html' ? '/' : manifest.urlStyle === 'clean' && f.endsWith('.html') ? `/${f.slice(0, -5)}` : `/${f}`, readFileSync(join(dir, f))]));
       const p = verifyServed(manifest, served);
       p.forEach((x) => console.log(`  - ${x}`));
       console.log(p.length ? 'FAIL  served bytes differ from the staged bundle' : 'PASS  served bytes equal the staged bundle');

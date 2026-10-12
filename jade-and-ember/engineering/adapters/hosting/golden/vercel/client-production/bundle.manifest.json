@@ -14,8 +14,8 @@
     {
       "path": "SETTINGS.txt",
       "role": "doc",
-      "sha256": "5bab0f2b0cf9c1401766acbf4424d493a1412f8db5600247254219788c10e72e",
-      "bytes": 2024
+      "sha256": "73cc881cb544280db7f64fb6956d3263e88c87fc341a2044a2e1a3a6f9090560",
+      "bytes": 2763
     },
     {
       "path": "site/404.html",
@@ -26,8 +26,14 @@
     {
       "path": "site/about.html",
       "role": "site",
-      "sha256": "fa6e676bf5a71eaba0ba7fa0780ae8889f3ed5685970da98a303b9ff827baee8",
-      "bytes": 491
+      "sha256": "86556f3e56a5246db660812cf7c88e3cc0181e510dda71f1317e2213075fabe7",
+      "bytes": 558
+    },
+    {
+      "path": "site/assets/app.js",
+      "role": "site",
+      "sha256": "77f5eec38c5ef075e11892244ccf9e249d82937e07401398df98319568775a17",
+      "bytes": 14
     },
     {
       "path": "site/fonts/fixture.woff2",
@@ -38,8 +44,8 @@
     {
       "path": "site/index.html",
       "role": "site",
-      "sha256": "e138e268aa31796cf371ffe1dd6125ee179c03727367293191097e1fa564d6a3",
-      "bytes": 524
+      "sha256": "f0a7ff96bef7b86e46c38784e69429aa17a7c05a9687423d0b7924b94929e001",
+      "bytes": 586
     },
     {
       "path": "site/llms.txt",
@@ -62,8 +68,8 @@
     {
       "path": "site/menu.html",
       "role": "site",
-      "sha256": "ae4d531379a332578f7b6ff5fb7048cf1f6f8193cff03c0d995f266bb866ada1",
-      "bytes": 481
+      "sha256": "bdb8a0eef953300f13d6e6372047dbb20ee64bd88e1ddec6d42fcfefe78166a6",
+      "bytes": 547
     },
     {
       "path": "site/robots.txt",
@@ -92,11 +98,11 @@
     {
       "path": "vercel.json",
       "role": "deploy-config",
-      "sha256": "0b4d16a7434a3328530711ea3f23d642c4f282ca75288b277d60b2fb0b7a0d12",
-      "bytes": 2095
+      "sha256": "80ef0db0bfb8274e71d0c6e5212986d873e7494a070d8466f91fce7453bd912b",
+      "bytes": 2225
     }
   ],
-  "siteTreeSha256": "6b4b4a03c8a4657a3083ceebc8b6c276e36bacd0bb9d35cdeed8c53d458b6ad7",
+  "siteTreeSha256": "78347745b7566ccfe8b7675aa63959ffd35e849721443b133f3dc0c967096490",
   "settingsToApply": [
     {
       "name": "Framework Preset",
@@ -108,7 +114,7 @@
     },
     {
       "name": "Deployment Protection",
-      "value": "Choose deliberately: previews are protected by default, production domains are public. Making a preview publicly reachable is a conscious setting change with its own approval (D-P3-5). Keep X-Robots-Tag: noindex (VC-16)."
+      "value": "Decide deliberately and record it. Whether previews are protected by default was reported inconsistently by the documentation results (HR-14), so this bundle does not rely on it. Making a preview publicly reachable is a conscious setting change with its own approval (D-P3-5). Keep X-Robots-Tag: noindex (VC-16)."
     },
     {
       "name": "Custom domain",
@@ -116,19 +122,22 @@
     },
     {
       "name": "Strict-Transport-Security",
-      "value": "The platform default for a custom domain is max-age=63072000 without includeSubDomains (VC-15). vercel.json sets the policy value instead; read the live header to see which one wins (unverified)."
+      "value": "The platform default for a custom domain is max-age=63072000 without includeSubDomains; *.vercel.app domains additionally get includeSubDomains; preload from the platform whatever vercel.json says, so the never-preload rule cannot apply there (VC-15). vercel.json sets the policy value for a custom domain; read the live header to see which one wins (unverified)."
     }
   ],
   "notes": {
     "unverifiedLive": [
       "that a 404.html in the output directory is served with status 404",
+      "what /404 and /404.html do (modelled: answered with the 404 page)",
       "that vercel.json at the bundle root works with the Root Directory setting (HR-06)",
-      "that the HSTS header in vercel.json replaces the platform default for a custom domain (VC-15)",
+      "that the HSTS header in vercel.json replaces the platform default for a custom domain (VC-15); *.vercel.app domains get includeSubDomains; preload from the platform whatever vercel.json says",
       "how several matching header entries combine when a key repeats (the open-source routing code sets it again)",
+      "that the source \"/(.*)\" is not treated as a named segment (which would change how colons in header values are read, VC-06)",
+      "that the routing library's /index and /x/index redirects (modelled) are what the platform does",
       "the content types served for .xml, .txt, .webm, .mp4 and .woff2",
       "Range support for the hero video",
       "that the deployed bytes equal the staged bytes (checklist C-07)",
-      "Deployment Protection state and the preview X-Robots-Tag (VC-16)"
+      "Deployment Protection state (whether previews are protected by default was reported inconsistently, HR-14) and the preview X-Robots-Tag (VC-16)"
     ],
     "liveBlockers": [],
     "providerFacts": [
@@ -136,6 +145,7 @@
       "VC-02",
       "VC-03",
       "VC-05",
+      "VC-06",
       "VC-07",
       "VC-10",
       "VC-11",
@@ -153,7 +163,7 @@
       "headersMechanism": "config-json",
       "unknownPath": "not-found (the platform answers; a 404.html in the output directory is used when present; the status of that response is not established)",
       "previewNoindex": "automatic on preview URLs, not on a custom domain of a non-production branch",
-      "previewProtection": "default-on for previews (Deployment Protection)",
+      "previewProtection": "a project setting (Deployment Protection); the default was reported inconsistently (HR-14)",
       "mount": [
         "domain-root"
       ],

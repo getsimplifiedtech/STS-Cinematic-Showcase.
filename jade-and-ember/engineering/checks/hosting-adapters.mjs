@@ -11,6 +11,7 @@ import { assembleCandidate } from '../lib/site.mjs';
 import { serveSite } from '../lib/server.mjs';
 import { isMain } from '../lib/git.mjs';
 import { ADAPTERS, MANIFEST, checkBundle, profileOf, readManifest, renderBundle, verifyServed } from '../adapters/hosting/index.mjs';
+import { request } from 'node:http';
 import { composeHeaders, describeSite, sha256, walkFiles } from '../adapters/hosting/common.mjs';
 import { writeFixtureSite } from '../adapters/hosting/fixture.mjs';
 import { checkHeadersFile as cfCheckImport, parseHeadersFile } from '../adapters/hosting/cloudflare-pages.mjs';
@@ -39,7 +40,7 @@ async function behaviour(adapterId, bundleDir, { policy, expect404 }) {
     for (const [k, v] of Object.entries(want)) if (r.h[k.toLowerCase()] !== v) problems.push(`${at(label)}: ${k} is ${JSON.stringify(String(r.h[k.toLowerCase()]).slice(0, 60))}, expected the policy value`);
     if (m.channel === 'client-production' && r.h['x-robots-tag']) problems.push(`${at(label)}: an indexable build sends X-Robots-Tag`);
     if (/includesubdomains|preload/i.test(r.h['strict-transport-security'] || '') && !m.options.hsts.includeSubDomains) problems.push(`${at(label)}: Strict-Transport-Security carries includeSubDomains or preload`);
-    if (page && r.h['cache-control'] !== policy.cache.html) problems.push(`${at(label)}: Cache-Control is ${JSON.stringify(r.h['cache-control'])}, expected ${JSON.stringify(policy.cache.html)}`);
+    if (page && prof.cache !== false && r.h['cache-control'] !== policy.cache.html) problems.push(`${at(label)}: Cache-Control is ${JSON.stringify(r.h['cache-control'])}, expected ${JSON.stringify(policy.cache.html)}`);
   };
   try {
     const served = new Map();
@@ -49,6 +50,7 @@ async function behaviour(adapterId, bundleDir, { policy, expect404 }) {
       if (!/^text\/html/.test(r.h['content-type'] || '')) problems.push(`${at(p.public)}: content type ${r.h['content-type']}`);
       if (!r.body.equals(readFileSync(join(siteDir, p.file)))) problems.push(`${at(p.public)}: the served bytes differ from ${p.file}`);
       sameHeaders(r, p.public, { page: true });
+      if (adapterId === 'cloudflare-pages' && p.public === '/' && r.h['access-control-allow-origin'] !== '*') problems.push(`${at('/')}: the Pages profile should carry the platform default Access-Control-Allow-Origin: * (CF-14b)`);
       served.set(p.public, r.body);
       if (m.urlStyle === 'clean') {
         const x = await get(p.file === 'index.html' ? '/index.html' : `/${p.file}`);
@@ -65,19 +67,24 @@ async function behaviour(adapterId, bundleDir, { policy, expect404 }) {
       if (r.status !== 200) { problems.push(`${at(`/${f}`)}: status ${r.status}`); continue; }
       served.set(`/${f}`, r.body);
       if (!r.body.equals(readFileSync(join(siteDir, f)))) problems.push(`${at(`/${f}`)}: bytes differ`);
-      const cls = /\.(css|js)$/.test(f) && !f.includes('/') ? policy.cache.code : /^(fonts|media)\//.test(f) ? policy.cache.static : null;
-      if (cls && r.h['cache-control'] !== cls) problems.push(`${at(`/${f}`)}: Cache-Control is ${JSON.stringify(r.h['cache-control'])}, expected ${JSON.stringify(cls)}`);
+      const cls = /\.(css|js)$/.test(f) && !/^(fonts|media)\//.test(f) ? policy.cache.code : /^(fonts|media)\//.test(f) ? policy.cache.static : null;
+      if (cls && prof.cache !== false && r.h['cache-control'] !== cls) problems.push(`${at(`/${f}`)}: Cache-Control is ${JSON.stringify(r.h['cache-control'])}, expected ${JSON.stringify(cls)}`);
       sameHeaders(r, `/${f}`);
     }
-    // the deployed-bytes comparison over what was just fetched (C-07), against the staged manifest
-    verifyServed(m, served).forEach((p) => problems.push(`${at('deployed bytes')}: ${p}`));
-    // unknown paths: a real 404, not the home page with 200 (D-P3-1)
+    // unknown paths: a real 404, not the home page with 200 (D-P3-1); the 404 page and /index have no address of their own
     const nf = await get('/no-such-page-g64');
     if (expect404) {
       if (nf.status !== 404) problems.push(`${at('/no-such-page-g64')}: an unknown path answered ${nf.status}, expected 404`);
       else if (site.hasNotFoundPage && !nf.body.equals(readFileSync(join(siteDir, '404.html')))) problems.push(`${at('/no-such-page-g64')}: the 404 body is not 404.html`);
       sameHeaders(nf, '404 response');
-    } else if (adapterId === 'cloudflare-pages' && !(nf.status === 200 && nf.body.equals(readFileSync(join(siteDir, 'index.html'))))) problems.push(`${at('/no-such-page-g64')}: without a 404.html the Pages simulation should answer the home page (CF-10, CF-11); got ${nf.status}`);
+    } else if (adapterId === 'cloudflare-pages') { if (!(nf.status === 200 && nf.body.equals(readFileSync(join(siteDir, 'index.html'))))) problems.push(`${at('/no-such-page-g64')}: without a 404.html the Pages simulation should answer the home page (CF-10, CF-11); got ${nf.status}`); }
+    else if (nf.status !== 404) problems.push(`${at('/no-such-page-g64')}: without a 404.html ${adapterId} should answer 404, got ${nf.status}`);
+    if (!(adapterId === 'cloudflare-pages' && !expect404)) for (const ghost of ['/404', '/404.html', '/index', '/Menu']) {
+      const g = await get(ghost);
+      if (g.status === 200) problems.push(`${at(ghost)}: answered 200 (a second address for a page, or the 404 page with a success status)`);
+    }
+    // the deployed-bytes comparison over what was just fetched (C-07), against the staged manifest
+    verifyServed(m, served, expect404 ? { unknown: { status: nf.status, body: nf.body } } : {}).forEach((p) => problems.push(`${at('deployed bytes')}: ${p}`));
     // search files: served for an indexable client build, never for the demonstration
     for (const f of ['robots.txt', 'sitemap.xml', 'llms.txt']) {
       const r = await get(`/${f}`);
@@ -126,6 +133,7 @@ const fixHash = (b, rel) => { const mp = join(b, MANIFEST), m = readJ(mp); const
 const treeOf = (m) => sha256(m.files.filter((e) => e.role === 'site').sort((a, b) => (a.path < b.path ? -1 : 1)).map((e) => `${e.sha256}  ${e.path.slice(m.siteRoot.length + 1)}`).join('\n'));
 // edits that keep the manifest consistent (an attacker who knows the format): the file list, the hashes and the tree hash are all repaired
 const addSiteFile = (b, name, content) => { const mp = join(b, MANIFEST), m = readJ(mp), rel = `${m.siteRoot}/${name}`; mkdirSync(dirname(join(b, rel)), { recursive: true }); writeFileSync(join(b, rel), content); m.files.push({ path: rel, role: 'site', sha256: sha256(Buffer.from(content)), bytes: Buffer.byteLength(content) }); m.files.sort((x, y) => (x.path < y.path ? -1 : 1)); m.siteTreeSha256 = treeOf(m); writeFileSync(mp, JSON.stringify(m, null, 2) + '\n'); };
+const editSiteFile = (b, name, fn) => { const mp = join(b, MANIFEST), m = readJ(mp), rel = `${m.siteRoot}/${name}`; const t = fn(readFileSync(join(b, rel), 'utf8')); writeFileSync(join(b, rel), t); const e = m.files.find((x) => x.path === rel); e.sha256 = sha256(Buffer.from(t)); e.bytes = Buffer.byteLength(t); m.siteTreeSha256 = treeOf(m); writeFileSync(mp, JSON.stringify(m, null, 2) + '\n'); };
 const removeSiteFile = (b, name) => { const mp = join(b, MANIFEST), m = readJ(mp), rel = `${m.siteRoot}/${name}`; rmrf(join(b, rel)); m.files = m.files.filter((e) => e.path !== rel); m.siteTreeSha256 = treeOf(m); writeFileSync(mp, JSON.stringify(m, null, 2) + '\n'); };
 const editJson = (p, fn) => { const j = JSON.parse(readFileSync(p, 'utf8')); fn(j); writeFileSync(p, JSON.stringify(j, null, 2) + '\n'); };
 const CASES = [
@@ -137,6 +145,11 @@ const CASES = [
   { n: 'a symbolic link inside the bundle', a: ['cloudflare-pages', 'vercel', 'static'], f: (b, m) => symlinkSync('/etc/passwd', join(b, m.siteRoot, 'link.txt')), re: /symbolic link/ },
   { n: 'the manifest is missing', a: ['cloudflare-pages', 'vercel', 'static'], f: (b) => rmrf(join(b, MANIFEST)), re: /bundle\.manifest\.json: missing/ },
   { n: 'the manifest lists a path that leaves the bundle', a: ['cloudflare-pages', 'vercel', 'static'], f: (b) => { const m = readJ(join(b, MANIFEST)); m.files.push({ path: '../outside', role: 'site', sha256: '0'.repeat(64), bytes: 1 }); writeFileSync(join(b, MANIFEST), JSON.stringify(m)); }, re: /unsafe or malformed path/ },
+  { n: 'the manifest names an Object.prototype key as its adapter', a: ['cloudflare-pages', 'vercel', 'static'], f: (b) => editJson(join(b, MANIFEST), (j) => { j.adapter = 'constructor'; }), re: /unknown adapter/ },
+  { n: 'a vendor file added at the bundle root and listed in the manifest', a: ['cloudflare-pages', 'vercel', 'static'], f: (b) => { writeFileSync(join(b, 'wrangler.toml'), 'name = "x"\n'); editJson(join(b, MANIFEST), (j) => { j.files.push({ path: 'wrangler.toml', role: 'doc', sha256: sha256(Buffer.from('name = "x"\n')), bytes: 13 }); }); }, re: /adapter declares exactly/ },
+  { n: 'an unknown option in the manifest', a: ['cloudflare-pages', 'vercel', 'static'], f: (b) => editJson(join(b, MANIFEST), (j) => { j.options.token = 'abc'; }), re: /options must be exactly/ },
+  { n: 'the no-credential statement removed from the manifest', a: ['cloudflare-pages', 'vercel', 'static'], f: (b) => editJson(join(b, MANIFEST), (j) => { delete j.noCredential; }), re: /no-credential statement is missing/ },
+  { n: 'the manifest is JSON null', a: ['cloudflare-pages', 'vercel', 'static'], f: (b) => writeFileSync(join(b, MANIFEST), 'null'), re: /not an object/ },
   { n: 'the manifest names another adapter', a: ['cloudflare-pages', 'vercel'], f: (b) => { const m = readJ(join(b, MANIFEST)); m.adapter = 'static'; writeFileSync(join(b, MANIFEST), JSON.stringify(m)); }, re: /adapter declares exactly|differs from what the static adapter/ },
   { n: 'a vendor file of another host rides along (wrangler.toml)', a: ['cloudflare-pages', 'vercel', 'static'], f: (b, m) => writeFileSync(join(b, m.siteRoot, 'wrangler.toml'), 'name = "x"'), re: /wrangler\.toml.*(host, application or secret|not listed)/ },
   { n: 'an environment file with a secret in the site', a: ['cloudflare-pages', 'vercel', 'static'], f: (b, m) => { writeFileSync(join(b, m.siteRoot, '.env'), 'TOKEN=abc'); }, re: /\.env/ },
@@ -154,6 +167,26 @@ const CASES = [
   { n: 'a harmless comment in nginx.conf with the manifest repaired', a: ['static'], f: (b) => { appendFileSync(join(b, 'nginx.conf'), '# extra\n'); fixHash(b, 'nginx.conf'); }, re: /differs from what the static adapter writes/ },
   { n: 'START-HERE.txt (a release-package file) added to the site with the manifest repaired', a: ['cloudflare-pages', 'vercel', 'static'], f: (b) => addSiteFile(b, 'START-HERE.txt', 'open index.html'), re: /START-HERE\.txt: belongs to the release package/ },
   { n: 'a hidden folder added to the site with the manifest repaired', a: ['cloudflare-pages', 'vercel', 'static'], f: (b) => addSiteFile(b, '.well-known/x.txt', 'x'), re: /hidden file/ },
+  // --- descriptive parts of the bundle, credentials, site hygiene (independent review)
+  { n: 'SETTINGS.txt rewritten to claim live verification (hash repaired)', a: ['cloudflare-pages', 'vercel', 'static'], f: (b) => { writeFileSync(join(b, 'SETTINGS.txt'), 'VERIFIED LIVE by a person.\n'); fixHash(b, 'SETTINGS.txt'); }, re: /SETTINGS\.txt: differs from what/ },
+  { n: 'the unverified-live list emptied in the manifest', a: ['cloudflare-pages', 'vercel', 'static'], f: (b) => editJson(join(b, MANIFEST), (j) => { j.notes.unverifiedLive = []; }), re: /notes .* are not what the .* adapter writes/ },
+  { n: 'settingsToApply replaced in the manifest', a: ['cloudflare-pages', 'vercel', 'static'], f: (b) => editJson(join(b, MANIFEST), (j) => { j.settingsToApply = [{ name: 'x', value: 'Verified live by a person' }]; }), re: /settingsToApply is not what/ },
+  { n: 'an account identifier added to the manifest', a: ['cloudflare-pages', 'vercel', 'static'], f: (b) => editJson(join(b, MANIFEST), (j) => { j.accountId = 'abc123'; }), re: /"accountId" is not a field of a bundle manifest/ },
+  { n: 'a credential-shaped string in a delivered file (manifest repaired)', a: ['cloudflare-pages', 'vercel', 'static'], f: (b) => editSiteFile(b, 'site.js', (t) => `${t}// cfat_${'A'.repeat(30)}\n`), re: /looks like a credential/ },
+  { n: 'a credential assignment in a file added with a repaired manifest', a: ['cloudflare-pages', 'vercel', 'static'], f: (b) => addSiteFile(b, 'notes.txt', 'CLOUDFLARE_API_TOKEN=abc'), re: /looks like a credential/ },
+  { n: 'an HTML page nested in a folder (manifest repaired)', a: ['cloudflare-pages', 'vercel', 'static'], f: (b) => addSiteFile(b, 'blog/post.html', '<p>x</p>'), re: /must sit at the top level/ },
+  { n: 'an upper-case extension', a: ['cloudflare-pages', 'vercel', 'static'], f: (b) => addSiteFile(b, 'EXTRA.HTML', '<p>x</p>'), re: /extension must be lower case/ },
+  { n: 'a stylesheet inside an asset folder', a: ['cloudflare-pages', 'vercel', 'static'], f: (b) => addSiteFile(b, 'fonts/fonts.css', 'a{}'), re: /fonts\/ holds assets only/ },
+  { n: 'a script inside media/', a: ['cloudflare-pages', 'vercel', 'static'], f: (b) => addSiteFile(b, 'media/player.js', '1'), re: /media\/ holds assets only/ },
+  { n: 'a folder that collides with a page', a: ['cloudflare-pages', 'vercel', 'static'], f: (b) => addSiteFile(b, 'menu/photo.png', 'x'), re: /collides with the page/ },
+  { n: 'project sources in the site (config/)', a: ['cloudflare-pages', 'vercel', 'static'], f: (b) => addSiteFile(b, 'config/client.json', '{}'), re: /holds project sources/ },
+  { n: 'a search file with the wrong case in the demonstration', a: ['cloudflare-pages', 'vercel', 'static'], channel: 'demonstration', f: (b) => addSiteFile(b, 'Robots.TXT', 'x'), re: /must be named exactly robots\.txt/ },
+  { n: '404.html is a copy of index.html (a soft 404)', a: ['cloudflare-pages', 'vercel', 'static'], f: (b, m) => editSiteFile(b, '404.html', () => readFileSync(join(b, m.siteRoot, 'index.html'), 'utf8')), re: /copy of index\.html/ },
+  { n: '404.html with no text', a: ['cloudflare-pages', 'vercel', 'static'], f: (b) => editSiteFile(b, '404.html', () => '<!doctype html><html><head><title>x</title></head><body></body></html>'), re: /has no text/ },
+  { n: '404.html that redirects with a meta refresh', a: ['cloudflare-pages', 'vercel', 'static'], f: (b) => editSiteFile(b, '404.html', (t) => t.replace('</head>', '<meta http-equiv="refresh" content="0;url=/"></head>')), re: /meta refresh/ },
+  { n: 'an empty robots.txt', a: ['cloudflare-pages', 'vercel', 'static'], channel: 'client-production', f: (b) => editSiteFile(b, 'robots.txt', () => ' '), re: /robots\.txt is empty/ },
+  { n: 'a sitemap that lists the other URL style', a: ['cloudflare-pages', 'vercel', 'static'], channel: 'client-production', f: (b, m) => editSiteFile(b, 'sitemap.xml', (t) => (m.urlStyle === 'clean' ? t.replaceAll('/menu<', '/menu.html<') : t.replaceAll('/menu.html<', '/menu<'))), re: /sitemap\.xml: .* is not a page address under urlStyle/ },
+  { n: 'a canonical link in the other URL style', a: ['cloudflare-pages', 'vercel', 'static'], channel: 'client-production', f: (b, m) => editSiteFile(b, 'menu.html', (t) => (m.urlStyle === 'clean' ? t.replace('/menu"', '/menu.html"') : t.replace('/menu.html"', '/menu"'))), re: /menu\.html canonical: .* is not a page address/ },
   // --- HSTS (D-P3-4, D-P4-5)
   { n: 'HSTS includeSubDomains slipped into the headers without a recorded authorisation', a: ['cloudflare-pages'], f: (b, m) => editFile(join(b, m.siteRoot, '_headers'), (t) => t.replace('Strict-Transport-Security: max-age=31536000', 'Strict-Transport-Security: max-age=31536000; includeSubDomains')), re: /includeSubDomains without a recorded authorisation/ },
   { n: 'HSTS includeSubDomains slipped into vercel.json without a recorded authorisation', a: ['vercel'], f: (b) => editFile(join(b, 'vercel.json'), (t) => t.replace('"max-age=31536000"', '"max-age=31536000; includeSubDomains"')), re: /includeSubDomains without a recorded authorisation/ },
@@ -210,6 +243,12 @@ const REFUSALS = [
   { n: 'an indexable site whose base URL has a path (D-P3-2)', adapter: 'vercel', opts: { baseUrl: 'https://example.test/shop/' }, channel: 'client-production', re: /domain or subdomain root/ },
   { n: 'a channel that disagrees with the pages', adapter: 'vercel', opts: { channel: 'demonstration' }, channel: 'client-production', re: /channel was given as demonstration but the pages say client-production/ },
   { n: 'an unknown adapter', adapter: 'netlify', opts: {}, re: /no adapter named/ },
+  { n: 'an adapter named after an Object.prototype key', adapter: 'constructor', opts: {}, re: /no adapter named/ },
+  { n: 'HSTS includeSubDomains with a well-formed reference that is not listed', adapter: 'cloudflare-pages', opts: { hsts: { includeSubDomains: true, authorisation: 'APR-JE-999' } }, re: /not listed in security\.json/ },
+  { n: 'HSTS includeSubDomains given as a string', adapter: 'cloudflare-pages', opts: { hsts: { includeSubDomains: 'no', authorisation: 'APR-JE-044' } }, re: /must be true or false/ },
+  { n: 'HSTS preload requested', adapter: 'vercel', opts: { hsts: { preload: true } }, re: /preload is never produced/ },
+  { n: 'an indexable site with an http base URL', adapter: 'vercel', opts: { baseUrl: 'http://fixture-bakery.example' }, channel: 'client-production', re: /is not https/ },
+  { n: 'an indexable site whose base URL carries a password', adapter: 'vercel', opts: { baseUrl: 'https://user:pw@fixture-bakery.example/' }, channel: 'client-production', re: /user name or password/ },
   { n: 'a mixed noindex build', adapter: 'vercel', opts: {}, mutateSite: (d) => editFile(join(d, 'about.html'), (t) => t.replace('<meta name="robots" content="noindex, nofollow">\n', '')), channel: 'demonstration', re: /some pages carry the robots noindex/ },
   { n: 'a site without index.html', adapter: 'vercel', opts: {}, mutateSite: (d) => rmrf(join(d, 'index.html')), re: /no index\.html/ },
   { n: 'a vendor file in the delivered site', adapter: 'cloudflare-pages', opts: {}, mutateSite: (d) => writeFileSync(join(d, '_worker.js'), 'export default {}'), re: /_worker\.js/ },
@@ -218,7 +257,7 @@ const REFUSALS = [
 ];
 
 // The two independent checkers on their own, so a fault in one cannot hide behind the other layer (the bundle check also writes the files again and compares).
-function unitCases(policy) {
+function unitCases(policy, policyOptIn) {
   const problems = [];
   const site = writeFixtureSite(join(tmp('unit'), 'site'), { channel: 'demonstration' });
   const client = writeFixtureSite(join(tmp('unit'), 'site'), { channel: 'client-production' });
@@ -238,7 +277,7 @@ function unitCases(policy) {
       expectOnly('_headers with HSTS preload', cfCheck(cf.replace('max-age=31536000', 'max-age=31536000; preload')), /carries preload/);
       expectOnly('vercel.json with HSTS preload', vcCheck(vc.replace('"max-age=31536000"', '"max-age=31536000; preload"')), /carries preload/);
       expectOnly('_headers with includeSubDomains and an opt-in that was never recorded', cfCheck(cf.replace('max-age=31536000', 'max-age=31536000; includeSubDomains')), /includeSubDomains without a recorded authorisation/);
-      expectOnly('the same file when the opt-in IS recorded must pass', cfCheck(cf.replace('max-age=31536000', 'max-age=31536000; includeSubDomains'), { includeSubDomains: true, authorisation: 'APR-JE-044' }).length ? ['fails'] : ['ok'], /ok/);
+      expectOnly('the same file when the opt-in IS recorded must pass', checkHeadersFileDirect(cf.replace('max-age=31536000', 'max-age=31536000; includeSubDomains'), { root, policy: policyOptIn, computed, hsts: { includeSubDomains: true, authorisation: 'APR-JE-044' } }).length ? ['fails'] : ['ok'], /ok/);
     }
     // the policy itself: a default HSTS value that carries includeSubDomains or preload is refused
     for (const bad of ['max-age=31536000; includeSubDomains', 'max-age=31536000; preload']) {
@@ -252,6 +291,7 @@ const checkHeadersFileDirect = (text, o) => cfCheckImport(text, { ...o, label: '
 export async function checkHostingAdapters({ updateGolden = false } = {}) {
   const problems = [], notes = [];
   const policy = loadPolicy();
+  const policyOptIn = { ...policy, hstsOptions: { ...policy.hstsOptions, authorisations: ['APR-JE-044'] } };   // a copy for the tests: the real list is empty
   const temps = [];
   const t = (l) => { const d = tmp(l); temps.push(d); return d; };
   try {
@@ -263,6 +303,7 @@ export async function checkHostingAdapters({ updateGolden = false } = {}) {
       for (const x of f.facts) {
         if (!['official-docs-raw-source', 'official-docs-search-paraphrase', 'provider-open-source-code'].includes(x.sourceKind)) problems.push(`provider-facts.json: ${x.id} has the unknown source kind ${x.sourceKind}`);
         if (x.sourceKind !== 'official-docs-search-paraphrase' && (!x.quote || !f.sources[x.source]?.sha256)) problems.push(`provider-facts.json: ${x.id} has no verbatim quote with a source digest`);
+        if (x.sourceKind !== 'official-docs-search-paraphrase') { if (!Array.isArray(x.quoteSupports)) problems.push(`provider-facts.json: ${x.id} does not list the words of its statement that its quote must contain`); else for (const w of x.quoteSupports) if (!String(x.quote).toLowerCase().includes(w)) problems.push(`provider-facts.json: the statement of ${x.id} claims "${w}", which is not in its quote`); }
         if (x.sourceKind === 'official-docs-search-paraphrase' && (!x.note || !x.publishedPage)) problems.push(`provider-facts.json: ${x.id} is a paraphrase and must say so and name the page`);
         if (x.live !== 'unchecked' || x.confirmedBy !== null) problems.push(`provider-facts.json: ${x.id} is marked as live-checked or confirmed, but no preview is authorised (D-P3-5) and no person has confirmed it`);
       }
@@ -273,13 +314,18 @@ export async function checkHostingAdapters({ updateGolden = false } = {}) {
 
     // 1. the HSTS default (D-P3-4, D-P4-5)
     if (/includeSubDomains|preload/i.test(policy.httpsOnlyHeaders['Strict-Transport-Security'])) problems.push('security.json: the default Strict-Transport-Security contains includeSubDomains or preload');
-    try { httpsHeaders(policy, { includeSubDomains: true }); problems.push('HSTS includeSubDomains was produced without an authorisation'); } catch { /* refused */ }
-    if (httpsHeaders(policy, { includeSubDomains: true, authorisation: 'APR-JE-044' })['Strict-Transport-Security'] !== `${policy.httpsOnlyHeaders['Strict-Transport-Security']}; includeSubDomains`) problems.push('the authorised HSTS opt-in is not the default plus includeSubDomains');
+    if ((policy.hstsOptions?.authorisations || []).length) problems.push('security.json lists an HSTS authorisation: no client has one (the list must be empty in this repository)');
+    for (const bad of [{ includeSubDomains: true }, { includeSubDomains: true, authorisation: 'APR-JE-044' }, { includeSubDomains: true, authorisation: 'ZZ-FAKE' }, { includeSubDomains: 'yes', authorisation: 'APR-JE-044' }, { includeSubDomains: 1, authorisation: 'APR-JE-044' }, { includeSubDomains: false, preload: true }]) {
+      try { httpsHeaders(policy, bad); problems.push(`HSTS option ${JSON.stringify(bad)} was accepted although no authorisation is listed`); } catch { /* refused */ }
+    }
+    try { httpsHeaders(policyOptIn, { includeSubDomains: true, authorisation: 'APR-JE-999' }); problems.push('an authorisation reference that is not listed was accepted'); } catch { /* refused */ }
+    try { httpsHeaders(policyOptIn, { includeSubDomains: true, authorisation: 'APR-JE-044', preload: true }); problems.push('HSTS preload was accepted'); } catch { /* refused */ }
+    if (httpsHeaders(policyOptIn, { includeSubDomains: true, authorisation: 'APR-JE-044' })['Strict-Transport-Security'] !== `${policy.httpsOnlyHeaders['Strict-Transport-Security']}; includeSubDomains`) problems.push('the listed HSTS opt-in is not the default plus includeSubDomains');
 
     // 2. every adapter x channel on the invented fixture: bundle checks, behaviour under the simulation profile, byte-for-byte golden outputs
     let behaviours = 0, golden = 0;
     for (const adapterId of Object.keys(ADAPTERS)) for (const channel of ['demonstration', 'client-production']) for (const with404 of [true, false]) {
-      const site = writeFixtureSite(join(t('fixture'), 'site'), { channel, with404 });
+      const site = writeFixtureSite(join(t('fixture'), 'site'), { channel, with404, urlStyle: URL_STYLE[adapterId] });
       const out = t('bundle');
       const bundle = join(out, 'b');
       let r;
@@ -290,7 +336,7 @@ export async function checkHostingAdapters({ updateGolden = false } = {}) {
       if (with404 && rel.problems.length) problems.push(`${adapterId} ${channel}: a bundle with a 404.html failed the release check: ${rel.problems[0]}`);
       if (!with404 && !rel.problems.some((p) => /release blocker D-P3-1/.test(p))) problems.push(`${adapterId} ${channel}: a bundle with no 404.html passed the release check`);
       if (with404 && c.blockers.length) problems.push(`${adapterId} ${channel}: blockers on a complete fixture: ${c.blockers.map((b) => b.id).join(', ')}`);
-      if (adapterId !== 'static') { (await behaviour(adapterId, bundle, { policy, expect404: with404 })).forEach((p) => problems.push(p)); behaviours++; }
+      (await behaviour(adapterId, bundle, { policy, expect404: with404 })).forEach((p) => problems.push(p)); behaviours++;
       if (with404) {   // golden: every file the adapter writes, byte for byte
         const gd = join(GOLDEN, adapterId, channel);
         const mine = r.manifest.files.filter((e) => e.role !== 'site').map((e) => e.path).concat([MANIFEST]);
@@ -308,7 +354,7 @@ export async function checkHostingAdapters({ updateGolden = false } = {}) {
     // 3. all renderings carry one header set
     const fx = writeFixtureSite(join(t('agree'), 'site'), { channel: 'client-production' });
     renderingsAgree(fx, policy).forEach((p) => problems.push(`renderings: ${p}`));
-    renderingsAgree(fx, policy, { includeSubDomains: true, authorisation: 'APR-JE-044' }).forEach((p) => problems.push(`renderings (HSTS opt-in): ${p}`));
+    renderingsAgree(fx, policyOptIn, { includeSubDomains: true, authorisation: 'APR-JE-044' }).forEach((p) => problems.push(`renderings (HSTS opt-in): ${p}`));
     notes.push('_headers, nginx.conf, htaccess and vercel.json carry the same security header names and values as security.json, with and without the HSTS opt-in');
 
     // 4. the real site: Jade & Ember's demonstration and a realistic indexable client build
@@ -332,11 +378,11 @@ export async function checkHostingAdapters({ updateGolden = false } = {}) {
     }
     notes.push('the real Jade & Ember site (demonstration) and an indexable client build of it, delivered folder unchanged, stage and check under both Cloudflare Pages and Vercel; the only open live blocker is the missing 404.html (D-P3-1: no page is created here; VP-3 is not approved)');
 
-    unitCases(policy).forEach((p) => problems.push(p));
+    unitCases(policy, policyOptIn).forEach((p) => problems.push(p));
     notes.push('the Cloudflare _headers checker and the vercel.json checker, run on their own against damaged text (a stale CSP, a changed HSTS max-age, preload, an unrecorded includeSubDomains), and the policy loader against a default HSTS that carries includeSubDomains or preload');
     // 5. adversarial negative cases
     const baseFor = (channel, adapterId, fx = {}) => {
-      const site = writeFixtureSite(join(t('neg-site'), 'site'), { channel, ...fx });
+      const site = writeFixtureSite(join(t('neg-site'), 'site'), { channel, urlStyle: URL_STYLE[adapterId], ...fx });
       const out = t('neg'), bundle = join(out, 'b');
       renderBundle(adapterId, { siteDir: site, outDir: bundle, urlStyle: URL_STYLE[adapterId], baseUrl: channel === 'client-production' ? 'https://fixture-bakery.example' : null, policy });
       return { site, bundle };
@@ -378,7 +424,43 @@ export async function checkHostingAdapters({ updateGolden = false } = {}) {
       if (!verifyServed(m, missing).some((p) => /\/about: not served/.test(p))) problems.push('a missing page passed the deployed-bytes comparison');
       const extra = new Map(ok); extra.set('/admin', Buffer.from('x'));
       if (!verifyServed(m, extra).some((p) => /\/admin: served but not part of the staged bundle/.test(p))) problems.push('an extra served path passed the deployed-bytes comparison');
-      notes.push('deployed-bytes comparison (C-07, D-P3-3): accepts the staged bytes; refuses a page rewritten by the host, a missing page and an extra served path');
+      const dup = new Map(ok); dup.set('/menu.html', Buffer.from('<html>other</html>'));
+      if (!verifyServed(m, dup).some((p) => /\/menu\.html: served although a clean-URL host redirects it/.test(p))) problems.push('the .html form of a page served with other bytes passed the deployed-bytes comparison');
+      const idx = new Map(ok); idx.set('/index.html', ok.get('/'));
+      if (!verifyServed(m, idx).some((p) => /\/index\.html: served although/.test(p))) problems.push('a second copy of the home page at /index.html passed the deployed-bytes comparison');
+      const nf404 = new Map(ok); nf404.set('/404', Buffer.from('x'));
+      if (!verifyServed(m, nf404).some((p) => /\/404: served but not part of the staged bundle/.test(p))) problems.push('the 404 page served at its own address passed the deployed-bytes comparison');
+      if (!verifyServed(m, ok, { unknown: { status: 200, body: ok.get('/') } }).some((p) => /unknown path answered 200/.test(p))) problems.push('a soft 404 passed the deployed-bytes comparison');
+      if (verifyServed(m, ok, { unknown: { status: 404, body: Buffer.from('not found') } }).length) problems.push('a real 404 was refused by the deployed-bytes comparison');
+      notes.push('deployed-bytes comparison (C-07, D-P3-3): accepts the staged bytes; refuses a page rewritten by the host, a missing page, an extra served path, a clean-URL host that serves the .html form or /index.html as a second copy, a 404 page with its own address, and a soft 404');
+    }
+    // output folders that must be refused; the delivered folder and everything near it must be untouched
+    {
+      const root = t('out'), site = writeFixtureSite(join(root, 'site'), {});
+      mkdirSync(join(root, 'other')); writeFileSync(join(root, 'precious.txt'), 'x'); writeFileSync(join(root, 'other', 'a'), 'x');
+      for (const [label, out] of [['the delivered folder itself', site], ['its parent', root], ['a folder inside it', join(site, 'out')], ['a non-empty unrelated folder', join(root, 'other')], ['the file system root', '/']]) {
+        negatives++;
+        try { renderBundle('vercel', { siteDir: site, outDir: out, urlStyle: 'clean', baseUrl: 'https://fixture-bakery.example', policy }); problems.push(`output folder (${label}) was accepted`); }
+        catch (e) { if (e.code !== 'unsafe-out') problems.push(`output folder (${label}) refused for the wrong reason: ${e.message.slice(0, 120)}`); }
+      }
+      if (!existsSync(join(site, 'index.html')) || !existsSync(join(root, 'precious.txt')) || !existsSync(join(root, 'other', 'a'))) problems.push('a refused output folder still deleted something');
+      renderBundle('vercel', { siteDir: site, outDir: join(root, 'bundle'), urlStyle: 'clean', baseUrl: 'https://fixture-bakery.example', policy });
+      renderBundle('vercel', { siteDir: site, outDir: join(root, 'bundle'), urlStyle: 'clean', baseUrl: 'https://fixture-bakery.example', policy });   // an existing bundle may be staged again
+    }
+    // a 404 page may carry noindex (or not) in an indexable build; the registry pages decide the channel
+    {
+      const site = writeFixtureSite(join(t('nf-noindex'), 'site'), {}), out = t('nf-noindex-b');
+      editFile(join(site, '404.html'), (x) => x.replace('<meta charset="utf-8">', '<meta charset="utf-8">\n<meta name="robots" content="noindex, nofollow">'));
+      try { renderBundle('cloudflare-pages', { siteDir: site, outDir: join(out, 'b'), urlStyle: 'clean', baseUrl: 'https://fixture-bakery.example', policy }); const c = checkBundle(join(out, 'b'), { policy, forRelease: true }); c.problems.forEach((p) => problems.push(`404.html with noindex: ${p}`)); } catch (e) { problems.push(`a 404.html with a noindex meta tag was refused: ${e.message.slice(0, 160)}`); }
+    }
+    // the simulation server never leaves the bundle's site folder
+    {
+      const site = writeFixtureSite(join(t('esc-site'), 'site'), {}), out = t('esc');
+      renderBundle('vercel', { siteDir: site, outDir: join(out, 'b'), urlStyle: 'clean', baseUrl: 'https://fixture-bakery.example', policy });
+      const sv = serveSite(join(out, 'b', 'site'), { profile: profileOf(join(out, 'b')) });
+      const raw = (path) => new Promise((resolveP) => { const r = request({ host: '127.0.0.1', port: new URL(sv.origin).port, path }, (res) => { const c = []; res.on('data', (d) => c.push(d)); res.on('end', () => resolveP({ status: res.statusCode, body: Buffer.concat(c).toString('utf8') })); }); r.end(); });
+      for (const path of ['/..%2fvercel.json', '/..%2fbundle.manifest.json', '/%2e%2e%2fSETTINGS.txt', '/..%5cvercel.json', '/fonts/..%2f..%2fvercel.json']) { const r = await raw(path); if (r.status === 200 && /cleanUrls|noCredential|SYNTHETIC STAGING/.test(r.body)) problems.push(`the simulation server served a file outside the site folder for ${path}`); }
+      sv.close();
     }
     // 7. the shipped host-file generators still carry the corrected default
     const demo = assembleCandidate(undefined, 'hosting-hsts');

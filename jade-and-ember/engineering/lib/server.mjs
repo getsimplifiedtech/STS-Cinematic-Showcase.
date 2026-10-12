@@ -33,7 +33,9 @@ export function serveSite(root, { prefix = '/', pretty = false, ranges = true, h
         const r = profile.resolve(p);
         const h = profile.headers(p, { kind: r.kind, status: r.status });
         if (!r.file) return send(r.status, { 'content-type': 'text/html; charset=utf-8', ...h }, '<!doctype html><title>Not found</title><p>The platform\'s own not-found page.</p>');
-        const body = await readFile(join(root, r.file)), type = TYPES[extname(r.file)] || 'application/octet-stream';
+        const target = normalize(join(root, r.file));
+        if (target !== root && !target.startsWith(root + sep)) return send(403, {}, 'forbidden');
+        const body = await readFile(target), type = TYPES[extname(r.file)] || 'application/octet-stream';
         const m = profile.ranges ? /^bytes=(\d*)-(\d*)$/.exec(req.headers.range || '') : null;
         if (m && (m[1] || m[2]) && r.status === 200) {
           const start = m[1] ? +m[1] : Math.max(0, body.length - +m[2]), end = m[1] && m[2] ? Math.min(+m[2], body.length - 1) : body.length - 1;

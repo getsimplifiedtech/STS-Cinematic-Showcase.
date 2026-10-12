@@ -42,6 +42,12 @@
       "bytes": 540
     },
     {
+      "path": "site/assets/app.js",
+      "role": "site",
+      "sha256": "77f5eec38c5ef075e11892244ccf9e249d82937e07401398df98319568775a17",
+      "bytes": 14
+    },
+    {
       "path": "site/fonts/fixture.woff2",
       "role": "site",
       "sha256": "1aa96856f1057a2280458a602b5fcee39623ef81ef49eb18c26cfe4eec6fd645",
@@ -84,7 +90,7 @@
       "bytes": 56
     }
   ],
-  "siteTreeSha256": "ddc04d628415d25b64d0e7f7256be702e2ebee61f14181d6259a7e9bced7c3da",
+  "siteTreeSha256": "43e64e90981973011caa7e523ef1c1f229858c8cd7fdfe2b330b3c5e24041eff",
   "settingsToApply": [
     {
       "name": "nginx",

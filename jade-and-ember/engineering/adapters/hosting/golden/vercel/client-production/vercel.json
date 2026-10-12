@@ -36,6 +36,12 @@
       ]
     },
     {
+      "source": "/assets/app.js",
+      "headers": [
+        { "key": "Cache-Control", "value": "no-cache" }
+      ]
+    },
+    {
       "source": "/site.js",
       "headers": [
         { "key": "Cache-Control", "value": "no-cache" }

@@ -14,8 +14,8 @@
     {
       "path": "SETTINGS.txt",
       "role": "doc",
-      "sha256": "c951f30790567194be479e4ba380c4d77758b7e893a9a90d5098ba62189c5cea",
-      "bytes": 1998
+      "sha256": "25ed523b1d5daa67f446373cd541dca5bc3fb9a8a8f5988809c9338e2716a93f",
+      "bytes": 2737
     },
     {
       "path": "site/404.html",
@@ -28,6 +28,12 @@
       "role": "site",
       "sha256": "83d1bb927e2bf5aac65fdfb044a32dab6f40398d7d60391d59f411b6a3109bcc",
       "bytes": 540
+    },
+    {
+      "path": "site/assets/app.js",
+      "role": "site",
+      "sha256": "77f5eec38c5ef075e11892244ccf9e249d82937e07401398df98319568775a17",
+      "bytes": 14
     },
     {
       "path": "site/fonts/fixture.woff2",
@@ -74,11 +80,11 @@
     {
       "path": "vercel.json",
       "role": "deploy-config",
-      "sha256": "da534750ced439a9d60f9246709b68e284db7a00e2fadc32a4744c4df42fee54",
-      "bytes": 2160
+      "sha256": "d1a65334fc42d213611d5ee80d6c6f9b418528c1415ef58f51eb444fddd031c8",
+      "bytes": 2290
     }
   ],
-  "siteTreeSha256": "ddc04d628415d25b64d0e7f7256be702e2ebee61f14181d6259a7e9bced7c3da",
+  "siteTreeSha256": "43e64e90981973011caa7e523ef1c1f229858c8cd7fdfe2b330b3c5e24041eff",
   "settingsToApply": [
     {
       "name": "Framework Preset",
@@ -90,7 +96,7 @@
     },
     {
       "name": "Deployment Protection",
-      "value": "Choose deliberately: previews are protected by default, production domains are public. Making a preview publicly reachable is a conscious setting change with its own approval (D-P3-5). Keep X-Robots-Tag: noindex (VC-16)."
+      "value": "Decide deliberately and record it. Whether previews are protected by default was reported inconsistently by the documentation results (HR-14), so this bundle does not rely on it. Making a preview publicly reachable is a conscious setting change with its own approval (D-P3-5). Keep X-Robots-Tag: noindex (VC-16)."
     },
     {
       "name": "Custom domain",
@@ -98,19 +104,22 @@
     },
     {
       "name": "Strict-Transport-Security",
-      "value": "The platform default for a custom domain is max-age=63072000 without includeSubDomains (VC-15). vercel.json sets the policy value instead; read the live header to see which one wins (unverified)."
+      "value": "The platform default for a custom domain is max-age=63072000 without includeSubDomains; *.vercel.app domains additionally get includeSubDomains; preload from the platform whatever vercel.json says, so the never-preload rule cannot apply there (VC-15). vercel.json sets the policy value for a custom domain; read the live header to see which one wins (unverified)."
     }
   ],
   "notes": {
     "unverifiedLive": [
       "that a 404.html in the output directory is served with status 404",
+      "what /404 and /404.html do (modelled: answered with the 404 page)",
       "that vercel.json at the bundle root works with the Root Directory setting (HR-06)",
-      "that the HSTS header in vercel.json replaces the platform default for a custom domain (VC-15)",
+      "that the HSTS header in vercel.json replaces the platform default for a custom domain (VC-15); *.vercel.app domains get includeSubDomains; preload from the platform whatever vercel.json says",
       "how several matching header entries combine when a key repeats (the open-source routing code sets it again)",
+      "that the source \"/(.*)\" is not treated as a named segment (which would change how colons in header values are read, VC-06)",
+      "that the routing library's /index and /x/index redirects (modelled) are what the platform does",
       "the content types served for .xml, .txt, .webm, .mp4 and .woff2",
       "Range support for the hero video",
       "that the deployed bytes equal the staged bytes (checklist C-07)",
-      "Deployment Protection state and the preview X-Robots-Tag (VC-16)"
+      "Deployment Protection state (whether previews are protected by default was reported inconsistently, HR-14) and the preview X-Robots-Tag (VC-16)"
     ],
     "liveBlockers": [],
     "providerFacts": [
@@ -118,6 +127,7 @@
       "VC-02",
       "VC-03",
       "VC-05",
+      "VC-06",
       "VC-07",
       "VC-10",
       "VC-11",
@@ -135,7 +145,7 @@
       "headersMechanism": "config-json",
       "unknownPath": "not-found (the platform answers; a 404.html in the output directory is used when present; the status of that response is not established)",
       "previewNoindex": "automatic on preview URLs, not on a custom domain of a non-production branch",
-      "previewProtection": "default-on for previews (Deployment Protection)",
+      "previewProtection": "a project setting (Deployment Protection); the default was reported inconsistently (HR-14)",
       "mount": [
         "domain-root"
       ],

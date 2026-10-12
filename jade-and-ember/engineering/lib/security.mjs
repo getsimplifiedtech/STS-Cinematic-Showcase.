@@ -43,8 +43,14 @@ export function httpsHeaders(policy, hsts = null) {
   const out = { ...policy.httpsOnlyHeaders };
   const key = 'Strict-Transport-Security';
   if (/includeSubDomains|preload/i.test(out[key] || '')) throw new Error('security.json: the default Strict-Transport-Security must not contain includeSubDomains or preload (D-P3-4, D-P4-5)');
-  if (hsts && hsts.includeSubDomains) {
-    if (typeof hsts.authorisation !== 'string' || !/^[A-Z][A-Z0-9]{1,7}(?:-[A-Z0-9]{1,12}){1,3}$/.test(hsts.authorisation)) throw new Error('HSTS includeSubDomains needs a recorded authorisation for this client (hsts.authorisation); it is off by default (D-P3-4)');
+  if (hsts) {
+    const unknown = Object.keys(hsts).filter((k) => !['includeSubDomains', 'authorisation'].includes(k));
+    if (unknown.length) throw new Error(`HSTS option ${unknown.join(', ')} is not supported (preload is never produced)`);
+    if (hsts.includeSubDomains !== undefined && typeof hsts.includeSubDomains !== 'boolean') throw new Error('hsts.includeSubDomains must be true or false');
+  }
+  if (hsts && hsts.includeSubDomains === true) {
+    const listed = policy.hstsOptions?.authorisations;
+    if (!Array.isArray(listed) || typeof hsts.authorisation !== 'string' || !listed.includes(hsts.authorisation)) throw new Error(`HSTS includeSubDomains needs a recorded authorisation for this client: the reference ${JSON.stringify(hsts.authorisation)} is not listed in security.json hstsOptions.authorisations (it is off by default, D-P3-4)`);
     out[key] = `${out[key]}; includeSubDomains`;
   }
   return out;
@@ -59,7 +65,7 @@ export function cacheHeader(pathname, type, policy = loadPolicy()) {
 // Does the built site tell search engines to stay away? Read from the delivered pages, not from the configuration, so the answer is what a
 // visitor's crawler would see: 'all' when every page carries the robots noindex meta tag, 'none' when no page does, 'mixed' otherwise.
 export function noindexState(root) {
-  const pages = pagesOf(root);
+  const pages = pagesOf(root).filter((f) => f !== '404.html');   // the not-found page may carry noindex or not; it is not a page of the registry
   const flags = pages.map((f) => /<meta name="robots" content="[^"]*\bnoindex\b[^"]*">/i.test(readFileSync(join(root, f), 'utf8')));
   return flags.length && flags.every(Boolean) ? 'all' : flags.some(Boolean) ? 'mixed' : 'none';
 }

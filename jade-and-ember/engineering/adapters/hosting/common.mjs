@@ -1,14 +1,16 @@
 // Shared parts of the hosting adapters (G6-4, APR-JE-044). Pure functions of files: no network, no credential, no deployment. An adapter turns the DELIVERED
 // folder (never modified) into a staged BUNDLE: the byte-identical site plus exactly the host files that adapter declares, and a manifest that lists them.
 import { createHash } from 'node:crypto';
-import { cpSync, existsSync, lstatSync, mkdirSync, readFileSync, readdirSync, rmSync, writeFileSync } from 'node:fs';
-import { dirname, join, relative } from 'node:path';
+import { cpSync, existsSync, lstatSync, mkdirSync, readFileSync, readdirSync, realpathSync, rmSync, writeFileSync } from 'node:fs';
+import { dirname, join, relative, resolve, sep } from 'node:path';
 import { buildCsp, httpsHeaders, loadPolicy, noindexState, robotsHeaders } from '../../lib/security.mjs';
 
 export const sha256 = (b) => createHash('sha256').update(b).digest('hex');
+export { canonicalJson } from '../../lib/candidate.mjs';
 export class AdapterError extends Error { constructor(code, message) { super(message); this.code = code; } }
 
 export const SEARCH_FILES = ['robots.txt', 'sitemap.xml', 'llms.txt'];
+export const ASSET_DIRS = ['fonts', 'media'];
 export const NOT_FOUND_PAGE = '404.html';
 export const MANIFEST = 'bundle.manifest.json';
 export const MANIFEST_SCHEMA = 'sts/hosting-bundle@1';
@@ -59,11 +61,10 @@ export function describeSite(siteDir, { urlStyle, baseUrl = null, channel = null
 export function composeHeaders(site, policy = loadPolicy(), { hsts = null } = {}) {
   const security = { 'Content-Security-Policy': buildCsp(site.siteDir, policy, { https: true }), ...policy.headers, ...httpsHeaders(policy, hsts) };
   const robots = robotsHeaders(site.siteDir, policy);
-  const top = site.files.filter((f) => !f.includes('/'));
   const cache = {
     pages: site.pages.map((p) => p.public),                                   // revalidate: policy.cache.html
-    code: top.filter((f) => /\.(css|js)$/.test(f)).map((f) => `/${f}`),       // revalidate: policy.cache.code
-    staticDirs: ['fonts', 'media'].filter((d) => site.files.some((f) => f.startsWith(`${d}/`))),   // reusable for a week: policy.cache.static
+    code: site.files.filter((f) => /\.(css|js)$/.test(f) && !ASSET_DIRS.some((d) => f.startsWith(`${d}/`))).map((f) => `/${f}`),   // revalidate: policy.cache.code (any depth outside the asset folders; the site may hold none inside them)
+    staticDirs: ASSET_DIRS.filter((d) => site.files.some((f) => f.startsWith(`${d}/`))),   // reusable for a week: policy.cache.static
   };
   return { security, robots, cache, values: { pages: policy.cache.html, code: policy.cache.code, static: policy.cache.static } };
 }
@@ -72,7 +73,23 @@ export function composeHeaders(site, policy = loadPolicy(), { hsts = null } = {}
 export function copySite(siteDir, destDir, files) {
   for (const f of files) { mkdirSync(dirname(join(destDir, f)), { recursive: true }); cpSync(join(siteDir, f), join(destDir, f)); }
 }
+// The bundle is written to a folder this tool may empty. It refuses the delivered folder itself, anything inside it, anything that contains it, and any existing folder that
+// is neither empty nor a bundle this tool wrote (a mistyped --out must never delete a site, a repository or a home folder).
+export function assertSafeOut(outDir, siteDir) {
+  const real = (p) => { let q = resolve(p); const tail = []; while (!existsSync(q)) { tail.unshift(q.slice(dirname(q).length + 1)); q = dirname(q); } return join(realpathSync(q), ...tail); };
+  const o = real(outDir), d = real(siteDir);
+  const within = (a, b) => a === b || a.startsWith(b + sep);
+  if (within(o, d)) throw new AdapterError('unsafe-out', `the output folder ${outDir} is the delivered folder or inside it: the delivered folder is never modified`);
+  if (within(d, o)) throw new AdapterError('unsafe-out', `the output folder ${outDir} contains the delivered folder: staging would delete it`);
+  if (o === resolve('/') || within(resolve(process.cwd()), o)) throw new AdapterError('unsafe-out', `the output folder ${outDir} contains the working folder`);
+  if (existsSync(o)) {
+    if (!lstatSync(o).isDirectory()) throw new AdapterError('unsafe-out', `${outDir} exists and is not a folder`);
+    const entries = readdirSync(o);
+    if (entries.length && !entries.includes(MANIFEST)) throw new AdapterError('unsafe-out', `${outDir} is not empty and is not a bundle written by this tool (no ${MANIFEST}); choose an empty or new folder`);
+  }
+}
 export function writeBundle({ outDir, adapter, site, siteRoot, extra, options, settingsToApply, notes }) {
+  assertSafeOut(outDir, site.siteDir);
   rmSync(outDir, { recursive: true, force: true });
   mkdirSync(join(outDir, siteRoot), { recursive: true });
   copySite(site.siteDir, join(outDir, siteRoot), site.files);
@@ -95,24 +112,28 @@ export function writeBundle({ outDir, adapter, site, siteRoot, extra, options, s
 export const readManifest = (bundleDir) => JSON.parse(readFileSync(join(bundleDir, MANIFEST), 'utf8'));
 
 // ---- the deployed-bytes comparison (D-P3-3, live checklist C-07): pure, so it can be run against bytes fetched later by something that holds no credential.
-// served: Map of public path -> Buffer. Every PAGE and every site file must be byte-identical to the bundle's; anything the bundle does not serve must not be served.
-export function verifyServed(manifest, served, { site = null } = {}) {
+// served: Map of public path -> Buffer. Every PAGE and every site file must be byte-identical to the bundle's at its PUBLIC address; the .html form of a page must not be
+// served at all under clean URLs (it is a redirect), and nothing the bundle does not serve may be served. 404.html has no address of its own: it answers unknown paths.
+//   unknown (optional): { status, body } of a request for a path that does not exist; the status must be 404 and the body must not be a page of the site (no soft 404)
+export function verifyServed(manifest, served, { unknown = null } = {}) {
   const problems = [];
-  // 404.html is answered for unknown paths, it has no public address of its own
-  const siteFiles = manifest.files.filter((e) => e.role === 'site' && e.path !== `${manifest.siteRoot}/${NOT_FOUND_PAGE}`);
-  for (const e of siteFiles) {
-    const name = e.path.slice(manifest.siteRoot.length + 1);
-    const urls = name === 'index.html' ? ['/'] : name.endsWith('.html') && manifest.urlStyle === 'clean' ? [`/${name.replace(/\.html$/, '')}`] : [`/${name}`];
-    for (const u of urls) {
-      const got = served.get(u);
-      if (!got) { problems.push(`${u}: not served (expected ${name})`); continue; }
-      if (sha256(got) !== e.sha256) problems.push(`${u}: the served bytes differ from the staged file ${name} (a host that rewrites HTML invalidates the CSP hashes: HR-08)`);
-    }
+  const entries = manifest.files.filter((e) => e.role === 'site' && e.path !== `${manifest.siteRoot}/${NOT_FOUND_PAGE}`);
+  const clean = manifest.urlStyle === 'clean';
+  const addressOf = (name) => (name === 'index.html' ? '/' : clean && name.endsWith('.html') ? `/${name.replace(/\.html$/, '')}` : `/${name}`);
+  const known = new Map();
+  for (const e of entries) { const name = e.path.slice(manifest.siteRoot.length + 1); known.set(addressOf(name), e); }
+  for (const [u, e] of known) {
+    const got = served.get(u);
+    if (!got) { problems.push(`${u}: not served (expected ${e.path.slice(manifest.siteRoot.length + 1)})`); continue; }
+    if (sha256(got) !== e.sha256) problems.push(`${u}: the served bytes differ from the staged file ${e.path.slice(manifest.siteRoot.length + 1)} (a host that rewrites HTML invalidates the CSP hashes: HR-08)`);
   }
   for (const u of served.keys()) {
-    const known = siteFiles.some((e) => { const n = e.path.slice(manifest.siteRoot.length + 1); return u === `/${n}` || (n === 'index.html' && u === '/') || (manifest.urlStyle === 'clean' && n.endsWith('.html') && u === `/${n.replace(/\.html$/, '')}`); });
-    if (!known) problems.push(`${u}: served but not part of the staged bundle`);
+    if (known.has(u)) continue;
+    problems.push(clean && /\.html$/.test(u) || u === '/index' ? `${u}: served although a clean-URL host redirects it (it must be a redirect, not a second copy of the page)` : `${u}: served but not part of the staged bundle`);
   }
-  void site;
+  if (unknown) {
+    if (unknown.status !== 404) problems.push(`an unknown path answered ${unknown.status}, expected 404 (a soft 404 is a search-visible duplicate: D-P3-1)`);
+    else if (unknown.body && entries.some((e) => sha256(unknown.body) === e.sha256 && e.path.endsWith('index.html'))) problems.push('an unknown path answered with the home page');
+  }
   return problems;
 }

@@ -52,7 +52,7 @@ export function checkHeadersFile(text, { root, policy = loadPolicy(), prefix = '
       if (/[\r\n\u0000-\u001f]/.test(v)) problems.push(`${label}: control characters in ${k}`);
       if (/immutable/i.test(v)) problems.push(`${label}: ${k} uses immutable for unhashed file names (rule "${r.path}")`);
       seen.set(k.toLowerCase(), (seen.get(k.toLowerCase()) || 0) + 1);
-      if (security.has(k.toLowerCase()) && r.path !== `${prefix}/*`) problems.push(`${label}: security header ${k} in rule "${r.path}" (must be only in the "/*" rule, or Cloudflare would send it twice: CF-02)`);
+      if (security.has(k.toLowerCase()) && r.path !== `${prefix}/*`) problems.push(`${label}: security header ${k} in rule "${r.path}" (must be only in the "/*" rule, or Cloudflare would join the values of the matching rules into one header: CF-02)`);
       if (k.toLowerCase() === 'cache-control' && r.path === `${prefix}/*`) problems.push(`${label}: Cache-Control in the catch-all rule would join with the narrower rules (CF-02, CF-03)`);
     }
   }
@@ -74,7 +74,7 @@ export function checkHeadersFile(text, { root, policy = loadPolicy(), prefix = '
       if (noindex === 'all') {
         if (!all.length) problems.push(`${label}: the demonstration is noindex but the ${name} header is missing (defence in depth if a host rewrites the HTML)`);
         else {
-          if (all.length > 1) problems.push(`${label}: ${name} appears ${all.length} times (Cloudflare joins matching rules, so it would be sent twice)`);
+          if (all.length > 1) problems.push(`${label}: ${name} appears ${all.length} times (Cloudflare joins the values of matching rules, so the header would carry the value more than once)`);
           for (const [path, v] of all) { if (path !== `${prefix}/*`) problems.push(`${label}: ${name} in rule "${path}" (must be only in the "/*" rule)`); if (v !== value) problems.push(`${label}: ${name} is "${v}", the policy says "${value}"`); }
         }
       } else if (noindex === 'none' && all.length) problems.push(`${label}: ${name} appears in an indexable build (${all.map(([p]) => p).join(', ')}): it would keep the real site out of search results`);
@@ -97,7 +97,7 @@ export function checkHeadersFile(text, { root, policy = loadPolicy(), prefix = '
 export const cloudflarePages = {
   id: 'cloudflare-pages',
   siteRoot: 'site',
-  facts: ['CF-01', 'CF-02', 'CF-03', 'CF-04', 'CF-05', 'CF-06', 'CF-08', 'CF-09', 'CF-10', 'CF-11', 'CF-12', 'CF-17', 'CF-18'],
+  facts: ['CF-01', 'CF-02', 'CF-03', 'CF-04', 'CF-04b', 'CF-05', 'CF-06', 'CF-08', 'CF-09', 'CF-09b', 'CF-10', 'CF-11', 'CF-12', 'CF-14', 'CF-14b', 'CF-15', 'CF-15b', 'CF-17', 'CF-17b'],
   capabilities: {
     cleanUrls: 'platform', trailingSlash: 'platform (not established for a page file such as /menu/)', headersMechanism: 'headers-file', unknownPath: 'spa-fallback unless a top-level 404.html exists',
     previewNoindex: 'automatic (platform adds X-Robots-Tag: noindex over preview URLs)', previewProtection: 'optional (public by default)', mount: ['domain-root'],
@@ -109,8 +109,7 @@ export const cloudflarePages = {
   validateSite(site) {
     const problems = [];
     if (site.urlStyle !== 'clean') problems.push('Cloudflare Pages serves a page at its extension-less path and redirects the .html form (CF-08): the site must declare seo.urlStyle "clean", or every canonical, sitemap and structured-data URL would be a redirect');
-    if (site.baseUrl) { try { const u = new URL(site.baseUrl); if (site.channel === 'client-production' && !/^\/?$/.test(u.pathname)) problems.push(`the base URL ${site.baseUrl} has a path: an indexable production site must use a domain or subdomain root (D-P3-2)`); } catch { problems.push(`the base URL ${site.baseUrl} is not a URL`); } }
-    if (site.files.length > PAGES_LIMITS.files) problems.push(`${site.files.length} files exceed the Pages limit of ${PAGES_LIMITS.files} (CF-17)`);
+    if (site.files.length > PAGES_LIMITS.files) problems.push(`${site.files.length} files exceed ${PAGES_LIMITS.files}, the free-plan limit of Pages (CF-17b; paid plans allow 100,000 with a project setting this adapter does not assume)`);
     return problems;
   },
   forbiddenInSite: FORBIDDEN,

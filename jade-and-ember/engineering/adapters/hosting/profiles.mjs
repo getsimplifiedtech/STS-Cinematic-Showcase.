@@ -9,6 +9,9 @@ import { parseNginx } from './static.mjs';
 import { AdapterError, MANIFEST, NOT_FOUND_PAGE, readManifest } from './common.mjs';
 
 const isFile = (p) => { try { return lstatSync(p).isFile(); } catch { return false; } };
+// a request path that tries to leave the site folder is never a file
+const safe = (rel) => typeof rel === 'string' && !rel.startsWith('/') && !rel.includes('\\') && !rel.includes('\u0000') && !rel.split('/').some((s) => s === '..');
+const NF = (rel) => rel === NOT_FOUND_PAGE || rel === NOT_FOUND_PAGE.replace(/\.html$/, '');   // /404 and /404.html have no address of their own: they are answered as any unknown path
 
 // "/*" "/media/*" "/*.css" "/menu" "/": a single splat matches greedily (CF-03 and the headers page); anything else is literal
 function pagesPattern(pattern) {
@@ -18,17 +21,18 @@ function pagesPattern(pattern) {
 }
 // the subset of Vercel header sources the adapter writes: "/(.*)", "/", an exact path, "/folder/(.*)"
 function vercelSource(source) {
-  if (!/^(?:\/|\/\(\.\*\)|\/[A-Za-z0-9._-]+|\/[A-Za-z0-9._-]+\/\(\.\*\))$/.test(source)) throw new AdapterError('source', `unsupported header source ${JSON.stringify(source)}`);
+  if (!/^(?:\/|\/\(\.\*\)|(?:\/[A-Za-z0-9._-]+)+|(?:\/[A-Za-z0-9._-]+)+\/\(\.\*\))$/.test(source)) throw new AdapterError('source', `unsupported header source ${JSON.stringify(source)}`);
   return new RegExp(`^${source.replace('(.*)', '\u0000').replace(/[.+?^${}|[\]\\]/g, '\\$&').replace('\u0000', '.*')}$`);
 }
 
 export function cloudflareProfile(siteDir) {
   const headersText = existsSync(join(siteDir, '_headers')) ? readFileSync(join(siteDir, '_headers'), 'utf8') : '';
   const rules = parseHeadersFile(headersText).rules.map((r) => ({ re: pagesPattern(r.path), headers: r.headers })).filter((r) => r.re);
-  const exists = (rel) => rel !== '_headers' && rel !== '_redirects' && isFile(join(siteDir, rel));   // the _headers file is parsed, never served (CF-04)
+  const exists = (rel) => safe(rel) && rel !== '_headers' && rel !== '_redirects' && isFile(join(siteDir, rel));   // the _headers file is parsed, never served (CF-04)
   return {
     id: 'cloudflare-pages', siteDir, ranges: false,
     redirect(p) {
+      if (NF(p.slice(1))) return null;
       if (p.endsWith('/index.html') && exists(p.slice(1))) return { status: 308, location: p.slice(0, -'index.html'.length) };
       if (p.endsWith('.html') && exists(p.slice(1))) return { status: 308, location: p.slice(0, -5) };
       return null;
@@ -36,8 +40,8 @@ export function cloudflareProfile(siteDir) {
     resolve(p) {
       if (p === '/') return exists('index.html') ? { file: 'index.html', status: 200, kind: 'file' } : { file: null, status: 404, kind: 'platform-404' };
       const rel = p.slice(1);
-      if (!rel.endsWith('/') && exists(rel) && !rel.endsWith('.html')) return { file: rel, status: 200, kind: 'file' };
-      if (!rel.endsWith('/') && exists(`${rel}.html`)) return { file: `${rel}.html`, status: 200, kind: 'file' };
+      if (!NF(rel) && rel !== 'index' && !rel.endsWith('/') && exists(rel) && !rel.endsWith('.html')) return { file: rel, status: 200, kind: 'file' };
+      if (!NF(rel) && rel !== 'index' && !rel.endsWith('/') && exists(`${rel}.html`)) return { file: `${rel}.html`, status: 200, kind: 'file' };
       if (exists(NOT_FOUND_PAGE)) return { file: NOT_FOUND_PAGE, status: 404, kind: 'notfound-page' };
       return { file: 'index.html', status: 200, kind: 'spa-fallback' };   // CF-10, CF-11: without a top-level 404.html every unknown path is answered with the home page
     },
@@ -52,14 +56,14 @@ export function cloudflareProfile(siteDir) {
     },
     models: ['extension-less page URLs and the 308 from the .html form (CF-08)', 'the _headers rules applied to the REQUEST path, several matching rules combined, repeated headers joined with a comma (CF-02, CF-03)', 'unknown paths: 404.html when present, otherwise the home page with 200 (CF-10, CF-11)', 'Range requests answered with 200 (CF-12)', 'redirects carry no _headers headers (CF-06)', 'the platform default headers (CF-14, CF-15)'],
     doesNotModel: ['compression (CF-13), ETag and 304 handling, edge caching and purge behaviour', 'HTTP to HTTPS redirects, TLS, www and the domain', 'the exact redirect status code (308 is assumed; the page says only "redirected")', 'a request for /menu/ (modelled as not found; the documentation does not say)', 'content types for .xml, .txt, .webm, .mp4 and .woff2 (the local server\'s table is used)', 'headers on the 404.html response (assumed to follow the same rules as any asset)', 'zone features that rewrite HTML (Rocket Loader, email obfuscation, analytics beacon)'],
-    assumptions: ['redirect status 308', '/menu/ is not found', 'the _headers rules apply to the 404.html response'],
+    assumptions: ['redirect status 308', '/menu/, /index, /404 and /404.html are answered as unknown paths', 'the 404.html response has status 404 (the documentation says only that the page is displayed)', 'the _headers rules apply to the 404.html response', 'a header set in _headers replaces the platform default of the same name (the documentation: "override what Cloudflare ordinarily sends")'],
   };
 }
 
 export function vercelProfile(bundleDir, siteDir) {
   const j = parseStrictJson(readFileSync(join(bundleDir, 'vercel.json'), 'utf8'));
   const entries = (j.headers || []).map((e) => ({ re: vercelSource(e.source), headers: e.headers }));
-  const exists = (rel) => isFile(join(siteDir, rel));
+  const exists = (rel) => safe(rel) && isFile(join(siteDir, rel));
   const clean = j.cleanUrls === true;
   return {
     id: 'vercel', siteDir, ranges: true,
@@ -76,8 +80,8 @@ export function vercelProfile(bundleDir, siteDir) {
     resolve(p) {
       if (p === '/') return exists('index.html') ? { file: 'index.html', status: 200, kind: 'file' } : { file: null, status: 404, kind: 'platform-404' };
       const rel = p.slice(1);
-      if (exists(rel)) return { file: rel, status: 200, kind: 'file' };
-      if (clean && !rel.endsWith('/') && exists(`${rel}.html`)) return { file: `${rel}.html`, status: 200, kind: 'file' };
+      if (!NF(rel) && exists(rel)) return { file: rel, status: 200, kind: 'file' };
+      if (!NF(rel) && clean && !rel.endsWith('/') && exists(`${rel}.html`)) return { file: `${rel}.html`, status: 200, kind: 'file' };
       if (exists(NOT_FOUND_PAGE)) return { file: NOT_FOUND_PAGE, status: 404, kind: 'notfound-page' };
       return { file: null, status: 404, kind: 'platform-404' };
     },
@@ -96,14 +100,15 @@ export function vercelProfile(bundleDir, siteDir) {
 
 export function staticProfile(bundleDir, siteDir) {
   const nginx = existsSync(join(bundleDir, 'nginx.conf')) ? parseNginx(readFileSync(join(bundleDir, 'nginx.conf'), 'utf8')) : [];
-  const exists = (rel) => isFile(join(siteDir, rel));
+  const exists = (rel) => safe(rel) && isFile(join(siteDir, rel));
   const fixed = {}; for (const [k, v] of nginx) fixed[k.toLowerCase()] = v;
   return {
     id: 'static', siteDir, ranges: true,
     redirect() { return null; },
-    resolve(p) { const rel = p === '/' ? 'index.html' : p.slice(1); return exists(rel) ? { file: rel, status: 200, kind: 'file' } : exists(NOT_FOUND_PAGE) ? { file: NOT_FOUND_PAGE, status: 404, kind: 'notfound-page' } : { file: null, status: 404, kind: 'platform-404' }; },
+    resolve(p) { const rel = p === '/' ? 'index.html' : p.slice(1); return !NF(rel) && exists(rel) ? { file: rel, status: 200, kind: 'file' } : exists(NOT_FOUND_PAGE) ? { file: NOT_FOUND_PAGE, status: 404, kind: 'notfound-page' } : { file: null, status: 404, kind: 'platform-404' }; },
     headers(p, { kind }) { return kind === 'redirect' ? {} : { ...fixed }; },
     models: ['files served as named', 'the security headers of nginx.conf on every response', 'unknown paths: 404'],
+    cache: false,
     doesNotModel: ['cache rules, compression, TLS, the domain', 'error_page / ErrorDocument (the 404 page needs server configuration this adapter does not write)'],
     assumptions: [],
   };

@@ -15,7 +15,7 @@ export const VERCEL_LIMITS = { routes: 2048 };
 const TOKEN = /^[!#$%&'*+.^_`|~0-9A-Za-z-]+$/;
 const ALLOWED_KEYS = new Set(['framework', 'outputDirectory', 'cleanUrls', 'trailingSlash', 'headers']);
 // only the source forms the adapter writes: the documented global pattern, the root, an exact path, a folder wildcard. No named segments, no regular expressions.
-const SOURCE_FORMS = /^(?:\/|\/\(\.\*\)|\/[A-Za-z0-9._-]+|\/[A-Za-z0-9._-]+\/\(\.\*\))$/;
+const SOURCE_FORMS = /^(?:\/|\/\(\.\*\)|(?:\/[A-Za-z0-9._-]+)+|(?:\/[A-Za-z0-9._-]+)+\/\(\.\*\))$/;
 const FORBIDDEN = [/^vercel\.json$/i, /^\.vercel$/i, /^netlify\.toml$/i, /^wrangler\.(toml|json|jsonc)$/i, /^_headers$/i, /^_redirects$/i, /^_worker\.js$/i, /^_routes\.json$/i, /^functions$/i, /^api$/i, /^package(-lock)?\.json$/i, /^node_modules$/i, /^next\.config\./i, /^\.env/i, /^\.git/i];
 
 export function renderVercelJson({ site, policy = loadPolicy(), hsts = null }) {
@@ -112,18 +112,17 @@ export function checkVercelJson(text, { site, policy = loadPolicy(), hsts = null
 export const vercel = {
   id: 'vercel',
   siteRoot: 'site',
-  facts: ['VC-01', 'VC-02', 'VC-03', 'VC-05', 'VC-07', 'VC-10', 'VC-11', 'VC-12', 'VC-13', 'VC-14', 'VC-15', 'VC-16', 'VC-17', 'VC-18'],
+  facts: ['VC-01', 'VC-02', 'VC-03', 'VC-05', 'VC-06', 'VC-07', 'VC-10', 'VC-11', 'VC-12', 'VC-13', 'VC-14', 'VC-15', 'VC-16', 'VC-17', 'VC-18'],
   capabilities: {
     cleanUrls: 'config', trailingSlash: 'config', headersMechanism: 'config-json', unknownPath: 'not-found (the platform answers; a 404.html in the output directory is used when present; the status of that response is not established)',
-    previewNoindex: 'automatic on preview URLs, not on a custom domain of a non-production branch', previewProtection: 'default-on for previews (Deployment Protection)', mount: ['domain-root'],
+    previewNoindex: 'automatic on preview URLs, not on a custom domain of a non-production branch', previewProtection: 'a project setting (Deployment Protection); the default was reported inconsistently (HR-14)', mount: ['domain-root'],
     limits: { rules: VERCEL_LIMITS.routes },
     ranges: 'assumed to be answered with 206 (not established)',
   },
   declared: () => ['vercel.json', 'SETTINGS.txt'],
   validateSite(site) {
-    const problems = [];
-    if (site.baseUrl) { try { const u = new URL(site.baseUrl); if (site.channel === 'client-production' && !/^\/?$/.test(u.pathname)) problems.push(`the base URL ${site.baseUrl} has a path: an indexable production site must use a domain or subdomain root (D-P3-2)`); } catch { problems.push(`the base URL ${site.baseUrl} is not a URL`); } }
-    return problems;
+    void site;
+    return [];   // the base URL, the search files and the URL style are checked for every adapter (siteProblems)
   },
   forbiddenInSite: FORBIDDEN,
   render({ site, policy, hsts }) {
@@ -140,8 +139,8 @@ export function settingsFor(site) {
   return [
     { name: 'Framework Preset', value: 'Other (vercel.json also sets "framework": null). Build Command and Install Command: blank (VC-13). No environment variables.' },
     { name: 'Root Directory / Output Directory', value: 'Root Directory: the bundle root, where vercel.json sits (whether vercel.json must sit at the project root when a Root Directory is set was not established: HR-06). Output Directory: site (also in vercel.json).' },
-    { name: 'Deployment Protection', value: 'Choose deliberately: previews are protected by default, production domains are public. Making a preview publicly reachable is a conscious setting change with its own approval (D-P3-5). Keep X-Robots-Tag: noindex (VC-16).' },
+    { name: 'Deployment Protection', value: 'Decide deliberately and record it. Whether previews are protected by default was reported inconsistently by the documentation results (HR-14), so this bundle does not rely on it. Making a preview publicly reachable is a conscious setting change with its own approval (D-P3-5). Keep X-Robots-Tag: noindex (VC-16).' },
     { name: 'Custom domain', value: `${site.channel === 'client-production' ? 'The client domain, at its root (D-P3-2); www to apex is a domain setting, not a rewrite.' : 'None: the demonstration is never published on a client domain.'}` },
-    { name: 'Strict-Transport-Security', value: 'The platform default for a custom domain is max-age=63072000 without includeSubDomains (VC-15). vercel.json sets the policy value instead; read the live header to see which one wins (unverified).' },
+    { name: 'Strict-Transport-Security', value: 'The platform default for a custom domain is max-age=63072000 without includeSubDomains; *.vercel.app domains additionally get includeSubDomains; preload from the platform whatever vercel.json says, so the never-preload rule cannot apply there (VC-15). vercel.json sets the policy value for a custom domain; read the live header to see which one wins (unverified).' },
   ];
 }
