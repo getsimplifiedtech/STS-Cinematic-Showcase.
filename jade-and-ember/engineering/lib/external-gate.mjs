@@ -9,6 +9,7 @@
 // `github-actions` was one (a JSON record is not proof of authenticity; see lib/authenticity.mjs and G6-3-SCOPE.md section 5).
 import { collectExternal, groupDestinations, recordProblems, registryDigest } from './external.mjs';
 import { isReservedHost } from './hosts.mjs';
+import { newestFirst } from './supply.mjs';
 
 // the files a release carries: build input (config/) and engineering files are not delivered
 const NOT_DELIVERED = /^((config|engineering)\/|START-HERE\.txt$|serve\.py$)/;   // (START-HERE.txt and serve.py are added to the ZIP when it is packed; they are not part of the built site)
@@ -34,7 +35,7 @@ export function externalLinksStatus({ ext, history, today, maxAgeDays = 30 }) {
   if (bad.length) return { ok: false, detail: bad.slice(0, 3).join('; '), record: null };
   if (!ext.destinations.length) return { ok: true, detail: 'the build delivers no external destination: nothing to verify', record: null, none: true };
   if (!history || !Array.isArray(history.records)) return { ok: false, detail: 'there is no external-links verification history', record: null };
-  const covering = history.records.filter((r) => r && r.registryDigest === ext.digest).sort((a, b) => (a.date < b.date ? 1 : -1));
+  const covering = history.records.filter((r) => r && r.registryDigest === ext.digest).sort(newestFirst);   // the newest record for this list decides; an older one never rescues it
   if (!covering.length) return { ok: false, detail: `no verification record covers this build's ${ext.destinations.length} destination(s) (digest ${ext.digest.slice(0, 12)}…): run npm run release:external-digest, then verify with --delivered on a networked runner`, record: null };
   const r = covering[0];
   const probs = recordProblems({ file: { records: [r] }, today });

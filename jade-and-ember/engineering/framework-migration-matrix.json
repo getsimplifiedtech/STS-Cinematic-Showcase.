@@ -441,7 +441,9 @@
     "jade-and-ember/engineering/checks/secrets.mjs",
     "jade-and-ember/engineering/checks/ci.mjs",
     "jade-and-ember/engineering/dependencies.json",
-    "jade-and-ember/engineering/lib/node-range.mjs"
+    "jade-and-ember/engineering/lib/node-range.mjs",
+    "jade-and-ember/engineering/supply-chain-verification.json",
+    "jade-and-ember/engineering/tools/supply-chain.mjs"
    ],
    "target": "engineering/security/supply-chain/",
    "external": [
@@ -593,7 +595,11 @@
     "jade-and-ember/engineering/release/demonstrations.json",
     "jade-and-ember/engineering/release/approvals/README.md",
     "jade-and-ember/engineering/release/deployments/README.md",
-    "jade-and-ember/engineering/G6-2-DESIGN.md"
+    "jade-and-ember/engineering/G6-2-DESIGN.md",
+    "jade-and-ember/engineering/lib/authenticity.mjs",
+    "jade-and-ember/engineering/lib/external-gate.mjs",
+    "jade-and-ember/engineering/lib/social.mjs",
+    "jade-and-ember/engineering/lib/supply.mjs"
    ],
    "target": "engineering/release/",
    "external": [
@@ -1135,7 +1141,8 @@
     "jade-and-ember/engineering/g6-2-evidence/",
     "jade-and-ember/engineering/G6-3-SCOPE.md",
     "jade-and-ember/engineering/G6-3-REPORT.md",
-    "jade-and-ember/engineering/g6-3-evidence/"
+    "jade-and-ember/engineering/g6-3-evidence/",
+    "jade-and-ember/engineering/CRAWLER-EVALUATION-G63.md"
    ],
    "target": "stays (absorbed by the framework specification at G6-0)",
    "external": [

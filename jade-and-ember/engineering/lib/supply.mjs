@@ -17,6 +17,9 @@ import { licenceSections } from './media-rights.mjs';
 const sha = (b) => createHash('sha256').update(b).digest('hex');
 const HEX64 = /^[0-9a-f]{64}$/;
 const isDate = (s) => typeof s === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(s) && new Date(`${s}T00:00:00Z`).toISOString().slice(0, 10) === s;
+// newest first: by date, and for the same date by the number in the id (SCV-2 is newer than SCV-1); an older record never rescues a newer one
+const idNum = (r) => Number(/(\d+)$/.exec(r?.id || '')?.[1] || 0);
+export const newestFirst = (a, b) => (a.date < b.date ? 1 : a.date > b.date ? -1 : idNum(b) - idNum(a));
 const days = (a, b) => Math.round((Date.parse(`${b}T00:00:00Z`) - Date.parse(`${a}T00:00:00Z`)) / 86400000);
 export const SEVERITIES = ['critical', 'high', 'moderate', 'low'];
 export const SUPPLY_FILE = 'supply-chain-verification.json';
@@ -166,7 +169,7 @@ export function supplyRecordProblems({ file, today }) {
 export function supplyStatus({ history, lockfileSha256, sbomSha256, lockPackages, deps, today, maxAgeDays = 30 }) {
   const none = (detail) => ({ ok: false, detail, record: null });
   let dependencySecurity, sbom;
-  const mine = (history?.records || []).filter((r) => r && r.lockfileSha256 === lockfileSha256).sort((a, b) => (a.date < b.date ? 1 : -1));
+  const mine = (history?.records || []).filter((r) => r && r.lockfileSha256 === lockfileSha256).sort(newestFirst);
   if (!mine.length) { dependencySecurity = none(`no supply-chain verification covers this lockfile (${String(lockfileSha256).slice(0, 12)}…): run npm run supply:record on a networked runner`); sbom = { ok: false, detail: 'no supply-chain verification covers this lockfile, so no SBOM digest was recorded' }; return { dependencySecurity, sbom }; }
   const r = mine[0];
   const probs = supplyRecordProblems({ file: { records: [r] }, today });

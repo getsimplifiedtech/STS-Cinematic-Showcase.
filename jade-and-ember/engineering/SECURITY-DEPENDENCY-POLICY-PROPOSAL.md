@@ -1,5 +1,7 @@
 # Proposed security and dependency-maintenance policy (Gate 5 Phase 6, `APR-JE-034`)
 
+> **G6-3 update (`APR-JE-040`).** Section 2.7's release requirements are **implemented** (decisions D-P6-5 and D-P6-7): `dependencySecurity` (a supply-chain verification for this lockfile: no high or critical advisory, every other one excepted in `dependencies.json` with a plan and an expiry of at most 90 days judged at release time, registry signatures for every locked package), `sbomVerified` (the deterministic composite CycloneDX SBOM, `lib/supply.mjs`, regenerates to the recorded digest), `dependencyPolicy` and `supportedRuntimes`. Not implemented here: update automation (D-P6-4, G6-7), download hash pinning (D-P6-8, deferred), build attestations (a separate, owner-approved release workflow; see `G6-3-SCOPE.md` section 5).
+
 **A proposal for the owner's decision. Nothing here is enabled, configured or enforced yet**, and no setting of the repository or of GitHub was changed. It builds on what is already enforced (section 1) and says what is new (section 2), what the framework should take over (section 3) and what the owner has to switch on in GitHub (section 4). Evidence and findings: [`DEPENDENCIES-SECURITY-GATE5.md`](DEPENDENCIES-SECURITY-GATE5.md).
 
 ## 1. Already enforced (keep)

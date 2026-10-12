@@ -1,5 +1,7 @@
 # Gate 5 Phase 5: external links (`APR-JE-033`)
 
+> **G6-3 update (`APR-JE-040`).** The requirement proposed in section 6 and approved as D-P5-1 is **implemented** as the client-production requirements `externalLinks` and `externalLinksReview` (`lib/external-gate.mjs`, `G6-3-REPORT.md`). Differences from the proposal: the destination list is derived from the files the release delivers (build input such as `config/` is not delivered), the review is a structured record (`external-links-review`, prefix `EXTL`) bound to the candidate, the list digest and the verification record id, and a printed mention (never a clickable link) can be accepted by name with a reason. `npm run release:external-digest` prints the digest and `external-links.mjs verify --delivered` verifies exactly that list. The verification history is evidence of a run, not proof of who made it (authenticity is a separate, unimplemented requirement).
+
 **Status: APPROVED and CLOSED for engineering assessment and verification by the owner (`APR-JE-034`, code commit `a749a9f`, Actions run 33).** What the demonstration links to, what a network said about each destination, and the release requirement proposed for external-link verification. Nothing was deployed, no page, style, font or media file changed, and the framework repository was not touched.
 
 ## 1. Result in brief

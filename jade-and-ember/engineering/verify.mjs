@@ -49,6 +49,7 @@ import { checkSelftest } from './checks/selftest.mjs';
 import { engDir, projectDir } from './lib/git.mjs';
 import { gitState } from './lib/release.mjs';
 import { computeCandidate } from './lib/candidate.mjs';
+import { buildCompositeSbom, sbomDigest, serialiseSbom } from './lib/supply.mjs';
 import { buildVerificationRecord, engineDigest, expectedCheckIds, registryDigest } from './lib/verification.mjs';
 import { assembleCandidate } from './lib/site.mjs';
 import { rmSync } from 'node:fs';
@@ -136,6 +137,8 @@ const moved = before.candidate.digest !== after.candidate.digest || before.engin
 if (moved) console.log('\n  - the candidate artifact or the verifying code changed while the checks were running: this run does not vouch for either');
 const record = buildVerificationRecord({ mode: fast ? 'fast' : 'full', results: moved ? [...results, { id: 'run:stable-inputs', passed: false, seconds: 0 }] : results, candidate: after.candidate, engine: after.engine, registry: registryDigest(expectedCheckIds()), commit: st.commit, dirty: st.dirty, startedAt, finishedAt: new Date().toISOString() });
 writeFileSync(join(engDir, '.reports', 'verify.json'), JSON.stringify(record, null, 2));
+// the composite SBOM is deterministic: this line must read the same on any machine for the same commit (compare a local run with the CI log)
+try { const site = assembleCandidate(projectDir, 'verify-sbom'); try { const sb = buildCompositeSbom({ siteDir: site }); console.log(`\n  composite SBOM digest (reproducible; compare local and CI): ${sbomDigest(serialiseSbom(sb))}, ${sb.components.length} components`); } finally { rmSync(site, { recursive: true, force: true }); } } catch (e) { console.log(`\n  composite SBOM could not be built: ${e.message}`); }
 console.log(`\n  verification record: ${record.mode} run, candidate ${record.candidate}, engine ${record.engineDigest.slice(0, 16)}…, ${record.checks.length} checks, seal ${record.seal}`);
 console.log(failed || moved ? `\nverify FAILED (${failed + (moved ? 1 : 0)} of ${results.length} checks)` : `\nverify passed (${results.length} of ${results.length} checks)`);
 process.exit(failed || moved ? 1 : 0);
