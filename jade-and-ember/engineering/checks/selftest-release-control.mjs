@@ -9,13 +9,13 @@ import { createSandbox } from '../lib/release-dryrun.mjs';
 import { initRc, openRc } from '../release-control/lib/state.mjs';
 import { ReleaseControl, derive } from '../release-control/lib/engine.mjs';
 import { Ledger } from '../release-control/lib/ledger.mjs';
+import { deployedDigest } from '../release-control/lib/adapter.mjs';
 import { blankHtml, classifyChange, editSize } from '../release-control/lib/classify.mjs';
-import { plainTree } from '../release-control/lib/intake.mjs';
+import { declaredZipSize, dirMap, filesDigest, intake, plainTree } from '../release-control/lib/intake.mjs';
 import { DEFAULT_DATA_FILES, buildView } from '../release-control/lib/view.mjs';
 import { CAPS } from '../release-control/lib/auth.mjs';
 import { RcError, sha256 } from '../release-control/lib/util.mjs';
 import { verifyAuthenticity } from '../lib/authenticity.mjs';
-import { buildManifest } from '../lib/hashed.mjs';
 import { zipBuffer } from '../lib/zip.mjs';
 
 const HOST_A = 'www.jade-and-ember-fixture.com';
@@ -55,6 +55,9 @@ export async function checkSelftestReleaseControl() {
   sb.restore();
   sb.committed(() => sb.json('config/copy.json', (o) => { o.home.process.steps[0].text += ' We now start an hour earlier.'; }), 'synthetic: one sentence of text');
   const PTXT = prep('text');
+  sb.restore();
+  sb.committed(() => sb.json('config/copy.json', (o) => { o.home.process.steps[0].text += ' We now start an hour earlier.'; o.home.process.steps[1].text += ' Bring friends along too.'; }), 'synthetic: two sentences of text');
+  const PTXT2 = prep('text2');
   sb.restore();
   sb.committed(() => sb.json('config/client.json', (o) => { o.ordering.url = 'https://order.jade-and-ember-fixture.com/menu-new'; }), 'synthetic: a changed ordering link');
   const PMAT = prep('material');
@@ -135,9 +138,9 @@ export async function checkSelftestReleaseControl() {
     ok(baseRel.r.mode === 'owner' && baseRel.r.class === 'material', 'not released by the owner as material');
     const live = join(base.dir, 'deploy', 'alpha', 'current'), names = readdirSync(live);
     ok(!names.includes('START-HERE.txt') && !names.includes('serve.py') && names.includes('index.html'), 'the deployed folder is not the delivered site');
-    ok(buildManifest(live).treeSha256 === baseRel.r.deployedDigest, 'the deployed digest does not match');
+    ok(filesDigest(dirMap(live)) === baseRel.r.deployedDigest && deployedDigest(base.rc.rc, 'alpha') === baseRel.r.deployedDigest, 'the deployed digest does not match');
     const a = base.rc.audit(base.tokens.owner, 'alpha');
-    ok(a.ok && a.timeline.length === 7 && /staged/.test(a.timeline[0]) && /approved/.test(a.timeline[5]) && /released/.test(a.timeline[6]), `the audit trail is not as expected: ${a.timeline.join(' | ')}`);
+    ok(a.ok && a.timeline.length === 9 && /genesis/.test(a.timeline[0]) && /staged/.test(a.timeline[1]) && /approved/.test(a.timeline[6]) && /release-started/.test(a.timeline[7]) && /released/.test(a.timeline[8]), `the audit trail is not as expected: ${a.timeline.join(' | ')}`);
   });
   await test('releasing the same stage twice, or after a newer stage exists, is refused', () => {
     const f = clone(base);
@@ -198,10 +201,13 @@ export async function checkSelftestReleaseControl() {
     const open = r.stage.coverage.filter((c) => !c.covered).map((c) => c.type);
     ok(open.includes('search') && open.includes('externalLinks'), `a changed link left these subjects open: ${open.join(', ') || 'none'} (a changed link must change the search files and the external destinations)`);
     refused('subjects-not-recorded', () => f.rc.approve(f.tokens.owner, 'alpha', r.stage.stageId));
-    refused('note-required', () => f.rc.approve(f.tokens.owner, 'alpha', r.stage.stageId, { note: 'ok' }));
+    refused('subjects-unconfirmed', () => f.rc.approve(f.tokens.owner, 'alpha', r.stage.stageId, { note: 'looked at the new link (self-test)', basis: 'licence' }), 'no subjects named: ');
+    refused('subjects-unconfirmed', () => f.rc.approve(f.tokens.owner, 'alpha', r.stage.stageId, { note: 'looked at the new link (self-test)', subjects: open.slice(1) }), 'one subject left out: ');
+    refused('subjects-unconfirmed', () => f.rc.approve(f.tokens.owner, 'alpha', r.stage.stageId, { note: 'looked at the new link (self-test)', subjects: [...open, 'domain'] }), 'a subject already covered: ');
+    refused('note-required', () => f.rc.approve(f.tokens.owner, 'alpha', r.stage.stageId, { note: 'ok', subjects: open }));
     const g = clone(f); const before = g.rc.audit(g.tokens.owner, 'alpha').timeline.length;
-    ok(g.rc.approve(g.tokens.owner, 'alpha', r.stage.stageId, { note: 'looked at the new link (self-test)', basis: 'licence' }).mode === 'owner', 'the one-command approval failed');
-    ok(g.rc.audit(g.tokens.owner, 'alpha').timeline.length === before + open.length + 2, 'the open subjects were not recorded one by one');
+    ok(g.rc.approve(g.tokens.owner, 'alpha', r.stage.stageId, { note: 'looked at the new link (self-test)', basis: 'licence', subjects: open }).mode === 'owner', 'the one-command approval failed');
+    ok(g.rc.audit(g.tokens.owner, 'alpha').timeline.length === before + open.length + 3, 'the open subjects were not recorded one by one');
     for (const t of open) f.rc.recordApproval(f.tokens.owner, 'alpha', r.stage.stageId, t, { note: 'looked at the new link (self-test)', basis: 'licence' });
     ok(f.rc.approve(f.tokens.owner, 'alpha', r.stage.stageId).mode === 'owner', 'the owner could not approve it');
   });
@@ -286,7 +292,7 @@ export async function checkSelftestReleaseControl() {
   });
   await test('revoking a released stage takes it out of the baseline: the next change is judged as a first release again', () => {
     const f = clone(base); f.rc.revoke(f.tokens.owner, 'alpha', baseRel.s.stageId, 'withdrawn after release');
-    ok(f.rc.status(f.tokens.owner, 'alpha').latestReleased === null, 'a revoked release is still the baseline');
+    const stt = f.rc.status(f.tokens.owner, 'alpha'); ok(stt.approvedBaseline === null && stt.liveRevoked === true && stt.live === baseRel.s.stageId, `revoking the live release: baseline ${stt.approvedBaseline}, liveRevoked ${stt.liveRevoked}, live ${stt.live}`);
     ok(f.rc.stage(f.tokens.owner, 'alpha', PID).class === 'material', 'without a baseline the change was not material');
   });
   await test('a frozen client refuses staging, approval and automatic release; only the owner can freeze and unfreeze', () => {
@@ -309,7 +315,7 @@ export async function checkSelftestReleaseControl() {
   });
   await test('approvals recorded for one client do not count for another (separate ledgers)', () => {
     const f = clone(base); const dir = f.rc;
-    ok(dir.status(f.tokens.owner, 'beta').latestReleased === null && dir.audit(f.tokens.owner, 'beta').timeline.length === 0, 'beta saw alpha\'s history');
+    ok(dir.status(f.tokens.owner, 'beta').live === null && dir.audit(f.tokens.owner, 'beta').timeline.length === 1, 'beta saw alpha\'s history');
   });
 
   // ====================================================================== 8. the hard stop and the boundary of the code itself
@@ -327,16 +333,121 @@ export async function checkSelftestReleaseControl() {
     ok(readdirSync(join(base.dir, 'deploy')).sort().join() === 'alpha,beta', 'the deployment target is not inside the folder');
   });
 
+  // ====================================================================== 8b. review fixes: drift, scheduler, subjects, ledger, locks, deploy, intake limits
+  await test('routine drift cannot ratchet: an automatic release never becomes the baseline, so edits add up against the last release the OWNER approved', () => {
+    const f = clone(base); const cfgFile = join(f.dir, 'config.json'), c = JSON.parse(readFileSync(cfgFile, 'utf8')); c.policy = { maxTextEditChars: 50 }; writeFileSync(cfgFile, JSON.stringify(c));
+    const g = new ReleaseControl(f.dir, { clock }); g.preauthGrant(f.tokens.owner, 'alpha', { kinds: ['identical', 'text-only'], days: 5, max: 5 });
+    ok(g.runScheduled(f.tokens.scheduler, 'alpha', PTXT).outcome === 'released-auto', 'the first small edit was not released');
+    const s2 = g.stage(f.tokens.scheduler, 'alpha', PTXT2);
+    ok(s2.class === 'material' && s2.reasons.some((r) => /characters of text changed/.test(r)), `the second edit, small against the last release but large against the owner's, was ${s2.class}: ${s2.reasons.join('; ')}`);
+    const st = g.status(f.tokens.owner, 'alpha'); ok(st.approvedBaseline === baseRel.s.stageId && st.live !== st.approvedBaseline, 'the automatic release became the approved baseline');
+  });
+  await test('the scheduler cannot push aside a material stage that waits for the owner; the owner can; a release that revokes the baseline in between is stale', () => {
+    const f = clone(base); const m = f.rc.stage(f.tokens.scheduler, 'alpha', PMAT);
+    refused('owner-pending', () => f.rc.stage(f.tokens.scheduler, 'alpha', PID)); refused('owner-pending', () => f.rc.runScheduled(f.tokens.scheduler, 'alpha', PID));
+    ok(f.rc.stage(f.tokens.owner, 'alpha', PID).class === 'identical', 'the owner could not replace the pending stage'); void m;
+    const g = clone(base); g.rc.preauthGrant(g.tokens.owner, 'alpha', { kinds: ['identical'], days: 5, max: 5 });
+    const s = g.rc.stage(g.tokens.scheduler, 'alpha', PID); g.rc.revoke(g.tokens.owner, 'alpha', baseRel.s.stageId, 'withdrawn between staging and release');
+    refused('stale-baseline', () => g.rc.autoRelease(g.tokens.scheduler, 'alpha', s.stageId));
+  });
+  await test('classifier evasions found by review stay MATERIAL: self-closing script, spaced end tag, quote-parity attributes, CDATA, processing instructions, noscript, UTF-16 and invalid UTF-8 pages', () => {
+    const page = (b) => `<!doctype html><html lang="en"><head><meta charset="utf-8"><title>T</title></head><body>${b}</body></html>`;
+    const cls = (a, b) => classifyChange({ prev: new Map([['index.html', Buffer.from(a)]]), next: new Map([['index.html', Buffer.from(b)]]), prevSubjects: {}, nextSubjects: {} }).class;
+    const pairs = [['<script/>x</script>', '<script/>y</script>'], ['<script>a</script ><p>t</p>', '<script>a</script ><p>u</p>'], ['<script src=a/>x</script>', '<script src=a/>y</script>'], ['<a title=x"y href="http://good.example>@evil.example/">t</a>', '<a title=x"y href="http://good.example>@evil.example/">u</a>'],
+      ['<![CDATA[ a ]]>', '<![CDATA[ b ]]>'], ['<?x a ?>', '<?x b ?>'], ['<noscript>a</noscript>', '<noscript>b</noscript>']];
+    pairs.forEach(([a, b], i) => ok(cls(page(a), page(b)) === 'material', `evasion ${i} was treated as routine`));
+    const bom = (s) => Buffer.concat([Buffer.from([0xff, 0xfe]), Buffer.from(s, 'utf16le')]);
+    const m16 = classifyChange({ prev: new Map([['index.html', bom(page('<p>a</p>'))]]), next: new Map([['index.html', bom(page('<p>b</p>'))]]), prevSubjects: {}, nextSubjects: {} });
+    ok(m16.class === 'material', 'a UTF-16 page was read as ordinary text');
+    const bad = classifyChange({ prev: new Map([['index.html', Buffer.from([...Buffer.from(page('<p>a</p>')), 0xc3])]]), next: new Map([['index.html', Buffer.from([...Buffer.from(page('<p>b</p>')), 0xc3])]]), prevSubjects: {}, nextSubjects: {} });
+    ok(bad.class === 'material', 'invalid UTF-8 was read as ordinary text');
+  });
+  await test('a changed tracked project record (findings, exceptions, crawler review) is MATERIAL even when no delivered file changed', () => {
+    const f = clone(base), d = tmp('tracked'); rmrf(d); cpSync(PID, d, { recursive: true });
+    const name = ['findings.json', 'dependencies.json', 'search-crawler-verification.json'].find((n) => existsSync(join(d, 'data', n)));
+    ok(name, 'the fixture holds no tracked data file to change');
+    const before = f.rc.stage(f.tokens.owner, 'alpha', PID); ok(before.class === 'identical', 'the control was not identical');
+    writeFileSync(join(d, 'data', name), readFileSync(join(d, 'data', name), 'utf8').replace(/\s*$/, '\n\n'));
+    let r; try { r = f.rc.stage(f.tokens.owner, 'alpha', d); } catch (e) { ok(e.code === 'verification-failed', `unexpected [${e.code}]`); return; }   // refused by the existing verifier is also acceptable
+    ok(r.class === 'material', `a changed ${name} was classed ${r.class}`);
+  });
+  await test('a data file that is not on the allow-list, a data file that is not JSON, and a nested data folder are refused', () => {
+    const f = mk();
+    for (const [label, mutate] of [['unlisted', (d) => writeFileSync(join(d, 'data', 'evil.json'), '{}')], ['not json', (d) => writeFileSync(join(d, 'data', 'findings.json'), 'not json')], ['nested', (d) => { mkdirSync(join(d, 'data', 'x')); writeFileSync(join(d, 'data', 'x', 'y.json'), '{}'); }]]) {
+      const d = tmp('baddata'); rmrf(d); cpSync(P0, d, { recursive: true }); mutate(d);
+      try { f.rc.stage(f.tokens.owner, 'alpha', d); throw new Error('accepted'); } catch (e) { ok(e instanceof RcError && ['bad-data-file', 'unexpected-files'].includes(e.code), `${label}: ${e.message}`); }
+    }
+  });
+  await test('intake limits: a package folder that is a symbolic link, and a ZIP that declares a huge unpacked size, are refused before anything is inflated', () => {
+    const f = mk(); const l = tmp('rootlink'); rmrf(l); spawnSync('ln', ['-s', P0, l]);
+    refused('unsafe-package', () => f.rc.stage(f.tokens.owner, 'alpha', l));
+    const d = tmp('bomb'); rmrf(d); cpSync(P0, d, { recursive: true }); const zn = join(d, readdirSync(d).find((n) => n.endsWith('.zip'))), z = readFileSync(zn);
+    const eocd = z.length - 22, cd = z.readUInt32LE(eocd + 16); z.writeUInt32LE(0x7fffffff, cd + 24); writeFileSync(zn, z);
+    refused('package-too-large', () => f.rc.stage(f.tokens.owner, 'alpha', d));
+    let hit = false; try { declaredZipSize(z, { maxEntries: 5000, maxExtractBytes: 1000 }); } catch (e) { hit = e.code === 'package-too-large'; } ok(hit, 'the declared-size check did not fire');
+  });
+  await test('serve.py in the package must be the copy release control holds (defence in depth behind the candidate digest)', () => {
+    const d = tmp('servepy'); rmrf(d); cpSync(P0, d, { recursive: true });
+    const data = new Map([...DEFAULT_DATA_FILES].filter((n) => existsSync(join(d, 'data', n))).map((n) => [n, readFileSync(join(d, 'data', n))])), view = buildView(tooling, data);
+    try {
+      const pending = () => ({ ok: false, detail: 'pending' });
+      const good = intake({ packageDir: d, tooling: view.eng, hook: pending, siteOut: join(d, '..', `out-${Date.now()}`), servePySha: sha256(readFileSync(join(view.eng, '..', 'serve.py'))) });
+      ok(good.siteFiles, 'the control package was not unpacked');
+      refused('serve-py-mismatch', () => intake({ packageDir: d, tooling: view.eng, hook: pending, siteOut: join(d, '..', `out2-${Date.now()}`), servePySha: '0'.repeat(64) }));
+    } finally { view.dispose(); }
+  });
+  await test('hosts are mandatory; a client\'s ledger starts with a genesis entry, so a missing ledger is a fault; an older ledger put back is caught by the anchor', () => {
+    refused('host-required', () => initRc(tmp('nohost'), { clients: ['alpha'], tooling, hosts: {} }));
+    const f = clone(base); const aud = f.rc.audit(f.tokens.owner, 'alpha'); ok(aud.ok && /genesis/.test(aud.timeline[0]), 'no genesis entry');
+    const g = clone(base); for (const x of ['alpha.jsonl', 'alpha.head.json']) rmrf(join(g.dir, 'ledger', x)); rmrf(join(g.dir, 'anchor', 'alpha.json'));
+    ok(!g.rc.audit(g.tokens.owner, 'alpha').ok, 'a ledger deleted with its head and anchor was taken for a fresh start'); refused('ledger-corrupt', () => g.rc.stage(g.tokens.owner, 'alpha', PID));
+    const h = clone(staged); const old = readFileSync(join(h.dir, 'ledger', 'alpha.jsonl')), oldHead = readFileSync(join(h.dir, 'ledger', 'alpha.head.json'));
+    h.rc.freeze(h.tokens.owner, 'alpha', 'a reason', true); writeFileSync(join(h.dir, 'ledger', 'alpha.jsonl'), old); writeFileSync(join(h.dir, 'ledger', 'alpha.head.json'), oldHead);
+    const au = h.rc.audit(h.tokens.owner, 'alpha'); ok(!au.ok && au.problems.some((p) => /anchor/.test(p)), `an older ledger with its older head was accepted: ${au.problems.join('; ')}`);
+  });
+  await test('one operation at a time per client; a dead holder\'s lock is broken; a fresh lock refuses; the emergency controls break a lock held too long', () => {
+    const f = clone(base), lock = join(f.dir, 'ledger', 'alpha.lock');
+    mkdirSync(lock); writeFileSync(join(lock, 'info.json'), JSON.stringify({ pid: process.pid, ts: Date.now() }));
+    refused('busy', () => f.rc.stage(f.tokens.owner, 'alpha', PID)); refused('busy', () => f.rc.freeze(f.tokens.owner, 'alpha', 'a reason'));
+    writeFileSync(join(lock, 'info.json'), JSON.stringify({ pid: process.pid, ts: Date.now() - 40000 }));
+    ok(f.rc.freeze(f.tokens.owner, 'alpha', 'urgent: stop everything').seq > 0, 'the freeze could not break a lock held for 40 s');
+    f.rc.freeze(f.tokens.owner, 'alpha', 'resolved', false);
+    mkdirSync(lock); writeFileSync(join(lock, 'info.json'), JSON.stringify({ pid: 2 ** 22 + 12345, ts: Date.now() }));
+    ok(f.rc.stage(f.tokens.owner, 'alpha', PID).class === 'identical', 'a lock whose holder is gone was not broken');
+  });
+  await test('an unknown release mode is refused; an interrupted release shows in the status; a crash between the two renames of a deployment is repaired by the next one', () => {
+    const f = clone(base); refused('bad-mode', () => f.rc.release(f.tokens.owner, 'alpha', 'x', 'root'));
+    const s = f.rc.stage(f.tokens.owner, 'alpha', PID); new Ledger(openRc(f.dir), 'alpha').append({ type: 'release-started', actor: { id: 'owner', role: 'owner' }, data: { stageId: s.stageId, mode: 'owner', preauth: null }, ts: now.toISOString() });
+    ok(f.rc.status(f.tokens.owner, 'alpha').interrupted === s.stageId, 'an interrupted release is not visible');
+    const live = join(f.dir, 'deploy', 'alpha', 'current'); cpSync(live, join(f.dir, 'deploy', 'alpha', '.prev'), { recursive: true }); rmrf(live);   // the crash window: no live site, a previous one aside
+    recordAll(f, s.stageId); const r = f.rc.approve(f.tokens.owner, 'alpha', s.stageId);
+    ok(existsSync(join(live, 'index.html')) && deployedDigest(f.rc.rc, 'alpha') === r.deployedDigest, 'the deployment was not completed after the crash window');
+    ok(f.rc.status(f.tokens.owner, 'alpha').interrupted === null, 'the release still shows as interrupted after it completed');
+  });
+  await test('tooling adoption is owner-wide: an owner limited to one client cannot adopt, every ledger is checked first, and the changed files are listed', () => {
+    const f = clone(base), file = join(f.dir, 'credentials.json'), cr = JSON.parse(readFileSync(file, 'utf8'));
+    cr.principals.find((p) => p.id === 'owner').clients = ['alpha']; writeFileSync(file, JSON.stringify(cr));
+    refused('forbidden-client', () => new ReleaseControl(f.dir, { clock }).adoptTooling(f.tokens.owner));
+    const g = clone(base), cf = join(g.dir, 'config.json'), c = JSON.parse(readFileSync(cf, 'utf8')), first = Object.keys(c.toolingFiles)[0]; c.toolingFiles[first] = '0'.repeat(64); c.toolingDigest = '1'.repeat(64); writeFileSync(cf, JSON.stringify(c));
+    appendFileSync(join(g.dir, 'ledger', 'beta.jsonl'), '{}\n');
+    refused('ledger-corrupt', () => new ReleaseControl(g.dir, { clock }).adoptTooling(g.tokens.owner), 'a damaged ledger of another client: ');
+    ok(JSON.parse(readFileSync(cf, 'utf8')).toolingDigest === '1'.repeat(64), 'the pin moved although an adoption was refused');
+    const h = clone(base), cf2 = join(h.dir, 'config.json'), c2 = JSON.parse(readFileSync(cf2, 'utf8')); c2.toolingFiles[first] = '0'.repeat(64); c2.toolingDigest = '1'.repeat(64); writeFileSync(cf2, JSON.stringify(c2));
+    const r = new ReleaseControl(h.dir, { clock }).adoptTooling(h.tokens.owner); ok(r.changed.includes(first), 'the adoption did not say which file differs');
+    for (const c3 of ['alpha', 'beta']) ok(new ReleaseControl(h.dir, { clock }).audit(h.tokens.owner, c3).timeline.some((l) => /tooling-adopted/.test(l)), `the adoption is not in ${c3}'s ledger`);
+  });
+
   // ====================================================================== 9. the owner's experience through the real command line
   await test('command line: stage, record, approve and audit with the disposable tokens; the agent token is refused with exit 1', () => {
     const root = tmp('cli'); const run = (args, cred) => spawnSync(process.execPath, [cli, ...args], { encoding: 'utf8', env: { ...process.env, RC_DIR: join(root, 'rc'), ...(cred ? { RC_CREDENTIAL: join(root, 'operator', `${cred}.token`) } : {}) } });
-    let r = spawnSync(process.execPath, [cli, 'init-demo', '--rc', root, '--clients', 'alpha,beta', '--hosts', `alpha=${HOST_A}`, '--tooling', tooling], { encoding: 'utf8' });
+    let r = spawnSync(process.execPath, [cli, 'init-demo', '--rc', root, '--clients', 'alpha,beta', '--hosts', `alpha=${HOST_A},beta=www.beta-fixture.example`, '--tooling', tooling], { encoding: 'utf8' });
     ok(r.status === 0 && /SYNTHETIC/.test(r.stdout), `init-demo: ${r.stderr}${r.stdout}`);
     r = run(['stage', '--client', 'alpha', '--package', P0], 'agent'); ok(r.status === 1 && /REFUSED \[forbidden\]/.test(r.stderr), 'the agent token staged a package from the command line');
     r = run(['stage', '--client', 'alpha', '--package', P0], 'scheduler'); ok(r.status === 0 && /STAGED st-.*MATERIAL/s.test(r.stdout), `stage: ${r.stderr}${r.stdout}`);
     const id = /STAGED (st-\S+):/.exec(r.stdout)[1];
     r = run(['approve', '--client', 'alpha', '--stage', id], 'scheduler'); ok(r.status === 1 && /\[forbidden\]/.test(r.stderr), 'the scheduler approved');
     r = run(['approve', '--client', 'alpha', '--stage', id], 'owner'); ok(r.status === 1 && /subjects-not-recorded/.test(r.stderr), 'approval did not wait for the subjects');
+    r = run(['approve', '--client', 'alpha', '--stage', id, '--note', 'looked at it (self-test)', '--basis', 'licence'], 'owner'); ok(r.status === 1 && /subjects-unconfirmed/.test(r.stderr), 'a note alone approved subjects it did not name');
     for (const t of ['search', 'rights', 'externalLinks', 'domain']) { r = run(['record-approval', '--client', 'alpha', '--stage', id, '--type', t, '--note', 'looked at it (self-test)', '--basis', 'licence'], 'owner'); ok(r.status === 0, `record ${t}: ${r.stderr}`); }
     r = run(['approve', '--client', 'alpha', '--stage', id], 'owner'); ok(r.status === 0 && /RELEASED/.test(r.stdout) && /matched the staged files/.test(r.stdout), `approve: ${r.stderr}${r.stdout}`);
     r = run(['audit', '--client', 'alpha'], 'owner'); ok(r.status === 0 && /LEDGER VERIFIES/.test(r.stdout), 'the audit did not verify');

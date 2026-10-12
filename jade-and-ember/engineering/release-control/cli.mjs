@@ -4,8 +4,8 @@
 //   stage --client c --package <release folder>          verify, classify and stage a prepared package; prints the review page
 //   review --client c --stage <id>                       print the status, the class and what still needs your decision
 //   record-approval --client c --stage <id> --type rights|search|externalLinks|domain --note "..." [--basis licence|permission|ownership]
-//   approve --client c --stage <id> [--note "what I checked" [--basis licence]]   release a staged package (the owner); the digest is matched by the engine, never typed.
-//                                                        With --note, every subject still open for THIS stage is recorded with that note first (one command for a first release)
+//   approve --client c --stage <id> [--note "what I checked" --subjects rights,search,... [--basis licence]]   release a staged package (the owner); the digest is matched by the engine, never typed.
+//                                                        With --note, the subjects you name (they must be exactly the ones still open for THIS stage) are recorded with that note first
 //   auto-release --client c --stage <id>                 release a ROUTINE staged package under a preauthorisation (the scheduler)
 //   run-scheduled --client c --package <release folder>  stage, then release automatically only if routine and preauthorised
 //   revoke --client c --stage <id> --reason "..."  |  revoke-approval --client c --approval <n> --reason "..."
@@ -40,7 +40,7 @@ try {
     'stage': () => { const r = rc.stage(token, client, resolve(arg('--package'))); show(`STAGED ${r.stageId}: ${r.class.toUpperCase()}\n${r.reasons.map((x) => `  - ${x}`).join('\n')}\nreview page: ${r.review}\nstill to record: ${r.coverage.filter((c) => !c.covered).map((c) => c.type).join(', ') || 'nothing'}\nexpires: ${r.expires}`); },
     'review': () => show(rc.review(token, client, stage)),
     'record-approval': () => { const r = rc.recordApproval(token, client, stage, arg('--type'), { note: arg('--note'), basis: arg('--basis') }); show(`RECORDED ${r.type} for exactly this stage's content (entry ${r.seq}, in force until ${r.validUntil.slice(0, 10)}); the digest was read from the stage, not typed`); },
-    'approve': () => { const r = rc.approve(token, client, stage, { note: arg('--note'), basis: arg('--basis') }); show(`RELEASED ${r.stageId} (${r.class}) to ${r.target}; deployed digest ${r.deployedDigest.slice(0, 16)}… matched the staged files`); },
+    'approve': () => { const r = rc.approve(token, client, stage, { note: arg('--note'), basis: arg('--basis'), subjects: (arg('--subjects') || '').split(',').filter(Boolean) }); show(`RELEASED ${r.stageId} (${r.class}) to ${r.target}; deployed digest ${r.deployedDigest.slice(0, 16)}… matched the staged files`); },
     'auto-release': () => { const r = rc.autoRelease(token, client, stage); show(`RELEASED AUTOMATICALLY ${r.stageId} (${r.class}) to ${r.target}; deployed digest ${r.deployedDigest.slice(0, 16)}… matched the staged files`); },
     'run-scheduled': () => { const r = rc.runScheduled(token, client, resolve(arg('--package'))); show(r.outcome === 'released-auto' ? `RELEASED AUTOMATICALLY ${r.release.stageId} (${r.stage.class}) to ${r.release.target}: a preauthorisation covered it; digest matched by the engine` : `WAITING FOR THE OWNER: stage ${r.stage.stageId} is ${r.stage.class.toUpperCase()}${r.why ? ` and ${r.why === 'no-preauth' ? 'no preauthorisation covers it' : r.why}` : ''}\n  ${r.stage.reasons.join('\n  ')}\nreview page: ${r.stage.review}`); },
     'revoke': () => { const r = rc.revoke(token, client, stage, arg('--reason')); show(`REVOKED ${r.ref} (entry ${r.seq})`); },

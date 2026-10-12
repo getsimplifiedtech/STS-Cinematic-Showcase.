@@ -1,6 +1,7 @@
 // Small shared helpers of the release-control proof of concept (G6-3A, APR-JE-043). Everything here is local and synthetic: nothing talks to GitHub or to a host.
 import { createHash, createHmac, randomBytes, timingSafeEqual } from 'node:crypto';
 import { resolve, sep } from 'node:path';
+import { renameSync, writeFileSync } from 'node:fs';
 export { canonicalJson } from '../../lib/candidate.mjs';
 
 export const sha256 = (b) => createHash('sha256').update(b).digest('hex');
@@ -28,3 +29,10 @@ export function inside(root, ...parts) {
 }
 export const iso = (d) => d.toISOString();
 export const addDays = (d, n) => new Date(d.getTime() + n * 86400000);
+
+// a file is replaced whole or not at all (a crash cannot leave half of it)
+export function writeAtomic(path, text, mode = 0o600) {
+  const tmp = `${path}.tmp-${process.pid}`;
+  writeFileSync(tmp, text, { mode });
+  renameSync(tmp, path);
+}

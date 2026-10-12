@@ -17,6 +17,8 @@ export const NOT_DELIVERED = new Set(['START-HERE.txt', 'serve.py']);   // added
 // every file of a package folder, refusing symlinks, devices and nested oddities; returns [{ rel, size }]
 export function plainTree(dir, limits = LIMITS) {
   const out = [];
+  const root = lstatSync(dir);
+  if (root.isSymbolicLink() || !root.isDirectory()) throw new RcError('unsafe-package', 'the package folder is not a plain folder (a symbolic link or a file)');
   const walk = (d, pre) => {
     for (const name of readdirSync(d).sort()) {
       const p = join(d, name), st = lstatSync(p), rel = pre ? `${pre}/${name}` : name;
@@ -35,6 +37,23 @@ export function plainTree(dir, limits = LIMITS) {
 export function treeDigest(dir) {
   return sha256(plainTree(dir, { maxEntries: 1e6, maxPackageBytes: Infinity }).map((f) => `${sha256(readFileSync(join(dir, f.rel)))}  ${f.rel}`).join('\n'));
 }
+// per-file digests of a folder (every file, nothing skipped): two folders hold the same bytes exactly when these maps are equal
+export const dirMap = (dir) => new Map(plainTree(dir, { maxEntries: 1e6, maxPackageBytes: Infinity }).map((f) => [f.rel, sha256(readFileSync(join(dir, f.rel)))]));
+// what a ZIP SAYS it will inflate to, read from its central directory before anything is inflated (a small file that expands to gigabytes is refused unread)
+export function declaredZipSize(buf, limits = LIMITS) {
+  const eocd = buf.length - 22;
+  if (eocd < 0 || buf.readUInt32LE(eocd) !== 0x06054b50) throw new RcError('bad-zip', 'not a ZIP file');
+  const count = buf.readUInt16LE(eocd + 10);
+  if (count > limits.maxEntries) throw new RcError('package-too-large', `the ZIP lists ${count} entries`);
+  let p = buf.readUInt32LE(eocd + 16), total = 0;
+  for (let i = 0; i < count; i++) {
+    if (p + 46 > eocd || buf.readUInt32LE(p) !== 0x02014b50) throw new RcError('bad-zip', 'bad central directory');
+    total += buf.readUInt32LE(p + 24);
+    if (total > limits.maxExtractBytes) throw new RcError('package-too-large', `the ZIP declares more than ${limits.maxExtractBytes} bytes once unpacked`);
+    p += 46 + buf.readUInt16LE(p + 28) + buf.readUInt16LE(p + 30) + buf.readUInt16LE(p + 32);
+  }
+  return total;
+}
 export const filesDigest = (map) => sha256(canonicalJson(Object.fromEntries([...map.entries()].sort(([a], [b]) => (a < b ? -1 : 1)))));
 
 // packageDir: a prepared release/ folder (already copied into RC's own storage). siteOut: where to extract the delivered site (created). hook: the authenticity decision.
@@ -46,10 +65,11 @@ export function layoutProblems(dir) {
   return files.filter((rel) => { const [top, second] = rel.split('/'); if (rel.split('/').length === 1) return !(TOP.has(rel) || /^[A-Za-z0-9._-]+\.zip$/.test(rel)); if (!TOP.has(top)) return true; return top === 'host' && !(rel.split('/').length === 2 && HOST.has(second)); });
 }
 
-export function intake({ packageDir, tooling, hook, siteOut, verify = verifyPackage }) {
+export function intake({ packageDir, tooling, hook, siteOut, verify = verifyPackage, servePySha = null }) {
   plainTree(packageDir);
   const stray = layoutProblems(packageDir);
   if (stray.length) throw new RcError('unexpected-files', `the package holds files a prepared package does not hold: ${stray.slice(0, 3).join(', ')}`);
+  for (const z of readdirSync(packageDir).filter((f) => f.endsWith('.zip'))) declaredZipSize(readFileSync(join(packageDir, z)));   // before the verifier (or anything) inflates a byte
   let pv;
   try { pv = verify(packageDir, { eng: tooling, authenticity: hook }); } catch (e) { pv = { ok: false, checks: [{ id: 'verifier', ok: false, detail: `the package verifier could not judge the package (${String(e.message).slice(0, 120)})` }] }; }
   const failing = pv.checks.filter((c) => !c.ok).map((c) => c.id);
@@ -63,11 +83,16 @@ export function intake({ packageDir, tooling, hook, siteOut, verify = verifyPack
       try {
         mkdirSync(siteOut, { recursive: true });
         unzipTo(zip, siteOut);
-        siteFiles = new Map(plainTree(siteOut).filter((f) => !NOT_DELIVERED.has(f.rel)).map((f) => [f.rel, readFileSync(join(siteOut, f.rel))]));
+        const all = plainTree(siteOut);
+        if (servePySha) {   // serve.py is run by whoever previews the package: it must be the copy RC's adopted tooling holds, not merely the copy the candidate covers
+          const sp = all.find((f) => f.rel === 'serve.py');
+          if (!sp || sha256(readFileSync(join(siteOut, 'serve.py'))) !== servePySha) throw new RcError('serve-py-mismatch', 'serve.py in the package is not the copy release control holds');
+        }
+        siteFiles = new Map(all.filter((f) => !NOT_DELIVERED.has(f.rel)).map((f) => [f.rel, readFileSync(join(siteOut, f.rel))]));
         const ext = deliveredDestinations(siteOut, { baseUrl: manifest.configuration?.baseUrl });
         let domain = null; try { domain = new URL(manifest.configuration.baseUrl).hostname.toLowerCase(); } catch { /* none */ }
         subjects = { search: manifest.search?.artifactsDigest ?? null, rights: deliveredMediaDigest(siteOut), externalLinks: ext.digest, domain };
-      } catch { siteFiles = null; subjects = null; }
+      } catch (e) { siteFiles = null; subjects = null; if (e instanceof RcError) throw e; }
     }
   }
   return { checks: pv.checks, failing, manifest, siteFiles, subjects, zipSha, zipName: zips[0] || null };

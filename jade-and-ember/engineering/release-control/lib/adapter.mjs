@@ -4,19 +4,21 @@ import { cpSync, existsSync, mkdirSync, readFileSync, renameSync, rmSync } from 
 import { join } from 'node:path';
 import { RcError, inside, sameHex, sha256 } from './util.mjs';
 import { clientConfig, pathsOf } from './state.mjs';
-import { buildManifest } from '../../lib/hashed.mjs';
+import { dirMap, filesDigest } from './intake.mjs';
 
 export function deployLocal(rc, client, siteDir, stageId) {
   const cfg = clientConfig(rc, client), p = pathsOf(rc, client);
   const token = existsSync(p.vault) ? readFileSync(p.vault, 'utf8').trim() : '';
   if (!token || !sameHex(sha256(token), cfg.deployTokenSha256)) throw new RcError('deploy-credential', `the deploy credential of ${client} is missing or does not match`);
   const next = inside(p.deploy, `.next-${stageId.replace(/[^a-z0-9-]/gi, '')}`), live = inside(p.deploy, 'current'), prev = inside(p.deploy, '.prev');
-  rmSync(next, { recursive: true, force: true }); rmSync(prev, { recursive: true, force: true });
   mkdirSync(p.deploy, { recursive: true });
+  if (!existsSync(live) && existsSync(prev)) renameSync(prev, live);   // a crash between the two renames below left no live site: put the previous one back first
+  rmSync(next, { recursive: true, force: true }); rmSync(prev, { recursive: true, force: true });
   cpSync(siteDir, next, { recursive: true });
-  if (existsSync(live)) renameSync(live, prev);
-  renameSync(next, live);
-  const digest = buildManifest(live).treeSha256;
+  const had = existsSync(live);
+  if (had) renameSync(live, prev);
+  try { renameSync(next, live); } catch (e) { if (had) renameSync(prev, live); throw e; }   // never leave the client without a site
+  const digest = filesDigest(dirMap(live));
   return { digest, target: `deploy/${client}/current` };
 }
-export const deployedDigest = (rc, client) => { const live = inside(pathsOf(rc, client).deploy, 'current'); return existsSync(live) ? buildManifest(live).treeSha256 : null; };
+export const deployedDigest = (rc, client) => { const live = inside(pathsOf(rc, client).deploy, 'current'); return existsSync(live) ? filesDigest(dirMap(live)) : null; };
