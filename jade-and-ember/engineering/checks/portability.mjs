@@ -27,7 +27,7 @@ import { assembleCandidate, pagesOf, SHARED } from '../lib/site.mjs';
 import { unzipTo, zipFolder } from '../lib/zip.mjs';
 import { settleFonts } from '../lib/runtime.mjs';
 import { isMain, listFiles, projectDir, tempDir } from '../lib/git.mjs';
-import { markup, selector } from '../lib/project.mjs';
+import { markup, project, selector } from '../lib/project.mjs';
 
 const titleOf = (dir, f) => /<title>([^<]*)<\/title>/.exec(readFileSync(join(dir, f), 'utf8'))[1].replace(/&amp;/g, '&');
 const h1Of = (dir, f) => /<h1[^>]*>([\s\S]*?)<\/h1>/.exec(readFileSync(join(dir, f), 'utf8'))[1].replace(/<[^>]+>/g, '').replace(/&amp;/g, '&').replace(/\s+/g, ' ').trim();
@@ -134,7 +134,7 @@ export async function checkPortability({ root = null, browserName = 'chromium', 
       // folder: ZIP, extract to a hostile path, open index.html directly
       const zip = zipFolder(dir);
       const holder = tempDir('portability'); cleanup.push(holder);
-      const hostile = join(holder, 'Jade & Ember — preview #1 [v0.9]', 'site folder');
+      const hostile = join(holder, `${project.name} — preview #1 [v0.9]`, 'site folder');
       mkdirSync(hostile, { recursive: true });
       const names = unzipTo(zip, hostile);
       if (names.length !== listFiles(dir).length) problems.push(`the ZIP held ${names.length} files, the folder ${listFiles(dir).length}`);
@@ -144,8 +144,8 @@ export async function checkPortability({ root = null, browserName = 'chromium', 
       if (f.fontsFailed) measured.push({ key: 'portability:file://:fonts-not-loaded', detail: `over file:// ${browserName} did not load ${f.fontsFailed} web-font declaration(s) across the walk (${f.corsBlocked} refusals "Origin null is not allowed by Access-Control-Allow-Origin"): the text falls back to the metric-matched fallback fonts; over http the same fonts load`, value: f.fontsFailed });
       const scenarios = [
         ['http at the domain root', { prefix: '/' }, (b) => b, null],
-        ['http under /clients/acme/jade-and-ember/', { prefix: '/clients/acme/jade-and-ember/' }, (b) => b, 'sub'],
-        ['http under a subdirectory, directory URL without the trailing slash', { prefix: '/clients/acme/jade-and-ember/' }, (b) => b.replace(/\/$/, ''), 'sub'],
+        [`http under /clients/acme/${project.id}/`, { prefix: `/clients/acme/${project.id}/` }, (b) => b, 'sub'],
+        ['http under a subdirectory, directory URL without the trailing slash', { prefix: `/clients/acme/${project.id}/` }, (b) => b.replace(/\/$/, ''), 'sub'],
         ['http with extension-less URLs', { prefix: '/', pretty: true }, (b) => b, null],
         ['http without Range support', { prefix: '/', ranges: false }, (b) => b, null],
       ];
@@ -170,7 +170,7 @@ export async function checkPortability({ root = null, browserName = 'chromium', 
         }
       }
       // pretty URLs entered directly, query strings and fragments
-      const sv = serveSite(dir, { prefix: '/clients/acme/jade-and-ember/', pretty: true });
+      const sv = serveSite(dir, { prefix: `/clients/acme/${project.id}/`, pretty: true });
       const ctx = await browser.newContext({ viewport: { width: 1280, height: 800 }, reducedMotion: 'reduce' });
       for (const f of pagesOf(dir)) {
         const page = await ctx.newPage(); const failed = [];
@@ -186,7 +186,7 @@ export async function checkPortability({ root = null, browserName = 'chromium', 
       await ctx.close(); sv.close();
     } finally { await browser.close(); }
     if (adapters) notes.push('the same delivered folder, staged by the Cloudflare Pages and Vercel adapters and served by each adapter\'s simulation profile (clean URLs and the .html redirect, the generated header rules applied, Range answered as that host documents): every page walked on desktop and phone with real clicks, no failed request, no error (a simulation of documented behaviour, not the live service)');
-    notes.push('serving conventions walked with real clicks on every page, desktop and phone menu, brand and footer links, Back and Forward: extracted ZIP over file:// (path with spaces, &, em dash, #, brackets), domain root, /clients/acme/jade-and-ember/, the directory URL without a trailing slash (host redirect), extension-less URLs, a server without Range support, query strings and fragments');
+    notes.push(`serving conventions walked with real clicks on every page, desktop and phone menu, brand and footer links, Back and Forward: extracted ZIP over file:// (path with spaces, &, em dash, #, brackets), domain root, /clients/acme/${project.id}/, the directory URL without a trailing slash (host redirect), extension-less URLs, a server without Range support, query strings and fragments`);
     if (preloadPerLoad) measured.push({ key: 'portability:preload-media-warning', detail: `${browserName} writes ${preloadPerLoad} console warning(s) per load of the Home page, "Preload of .../media/hero-wok*.webp was ignored due to unknown as or type values, or non-matching media attribute": the Home page has one media-qualified hero preload per art direction and only one can match; the one that matches is used`, value: preloadPerLoad });
     const r = reconcile('portability', measured);
     return { problems: [...problems, ...r.problems], notes: [...notes, ...r.notes] };

@@ -23,12 +23,13 @@ import { fixtureRecord } from './evidence-fixtures.mjs';
 import { loadSpec } from './evidence.mjs';
 import { APPROVAL_SCHEMA, DEPLOYMENT_SCHEMA, REVIEWERS_SCHEMA, SEARCH_REVIEWED } from './records.mjs';
 import { buildVerificationRecord, sealOf } from './verification.mjs';
+import { fixtureNames, ids, project, projectFolder } from './project.mjs';
 
 export const SYNTH = 'SYNTHETIC DRY-RUN FIXTURE (not an approval, not evidence)';
 export const TODAY = () => new Date().toISOString().slice(0, 10);
 const sha = (b) => createHash('sha256').update(b).digest('hex');
 const deep = (o) => JSON.parse(JSON.stringify(o));
-const LEDGER = 'docs/JADE_AND_EMBER_APPROVALS.md';
+const LEDGER = project.governance.approvalsLog;
 const TARGETS = ['iphone-safari', 'android-chrome', 'sr-nvda-firefox', 'sr-voiceover-macos-safari', 'sr-talkback-android-chrome', 'desktop-chrome', 'desktop-firefox', 'desktop-safari', 'ci-run'];
 const SKIP_ANY = new Set(['node_modules', '.reports', '__pycache__', '.lighthouseci', 'shots']);
 const SKIP_TOP = new Set(['release', 'host', 'hashed', 'tests', 'tools', 'QA.md']);
@@ -42,7 +43,7 @@ export const PERSONA = {
 };
 const ALL = ['release-approval', 'rights-verification', 'search-review', 'external-links-review'];
 export const reviewerTable = () => ({
-  $comment: `${SYNTH}: personas written by the dry-run harness inside a throwaway copy.`, schema: REVIEWERS_SCHEMA, establishedBy: 'APR-JE-001',
+  $comment: `${SYNTH}: personas written by the dry-run harness inside a throwaway copy.`, schema: REVIEWERS_SCHEMA, establishedBy: ids.approval(1),
   reviewers: [
     { id: 'R-91', name: PERSONA.owner.name, role: 'synthetic dry-run persona (not a person)', mayApprove: ALL, mayReject: ALL, mayRevoke: [...ALL, 'deployment-authorisation'], validFrom: '2026-01-01', validTo: null },
     { id: 'R-92', name: PERSONA.rights.name, role: 'synthetic dry-run persona (not a person)', mayApprove: ['rights-verification'], mayReject: ['rights-verification'], mayRevoke: [], validFrom: '2026-01-01', validTo: null },
@@ -82,7 +83,7 @@ try {
 
 // ---- the sandbox
 export function createSandbox({ flavour = 'client' } = {}) {
-  const root = tempDir('dryrun'), proj = join(root, 'jade-and-ember'), aux = tempDir('dryaux');
+  const root = tempDir('dryrun'), proj = join(root, projectFolder), aux = tempDir('dryaux');
   writeFileSync(join(aux, 'helper.mjs'), HELPER);
   const g = (...a) => spawnSync('git', [...GIT, ...a], { cwd: root, encoding: 'utf8' });
   const sb = { root, proj, flavour, spec: loadSpec(), base: null, head: null, parent: null, configCommit: null, state: null, verifyText: null, rebindError: null };
@@ -107,11 +108,11 @@ export function createSandbox({ flavour = 'client' } = {}) {
     Object.assign(o.seo, { host: 'cloudflare-pages', urlStyle: 'clean', crawlers: { search: 'allow', aiSearch: 'allow', training: 'disallow' } });
   };
   if (flavour !== 'demo') {
-    const b = buildClient({ edit, base: 'https://www.jade-and-ember-fixture.com', label: 'dryrun-cfg' });
+    const b = buildClient({ edit, base: `https://${fixtureNames.productionHost}`, label: 'dryrun-cfg' });
     if (b.status !== 0) { rmSync(root, { recursive: true, force: true }); rmSync(b.root, { recursive: true, force: true }); throw new Error(`the synthetic client configuration does not build:\n${b.text}`); }
     for (const f of readdirSync(b.cfgDir)) cpSync(join(b.cfgDir, f), p(`config/${f}`));
     // the client fixture's own destinations are on reserved .test hosts, which a client release refuses; the throwaway copy uses ordinary invented names instead
-    for (const f of readdirSync(p('config'))) { const t = readFileSync(p(`config/${f}`), 'utf8'); writeFileSync(p(`config/${f}`), t.replace(/order\.example-restaurant\.test/g, 'order.jade-and-ember-fixture.com').replace(/maps\.example\.test/g, 'maps.jade-and-ember-fixture.com')); }
+    for (const f of readdirSync(p('config'))) { const t = readFileSync(p(`config/${f}`), 'utf8'); writeFileSync(p(`config/${f}`), t.replace(/order\.example-restaurant\.test/g, `order.${fixtureNames.fixtureDomain}`).replace(/maps\.example\.test/g, `maps.${fixtureNames.fixtureDomain}`)); }
     rmSync(b.root, { recursive: true, force: true });
   }
   sb.setVersion = (version, channel) => {
@@ -127,7 +128,7 @@ export function createSandbox({ flavour = 'client' } = {}) {
     writeFileSync(p('engineering/lib/authenticity.mjs'), sb.syntheticAuthenticity);
     // rights: what the closed requirements would look like once a person had done their part (all of it synthetic, inside the copy)
     const invPath = p('engineering/media-rights-inventory.json'), inv = JSON.parse(readFileSync(invPath, 'utf8'));
-    for (const a of inv.assets) if (a.kind === 'image' || a.kind === 'video') a.rights = { status: 'verified', approval: 'RIGHTS-JE-901', established: [`${SYNTH}: the use of this file is assumed here only to exercise the gate.`], notEstablished: [] };
+    for (const a of inv.assets) if (a.kind === 'image' || a.kind === 'video') a.rights = { status: 'verified', approval: ids.rec('RIGHTS', 901), established: [`${SYNTH}: the use of this file is assumed here only to exercise the gate.`], notEstablished: [] };
     for (const t of inv.terms) Object.assign(t, { status: 'reviewed', reviewedOn: TODAY(), reviewedBy: PERSONA.rights.name });
     writeFileSync(invPath, JSON.stringify(inv, null, 2) + '\n');
     const fp = p('engineering/findings.json'), fj = JSON.parse(readFileSync(fp, 'utf8'));
@@ -174,7 +175,7 @@ export function createSandbox({ flavour = 'client' } = {}) {
       : type === 'search-review' ? { searchDigest: sb.state.searchDigest, reviewed: [...SEARCH_REVIEWED] }
       : type === 'rights-verification' ? { sources: ['none: nothing exists to review (synthetic)'], verifiedOn: TODAY(), inventory: sb.state.mediaDigest, basis: 'licence' }
       : type === 'external-links-review' ? { destinationsDigest: sb.state.ext.digest, verification: 'EXTV-901', opened: true }
-      : { releaseApproval: 'REL-JE-901', targetHost: host };
+      : { releaseApproval: ids.rec('REL', 901), targetHost: host };
     const { subject: so, decidedBy: db, ...rest } = over;
     return {
       schema: type === 'deployment-authorisation' ? DEPLOYMENT_SCHEMA : APPROVAL_SCHEMA, id: `${prefix}-JE-901`, type, status: 'approved',
@@ -238,7 +239,7 @@ export function createSandbox({ flavour = 'client' } = {}) {
     sb.writeReviewers();
     if (flavour === 'client') {
       // (a build without search artifacts, such as a noindex one, has no search digest and so nothing a search review could be bound to)
-      for (const t of ['release-approval', 'rights-verification', 'search-review', 'external-links-review']) { if (t === 'search-review' && !sb.state.searchDigest) { sb.drop('SRCH-JE-901.json'); continue; } sb.put(sb.record(t)); }
+      for (const t of ['release-approval', 'rights-verification', 'search-review', 'external-links-review']) { if (t === 'search-review' && !sb.state.searchDigest) { sb.drop(ids.rec('SRCH', 901) + '.json'); continue; } sb.put(sb.record(t)); }
       sb.writeHistories();
       sb.writeEvidence();
     }

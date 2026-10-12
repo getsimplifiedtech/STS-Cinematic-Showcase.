@@ -13,7 +13,7 @@ import { registryIds } from './registry.mjs';
 export const VERIFY_SCHEMA = schemaId('verification@1');
 
 // Everything that decides what a check does or what the gate judges, as POSIX paths: the engineering folder's .mjs and .json (labelled relative to it), and the
-// code those checks import or run outside it (@project/ and @repo/ labels: the @ keeps them apart from a folder of the engineering folder that happens to be called project): the build, the shared source libraries (configuration, search, crawler policy), the browser
+// code those checks import or run outside it (project/ and repo/ labels; the engineering folder holds no folder of those names): the build, the shared source libraries (configuration, search, crawler policy), the browser
 // test helpers, the server script, package.json and the CI workflows. NOT code: the record families, the reviewer table, the demonstration registry, the reports,
 // the evidence folders, the governance ledgers and documents (recording or reviewing a release must not invalidate a verification).
 // Exclusions are EXACT paths, not names matched at any depth (a folder that happened to be called `files` could otherwise hide code; G6-2 review, F6).
@@ -31,12 +31,12 @@ export function engineFiles(eng = coreDir) {
   };
   walk(eng, '', '', EXCLUDE_PATH);
   const proj = eng === coreDir ? project : loadProject(join(eng, '..')), root = proj.root, repo = proj.repoRoot;   // the project that owns this engineering folder (a throwaway copy has its own)
-  for (const sub of proj.engine.projectFolders) if (existsSync(join(root, sub))) walk(root, sub, '@project/');
-  for (const f of proj.engine.projectFiles) if (existsSync(join(root, f))) out.push(`@project/${f}`);
-  if (existsSync(join(repo, '.github', 'workflows'))) walk(repo, '.github/workflows', '@repo/');
+  for (const sub of proj.engine.projectFolders) if (existsSync(join(root, sub))) walk(root, sub, 'project/');
+  for (const f of proj.engine.projectFiles) if (existsSync(join(root, f))) out.push(`project/${f}`);
+  if (existsSync(join(repo, '.github', 'workflows'))) walk(repo, '.github/workflows', 'repo/');
   return out.sort();
 }
-const pathOf = (eng, f) => { const proj = eng === coreDir ? project : loadProject(join(eng, '..')); return f.startsWith('@project/') ? join(proj.root, f.slice(9)) : f.startsWith('@repo/') ? join(proj.repoRoot, f.slice(6)) : join(eng, f); };
+const pathOf = (eng, f) => { const proj = eng === coreDir ? project : loadProject(join(eng, '..')); return f.startsWith('project/') ? join(proj.root, f.slice(8)) : f.startsWith('repo/') ? join(proj.repoRoot, f.slice(5)) : join(eng, f); };
 export function engineDigest(eng = coreDir) {
   return sha(engineFiles(eng).map((f) => `${sha(readFileSync(pathOf(eng, f)))}  ${f}`).join('\n') + '\n');
 }

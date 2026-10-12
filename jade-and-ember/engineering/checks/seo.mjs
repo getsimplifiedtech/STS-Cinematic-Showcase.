@@ -26,6 +26,7 @@ import { checkSecurityStatic } from './security.mjs';
 import { checkPrivacyStatic } from './privacy.mjs';
 import { engDir, isMain, projectDir, readJson } from '../lib/git.mjs';
 import { requireIndustry } from '../lib/industry.mjs';
+import { fixtureNames } from '../lib/project.mjs';
 import { validateStructuredData } from '../lib/structured-data.mjs';
 
 
@@ -154,7 +155,7 @@ export async function checkSeo({ root = null, browser = true, browserName = 'chr
     }
     // a hostile configuration cannot inject markup
     const evil = '</script><script>alert(1)</script>"><img src=x onerror=alert(1)>&';
-    const h = fx({ edit: (n, o) => { if (n === 'client') { o.brand.name = `Jade ${evil}`; o.seo.business.address.streetAddress = evil; o.address.lines[0] = evil; o.seo.business.servesCuisine = [evil]; } } });
+    const h = fx({ edit: (n, o) => { if (n === 'client') { o.brand.name = `${fixtureNames.brand} ${evil}`; o.seo.business.address.streetAddress = evil; o.address.lines[0] = evil; requireIndustry().hostileFields(o.seo.business, evil); } } });
     if (h.status !== 0) problems.push(`hostile-text fixture failed to build: ${h.text.slice(0, 200)}`);
     else {
       for (const f of [...pagesOf(h.dir), 'sitemap.xml', 'robots.txt']) { const t = readFileSync(join(h.dir, f), 'utf8'); if (/<img src=x|<script>alert|<\/script><script>/.test(t)) problems.push(`hostile configuration text became markup in ${f}`); }
@@ -163,12 +164,12 @@ export async function checkSeo({ root = null, browser = true, browserName = 'chr
       else notes.push('hostile configuration text (script, tag and attribute breakouts) stays escaped data in the JSON-LD, pages and sitemap');
     }
     // a base URL with a path
-    const sub = fx({ base: 'https://example.test/clients/jade' });
+    const sub = fx({ base: `https://example.test/clients/${fixtureNames.short}` });
     if (sub.status !== 0) problems.push(`subpath fixture failed: ${sub.text.slice(0, 200)}`);
     else { const c = checkSeoClient({ fixture: sub }); problems.push(...c.problems.map((m) => `base URL with a path: ${m}`)); if (!/robots\.txt is only read at the root/.test(sub.text)) problems.push('the build must warn that robots.txt only works at the domain root when the base URL has a path'); else notes.push('a base URL with a path works and the build warns that robots.txt belongs at the domain root'); }
     // validation messages
     const bads = [
-      ['an http base URL', { edit: (n, o) => { if (n === 'client') o.seo.baseUrl = 'http://jade.example.test'; } }, /https/],
+      ['an http base URL', { edit: (n, o) => { if (n === 'client') o.seo.baseUrl = `http://${fixtureNames.short}.example.test`; } }, /https/],
       ['a localhost base URL', { edit: (n, o) => { if (n === 'client') o.seo.baseUrl = 'https://localhost:8080'; } }, /localhost/],
       ['structured data without the business block', { business: null }, /needs seo\.business/],
       ['hours that cannot be understood', { edit: (n, o) => { if (n === 'client') o.hours.rows[1] = { days: 'Weekdays', time: 'noon till late' }; } }, /cannot be turned into opening hours/],
@@ -182,13 +183,14 @@ export async function checkSeo({ root = null, browser = true, browserName = 'chr
     for (const [name, opts, re] of bads) { const f = fx(opts); if (f.status === 0) problems.push(`"${name}" should fail the build but passed`); else if (!re.test(f.text)) problems.push(`"${name}" failed with an unexpected message: ${f.text.slice(0, 200)}`); else refused++; if (f.status !== 0 && existsSync(join(f.dir, 'sitemap.xml'))) problems.push(`"${name}" wrote a sitemap although validation failed`); }
     notes.push(`validation: ${refused}/${bads.length} bad production configurations are refused with readable messages and write nothing`);
     // staging and example hosts are recognised; real-looking domains are not
-    const reservedYes = ['jade.example.test', 'example.com', 'www.example.org', 'localhost', '127.0.0.1', '10.1.2.3', 'jade.pages.dev', 'jade.vercel.app', 'jade.netlify.app', 'staging.jade.com', 'preview.jade.com', 'jade.local', 'intranet.corp', 'jade.github.io', 'jade'];
-    const reservedNo = ['www.jadeandember.com', 'jadeandember.co.uk', 'kitchen.restaurant', 'www.jade-and-ember-fixture.com'];
+    const n = fixtureNames.short;
+    const reservedYes = [`${n}.example.test`, 'example.com', 'www.example.org', 'localhost', '127.0.0.1', '10.1.2.3', `${n}.pages.dev`, `${n}.vercel.app`, `${n}.netlify.app`, `staging.${n}.com`, `preview.${n}.com`, `${n}.local`, 'intranet.corp', `${n}.github.io`, n];
+    const reservedNo = [`www.${fixtureNames.compact}.com`, `${fixtureNames.compact}.co.uk`, requireIndustry().realLookingDomain, fixtureNames.productionHost];
     for (const h of reservedYes) if (!isReservedHost(h)) problems.push(`${h} must be recognised as a staging, example or local host`);
     for (const h of reservedNo) if (isReservedHost(h)) problems.push(`${h} must not be treated as a staging host`);
     notes.push(`staging and example hosts: ${reservedYes.length} reserved, preview and local names recognised, ${reservedNo.length} real-looking domains not flagged; the fixture's own host ${reservedBase(loadCfg(ok.dir, ok.cfgDir)) || '(none)'} is reserved by design`);
     // a production-shaped domain builds clean end to end
-    const prod = fx({ base: 'https://www.jade-and-ember-fixture.com', edit: (n, o) => { if (n === 'client') { o.seo.host = 'cloudflare-pages'; o.seo.urlStyle = 'clean'; o.seo.crawlers = { search: 'allow', aiSearch: 'allow', training: 'disallow' }; } } });
+    const prod = fx({ base: `https://${fixtureNames.productionHost}`, edit: (n, o) => { if (n === 'client') { o.seo.host = 'cloudflare-pages'; o.seo.urlStyle = 'clean'; o.seo.crawlers = { search: 'allow', aiSearch: 'allow', training: 'disallow' }; } } });
     if (prod.status !== 0) problems.push(`production-shaped fixture failed to build: ${prod.text.slice(0, 200)}`);
     else {
       const c = checkSeoClient({ fixture: prod }); problems.push(...c.problems.map((m) => `production-shaped build: ${m}`));

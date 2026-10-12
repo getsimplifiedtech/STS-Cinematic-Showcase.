@@ -21,6 +21,7 @@ import { withSite } from '../lib/runtime.mjs';
 import { assembleCandidate, pagesOf } from '../lib/site.mjs';
 import { engDir, isMain, listFiles, projectDir, readJson, repoRoot } from '../lib/git.mjs';
 import { selector, stylesheet } from '../lib/project.mjs';
+import { industry } from '../lib/industry.mjs';
 import { mediaRightsProblems } from '../lib/media-rights.mjs';
 import { standingRightsRecords } from '../lib/records.mjs';
 import { rmSync } from 'node:fs';
@@ -30,7 +31,7 @@ const attr = (tag, name) => { const m = new RegExp(`(?:^|\\s)${name}(?:="([^"]*)
 export function checkMediaStatic(root, cfgRoot = projectDir) {
   const measured = [];
   const bad = (rule, who, detail) => measured.push({ key: `media:${rule}:${who}`, detail });
-  const copy = readJson(join(cfgRoot, 'config', 'copy.json'));
+  const declared = industry ? industry.declaredMedia(cfgRoot) : { images: [], video: null };   // what the project's configuration says about its media (the industry adapter reads it)
   const files = listFiles(join(root, 'media')).filter((f) => f !== 'PROVENANCE.md');
   const referenced = new Set();
   const dims = {};   // intrinsic image sizes
@@ -100,28 +101,31 @@ export function checkMediaStatic(root, cfgRoot = projectDir) {
   for (const r of referenced) if (!files.includes(r)) bad('missing', r, `a page references media/${r}, which is not delivered`);
 
   // configuration against the files
-  const h = copy.home.hero, cfgDims = [[h.image.desktop, h.image.width, h.image.height], [h.image.mobile, h.image.mobileWidth, h.image.mobileHeight], [copy.menu.band.src, copy.menu.band.width, copy.menu.band.height], [copy.story.image.src, copy.story.image.width, copy.story.image.height]];
+  const cfgDims = declared.images;
   for (const [src, w, hh] of cfgDims) { const real = dims[src.replace(/^media\//, '')]; if (real && (real.width !== w || real.height !== hh)) bad('config-dimensions', src, `config says ${src} is ${w}x${hh}; the file is ${real.width}x${real.height}`); }
 
   // video files
-  const v = h.video;
-  const webm = readWebm(readFileSync(join(root, v.webm))), mp4 = readMp4(readFileSync(join(root, v.mp4)));
-  if (!webm) bad('video-format', v.webm, `${v.webm} cannot be read as WebM`);
-  else {
-    const vt = webm.tracks.filter((t) => t.type === 'vide'), at = webm.tracks.filter((t) => t.type === 'soun');
-    if (webm.doctype !== 'webm') bad('video-format', v.webm, `${v.webm} doctype is "${webm.doctype}", not webm`);
-    if (vt.length !== 1 || at.length) bad('video-tracks', v.webm, `${v.webm} must have exactly one video track and no audio (it has ${vt.length} video, ${at.length} audio)`);
-    if (vt[0] && vt[0].codec !== 'V_VP9') bad('video-codec', v.webm, `${v.webm} codec is ${vt[0].codec}, expected V_VP9`);
-    if (vt[0] && (vt[0].width !== v.width || vt[0].height !== v.height)) bad('video-dimensions', v.webm, `${v.webm} is ${vt[0].width}x${vt[0].height}; config says ${v.width}x${v.height}`);
-    if (webm.duration !== null && Math.abs(webm.duration - v.loopSeconds) > 0.25) bad('video-duration', v.webm, `${v.webm} lasts ${webm.duration.toFixed(2)} s; config says ${v.loopSeconds} s`);
-  }
-  if (!mp4) bad('video-format', v.mp4, `${v.mp4} cannot be read as MP4`);
-  else {
-    const vt = mp4.tracks.filter((t) => t.type === 'vide'), at = mp4.tracks.filter((t) => t.type === 'soun');
-    if (vt.length !== 1 || at.length) bad('video-tracks', v.mp4, `${v.mp4} must have exactly one video track and no audio (it has ${vt.length} video, ${at.length} audio)`);
-    if (vt[0] && vt[0].codec !== 'avc1') bad('video-codec', v.mp4, `${v.mp4} codec is ${vt[0].codec}, expected avc1 (H.264)`);
-    if (vt[0] && (vt[0].width !== v.width || vt[0].height !== v.height)) bad('video-dimensions', v.mp4, `${v.mp4} is ${vt[0].width}x${vt[0].height}; config says ${v.width}x${v.height}`);
-    if (mp4.duration !== null && Math.abs(mp4.duration - v.loopSeconds) > 0.25) bad('video-duration', v.mp4, `${v.mp4} lasts ${mp4.duration.toFixed(2)} s; config says ${v.loopSeconds} s`);
+  const v = declared.video;
+  if (v) {
+    const webm = readWebm(readFileSync(join(root, v.webm))), mp4 = readMp4(readFileSync(join(root, v.mp4)));
+    if (!webm) bad('video-format', v.webm, `${v.webm} cannot be read as WebM`);
+    else {
+      const vt = webm.tracks.filter((t) => t.type === 'vide'), at = webm.tracks.filter((t) => t.type === 'soun');
+      if (webm.doctype !== 'webm') bad('video-format', v.webm, `${v.webm} doctype is "${webm.doctype}", not webm`);
+      if (vt.length !== 1 || at.length) bad('video-tracks', v.webm, `${v.webm} must have exactly one video track and no audio (it has ${vt.length} video, ${at.length} audio)`);
+      if (vt[0] && vt[0].codec !== 'V_VP9') bad('video-codec', v.webm, `${v.webm} codec is ${vt[0].codec}, expected V_VP9`);
+      if (vt[0] && (vt[0].width !== v.width || vt[0].height !== v.height)) bad('video-dimensions', v.webm, `${v.webm} is ${vt[0].width}x${vt[0].height}; config says ${v.width}x${v.height}`);
+      if (webm.duration !== null && Math.abs(webm.duration - v.loopSeconds) > 0.25) bad('video-duration', v.webm, `${v.webm} lasts ${webm.duration.toFixed(2)} s; config says ${v.loopSeconds} s`);
+    }
+    if (!mp4) bad('video-format', v.mp4, `${v.mp4} cannot be read as MP4`);
+    else {
+      const vt = mp4.tracks.filter((t) => t.type === 'vide'), at = mp4.tracks.filter((t) => t.type === 'soun');
+      if (vt.length !== 1 || at.length) bad('video-tracks', v.mp4, `${v.mp4} must have exactly one video track and no audio (it has ${vt.length} video, ${at.length} audio)`);
+      if (vt[0] && vt[0].codec !== 'avc1') bad('video-codec', v.mp4, `${v.mp4} codec is ${vt[0].codec}, expected avc1 (H.264)`);
+      if (vt[0] && (vt[0].width !== v.width || vt[0].height !== v.height)) bad('video-dimensions', v.mp4, `${v.mp4} is ${vt[0].width}x${vt[0].height}; config says ${v.width}x${v.height}`);
+      if (mp4.duration !== null && Math.abs(mp4.duration - v.loopSeconds) > 0.25) bad('video-duration', v.mp4, `${v.mp4} lasts ${mp4.duration.toFixed(2)} s; config says ${v.loopSeconds} s`);
+    }
+
   }
 
   // provenance and rights
@@ -207,8 +211,8 @@ export async function checkMedia({ root = null, browser = true, browserName = 'c
     let measured = s.measured;
     // flashing (2.3.1): every video file, when ffmpeg is on the machine
     if (ffmpegAvailable()) {
-      const copy = readJson(join(projectDir, 'config', 'copy.json')).home.hero.video;
-      for (const f of [copy.webm, copy.mp4]) {
+      const copy = industry ? industry.declaredMedia(projectDir).video : null;
+      for (const f of copy ? [copy.webm, copy.mp4] : []) {
         const st = flashStats(join(dir, f));
         if (!st.ok) measured.push({ key: `media:flash:${f}`, detail: `${f} has up to ${st.maxPerSecond} large luminance reversals in one second (${st.worst}); the limit is 3 (2.3.1)` });
         notes.push(`flash proxy: ${f} ${st.frames} frames, at most ${st.maxPerSecond} reversal(s) per second`);

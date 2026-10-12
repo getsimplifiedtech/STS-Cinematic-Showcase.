@@ -73,7 +73,8 @@
     "probes": {
       "footerLinkPage": "visit-us.html",
       "sectionJumpPage": "menu.html"
-    }
+    },
+    "heroPreloadPattern": "media\\/hero-wok(-m)?\\.webp"
   },
   "generators": {
     "seo": "src/lib/seo.mjs",
@@ -82,11 +83,12 @@
   },
   "industry": "restaurant",
   "fixtures": {
-    "clientBuild": "engineering/project/client-build.mjs"
+    "clientBuild": "engineering/project-owned/client-build.mjs"
   },
   "baseline": {
     "label": "v0.8",
-    "record": "baseline.json"
+    "record": "baseline.json",
+    "regression": "engineering/project-owned/regression.mjs"
   },
   "creativeAuthority": {
     "record": "authority.json"
@@ -98,6 +100,7 @@
       "tools"
     ],
     "projectFiles": [
+      "sts.engineering.json",
       "build.mjs",
       "serve.py",
       "package.json"

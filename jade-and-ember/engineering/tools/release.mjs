@@ -22,6 +22,7 @@ import { startHereText } from '../lib/candidate.mjs';
 import { verifyPackage } from '../lib/release-package.mjs';
 import { engDir, listFiles, projectDir, readJson } from '../lib/git.mjs';
 import { project } from '../lib/project.mjs';
+import { industry } from '../lib/industry.mjs';
 import { loadPolicy, renderApache, renderHeadersFile, renderNginx } from '../lib/security.mjs';
 
 const arg = (n) => { const i = process.argv.indexOf(n); return i > -1 ? process.argv[i + 1] : null; };
@@ -46,7 +47,7 @@ try {
     if (!d) { console.log('This build has no search artifacts (the fictional demonstration is noindex and publishes none).'); finish(0); }
     console.log(`digest: ${d}\n\nReview exactly these files before an authorised reviewer records a search-review (npm run release:record -- template search-review prints the record with this digest filled in; the decision, the reviewer and the rationale are theirs to write):`);
     for (const f of ['sitemap.xml', 'robots.txt', 'llms.txt']) console.log(`  ${f}`);
-    console.log('  the Home page JSON-LD block\nCheck: every fact (name, address, phone, hours, cuisine, ordering link) against the client; the schema.org type; the crawler classes; the production domain.');
+    console.log('  the Home page JSON-LD block\nCheck: every fact (' + (industry ? industry.factsList : 'name, address, phone, hours, ordering link') + ') against the client; the schema.org type; the crawler classes; the production domain.');
     finish(0);
   }
   if (cmd === 'external-digest') {

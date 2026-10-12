@@ -7,6 +7,12 @@ export const id = 'restaurant';
 export const schemaType = 'Restaurant';
 // what a visitor would take the demonstration for if it were not labelled fictional (used in the demonstration notes of check:seo)
 export const businessNoun = 'restaurant';
+// a plausible real domain of this industry that must not be mistaken for a staging host (check:seo)
+export const realLookingDomain = 'kitchen.restaurant';
+// check:seo's hostile-input case: the industry fields of seo.business that carry text into the page and the structured data
+export function hostileFields(business, evil) { business.servesCuisine = [evil]; }
+// the facts a person compares with the client when reviewing the search artifacts (tools/release.mjs prints them)
+export const factsList = 'name, address, phone, hours, cuisine, ordering link';
 export const allowedTypes = ['Restaurant', 'FoodEstablishment', 'CafeOrCoffeeShop', 'BarOrPub', 'Bakery', 'FastFoodRestaurant'];
 // how check:seo names what the structured data of an indexable build must match
 export const summary = 'Restaurant matching the configuration (name, phone, address, cuisine, hours, menu, image)';
@@ -32,4 +38,17 @@ export function pageProblems(ld, cfg) {
   const { publicUrl } = generator('seo');
   const menu = cfg.pages.find((x) => x.id === 'menu');
   return ld.hasMenu !== publicUrl({ client: cfg.client, pages: cfg.pages }, menu) ? ['hasMenu must be the menu page\'s public URL'] : [];
+}
+
+// What the restaurant configuration (config/copy.json) declares about media, for check:media to hold against the files: the hero images, the menu band, the story image,
+// and the hero video with its size and loop length. Read from the project folder it is given.
+import { readFileSync } from 'node:fs';
+import { join } from 'node:path';
+export function declaredMedia(root) {
+  const copy = JSON.parse(readFileSync(join(root, 'config', 'copy.json'), 'utf8'));
+  const h = copy.home.hero;
+  return {
+    images: [[h.image.desktop, h.image.width, h.image.height], [h.image.mobile, h.image.mobileWidth, h.image.mobileHeight], [copy.menu.band.src, copy.menu.band.width, copy.menu.band.height], [copy.story.image.src, copy.story.image.width, copy.story.image.height]],
+    video: h.video,
+  };
 }

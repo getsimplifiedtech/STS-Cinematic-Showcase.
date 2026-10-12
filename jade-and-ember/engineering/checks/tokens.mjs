@@ -50,7 +50,8 @@ export function checkTokens({ root = projectDir, cssFile = stylesheet, pagesRoot
   if (literals > rec.colorLiteralsOutsideRoot) problems.push(`${literals} hard-coded colours outside :root (the recorded count is ${rec.colorLiteralsOutsideRoot}): use a token, or record an owner-approved change`);
   // valid
   for (const [k, v] of Object.entries(tokens)) {
-    if (/^--(kitchen|lacquer|pine|celadon|rice|rice-dim|ember|ember-hi|line)$/.test(k) && !hex(v)) problems.push(`${k}: "${v}" is not a six-digit hex colour`);
+    // a token the snapshot records as a hex colour stays a six-digit hex colour
+    if (/^#/.test(rec.tokens[k] ?? '') && !hex(v)) problems.push(`${k}: "${v}" is not a six-digit hex colour`);
   }
   const px = rec.spacingScale.map((k) => parseFloat(tokens[k]));
   if (px.some((v, i) => !Number.isFinite(v) || (i > 0 && v <= px[i - 1]))) problems.push(`the spacing scale ${rec.spacingScale.join(', ')} must be numbers that only grow (${px.join(', ')})`);

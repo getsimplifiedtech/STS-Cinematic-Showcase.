@@ -77,7 +77,23 @@ export function buildCommand(root, out) {
 }
 // The build command as a person would type it, for messages ("node build.mjs").
 export const buildCommandText = project.delivery.build ? project.delivery.build.command.filter((t) => t !== '--out' && t !== '{out}').join(' ') : null;
+// Invented names for test material, derived from the project id so that a fixture host is never another project's: jade-and-ember gives jadeandember (compact), jade
+// (short) and www.jade-and-ember-fixture.com (the production-shaped fixture host). Example and fixture hosts are reserved by design and are never contacted.
+export const fixtureNames = Object.freeze({
+  compact: project.id.replace(/-/g, ''), short: project.id.split('-')[0], brand: project.name.split(/\s+/)[0],
+  exampleHost: `${project.id.replace(/-/g, '')}.example.test`, fixtureDomain: `${project.id}-fixture.com`, productionHost: `www.${project.id}-fixture.com`,
+});
+
+// Governance and release record ids as test material writes them: ids.rec('REL', 902) is REL-JE-902, ids.approval(17) is APR-JE-017, ids.demo(1) is DEMO-JE-001 (the project's own prefixes).
+const pad = (n) => String(n).padStart(3, '0');
+export const ids = Object.freeze({
+  rec: (kind, n) => `${recordPrefix(kind)}-${pad(n)}`,
+  approval: (n) => `${project.governance.approvalIdPrefix}-${pad(n)}`,
+  demo: (n) => `${project.governance.demonstrationIdPrefix}-${pad(n)}`,
+});
 export const stylesheet = project.delivery.stylesheet;
+// The baseline's version as VERSION.json writes it (v0.8 -> 0.8).
+export const baselineVersion = (project.baseline?.label ?? '').replace(/^v/, '');
 export const baselineLabel = project.baseline?.label ?? 'baseline';
 export const workflowPath = (root = project.repoRoot) => join(root, '.github', 'workflows', project.ci.workflow);
 

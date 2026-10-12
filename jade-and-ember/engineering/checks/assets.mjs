@@ -13,7 +13,7 @@ import { assembleCandidate, loadAllowlist, pagesOf, SHARED } from '../lib/site.m
 import { buildHashed, buildManifest, sha256hex, treeHash } from '../lib/hashed.mjs';
 import { runRegression } from '../lib/regression.mjs';
 import { baselineRecord, engDir, exportBaseline, isMain, listFiles, projectDir, readJson, repoRoot, tempDir } from '../lib/git.mjs';
-import { baselineLabel } from '../lib/project.mjs';
+import { baselineLabel, stylesheet } from '../lib/project.mjs';
 
 // every local reference in pages and CSS resolves to a file in the folder
 export function refsResolve(dir) {
@@ -79,7 +79,7 @@ export async function checkAssets({ root = null, browser = true, browserName = '
     for (const f of SHARED.filter((x) => x.endsWith('.js'))) if (!readFileSync(join(dir, f)).equals(readFileSync(join(h1, built.map[f])))) problems.push(`${f}: script bytes changed by hashing`);
     problems.push(...refsResolve(h1).map((p) => `hashed build: ${p}`));
     const stale = (text, names) => names.filter((old) => new RegExp(`(?<![\\w.-])${old.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}(?![\\w.])`).test(text));
-    const css = readFileSync(join(h1, built.map['styles.css']), 'utf8');
+    const css = readFileSync(join(h1, built.map[stylesheet]), 'utf8');
     for (const f of pagesOf(h1)) for (const old of stale(readFileSync(join(h1, f), 'utf8'), Object.keys(built.map).filter((k) => !/\.(md|txt)$/.test(k)))) problems.push(`hashed build: ${f} still refers to ${old}`);
     for (const old of stale(css, Object.keys(built.map).filter((k) => /^(fonts|media)\//.test(k) && !/\.(md|txt)$/.test(k)))) problems.push(`hashed build: the stylesheet still refers to ${old}`);
     for (const f of pagesOf(dir)) if (!existsSync(join(h1, f))) problems.push(`hashed build lost ${f}`);

@@ -245,6 +245,10 @@
         "record": {
           "type": "string",
           "description": "The baseline record, relative to the engineering folder."
+        },
+        "regression": {
+          "type": "string",
+          "description": "A module in the project (relative to the project root) that exports scenarios (behaviour scenarios) and states (state screenshots) for the regression harness to run against the baseline and the candidate."
         }
       }
     },
@@ -367,7 +371,8 @@
       "required": [
         "selectors",
         "heroStates",
-        "probes"
+        "probes",
+        "heroPreloadPattern"
       ],
       "additionalProperties": false,
       "description": "The markup contract the browser checks rely on, as CSS selectors and class names. The creative authority decides how the site looks; engineering only needs to find the controls it has to operate. A selector a check needs but the project sets to null is an error, never a silent skip.",
@@ -495,6 +500,11 @@
               "description": "The page file that carries the in-page jump navigation."
             }
           }
+        },
+        "heroPreloadPattern": {
+          "type": "string",
+          "minLength": 1,
+          "description": "A regular expression (source text, no slashes) for the hero image paths the Home page preloads once per art direction; Firefox's known warning about a non-matching media-qualified preload is recognised only for these (F-G5-02)."
         }
       }
     },

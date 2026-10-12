@@ -14,7 +14,13 @@ import { serveSite } from './server.mjs';
 import { environment, launchBrowser } from './browser.mjs';
 import { satisfies } from './node-range.mjs';
 import { comparePng } from './pixels.mjs';
-import { scenarios } from './scenarios.mjs';
+import { join as joinPath } from 'node:path';
+import { pathToFileURL } from 'node:url';
+import { project } from './project.mjs';
+
+// The behaviour scenarios and the state screenshots are the PROJECT's: they exercise its own controls (sts.engineering.json, baseline.regression). The harness only compares.
+const projectRegression = project.baseline && project.baseline.regression ? await import(pathToFileURL(joinPath(project.root, ...project.baseline.regression.split('/'))).href) : { scenarios: [], states: [] };
+const { scenarios, states } = projectRegression;
 import { compareSources, loadAllowlist, pagesOf } from './site.mjs';
 import { approvedStyleDifference, loadApprovedStyleDifferences } from './approved-styles.mjs';
 
@@ -169,14 +175,7 @@ export async function runRegression({ baselineRoot, candidateRoot, browserName =
 
       if (want('pixels') && subset.states !== false) {
         const vp = (n) => env.viewports.find((v) => v.name === n);
-        // phone menu open
-        { const { b, c, close } = await pair(vp('mobile-390'), 'index.html'); await Promise.all([b, c].map((p) => p.click('.nav-toggle'))); await b.waitForTimeout(300); await shot('state-phone-menu-open', b, c, { fullPage: false }); await close(); }
-        // keyboard focus ring (skip link, then the first navigation link)
-        { const { b, c, close } = await pair(vp('desktop-1440'), 'index.html'); for (const p of [b, c]) { await p.keyboard.press('Tab'); await p.keyboard.press('Tab'); } await shot('state-focus-ring', b, c, { fullPage: false }); await close(); }
-        // current menu jump link
-        { const { b, c, close } = await pair(vp('desktop-1440'), 'menu.html'); await Promise.all([b, c].map(async (p) => { await p.evaluate(() => { const ids = [...document.querySelectorAll('.jump a')].map((a) => a.getAttribute('href').slice(1)); const el = document.getElementById(ids[2]); scrollTo({ top: el.getBoundingClientRect().top + scrollY - innerHeight * 0.32, left: 0, behavior: 'instant' }); }); await p.waitForTimeout(400); })); await shot('state-menu-current-jump-link', b, c, { fullPage: false }); await close(); }
-        // print layout of the menu
-        { const { b, c, close } = await pair({ name: 'print', width: 1000, height: 1400 }, 'menu.html'); await Promise.all([b, c].map((p) => p.emulateMedia({ media: 'print' }))); await shot('state-menu-print', b, c); await close(); }
+        for (const st of states) await st.run({ pair, vp, shot });   // the project's state screenshots (project/regression.mjs)
       }
 
       if (want('behaviour')) {

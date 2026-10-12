@@ -195,8 +195,8 @@ PASS  check:portability (T s)
   dry run (synthetic, in a throwaway copy; real tool, parser, validator and git): 319/319 scenarios as expected — success path 1/1, approvals 42/42, domain 12/12, verification 16/16, candidate 9/9, tree 1/1, stays-valid 11/11, records 15/15, evidence 29/29, configuration 18/18, ci-evidence 11/11, external-links 16/16, rights 10/10, social 4/4, supply 17/17, authenticity 2/2, environment 14/14, ledger 2/2, package 65/65, channel 11/11, deployment 10/10, separation 3/3
   findings with blocking scenarios (blocking+must-stay-valid / all pass; RG-14 is held shut by the authenticity hard stop, not resolved): RG-01 12+4 (all as expected), RG-02 20+0 (all as expected), RG-03 14+0 (all as expected), RG-04 13+2 (all as expected), RG-05 2+1 (all as expected), RG-06 5+1 (all as expected), RG-07 2+1 (all as expected), RG-08 17+0 (all as expected), RG-09 1+0 (all as expected), RG-10 13+1 (all as expected), RG-11 10+0 (all as expected), RG-13 14+0 (all as expected), RG-14 4+0 (all as expected)
   measured gaps (not failures): 6 probes, 2 let something through that should arguably be refused: RG-08, RG-12 (see engineering/RELEASE-DRYRUN-GATE5.md and G6-2-REPORT.md)
-  release-control proof of concept (G6-3A): 41 cases held, 0 failed; 41 release-control cases run in 35 s; synthetic clients and disposable tokens only; nothing was deployed anywhere but a throwaway folder
-  took 259 s; the synthetic folders were deleted; the real ledger, records, reviewer table and tree are unchanged
+  release-control proof of concept (G6-3A): 41 cases held, 0 failed; 41 release-control cases run in T s; synthetic clients and disposable tokens only; nothing was deployed anywhere but a throwaway folder
+  took T s; the synthetic folders were deleted; the real ledger, records, reviewer table and tree are unchanged
 PASS  check:release-dryrun (T s)
 
 == check:regression: candidate against the frozen v0.8 baseline (source, text, structure, styles, pixels, behaviour)
@@ -268,7 +268,7 @@ PASS  check:selftest (T s)
   caught: contracts: a script injected through a component
   caught: flash: a 6 Hz strobe (12 reversals per second)
   caught: findings register: a new finding, a worse finding and a stale entry
-  42 targeted negative tests run in 155 s
+  42 targeted negative tests run in T s
 PASS  check:selftest-gate2 (T s)
 
 == check:selftest-gate3: Gate 3 checks fail when they should (targeted negative tests)
@@ -340,7 +340,7 @@ PASS  check:selftest-gate2 (T s)
   caught: ci: the blocking job may fail silently
   caught: ci: the verify step removed
   the real workflow passes the CI check
-  68 targeted negative tests run in 177 s
+  68 targeted negative tests run in T s
 PASS  check:selftest-gate3 (T s)
 
 == check:selftest-gate5: the cross-browser harness cannot skip a check silently, reports engine adaptations, and D-11 detection works
@@ -369,7 +369,7 @@ PASS  check:selftest-gate3 (T s)
   caught: ci: a cross-browser job that installs no browser is refused
   caught: ci: the Chromium verify job is unchanged and still blocking
   held: ci: the untouched workflow passes (must find nothing)
-  25 harness tests run in 19 s
+  25 harness tests run in T s
 PASS  check:selftest-gate5 (T s)
 
 == check:selftest-gate6: Gate 6 (G6-1): the direct Lighthouse runner, its floor and aggregation, the Node 24 baseline, the engines ranges, the retired Lighthouse CI and the pinned Actions fail when they should; the runner is driven against the real site
@@ -472,7 +472,7 @@ PASS  check:selftest-gate5 (T s)
   held: runner: the measured accessibility score is a real number, and the Lighthouse version is the pinned one
   caught: runner: impossible thresholds on the real measurement fail the command
   caught: runner: a page that does not exist is a failed run, not a pass
-  99 Gate 6 (G6-1 to G6-3) tests run in 15 s; aggregations: optimistic, median, pessimistic
+  99 Gate 6 (G6-1 to G6-3) tests run in T s; aggregations: optimistic, median, pessimistic
 PASS  check:selftest-gate6 (T s)
 
 == check:selftest-evidence: the evidence validator rejects incomplete, fabricated, mismatched and wrongly classified human-testing evidence (negative tests)
@@ -731,7 +731,7 @@ PASS  check:selftest-evidence (T s)
   the untouched demonstration pages pass html-validate
   the untouched demonstration and client build pass the link checks
   the untouched client build passes the SEO and hosting checks
-  251 targeted negative tests run in 26 s
+  251 targeted negative tests run in T s
 PASS  check:selftest-gate4 (T s)
 
 == summary

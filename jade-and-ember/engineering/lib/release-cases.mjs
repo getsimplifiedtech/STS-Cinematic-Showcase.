@@ -15,6 +15,7 @@ const mutateEv = (target, fn) => G().evidence.map((e) => (e.record.target === ta
 const cfg = (fn) => { const c = G().client; fn(c); return c; };
 const OTHER = '0'.repeat(64);
 import { registryDigest as destinationsDigestOf } from './external.mjs';
+import { fixtureNames, ids, schemaId } from './project.mjs';
 const require_digest = (pairs) => destinationsDigestOf({ destinations: pairs.map(([kind, url]) => ({ kind, url })) });
 const rec = (type, over, o) => fxRecord(type, over, o);
 const hist = (fn) => { const h = fxExternalHistory(); fn(h.records[0]); return h; };
@@ -62,8 +63,8 @@ export const RELEASE_CASES = {
     'a release approval for the other channel': { approvalRecords: editType('release-approval', (r) => { r.channel = 'demonstration'; }) },
     'a release approval whose status is rejected': { approvalRecords: editType('release-approval', (r) => { r.status = 'rejected'; }) },
     'a release approval and a later rejection (both in force)': { approvalRecords: plus(rec('release-approval', { status: 'rejected', decidedAt: '2026-10-11T12:00:00Z' }, { n: 2 })) },
-    'a release approval revoked by an authorised reviewer': { approvalRecords: plus(rec('release-approval', { status: 'revoked', ends: 'REL-JE-001', decidedAt: '2026-10-11T12:00:00Z' }, { n: 2 })) },
-    'a release approval superseded without a replacement': { approvalRecords: plus(rec('release-approval', { status: 'superseded', ends: 'REL-JE-001', decidedAt: '2026-10-11T12:00:00Z' }, { n: 2 })) },
+    'a release approval revoked by an authorised reviewer': { approvalRecords: plus(rec('release-approval', { status: 'revoked', ends: ids.rec('REL', 1), decidedAt: '2026-10-11T12:00:00Z' }, { n: 2 })) },
+    'a release approval superseded without a replacement': { approvalRecords: plus(rec('release-approval', { status: 'superseded', ends: ids.rec('REL', 1), decidedAt: '2026-10-11T12:00:00Z' }, { n: 2 })) },
     'a release approval by a reviewer who is not in the table': { approvalRecords: editType('release-approval', (r) => { r.decidedBy = { reviewer: 'R-09', name: 'Nobody' }; }) },
     'a release approval by a reviewer who may not approve it (rights reviewer)': { approvalRecords: editType('release-approval', (r) => { r.decidedBy = { reviewer: 'R-02', name: 'Fixture Rights Reviewer' }; }) },
     'a release approval signed with the wrong name for a valid reviewer id': { approvalRecords: editType('release-approval', (r) => { r.decidedBy.name = 'Someone Else'; }) },
@@ -71,21 +72,21 @@ export const RELEASE_CASES = {
     'a release approval decided after the reviewer\'s authorisation ended': { reviewers: (() => { const t = fxReviewers(); t.reviewers[0].validTo = '2026-10-01'; return t; })() },
     'an empty reviewer table': { reviewers: fxReviewers({ establishedBy: null, reviewers: [] }) },
     'a reviewer table with a duplicate id': { reviewers: (() => { const t = fxReviewers(); t.reviewers.push({ ...t.reviewers[0] }); return t; })() },
-    'a reviewer table established by a governance record that does not exist': { reviewers: fxReviewers({ establishedBy: 'APR-JE-999' }) },
+    'a reviewer table established by a governance record that does not exist': { reviewers: fxReviewers({ establishedBy: ids.approval(999) }) },
     'an approval dated in the future': { approvalRecords: editType('release-approval', (r) => { r.decidedAt = '2026-12-31T10:00:00Z'; }) },
     'a record with a status the model does not know': { approvalRecords: editType('release-approval', (r) => { r.status = 'pending'; }) },
     'a record with the status spelled in prose': { approvalRecords: editType('release-approval', (r) => { r.status = 'approved (REVOKED)'; }) },
-    'a record of an unknown type': { approvalRecords: plus({ ...rec('release-approval'), type: 'something-else', id: 'REL-JE-009' }) },
+    'a record of an unknown type': { approvalRecords: plus({ ...rec('release-approval'), type: 'something-else', id: ids.rec('REL', 9) }) },
     'a record file that is not valid JSON': { approvalRecords: [...G().approvalRecords, { file: 'broken.json', record: null, parseError: 'not valid JSON (Unexpected token)' }] },
     'a release approval that carries no production host': { approvalRecords: editType('release-approval', (r) => { delete r.subject.productionHost; }) },
     'a release approval for a different production host': { approvalRecords: editType('release-approval', (r) => { r.subject.productionHost = 'www.other-restaurant.com'; }) },
-    'a release approval for a reserved host (example.test)': { approvalRecords: editType('release-approval', (r) => { r.subject.productionHost = 'jade.example.test'; }), client: cfg((c) => { c.seo.baseUrl = 'https://jade.example.test'; }) },
-    'an unauthorised revocation (the approval stays, the record blocks)': { approvalRecords: plus(rec('release-approval', { status: 'revoked', ends: 'REL-JE-001', decidedBy: { reviewer: 'R-02', name: 'Fixture Rights Reviewer' }, decidedAt: '2026-10-11T12:00:00Z' }, { n: 2 })) },
+    'a release approval for a reserved host (example.test)': { approvalRecords: editType('release-approval', (r) => { r.subject.productionHost = `${fixtureNames.short}.example.test`; }), client: cfg((c) => { c.seo.baseUrl = `https://${fixtureNames.short}.example.test`; }) },
+    'an unauthorised revocation (the approval stays, the record blocks)': { approvalRecords: plus(rec('release-approval', { status: 'revoked', ends: ids.rec('REL', 1), decidedBy: { reviewer: 'R-02', name: 'Fixture Rights Reviewer' }, decidedAt: '2026-10-11T12:00:00Z' }, { n: 2 })) },
     'an unauthorised rejection': { approvalRecords: plus(rec('release-approval', { status: 'rejected', decidedBy: { reviewer: 'R-09', name: 'Nobody' }, decidedAt: '2026-10-11T12:00:00Z' }, { n: 2 })) },
-    'a revocation that ends a record that does not exist': { approvalRecords: plus(rec('release-approval', { status: 'revoked', ends: 'REL-JE-077', decidedAt: '2026-10-11T12:00:00Z' }, { n: 2 })) },
-    'a revocation that ends an approval of another candidate': { approvalRecords: plus(rec('release-approval', { status: 'revoked', ends: 'REL-JE-001', decidedAt: '2026-10-11T12:00:00Z' }, { n: 2, candidate: OTHER })) },
-    'a revocation dated before the approval it ends': { approvalRecords: plus(rec('release-approval', { status: 'revoked', ends: 'REL-JE-001', decidedAt: '2026-10-10T08:00:00Z' }, { n: 2 })) },
-    'a revocation of a revocation': { approvalRecords: plus(rec('release-approval', { status: 'revoked', ends: 'REL-JE-001', decidedAt: '2026-10-11T12:00:00Z' }, { n: 2 }), rec('release-approval', { status: 'revoked', ends: 'REL-JE-002', decidedAt: '2026-10-11T13:00:00Z' }, { n: 3 }), rec('release-approval', { decidedAt: '2026-10-11T14:00:00Z' }, { n: 4 })).filter((e) => e.record.id !== 'REL-JE-001') },
+    'a revocation that ends a record that does not exist': { approvalRecords: plus(rec('release-approval', { status: 'revoked', ends: ids.rec('REL', 77), decidedAt: '2026-10-11T12:00:00Z' }, { n: 2 })) },
+    'a revocation that ends an approval of another candidate': { approvalRecords: plus(rec('release-approval', { status: 'revoked', ends: ids.rec('REL', 1), decidedAt: '2026-10-11T12:00:00Z' }, { n: 2, candidate: OTHER })) },
+    'a revocation dated before the approval it ends': { approvalRecords: plus(rec('release-approval', { status: 'revoked', ends: ids.rec('REL', 1), decidedAt: '2026-10-10T08:00:00Z' }, { n: 2 })) },
+    'a revocation of a revocation': { approvalRecords: plus(rec('release-approval', { status: 'revoked', ends: ids.rec('REL', 1), decidedAt: '2026-10-11T12:00:00Z' }, { n: 2 }), rec('release-approval', { status: 'revoked', ends: ids.rec('REL', 2), decidedAt: '2026-10-11T13:00:00Z' }, { n: 3 }), rec('release-approval', { decidedAt: '2026-10-11T14:00:00Z' }, { n: 4 })).filter((e) => e.record.id !== ids.rec('REL', 1)) },
     'a revocation without an ends field': { approvalRecords: plus((() => { const r = rec('release-approval', { status: 'revoked', decidedAt: '2026-10-11T12:00:00Z' }, { n: 2 }); return r; })()) },
     'a missing rights verification': { approvalRecords: withoutType('rights-verification') },
     'a rights verification that names no source': { approvalRecords: editType('rights-verification', (r) => { r.subject.sources = []; }) },
@@ -99,7 +100,7 @@ export const RELEASE_CASES = {
     'a search review that does not list the structured data': { approvalRecords: editType('search-review', (r) => { r.subject.reviewed = ['business-facts', 'crawler-policy']; }) },
     'a search review for another candidate': { approvalRecords: editType('search-review', (r) => { r.candidate = OTHER; }) },
     'no search artifacts to review': { searchDigest: null },
-    'a missing required gate approval (APR-JE-017)': { approvals: G().approvals.filter((a) => a.id !== 'APR-JE-017') },
+    'a missing required gate approval (APR-JE-017)': { approvals: G().approvals.filter((a) => a.id !== ids.approval(17)) },
     // ---- the tree, the verification record (RG-08), findings
     'a dirty working tree': { git: { ...G().git, dirty: true } },
     'no verification record': { verify: null },
@@ -168,11 +169,11 @@ export const RELEASE_CASES = {
     'a clickable link the site refused (blocked)': { externalHistory: hist((r) => { Object.assign(r.results[0], { class: 'blocked', finalStatus: 403 }); }) },
     'a clickable link that is gone (unavailable)': { externalHistory: hist((r) => { Object.assign(r.results[0], { class: 'unavailable', finalStatus: 404 }); }) },
     'a clickable link that could not be reached (inconclusive)': { externalHistory: hist((r) => { Object.assign(r.results[0], { class: 'inconclusive', finalStatus: null, chain: [] }); }) },
-    'a verified link through an http hop': { externalHistory: hist((r) => { r.results[0].chain = [{ url: 'http://order.jade-and-ember-fixture.com/', status: 301, method: 'HEAD' }, ...r.results[0].chain]; }) },
-    'a verification record with no result for a destination': { externalHistory: hist((r) => { r.results = [{ ...r.results[0], url: 'https://elsewhere.jade-and-ember-fixture.com/' }]; }) },
-    'a clickable link that is not https': extCase('http://order.jade-and-ember-fixture.com/'),
+    'a verified link through an http hop': { externalHistory: hist((r) => { r.results[0].chain = [{ url: `http://order.${fixtureNames.fixtureDomain}/`, status: 301, method: 'HEAD' }, ...r.results[0].chain]; }) },
+    'a verification record with no result for a destination': { externalHistory: hist((r) => { r.results = [{ ...r.results[0], url: `https://elsewhere.${fixtureNames.fixtureDomain}/` }]; }) },
+    'a clickable link that is not https': extCase(`http://order.${fixtureNames.fixtureDomain}/`),
     'a clickable link to a reserved host': extCase('https://order.jade-and-ember-fixture.test/'),
-    'a clickable link to a staging host': extCase('https://stage2.jade-and-ember-fixture.com/'),
+    'a clickable link to a staging host': extCase(`https://stage2.${fixtureNames.fixtureDomain}/`),
     'an external-links review and a later rejection of it, both in force': { approvalRecords: plus(rec('external-links-review', { status: 'rejected', decidedAt: '2026-10-11T12:00:00Z' }, { n: 2 })) },
     'a missing external-links review': { approvalRecords: withoutType('external-links-review') },
     'an external-links review of another destination list': { approvalRecords: editType('external-links-review', (r) => { r.subject.destinationsDigest = OTHER; }) },
@@ -186,8 +187,8 @@ export const RELEASE_CASES = {
     'a rights verification with no inventory digest': { approvalRecords: editType('rights-verification', (r) => { delete r.subject.inventory; }) },
     'a rights verification with a basis the model does not know': { approvalRecords: editType('rights-verification', (r) => { r.subject.basis = 'it seemed fine'; }) },
     'an image still unverified in the inventory': { inventory: inv((i) => { i.assets[0].rights = { status: 'unverified', established: ['x'], notEstablished: ['the licence'] }; }) },
-    'an inventory approval naming a record that does not exist': { inventory: inv((i) => { i.assets[0].rights.approval = 'RIGHTS-JE-777'; }) },
-    'the rights verification revoked after the inventory was written (the inventory still says verified)': { approvalRecords: plus(rec('rights-verification', { status: 'revoked', ends: 'RIGHTS-JE-001', decidedAt: '2026-10-11T12:00:00Z' }, { n: 2 })) },
+    'an inventory approval naming a record that does not exist': { inventory: inv((i) => { i.assets[0].rights.approval = ids.rec('RIGHTS', 777); }) },
+    'the rights verification revoked after the inventory was written (the inventory still says verified)': { approvalRecords: plus(rec('rights-verification', { status: 'revoked', ends: ids.rec('RIGHTS', 1), decidedAt: '2026-10-11T12:00:00Z' }, { n: 2 })) },
     'the rights verification rejected after the inventory was written': { approvalRecords: plus(rec('rights-verification', { status: 'rejected', decidedAt: '2026-10-11T12:00:00Z' }, { n: 2 })) },
     'provider terms nobody has reviewed': { inventory: inv((i) => { i.terms[0].status = 'not-reviewed'; delete i.terms[0].reviewedOn; delete i.terms[0].reviewedBy; }) },
     'the Noto Serif SC notice finding (F-G5-05) still open': { findings: [{ id: 'F-G5-05', severity: 'Minor', visual: false, status: 'open: awaits the owner' }] },
@@ -223,9 +224,9 @@ export const RELEASE_CASES = {
     // ---- G6-3: authenticity (D-G62-2, RG-14): the real verifier is a hard stop
     'authenticated authorisation and provenance (not implemented)': { authenticityVerifier: undefined },
     // ---- search, domain and configuration
-    'a staging domain (pages.dev)': { client: cfg((c) => { c.seo.baseUrl = 'https://jade.pages.dev'; }) },
-    'an example domain': { client: cfg((c) => { c.seo.baseUrl = 'https://jade.example.test'; }) },
-    'a vercel.app preview domain': { client: cfg((c) => { c.seo.baseUrl = 'https://jade.vercel.app'; }) },
+    'a staging domain (pages.dev)': { client: cfg((c) => { c.seo.baseUrl = `https://${fixtureNames.short}.pages.dev`; }) },
+    'an example domain': { client: cfg((c) => { c.seo.baseUrl = `https://${fixtureNames.short}.example.test`; }) },
+    'a vercel.app preview domain': { client: cfg((c) => { c.seo.baseUrl = `https://${fixtureNames.short}.vercel.app`; }) },
     'a production host the approval does not name (baseUrl changed after approval)': { client: cfg((c) => { c.seo.baseUrl = 'https://www.changed-after-approval.com'; }) },
     'no hosting target declared': { client: cfg((c) => { delete c.seo.host; }) },
     'a crawler policy that was never decided': { client: cfg((c) => { delete c.seo.crawlers; }) },
@@ -242,29 +243,29 @@ export const RELEASE_CASES = {
     'a revoked-looking type text in a rationale of the rights verification': { approvalRecords: editType('rights-verification', (r) => { r.rationale = 'NOT verified is what an earlier draft said; this record is the verification (prose only).'; }) },
     'an old approval for another candidate kept as history': { approvalRecords: plus(rec('release-approval', { status: 'rejected', decidedAt: '2026-09-01T10:00:00Z' }, { n: 2, candidate: OTHER })) },
     'a rejected record for another channel kept as history': { approvalRecords: plus(rec('release-approval', { status: 'rejected', decidedAt: '2026-09-01T10:00:00Z' }, { n: 2, channel: 'demonstration' })) },
-    'a revoked approval followed by a NEW approval record': { approvalRecords: plus(rec('release-approval', { status: 'revoked', ends: 'REL-JE-001', decidedAt: '2026-10-11T12:00:00Z' }, { n: 2 }), rec('release-approval', { decidedAt: '2026-10-11T13:00:00Z' }, { n: 3 })) },
-    'a rejection that an authorised reviewer superseded, then approved again': { approvalRecords: plus(rec('release-approval', { status: 'rejected', decidedAt: '2026-10-11T11:00:00Z' }, { n: 2 }), rec('release-approval', { status: 'superseded', ends: 'REL-JE-002', decidedAt: '2026-10-11T12:00:00Z' }, { n: 3 })) },
+    'a revoked approval followed by a NEW approval record': { approvalRecords: plus(rec('release-approval', { status: 'revoked', ends: ids.rec('REL', 1), decidedAt: '2026-10-11T12:00:00Z' }, { n: 2 }), rec('release-approval', { decidedAt: '2026-10-11T13:00:00Z' }, { n: 3 })) },
+    'a rejection that an authorised reviewer superseded, then approved again': { approvalRecords: plus(rec('release-approval', { status: 'rejected', decidedAt: '2026-10-11T11:00:00Z' }, { n: 2 }), rec('release-approval', { status: 'superseded', ends: ids.rec('REL', 2), decidedAt: '2026-10-11T12:00:00Z' }, { n: 3 })) },
     'two valid approvals of the same release by two reviewers': { approvalRecords: plus(rec('release-approval', { decidedBy: { reviewer: 'R-01', name: 'Fixture Owner' }, decidedAt: '2026-10-11T12:00:00Z' }, { n: 2 })) },
     'an unauthorised POSITIVE record (not counted, harmless)': { approvalRecords: plus(rec('release-approval', { decidedBy: { reviewer: 'R-09', name: 'Nobody' } }, { n: 2 })) },
     'an unrelated deployment authorisation record': { deploymentRecords: [fxEntry(rec('deployment-authorisation', {}))] },
     'a printed mention accepted by name in the external-links review': (() => {
-      const e = clone(fxSite().ext); e.destinations.push({ kind: 'mention', url: 'https://mentioned.jade-and-ember-fixture.com/', files: ['fonts/LICENSES.txt'], count: 1 });
+      const e = clone(fxSite().ext); e.destinations.push({ kind: 'mention', url: `https://mentioned.${fixtureNames.fixtureDomain}/`, files: ['fonts/LICENSES.txt'], count: 1 });
       e.digest = (() => { const d = e.destinations.map((x) => [x.kind, x.url]).sort(); return require_digest(d); })();
-      const h = fxExternalHistory(); h.records[0].registryDigest = e.digest; h.records[0].results.push({ url: 'https://mentioned.jade-and-ember-fixture.com/', kind: 'mention', class: 'inconclusive', finalUrl: null, finalStatus: null, chain: [], attempts: 2, detail: 'no DNS answer' });
-      const recs = G().approvalRecords.map((x) => (x.record.type === 'external-links-review' ? { ...x, record: { ...clone(x.record), subject: { destinationsDigest: e.digest, verification: 'EXTV-1', opened: true, accepted: [{ url: 'https://mentioned.jade-and-ember-fixture.com/', reason: 'INVENTED: the owner opened it by hand' }] } } } : x));
+      const h = fxExternalHistory(); h.records[0].registryDigest = e.digest; h.records[0].results.push({ url: `https://mentioned.${fixtureNames.fixtureDomain}/`, kind: 'mention', class: 'inconclusive', finalUrl: null, finalStatus: null, chain: [], attempts: 2, detail: 'no DNS answer' });
+      const recs = G().approvalRecords.map((x) => (x.record.type === 'external-links-review' ? { ...x, record: { ...clone(x.record), subject: { destinationsDigest: e.digest, verification: 'EXTV-1', opened: true, accepted: [{ url: `https://mentioned.${fixtureNames.fixtureDomain}/`, reason: 'INVENTED: the owner opened it by hand' }] } } } : x));
       return { ext: e, externalHistory: h, approvalRecords: recs };
     })(),
     'a moderate advisory with a current, planned exception': { supplyHistory: withAdvisory(advisory()), deps: depsWith(exc()) },
     'a social image that is a delivered, inventoried, rights-verified file': { socialSiteDir: fxSiteWithIndex(page('<meta property="og:image" content="media/hero.webp">')) },
     'a rejected external-links review for an older candidate kept as history': { approvalRecords: plus(rec('external-links-review', { status: 'rejected', decidedAt: '2026-09-01T10:00:00Z' }, { n: 2, candidate: OTHER })) },
-    'a rights verification superseded by a new one that covers the same media': { approvalRecords: plus(rec('rights-verification', { status: 'superseded', ends: 'RIGHTS-JE-001', decidedAt: '2026-10-11T12:00:00Z' }, { n: 2 }), rec('rights-verification', { decidedAt: '2026-10-11T13:00:00Z' }, { n: 3 })), inventory: inv((i) => { for (const a of i.assets) if (a.rights.approval) a.rights.approval = 'RIGHTS-JE-003'; }) },
+    'a rights verification superseded by a new one that covers the same media': { approvalRecords: plus(rec('rights-verification', { status: 'superseded', ends: ids.rec('RIGHTS', 1), decidedAt: '2026-10-11T12:00:00Z' }, { n: 2 }), rec('rights-verification', { decidedAt: '2026-10-11T13:00:00Z' }, { n: 3 })), inventory: inv((i) => { for (const a of i.assets) if (a.rights.approval) a.rights.approval = ids.rec('RIGHTS', 3); }) },
     'a CI summary with a seal different from the local record (they are different runs)': { evidence: mutateEv('ci-run', (r) => { r.verification.seal = 'e'.repeat(64); }) },
     'the HEAD commit differing from every recorded commit (records are bound to the artifact, not to HEAD)': { git: { ...G().git, commit: 'a'.repeat(40), tree: 'f'.repeat(40) } },
   }),
   demonstrationBlocked: () => ({
-    'client-style content labelled as a demonstration (its configuration is not registered)': { demonstrations: { schema: 'jade-and-ember/demonstrations@1', registered: [] } },
-    'a registry entry for a different configuration': { demonstrations: { schema: 'jade-and-ember/demonstrations@1', registered: [{ id: 'DEMO-JE-001', configurationDigest: OTHER, registeredBy: 'APR-JE-039', description: 'INVENTED FIXTURE: another configuration.' }] } },
-    'a malformed demonstration registry': { demonstrations: { schema: 'jade-and-ember/demonstrations@1', registered: [{ id: 'demo', configurationDigest: 'x' }] } },
+    'client-style content labelled as a demonstration (its configuration is not registered)': { demonstrations: { schema: schemaId('demonstrations@1'), registered: [] } },
+    'a registry entry for a different configuration': { demonstrations: { schema: schemaId('demonstrations@1'), registered: [{ id: ids.demo(1), configurationDigest: OTHER, registeredBy: ids.approval(39), description: 'INVENTED FIXTURE: another configuration.' }] } },
+    'a malformed demonstration registry': { demonstrations: { schema: schemaId('demonstrations@1'), registered: [{ id: 'demo', configurationDigest: 'x' }] } },
     'a demonstration that declares a production domain': { client: (() => { const c = greenClientContext().client; c.flags.demo = true; c.seo.noindex = true; c.seo.baseUrl = `https://${FX_HOST}`; return c; })() },
     'an indexable demonstration (demo flag on, noindex off)': { client: (() => { const c = greenClientContext().client; c.flags.demo = true; c.seo.noindex = false; return c; })() },
     'a demonstration with a stale recorded asset manifest': { assetsManifestMatches: false },

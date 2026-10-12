@@ -16,6 +16,7 @@ export function normalise(text) {
       .replace(/^(\s+(?:PASS|FAIL)\s+\S+)\s+\d+(?:\.\d+)? s\b/, '$1 T s')
       .replace(/\b\d+(?:\.\d+)? ms\b/g, 'N ms')
       .replace(/slowest event: \w+/g, 'slowest event: EVENT')
+      .replace(/\b(run in|took) \d+ s\b/g, '$1 T s')
       .replace(/, \d+ s\)/g, ', T s)')
       .replace(/\b\d+(?:\.\d+)? min\b/g, 'T min')
       .replace(/(\/tmp\/|\/var\/folders\/)\S+/g, 'TMP')

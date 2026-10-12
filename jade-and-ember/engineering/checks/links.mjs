@@ -18,6 +18,7 @@ import { assembleCandidate, pagesOf } from '../lib/site.mjs';
 import { buildClient } from '../lib/fixtures.mjs';
 import { readSitemap } from './seo.mjs';
 import { engDir, isMain, projectDir, readJson } from '../lib/git.mjs';
+import { fixtureNames } from '../lib/project.mjs';
 import { CLASSES, collectExternal, recordProblems, registryProblems, verifyUrl } from '../lib/external.mjs';
 
 // exact-case existence: every path segment must appear in its directory listing as written
@@ -123,12 +124,12 @@ export async function checkLinks({ root = null, online = false } = {}) {
     else {
       client = scanLinks({ root: fx.dir, label: 'client build ' });
       problems.push(...client.problems);
-      problems.push(...checkSearchAgreement({ dir: fx.dir, base: 'https://jadeandember.example.test' }).map((m) => `client build ${m}`));
+      problems.push(...checkSearchAgreement({ dir: fx.dir, base: `https://${fixtureNames.exampleHost}` }).map((m) => `client build ${m}`));
     }
     // the same site built for a clean-URL host (Cloudflare Pages): the files and internal links are unchanged, the public addresses lose .html
     const fc = buildClient({ edit: (n, o) => { if (n === 'client') { o.seo.host = 'cloudflare-pages'; o.seo.urlStyle = 'clean'; } } }); cleanup.push(fc.root);
     if (fc.status !== 0) problems.push(`the clean-URL client fixture failed to build: ${fc.text.slice(0, 200)}`);
-    else { const c2 = scanLinks({ root: fc.dir, label: 'clean-URL client build ' }); problems.push(...c2.problems); problems.push(...checkSearchAgreement({ dir: fc.dir, base: 'https://jadeandember.example.test' }).map((m) => `clean-URL client build ${m}`)); }
+    else { const c2 = scanLinks({ root: fc.dir, label: 'clean-URL client build ' }); problems.push(...c2.problems); problems.push(...checkSearchAgreement({ dir: fc.dir, base: `https://${fixtureNames.exampleHost}` }).map((m) => `clean-URL client build ${m}`)); }
     const ext = [...new Set([...demo.externals, ...client.externals])];
     // the destinations the demonstration may carry, and the history of verification runs (structure only: a record being old is not a failure)
     const registry = readJson(join(engDir, 'external-destinations.json')), history = readJson(join(engDir, 'external-links-verification.json'));
