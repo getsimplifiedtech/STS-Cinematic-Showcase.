@@ -22,6 +22,7 @@ import { parse as parseYaml } from 'yaml';
 import { createSandbox } from '../lib/release-dryrun.mjs';
 import { GATE_SCENARIOS, reservedHostCorpus, runChannelScenarios, runEnvironmentScenarios, runLedgerScenario, runGateProbes, runPackageScenarios } from '../lib/release-dryrun-scenarios.mjs';
 import { engDir, isMain, listFiles, projectDir, repoRoot } from '../lib/git.mjs';
+import { project, workflowPath } from '../lib/project.mjs';
 import { loadReleasePolicy } from '../lib/release.mjs';
 import { checkSelftestReleaseControl } from './selftest-release-control.mjs';
 
@@ -31,7 +32,7 @@ const exists = (p) => existsSync(p);
 // What must be identical before and after: the real ledger, every real record family, the reviewer table, the demonstration registry, the real tree's status
 // and the absence of a release folder.
 function realState() {
-  const ledger = join(repoRoot, 'docs', 'JADE_AND_EMBER_APPROVALS.md');
+  const ledger = project.governance.approvalsPath;
   const fam = ['approvals', 'evidence', 'deployments'].flatMap((f) => { const d = join(engDir, 'release', f); return exists(d) ? listFiles(d).map((x) => `${f}/${x}:${sha(readFileSync(join(d, x)))}`) : []; });
   const loose = ['reviewers.json', 'demonstrations.json'].map((f) => `${f}:${sha(readFileSync(join(engDir, 'release', f)))}`);
   const st = spawnSync('git', ['status', '--porcelain'], { cwd: repoRoot, encoding: 'utf8' }).stdout;
@@ -55,7 +56,7 @@ function judge(s, g) {
 // Nothing in the tools, the checks or the workflow can deploy, publish or write to a remote system.
 export function deploymentSafety() {
   const rows = [], add = (t, ok, detail) => rows.push({ g: 'deployment', t, ok, detail });
-  const wfPath = join(repoRoot, '.github', 'workflows', 'jade-and-ember-verify.yml'), text = readFileSync(wfPath, 'utf8'), wf = parseYaml(text);
+  const wfPath = workflowPath(), text = readFileSync(wfPath, 'utf8'), wf = parseYaml(text);
   const jobs = Object.entries(wf.jobs || {});
   const triggers = Object.keys(wf.on || wf[true] || {});
   add('the workflow is triggered only by push, pull_request and workflow_dispatch', triggers.every((t) => ['push', 'pull_request', 'workflow_dispatch'].includes(t)), triggers.join(', '));
@@ -125,7 +126,7 @@ export async function checkReleaseDryRun({ report = null, fast = false } = {}) {
   const after = realState();
   if (before !== after) problems.push('the dry run changed the real ledger, a real record family, the reviewer table, the working tree or created a release folder');
   rows.push({ g: 'separation', t: 'the real ledger, approval, evidence and deployment records, reviewer table, working tree and release folder are exactly as they were', ok: before === after, expected: 'unchanged', observed: before === after ? 'unchanged' : 'CHANGED' });
-  const leak = [join(repoRoot, 'docs', 'JADE_AND_EMBER_APPROVALS.md'), ...(exists(join(engDir, 'release', 'evidence')) ? listFiles(join(engDir, 'release', 'evidence')).filter((f) => f.endsWith('.json')).map((f) => join(engDir, 'release', 'evidence', f)) : []), join(engDir, 'search-crawler-verification.json'), join(engDir, 'external-links-verification.json'), join(engDir, 'findings.json'), join(engDir, 'release', 'reviewers.json'), join(engDir, 'release', 'demonstrations.json'), ...['approvals', 'deployments'].flatMap((fam) => (exists(join(engDir, 'release', fam)) ? listFiles(join(engDir, 'release', fam)).map((f) => join(engDir, 'release', fam, f)) : [])), ...(exists(join(engDir, '.reports', 'verify.json')) ? [join(engDir, '.reports', 'verify.json')] : [])].filter((f) => /Dry-run (Persona|Owner Persona|Rights Persona|Deployer Persona)|SYNTHETIC DRY-RUN FIXTURE|JE-901/.test(readFileSync(f, 'utf8')));
+  const leak = [project.governance.approvalsPath, ...(exists(join(engDir, 'release', 'evidence')) ? listFiles(join(engDir, 'release', 'evidence')).filter((f) => f.endsWith('.json')).map((f) => join(engDir, 'release', 'evidence', f)) : []), join(engDir, 'search-crawler-verification.json'), join(engDir, 'external-links-verification.json'), join(engDir, 'findings.json'), join(engDir, 'release', 'reviewers.json'), join(engDir, 'release', 'demonstrations.json'), ...['approvals', 'deployments'].flatMap((fam) => (exists(join(engDir, 'release', fam)) ? listFiles(join(engDir, 'release', fam)).map((f) => join(engDir, 'release', fam, f)) : [])), ...(exists(join(engDir, '.reports', 'verify.json')) ? [join(engDir, '.reports', 'verify.json')] : [])].filter((f) => /Dry-run (Persona|Owner Persona|Rights Persona|Deployer Persona)|SYNTHETIC DRY-RUN FIXTURE|JE-901/.test(readFileSync(f, 'utf8')));
   if (leak.length) problems.push(`synthetic markers found in real records: ${leak.join(', ')}`);
   rows.push({ g: 'separation', t: 'no synthetic approval, persona or marker appears in any real record', ok: !leak.length, expected: 'none', observed: leak.length ? leak.join(', ') : 'none found' });
   const realEvidence = exists(join(engDir, 'release', 'evidence')) ? readdirSync(join(engDir, 'release', 'evidence')).filter((f) => f.endsWith('.json')) : [];

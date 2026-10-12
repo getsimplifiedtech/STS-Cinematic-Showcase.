@@ -11,6 +11,8 @@ import { join } from 'node:path';
 import { gzipSync } from 'node:zlib';
 import { withSite } from '../lib/runtime.mjs';
 import { exportBaseline, engDir, isMain, listFiles, readJson } from '../lib/git.mjs';
+import { baselineLabel, selector, stylesheet } from '../lib/project.mjs';
+
 import { assembleCandidate, pagesOf, SHARED } from '../lib/site.mjs';
 import { rmSync } from 'node:fs';
 import { dirname } from 'node:path';
@@ -27,7 +29,7 @@ export function pageParts(root, file) {
   const inlineJs = [...html.matchAll(/<script>([\s\S]*?)<\/script>/g)].map((m) => m[1].length);
   const preload = [...html.matchAll(/<link[^>]+rel="preload"[^>]+href="([^"]+)"/g)].map((m) => m[1]);
   const imgs = [...html.matchAll(/<img\b[^>]*>/g)].map((m) => ({ src: /src="([^"]+)"/.exec(m[0])[1], lazy: /loading="lazy"/.test(m[0]) }));
-  const fonts = [...new Set([...readFileSync(join(root, css[0] || 'styles.css'), 'utf8').matchAll(/url\(([^)]+\.woff2)\)/g)].map((m) => m[1]))];
+  const fonts = [...new Set([...readFileSync(join(root, css[0] || stylesheet), 'utf8').matchAll(/url\(([^)]+\.woff2)\)/g)].map((m) => m[1]))];
   return { html: file, css, js, inlineJs, preload, imgs, fonts };
 }
 
@@ -48,7 +50,7 @@ export function measureStatic(root) {
     deliveredBytes: Object.values(sizes).reduce((s, n) => s + n, 0),
     maxImageBytes: Math.max(...by(/\.webp$/)), maxWebmBytes: Math.max(...by(/\.webm$/)), maxMp4Bytes: Math.max(...by(/\.mp4$/)),
     fontBytes: by(/\.woff2$/).reduce((s, n) => s + n, 0), fontFiles: by(/\.woff2$/).length,
-    cssGzip: sizeOf(join(root, 'styles.css')), scriptsGzipTotal: SHARED.filter((f) => f.endsWith('.js')).reduce((s, f) => s + sizeOf(join(root, f)), 0),
+    cssGzip: sizeOf(join(root, stylesheet)), scriptsGzipTotal: SHARED.filter((f) => f.endsWith('.js')).reduce((s, f) => s + sizeOf(join(root, f)), 0),
   };
 }
 
@@ -83,7 +85,7 @@ export async function measureRuntime(root, browserName, only = null) {
         await page.goto(base + file, { waitUntil: 'load' });
         await page.waitForTimeout(2500);
         // an interaction: the phone menu button, then Escape
-        if (await page.$('.nav-toggle')) { await page.click('.nav-toggle'); await page.waitForTimeout(150); await page.keyboard.press('Escape'); await page.waitForTimeout(250); }
+        if (await page.$(selector('navToggle'))) { await page.click(selector('navToggle')); await page.waitForTimeout(150); await page.keyboard.press('Escape'); await page.waitForTimeout(250); }
         const m = await page.evaluate(() => window.__m);
         runs.push({ lcp: m.lcp, cls: m.cls, blocking: m.blocking, interaction: Math.max(0, ...m.events), delay: Math.max(0, ...m.delay), total: Math.max(0, ...m.total), worstEvent: m.worst, present: Math.max(0, ...m.present), requests: seen.size, bytes: [...seen.values()].reduce((s, v) => s + v, 0) });
         await ctx.close();
@@ -106,7 +108,7 @@ export async function checkBudgets({ root = null, browser = true, browserName = 
     const s = measureStatic(dir);
     const lim = b.limits, reg = 1 + b.regressionTolerancePercent / 100;
     const over = (what, value, limit) => { if (value > limit) problems.push(`${what}: ${value} exceeds the budget of ${limit}`); };
-    const drift = (what, value, was) => { if (was !== undefined && value > was * reg) problems.push(`${what}: ${value} is more than ${b.regressionTolerancePercent}% above the v0.8 measurement of ${was}`); };
+    const drift = (what, value, was) => { if (was !== undefined && value > was * reg) problems.push(`${what}: ${value} is more than ${b.regressionTolerancePercent}% above the ${baselineLabel} measurement of ${was}`); };
     for (const [file, p] of Object.entries(s.pages)) {
       over(`${file} HTML (gzip)`, p.htmlGzip, lim.page.htmlGzip);
       over(`${file} initial transfer (gzip)`, p.initialGzip, lim.page.initialGzip);
@@ -129,8 +131,8 @@ export async function checkBudgets({ root = null, browser = true, browserName = 
     baseExport = exportBaseline('budgets-base');
     const baseTotal = measureStatic(baseExport).deliveredBytes;
     const pct = ((s.deliveredBytes - baseTotal) / baseTotal) * 100;
-    if (pct > b.baselineGrowthPercent) problems.push(`delivered size grew ${pct.toFixed(2)}% over the v0.8 baseline (${baseTotal} to ${s.deliveredBytes} bytes); the limit is ${b.baselineGrowthPercent}%`);
-    notes.push(`static: ${Object.keys(s.pages).length} pages measured; delivered ${s.deliveredBytes} bytes (${pct >= 0 ? '+' : ''}${pct.toFixed(2)}% against the v0.8 baseline of ${baseTotal}); largest page initial transfer ${Math.max(...Object.values(s.pages).map((p) => p.initialGzip))} bytes gzip`);
+    if (pct > b.baselineGrowthPercent) problems.push(`delivered size grew ${pct.toFixed(2)}% over the ${baselineLabel} baseline (${baseTotal} to ${s.deliveredBytes} bytes); the limit is ${b.baselineGrowthPercent}%`);
+    notes.push(`static: ${Object.keys(s.pages).length} pages measured; delivered ${s.deliveredBytes} bytes (${pct >= 0 ? '+' : ''}${pct.toFixed(2)}% against the ${baselineLabel} baseline of ${baseTotal}); largest page initial transfer ${Math.max(...Object.values(s.pages).map((p) => p.initialGzip))} bytes gzip`);
 
     let rt = null;
     if (browser) {

@@ -12,6 +12,7 @@ import { existsSync, lstatSync, readFileSync, readdirSync } from 'node:fs';
 import { join, posix } from 'node:path';
 import { spawnSync } from 'node:child_process';
 import { engDir, readJson, repoRoot } from './git.mjs';
+import { projectFolder } from './project.mjs';
 import { parseStrictJson } from './strict-json.mjs';
 
 export const loadSpec = () => readJson(join(engDir, 'release', 'evidence-spec.json'));
@@ -65,7 +66,7 @@ export const realGit = {
   isAncestor: (a, b) => git(['merge-base', '--is-ancestor', a, b]).status === 0,
   commitDate: (c) => git(['show', '-s', '--format=%cs', c]).stdout.trim(),
 };
-export const realFs = { exists: (p) => existsSync(join(repoRoot, 'jade-and-ember', p)), read: (p) => readFileSync(join(repoRoot, 'jade-and-ember', p)) };
+export const realFs = { exists: (p) => existsSync(join(repoRoot, projectFolder, p)), read: (p) => readFileSync(join(repoRoot, projectFolder, p)) };
 
 // ---------------------------------------------------------------------------------------------------------------------------------------------------
 // Validates ONE record. vctx: { spec, releaseCommit, assetsTree, candidate, verification, git, fs, today, allowFixture }.

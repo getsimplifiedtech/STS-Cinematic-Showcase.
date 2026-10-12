@@ -48,7 +48,37 @@
         "--out",
         "{out}"
       ]
+    },
+    "stylesheet": "styles.css",
+    "sourceRoots": [
+      "src",
+      "build.mjs"
+    ]
+  },
+  "markup": {
+    "selectors": {
+      "navToggle": ".nav-toggle",
+      "siteNav": "#site-nav",
+      "pauseControl": ".pause",
+      "ambientHero": "[data-ambient-root]",
+      "brandLink": "a.brand",
+      "footerNav": ".foot-nav",
+      "sectionJump": ".jump",
+      "skipLinkClass": "skip"
+    },
+    "heroStates": {
+      "video": "is-video",
+      "poster": "push-on"
+    },
+    "probes": {
+      "footerLinkPage": "visit-us.html",
+      "sectionJumpPage": "menu.html"
     }
+  },
+  "generators": {
+    "seo": "src/lib/seo.mjs",
+    "crawlers": "src/lib/crawlers.mjs",
+    "config": "src/lib/config.mjs"
   },
   "baseline": {
     "label": "v0.8",
@@ -56,6 +86,18 @@
   },
   "creativeAuthority": {
     "record": "authority.json"
+  },
+  "engine": {
+    "projectFolders": [
+      "src/lib",
+      "tests",
+      "tools"
+    ],
+    "projectFiles": [
+      "build.mjs",
+      "serve.py",
+      "package.json"
+    ]
   },
   "checks": {
     "project": []

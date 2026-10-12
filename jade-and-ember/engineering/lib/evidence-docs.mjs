@@ -1,14 +1,16 @@
 // The human procedures, generated from release/evidence-spec.json so that they cannot drift from what the templates and the release gate demand.
 // npm run evidence:docs writes them; check:evidence fails if the files in docs/device-testing/ differ from what this module renders.
+import { basename } from 'node:path';
 import { itemsFor } from './evidence.mjs';
+import { project, projectFolder } from './project.mjs';
 
-const GEN = '<!-- Generated from jade-and-ember/engineering/release/evidence-spec.json by `npm run evidence:docs`. Do not edit by hand: change the specification and regenerate. -->';
+const GEN = `<!-- Generated from ${projectFolder}/engineering/release/evidence-spec.json by \`npm run evidence:docs\`. Do not edit by hand: change the specification and regenerate. -->`;
 const list = (a) => a.join(' or ');
 const SEVERITY = ['**Blocker**: a visitor cannot read a page, reach a page or complete the main task.', '**Major**: content is lost or a main task is hard for a group of visitors.', '**Minor**: a cosmetic problem or a small annoyance with an easy workaround.', '**Info**: an observation, not a defect.'];
 
 const HOW_TO_RUN = (spec, id) => [
   '1. Get the exact build to test. The scaffolded record already names the commit, the delivered-files hash and the **candidate artifact digest** (`build.commit`, `build.assetsTree`, `build.candidate`); you must test that build. The digest is what the release approval is bound to: if anything in the artifact changes, the digest changes and this record stops counting (`npm run release:candidate` prints it). Ask the engineer for the preview package for that commit (`npm run release:prepare` writes it; nothing is deployed), or build it yourself from that commit.',
-  '2. Serve it over HTTP. On the computer that holds the files run `python3 serve.py` (from the `jade-and-ember` folder, or the folder inside the package): it supports the byte-range requests that Safari needs to play video and listens on this computer only. For a phone or tablet on the same trusted Wi-Fi run `python3 serve.py 8766 0.0.0.0` and open `http://<the computer\'s address>:8766/` on the device. Android can also use USB debugging with `adb reverse tcp:8766 tcp:8766` and open `http://localhost:8766/`. Do not open the pages straight from a folder (`file://`) in Safari: WebKit then shows fallback fonts by design of the browser (known finding F-G5-01), which is not what visitors see.',
+  '2. Serve it over HTTP. On the computer that holds the files run `python3 serve.py` (from the `' + projectFolder + '` folder, or the folder inside the package): it supports the byte-range requests that Safari needs to play video and listens on this computer only. For a phone or tablet on the same trusted Wi-Fi run `python3 serve.py 8766 0.0.0.0` and open `http://<the computer\'s address>:8766/` on the device. Android can also use USB debugging with `adb reverse tcp:8766 tcp:8766` and open `http://localhost:8766/`. Do not open the pages straight from a folder (`file://`) in Safari: WebKit then shows fallback fonts by design of the browser (known finding F-G5-01), which is not what visitors see.',
   `3. Scaffold the record: \`npm run evidence:new -- ${id}\`. It writes an unfilled template to \`engineering/release/evidence/\`; it never fills in a result.`,
 ];
 
@@ -78,7 +80,7 @@ export function renderProcedure(spec, key) {
 }
 
 export function renderInventory(spec) {
-  const L = [GEN, '', '# Device, browser and screen-reader testing: inventory', '', 'Reusable procedures and evidence templates for the testing that automation cannot do. Read the [protocol](../JADE_AND_EMBER_DEVICE_TEST_PROTOCOL.md) first. **No physical-device, screen-reader or desktop-Safari testing has been done yet**; the release gate stays closed until people record it.', '',
+  const L = [GEN, '', '# Device, browser and screen-reader testing: inventory', '', 'Reusable procedures and evidence templates for the testing that automation cannot do. Read the [protocol](../' + basename(project.governance.documents.deviceTestProtocol) + ') first. **No physical-device, screen-reader or desktop-Safari testing has been done yet**; the release gate stays closed until people record it.', '',
     '| Target | Gate type | Class | Procedure | Scaffold a record | About |', '|---|---|---|---|---|---|'];
   for (const [id, t] of Object.entries(spec.targets)) L.push(`| ${t.title} | \`${t.gateType}\` | ${t.classes.join('/')} | [${id}.md](${id}.md) | \`npm run evidence:new -- ${id}\` | ${t.estimatedMinutes ? `${t.estimatedMinutes} min` : 'automated'} |`);
   L.push('', '## Cross-cutting procedures', '', '- [Keyboard-only navigation](procedures/keyboard-only.md)', '- [Responsive layouts, zoom, reduced motion and media fallback](procedures/responsive-zoom-motion-media.md)', '- [Screen readers: VoiceOver, NVDA and TalkBack](procedures/screen-readers.md)', '',

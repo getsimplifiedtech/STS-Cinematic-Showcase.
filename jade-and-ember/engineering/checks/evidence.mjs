@@ -14,6 +14,7 @@ import { assessEvidence, coverage, defaultVctx, itemsFor, loadEvidenceEntries, l
 import { FIXTURE_COMMIT, FIXTURE_TREE, fixtureEvidenceSet, fixtureRecord, fixtureVctx } from '../lib/evidence-fixtures.mjs';
 import { renderAll } from '../lib/evidence-docs.mjs';
 import { engDir, isMain, projectDir, repoRoot } from '../lib/git.mjs';
+import { project } from '../lib/project.mjs';
 
 export function specProblems(spec) {
   const p = [];
@@ -91,7 +92,7 @@ export async function checkEvidence({ root = null } = {}) {
     for (const [k, v] of Object.entries(docs)) { const f = join(docsDir, k); if (!existsSync(f)) problems.push(`docs/device-testing/${k} is missing (run npm run evidence:docs)`); else if (readFileSync(f, 'utf8') !== (v.endsWith('\n') ? v : v + '\n')) problems.push(`docs/device-testing/${k} differs from the specification (run npm run evidence:docs)`); }
     const have = existsSync(docsDir) ? [...readdirSync(docsDir).filter((f) => f.endsWith('.md')), ...(existsSync(join(docsDir, 'procedures')) ? readdirSync(join(docsDir, 'procedures')).map((f) => `procedures/${f}`) : [])] : [];
     for (const f of have) if (!(f in docs)) problems.push(`docs/device-testing/${f} is not generated from the specification`);
-    if (!existsSync(join(repoRoot, 'docs', 'JADE_AND_EMBER_DEVICE_TEST_PROTOCOL.md'))) problems.push('docs/JADE_AND_EMBER_DEVICE_TEST_PROTOCOL.md is missing');
+    if (!existsSync(join(repoRoot, project.governance.documents.deviceTestProtocol))) problems.push(`${project.governance.documents.deviceTestProtocol} is missing`);
     notes.push(`procedures: ${Object.keys(docs).length} generated documents in docs/device-testing/ equal the specification (${targets.length} per-target procedures, 3 cross-cutting procedures, the inventory), plus the protocol`);
     // the records on file
     const entries = loadEvidenceEntries();

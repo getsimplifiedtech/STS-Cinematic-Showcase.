@@ -11,6 +11,7 @@ import { reconcile } from '../lib/findings.mjs';
 import { withSite } from '../lib/runtime.mjs';
 import { comparePng } from '../lib/pixels.mjs';
 import { engDir, isMain, readJson } from '../lib/git.mjs';
+import { markup } from '../lib/project.mjs';
 
 const lum = (r, g, b) => { const f = (v) => { v /= 255; return v <= 0.03928 ? v / 12.92 : ((v + 0.055) / 1.055) ** 2.4; }; return 0.2126 * f(r) + 0.7152 * f(g) + 0.0722 * f(b); };
 const ratio = (a, b) => (Math.max(a, b) + 0.05) / (Math.min(a, b) + 0.05);
@@ -31,7 +32,7 @@ const textRuns = () => {
   }
   return out;
 };
-const controls = () => [...document.querySelectorAll('a[href], button')].filter((e) => e.checkVisibility({ checkVisibilityCSS: true }) && !e.classList.contains('skip')).map((e) => { const r = e.getBoundingClientRect(); return { n: `${e.tagName.toLowerCase()}${e.className && typeof e.className === 'string' ? '.' + e.className.trim().split(/\s+/).join('.') : ''} "${(e.innerText || e.getAttribute('aria-label') || '').trim().slice(0, 18)}"`, kind: `${e.tagName.toLowerCase()}.${(typeof e.className === 'string' ? e.className : '').trim().split(/\s+/).join('.')}`, x: r.left + scrollX, y: r.top + scrollY, w: r.width, h: r.height }; });
+const controls = (skipClass) => [...document.querySelectorAll('a[href], button')].filter((e) => e.checkVisibility({ checkVisibilityCSS: true }) && !e.classList.contains(skipClass)).map((e) => { const r = e.getBoundingClientRect(); return { n: `${e.tagName.toLowerCase()}${e.className && typeof e.className === 'string' ? '.' + e.className.trim().split(/\s+/).join('.') : ''} "${(e.innerText || e.getAttribute('aria-label') || '').trim().slice(0, 18)}"`, kind: `${e.tagName.toLowerCase()}.${(typeof e.className === 'string' ? e.className : '').trim().split(/\s+/).join('.')}`, x: r.left + scrollX, y: r.top + scrollY, w: r.width, h: r.height }; });
 
 export async function checkForcedColors({ root = null, browserName = 'chromium', pages: only = null } = {}) {
   const cfg = readJson(join(engDir, 'a11y.json')).forcedColors;
@@ -51,7 +52,7 @@ export async function checkForcedColors({ root = null, browserName = 'chromium',
       const bad = (rule, who, detail, extra = {}) => measured.push({ key: `${tag}:${rule}:${who}`, detail, ...extra });
       const { page, close } = await newPage({ viewport: { width: c.width, height: c.height }, forcedColors: 'active' }, file);
       if (!(await page.evaluate(() => matchMedia('(forced-colors: active)').matches))) { bad('emulation', 'browser', 'forced-colours emulation did not activate'); await close(); continue; }
-      const runs = await page.evaluate(textRuns), ctl = await page.evaluate(controls);
+      const runs = await page.evaluate(textRuns), ctl = await page.evaluate(controls, markup.selectors.skipLinkClass);
       adjustNone += await page.evaluate(() => [...document.querySelectorAll('*')].filter((e) => getComputedStyle(e).forcedColorAdjust === 'none').length);
       const shot = PNG.sync.read(await page.screenshot({ fullPage: true, animations: 'disabled', caret: 'hide' }));
       // 1. text over what is painted: dominant non-glyph colour behind each line
@@ -86,7 +87,7 @@ export async function checkForcedColors({ root = null, browserName = 'chromium',
         if (100 * diff / total < cfg.minControlPixelsPercent) bad('control-invisible', k.n, `${k.n} paints nothing distinguishable in forced colours (${(100 * diff / total).toFixed(2)}% of its pixels differ from its corner)`);
       }
       // 3. a focus indicator for one control of each kind
-      const kinds = await page.evaluate(() => [...document.querySelectorAll('a[href], button')].filter((e) => e.checkVisibility({ checkVisibilityCSS: true }) && !e.classList.contains('skip')).map((e, i) => { e.dataset.fc = String(i); return `${e.tagName.toLowerCase()}.${(typeof e.className === 'string' ? e.className : '').trim().split(/\s+/).join('.')}`; }));
+      const kinds = await page.evaluate((skipClass) => [...document.querySelectorAll('a[href], button')].filter((e) => e.checkVisibility({ checkVisibilityCSS: true }) && !e.classList.contains(skipClass)).map((e, i) => { e.dataset.fc = String(i); return `${e.tagName.toLowerCase()}.${(typeof e.className === 'string' ? e.className : '').trim().split(/\s+/).join('.')}`; }), markup.selectors.skipLinkClass);
       for (const [kind, i] of kinds.map((k, n) => [k, n]).filter(([k, n]) => kinds.indexOf(k) === n)) {
         await page.keyboard.press('Tab');   // keyboard use first, so that :focus-visible applies to the programmatic focus below
         await page.evaluate(() => document.activeElement && document.activeElement.blur());

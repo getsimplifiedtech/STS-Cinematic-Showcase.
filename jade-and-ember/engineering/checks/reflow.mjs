@@ -7,9 +7,10 @@ import { join } from 'node:path';
 import { reconcile } from '../lib/findings.mjs';
 import { withSite } from '../lib/runtime.mjs';
 import { engDir, isMain, readJson } from '../lib/git.mjs';
+import { markup } from '../lib/project.mjs';
 
 // Runs in the page. Returns everything the check needs; no judgement here.
-export const measure = (minOverlap) => {
+export const measure = ({ minOverlap, skipClass }) => {
   const label = (e) => `${e.tagName.toLowerCase()}${e.id ? '#' + e.id : ''}${e.className && typeof e.className === 'string' ? '.' + e.className.trim().split(/\s+/).slice(0, 2).join('.') : ''}`;
   const out = { overflowX: document.documentElement.scrollWidth - document.documentElement.clientWidth, wide: [], clipped: [], overlaps: [], tight: [] };
   const scrollsX = (e) => { for (let a = e.parentElement; a; a = a.parentElement) { const o = getComputedStyle(a).overflowX; if (o === 'auto' || o === 'scroll' || o === 'hidden' || o === 'clip') return true; } return false; };
@@ -45,7 +46,7 @@ export const measure = (minOverlap) => {
     if (w > 1 && h > 0.35 * Math.min(a.r.height, b.r.height) && w * h >= minOverlap) out.overlaps.push(`"${a.t}" (${label(a.el)}) over "${b.t}" (${label(b.el)})`);
   }
   // interactive elements overlapping each other
-  const ints = [...document.querySelectorAll('a[href], button')].filter((e) => e.checkVisibility({ checkVisibilityCSS: true }) && !e.classList.contains('skip'));
+  const ints = [...document.querySelectorAll('a[href], button')].filter((e) => e.checkVisibility({ checkVisibilityCSS: true }) && !e.classList.contains(skipClass));
   for (let i = 0; i < ints.length; i++) for (let j = i + 1; j < ints.length; j++) {
     if (ints[i].contains(ints[j]) || ints[j].contains(ints[i])) continue;
     const a = ints[i].getBoundingClientRect(), b = ints[j].getBoundingClientRect();
@@ -67,7 +68,7 @@ export async function checkReflow({ root = null, browserName = 'chromium', pages
     for (const w of cfg.widths) for (const file of pages) {
       const tag = `reflow:${file}@${w.name}`;
       const { page, close } = await newPage({ viewport: { width: w.width, height: w.height }, deviceScaleFactor: w.deviceScaleFactor || 1 }, file);
-      const m = await page.evaluate(measure, cfg.overlapMinPixels); runs++;
+      const m = await page.evaluate(measure, { minOverlap: cfg.overlapMinPixels, skipClass: markup.selectors.skipLinkClass }); runs++;
       if (m.overflowX > 1) measured.push({ key: `${tag}:horizontal-scroll:page`, detail: `the page scrolls sideways by ${m.overflowX}px (1.4.10)`, value: m.overflowX });
       add(tag, 'wide', m.wide, 'content extends past the viewport');
       add(tag, 'clipped', m.clipped, 'content is clipped');
@@ -79,9 +80,9 @@ export async function checkReflow({ root = null, browserName = 'chromium', pages
     for (const c of cfg.spacing.contexts) for (const file of pages) {
       const tag = `reflow:${file}@spacing-${c.name}`;
       const { page, close } = await newPage({ viewport: { width: c.width, height: c.height } }, file);
-      const before = await page.evaluate(measure, cfg.overlapMinPixels);
+      const before = await page.evaluate(measure, { minOverlap: cfg.overlapMinPixels, skipClass: markup.selectors.skipLinkClass });
       await page.addStyleTag({ content: spacingCss(cfg.spacing) }); await page.waitForTimeout(150);
-      const after = await page.evaluate(measure, cfg.overlapMinPixels); runs++;
+      const after = await page.evaluate(measure, { minOverlap: cfg.overlapMinPixels, skipClass: markup.selectors.skipLinkClass }); runs++;
       const added = (k) => after[k].filter((x) => !before[k].includes(x));
       if (after.overflowX > before.overflowX + 1) measured.push({ key: `${tag}:horizontal-scroll:page`, detail: `text spacing makes the page scroll sideways by ${after.overflowX}px (1.4.12)`, value: after.overflowX });
       add(tag, 'wide', added('wide'), 'text spacing pushes content past the viewport');

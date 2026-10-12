@@ -11,6 +11,7 @@ import { takeAdaptations, launchBrowser } from './lib/browser.mjs';
 import { engineChecks, renderMatrix, SCOPE } from './lib/cross-catalogue.mjs';
 import { setEngine } from './lib/findings.mjs';
 import { engDir, projectDir } from './lib/git.mjs';
+import { stylesheet } from './lib/project.mjs';
 import { checkMedia } from './checks/media.mjs';
 import { checkSeo } from './checks/seo.mjs';
 import { checkPrivacy } from './checks/privacy.mjs';
@@ -67,7 +68,7 @@ const FEATURES = [
 ];
 async function capabilities() {
   const { browser, version } = await launchBrowser(engine);
-  const css = readFileSync(join(projectDir, 'styles.css'), 'utf8');
+  const css = readFileSync(join(projectDir, stylesheet), 'utf8');
   const used = FEATURES.filter(([, re]) => re.test(css));
   try {
     const page = await browser.newPage();
@@ -81,7 +82,7 @@ async function capabilities() {
     console.log(`\n== engine: ${engine} ${version}`);
     console.log(`  user agent: ${r.ua}`);
     console.log(`  video support (canPlayType): ${Object.entries(r.codecs).map(([k, v]) => `${k}: ${v}`).join('; ')}`);
-    console.log(`  CSS features used by styles.css (${r.features.length}): ${r.features.map(([n, ok]) => `${n}: ${ok === true ? 'supported' : ok === false ? 'NOT SUPPORTED (check the fallback)' : ok}`).join('; ')}`);
+    console.log(`  CSS features used by ${stylesheet} (${r.features.length}): ${r.features.map(([n, ok]) => `${n}: ${ok === true ? 'supported' : ok === false ? 'NOT SUPPORTED (check the fallback)' : ok}`).join('; ')}`);
     return { version, ...r };
   } finally { await browser.close(); }
 }

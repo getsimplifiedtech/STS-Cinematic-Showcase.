@@ -27,6 +27,7 @@ import { assembleCandidate, pagesOf, SHARED } from '../lib/site.mjs';
 import { unzipTo, zipFolder } from '../lib/zip.mjs';
 import { settleFonts } from '../lib/runtime.mjs';
 import { isMain, listFiles, projectDir, tempDir } from '../lib/git.mjs';
+import { markup, selector } from '../lib/project.mjs';
 
 const titleOf = (dir, f) => /<title>([^<]*)<\/title>/.exec(readFileSync(join(dir, f), 'utf8'))[1].replace(/&amp;/g, '&');
 const h1Of = (dir, f) => /<h1[^>]*>([\s\S]*?)<\/h1>/.exec(readFileSync(join(dir, f), 'utf8'))[1].replace(/<[^>]+>/g, '').replace(/&amp;/g, '&').replace(/\s+/g, ' ').trim();
@@ -90,15 +91,15 @@ async function walkSiteInner({ browser, dir, label, start, prefixCheck, video = 
     await verifyPage('index.html');
     if (!mobile) {
       // the hero
-      await page.waitForFunction(() => { const h = document.querySelector('[data-ambient-root]'); return h && (h.classList.contains('is-video') || h.classList.contains('push-on')); }, null, { timeout: 15000 }).catch(() => bad(`${tag('index.html')}: the hero never settled`));
-      const hero = await page.evaluate(() => document.querySelector('[data-ambient-root]').className);
-      if (video === 'expect' && !/is-video/.test(hero)) bad(`${tag('index.html')}: the hero video did not start (${hero})`);
-      if (video === 'either' && !/is-video|push-on/.test(hero)) bad(`${tag('index.html')}: neither the video nor the poster push took over (${hero})`);
+      await page.waitForFunction(({ sel, states }) => { const h = document.querySelector(sel); return h && states.some((c) => h.classList.contains(c)); }, { sel: selector('ambientHero'), states: [markup.heroStates.video, markup.heroStates.poster] }, { timeout: 15000 }).catch(() => bad(`${tag('index.html')}: the hero never settled`));
+      const hero = await page.evaluate((sel) => document.querySelector(sel).className, selector('ambientHero'));
+      if (video === 'expect' && !new RegExp(markup.heroStates.video).test(hero)) bad(`${tag('index.html')}: the hero video did not start (${hero})`);
+      if (video === 'either' && !new RegExp(`${markup.heroStates.video}|${markup.heroStates.poster}`).test(hero)) bad(`${tag('index.html')}: neither the video nor the poster push took over (${hero})`);
     }
     // every page through the navigation, then back
     const visited = ['index.html'];
     for (const f of pages.filter((p) => p !== 'index.html')) {
-      if (mobile) { await page.click('.nav-toggle'); await page.waitForTimeout(80); }
+      if (mobile) { await page.click(selector('navToggle')); await page.waitForTimeout(80); }
       const link = page.locator(`header a[href="${f}"]`).filter({ visible: true }).first();
       await Promise.all([page.waitForLoadState('load'), link.click()]);
       await verifyPage(f); visited.push(f);
@@ -109,10 +110,10 @@ async function walkSiteInner({ browser, dir, label, start, prefixCheck, video = 
     }
     // brand link and a footer link
     await page.goto(new URL(pages[1], page.url()).href); await settleFonts(page);
-    await Promise.all([page.waitForLoadState('load'), page.click('a.brand')]);
+    await Promise.all([page.waitForLoadState('load'), page.click(selector('brandLink'))]);
     if (!/index\.html$|\/$/.test(new URL(page.url()).pathname)) bad(`${tag('brand')}: the brand link did not go home (${page.url()})`);
-    await Promise.all([page.waitForLoadState('load'), page.click('.foot-nav a[href="visit-us.html"]')]);
-    await verifyPage('visit-us.html');
+    await Promise.all([page.waitForLoadState('load'), page.click(`${selector('footerNav')} a[href="${markup.probes.footerLinkPage}"]`)]);
+    await verifyPage(markup.probes.footerLinkPage);
     failed.forEach((m) => bad(`${tag('')} ${m}`));
     errors.forEach((m) => bad(`${tag('')} ${m}`));
     await ctx.close();

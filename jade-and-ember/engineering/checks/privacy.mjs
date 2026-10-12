@@ -12,6 +12,7 @@ import { join } from 'node:path';
 import { assembleCandidate, pagesOf, SHARED } from '../lib/site.mjs';
 import { withSite } from '../lib/runtime.mjs';
 import { engDir, isMain, projectDir, readJson } from '../lib/git.mjs';
+import { selector, stylesheet } from '../lib/project.mjs';
 
 export function checkPrivacyStatic({ root, cfgRoot = projectDir }) {
   const pol = readJson(join(engDir, 'privacy.json'));
@@ -44,9 +45,9 @@ export function checkPrivacyStatic({ root, cfgRoot = projectDir }) {
       if (/target="_blank"/.test(m[0]) && !/rel="[^"]*noopener[^"]*noreferrer[^"]*"/.test(m[0])) problems.push(`${f}: a new-tab link to ${host} lacks rel="noopener noreferrer"`);
     }
   }
-  const css = readFileSync(join(root, 'styles.css'), 'utf8');
-  if (/@import/.test(css)) problems.push('styles.css uses @import');
-  if (/url\(\s*['"]?https?:/.test(css)) problems.push('styles.css loads a URL from another origin');
+  const css = readFileSync(join(root, stylesheet), 'utf8');
+  if (/@import/.test(css)) problems.push(`${stylesheet} uses @import`);
+  if (/url\(\s*['"]?https?:/.test(css)) problems.push(`${stylesheet} loads a URL from another origin`);
   notes.push(`static: ${scripts.length} scripts scanned for ${pol.forbiddenScriptApis.length} forbidden APIs; ${links} outbound link(s) all to allowed hosts (${[...hosts].join(', ')}); no third-party resource, preconnect or @import`);
   return { problems, notes };
 }
@@ -68,8 +69,8 @@ export async function checkPrivacy({ root = null, browser = true, browserName = 
           page.on('request', (r) => { if (!r.url().startsWith(origin) && !r.url().startsWith('data:')) foreign.push(r.url()); if (r.headers().cookie) cookieHeaders.push('request cookie'); });
           page.on('response', (r) => { if (r.headers()['set-cookie']) cookieHeaders.push(`set-cookie from ${r.url()}`); });
           await page.goto(base + file); await page.waitForTimeout(name === 'desktop' ? 3000 : 1200);
-          if (name === 'phone') { await page.click('.nav-toggle'); await page.keyboard.press('Escape'); }
-          if (name === 'desktop' && file === 'index.html') { await page.click('.pause'); await page.click('.pause'); }
+          if (name === 'phone') { await page.click(selector('navToggle')); await page.keyboard.press('Escape'); }
+          if (name === 'desktop' && file === 'index.html') { await page.click(selector('pauseControl')); await page.click(selector('pauseControl')); }
           const st = await page.evaluate(async () => ({
             cookie: document.cookie, ls: localStorage.length, ss: sessionStorage.length,
             idb: indexedDB.databases ? (await indexedDB.databases()).length : 0, caches: (await caches.keys()).length,

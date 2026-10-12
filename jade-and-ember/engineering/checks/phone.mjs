@@ -10,6 +10,7 @@
 // The wrap map (how many widths split the number across lines) is reported so the owner can see exactly what was accepted.
 import { withSite } from '../lib/runtime.mjs';
 import { isMain } from '../lib/git.mjs';
+import { baselineLabel } from '../lib/project.mjs';
 
 export const WIDTHS = [
   { name: '320x568', width: 320, height: 568 }, { name: '360x740', width: 360, height: 740 }, { name: '375x667', width: 375, height: 667 },
@@ -77,7 +78,7 @@ export async function checkPhone({ root = null, browserName = 'chromium', pages:
     }
   }, { root, browserName, pages: only });
   const wrapText = [...wraps.entries()].map(([f, ws]) => `${f}: ${ws.join(', ')}`).join('; ');
-  notes.push(`${numbers} phone-number measurements over ${measured} page loads at ${widths.length} supported mobile widths (portrait, landscape, tablet): readable, inside the viewport, not clipped, not covered, pressable${wraps.size ? `. Numbers that wrap onto a second line (the accepted v0.8 appearance, not a defect): ${wrapText}` : '. No number wraps at any of these widths'}`);
+  notes.push(`${numbers} phone-number measurements over ${measured} page loads at ${widths.length} supported mobile widths (portrait, landscape, tablet): readable, inside the viewport, not clipped, not covered, pressable${wraps.size ? `. Numbers that wrap onto a second line (the accepted ${baselineLabel} appearance, not a defect): ${wrapText}` : '. No number wraps at any of these widths'}`);
   return { problems, notes };
 }
 

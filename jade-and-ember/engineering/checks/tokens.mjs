@@ -10,6 +10,7 @@ import { readFileSync, rmSync } from 'node:fs';
 import { join } from 'node:path';
 import { assembleCandidate, pagesOf } from '../lib/site.mjs';
 import { engDir, isMain, projectDir, readJson } from '../lib/git.mjs';
+import { baselineLabel, stylesheet } from '../lib/project.mjs';
 
 const hex = (s) => { const m = /^#([0-9a-f]{6})$/i.exec(s.trim()); return m ? [0, 2, 4].map((i) => parseInt(m[1].slice(i, i + 2), 16)) : null; };
 const lum = ([r, g, b]) => { const f = (v) => { v /= 255; return v <= 0.03928 ? v / 12.92 : ((v + 0.055) / 1.055) ** 2.4; }; return 0.2126 * f(r) + 0.7152 * f(g) + 0.0722 * f(b); };
@@ -23,17 +24,17 @@ export function parseRoot(css) {
   return { tokens, block: m[0] };
 }
 
-export function checkTokens({ root = projectDir, cssFile = 'styles.css', pagesRoot = null } = {}) {
+export function checkTokens({ root = projectDir, cssFile = stylesheet, pagesRoot = null } = {}) {
   const rec = readJson(join(engDir, 'tokens.json'));
   const problems = [], notes = [];
   const css = readFileSync(join(root, cssFile), 'utf8');
   const parsed = parseRoot(css);
-  if (!parsed) return { problems: ['styles.css has no :root block'], notes };
+  if (!parsed) return { problems: [`${cssFile} has no :root block`], notes };
   const { tokens, block } = parsed;
   // unchanged
   for (const [k, v] of Object.entries(rec.tokens)) {
     if (!(k in tokens)) problems.push(`token ${k} was removed (recorded as ${v})`);
-    else if (tokens[k] !== v) problems.push(`token ${k} changed from ${v} to ${tokens[k]}: a visual change, it needs a recorded owner approval before tokens.json and styles.css change together`);
+    else if (tokens[k] !== v) problems.push(`token ${k} changed from ${v} to ${tokens[k]}: a visual change, it needs a recorded owner approval before tokens.json and ${cssFile} change together`);
   }
   for (const k of Object.keys(tokens)) if (!(k in rec.tokens)) problems.push(`token ${k} (${tokens[k]}) is not in tokens.json: add it only with an owner-approved change`);
   // defined
@@ -64,7 +65,7 @@ export function checkTokens({ root = projectDir, cssFile = 'styles.css', pagesRo
     const r = ratio(a, b);
     if (r < p.min) problems.push(`${p.fg} on ${p.bg} is ${r.toFixed(2)}:1, under ${p.min}:1 (${p.use})`);
   }
-  notes.push(`${Object.keys(tokens).length} tokens equal the frozen v0.8 snapshot; ${used.size} distinct var() references all defined; ${literals} colour literals outside :root (recorded ${rec.colorLiteralsOutsideRoot}); spacing scale grows; ${checked} contrast pairs meet their minimum`);
+  notes.push(`${Object.keys(tokens).length} tokens equal the frozen ${baselineLabel} snapshot; ${used.size} distinct var() references all defined; ${literals} colour literals outside :root (recorded ${rec.colorLiteralsOutsideRoot}); spacing scale grows; ${checked} contrast pairs meet their minimum`);
   return { problems, notes };
 }
 

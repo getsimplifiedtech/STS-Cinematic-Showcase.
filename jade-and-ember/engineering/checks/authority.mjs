@@ -11,12 +11,13 @@ import { existsSync, readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { execFileSync } from 'node:child_process';
 import { engDir, git, isMain, readJson, repoRoot, sha256 } from '../lib/git.mjs';
+import { project, projectFolder } from '../lib/project.mjs';
 
 const WINDOW = 6;   // a mention must have a marker within this many lines
 
 export function checkAuthority({ root = repoRoot, framework = process.env.STS_FRAMEWORK_DIR } = {}) {
   const problems = [], notes = [];
-  const auth = readJson(join(root, 'jade-and-ember', 'engineering', 'authority.json'));
+  const auth = readJson(join(root, projectFolder, 'engineering', project.creativeAuthority.record));
   const read = (rel) => (existsSync(join(root, rel)) ? readFileSync(join(root, rel), 'utf8') : null);
 
   // 1. record shape and agreement with the written reference

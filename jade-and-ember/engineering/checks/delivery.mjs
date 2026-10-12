@@ -8,6 +8,7 @@ import { existsSync, readFileSync, rmSync } from 'node:fs';
 import { dirname, join, posix } from 'node:path';
 import { assembleCandidate, pagesOf, SHARED } from '../lib/site.mjs';
 import { baselineRecord, isMain, listFiles, projectDir, repoRoot } from '../lib/git.mjs';
+import { baselineLabel } from '../lib/project.mjs';
 
 // The preview package also carries START-HERE.txt (written when the ZIP is packed) and the optional serve.py helper.
 const PACKAGING_ONLY = new Set(['START-HERE.txt', 'serve.py']);
@@ -20,9 +21,9 @@ export function checkDelivery({ root = null } = {}) {
     const delivered = [...pagesOf(dir), ...SHARED, ...listFiles(join(dir, 'fonts')).map((f) => `fonts/${f}`), ...listFiles(join(dir, 'media')).map((f) => `media/${f}`)].sort();
     const rec = baselineRecord();
     const zipSet = readFileSync(join(repoRoot, rec.recordsDir, 'SHA256SUMS.preview-contents.txt'), 'utf8').split('\n').filter(Boolean).map((l) => l.slice(66)).filter((f) => !PACKAGING_ONLY.has(f)).sort();
-    for (const f of delivered) if (!zipSet.includes(f)) problems.push(`delivered file not in the v0.8 preview package: ${f} (a new delivered file needs an approved change)`);
-    for (const f of zipSet) if (!delivered.includes(f)) problems.push(`v0.8 preview package file missing from the delivered set: ${f}`);
-    notes.push(`delivered set: ${delivered.length} files, same as the v0.8 preview package (without START-HERE.txt and serve.py)`);
+    for (const f of delivered) if (!zipSet.includes(f)) problems.push(`delivered file not in the ${baselineLabel} preview package: ${f} (a new delivered file needs an approved change)`);
+    for (const f of zipSet) if (!delivered.includes(f)) problems.push(`${baselineLabel} preview package file missing from the delivered set: ${f}`);
+    notes.push(`delivered set: ${delivered.length} files, same as the ${baselineLabel} preview package (without START-HERE.txt and serve.py)`);
 
     const set = new Set(delivered);
     const okExternal = /^(https:|tel:|mailto:|#|data:)/;

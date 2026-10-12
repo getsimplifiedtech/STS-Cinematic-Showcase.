@@ -12,7 +12,10 @@
     "delivery",
     "creativeAuthority",
     "checks",
-    "ci"
+    "ci",
+    "markup",
+    "engine",
+    "generators"
   ],
   "additionalProperties": false,
   "properties": {
@@ -132,7 +135,9 @@
         "sharedFiles",
         "assetFolders",
         "configDir",
-        "pages"
+        "pages",
+        "stylesheet",
+        "sourceRoots"
       ],
       "additionalProperties": false,
       "properties": {
@@ -201,6 +206,20 @@
               "description": "The builder, run in the project root; {out} is replaced by the output folder. null for a project whose delivered folder is the source."
             }
           }
+        },
+        "stylesheet": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9._-]+$",
+          "description": "The main stylesheet, at the root of the delivered folder (one of sharedFiles)."
+        },
+        "sourceRoots": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": {
+            "type": "string"
+          },
+          "description": "The project's own sources of the delivered folder (builder and sources), relative to the project root: scanned to prove the site depends on no hosting vendor."
         }
       }
     },
@@ -315,6 +334,200 @@
           "type": "string",
           "pattern": "^[A-Za-z0-9._-]+\\.ya?ml$",
           "description": "The verify workflow, a file name in .github/workflows/ at the repository root."
+        }
+      }
+    },
+    "markup": {
+      "type": "object",
+      "required": [
+        "selectors",
+        "heroStates",
+        "probes"
+      ],
+      "additionalProperties": false,
+      "description": "The markup contract the browser checks rely on, as CSS selectors and class names. The creative authority decides how the site looks; engineering only needs to find the controls it has to operate. A selector a check needs but the project sets to null is an error, never a silent skip.",
+      "properties": {
+        "selectors": {
+          "type": "object",
+          "required": [
+            "navToggle",
+            "siteNav",
+            "pauseControl",
+            "ambientHero",
+            "brandLink",
+            "footerNav",
+            "sectionJump",
+            "skipLinkClass"
+          ],
+          "additionalProperties": false,
+          "properties": {
+            "navToggle": {
+              "type": [
+                "string",
+                "null"
+              ],
+              "minLength": 1,
+              "description": "The button that opens the phone navigation."
+            },
+            "siteNav": {
+              "type": [
+                "string",
+                "null"
+              ],
+              "minLength": 1,
+              "description": "The navigation container the toggle controls."
+            },
+            "pauseControl": {
+              "type": [
+                "string",
+                "null"
+              ],
+              "minLength": 1,
+              "description": "The control that pauses moving content (WCAG 2.2.2)."
+            },
+            "ambientHero": {
+              "type": [
+                "string",
+                "null"
+              ],
+              "minLength": 1,
+              "description": "The element that carries the hero's playback state classes."
+            },
+            "brandLink": {
+              "type": [
+                "string",
+                "null"
+              ],
+              "minLength": 1,
+              "description": "The brand link that returns to the home page."
+            },
+            "footerNav": {
+              "type": [
+                "string",
+                "null"
+              ],
+              "minLength": 1,
+              "description": "The footer navigation."
+            },
+            "sectionJump": {
+              "type": [
+                "string",
+                "null"
+              ],
+              "minLength": 1,
+              "description": "The in-page jump navigation, if a page has one."
+            },
+            "skipLinkClass": {
+              "type": [
+                "string",
+                "null"
+              ],
+              "pattern": "^[A-Za-z0-9_-]+$",
+              "description": "The class name of the skip link."
+            }
+          }
+        },
+        "heroStates": {
+          "type": "object",
+          "required": [
+            "video",
+            "poster"
+          ],
+          "additionalProperties": false,
+          "properties": {
+            "video": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9_-]+$",
+              "description": "The class on the hero element once the video plays."
+            },
+            "poster": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9_-]+$",
+              "description": "The class once the poster takes over where video cannot play."
+            }
+          }
+        },
+        "probes": {
+          "type": "object",
+          "required": [
+            "footerLinkPage",
+            "sectionJumpPage"
+          ],
+          "additionalProperties": false,
+          "properties": {
+            "footerLinkPage": {
+              "type": [
+                "string",
+                "null"
+              ],
+              "description": "A page file reached from the footer navigation, clicked by the portability walk."
+            },
+            "sectionJumpPage": {
+              "type": [
+                "string",
+                "null"
+              ],
+              "description": "The page file that carries the in-page jump navigation."
+            }
+          }
+        }
+      }
+    },
+    "engine": {
+      "type": "object",
+      "required": [
+        "projectFolders",
+        "projectFiles"
+      ],
+      "additionalProperties": false,
+      "description": "Project files that are part of the verifying code (the checks import or run them), so the engine digest of a verification record covers them.",
+      "properties": {
+        "projectFolders": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": {
+            "type": "string"
+          }
+        },
+        "projectFiles": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "generators": {
+      "type": "object",
+      "required": [
+        "seo",
+        "crawlers",
+        "config"
+      ],
+      "additionalProperties": false,
+      "description": "Modules of the project that implement the build-time generators the checks validate against: the search and structured-data generator, the crawler policy and the configuration loader. They stay where the project keeps them until the framework owns them (G6-6); the engineering reaches them only through this section. A check that needs one the project does not declare is not applicable and says so.",
+      "properties": {
+        "seo": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "description": "Public URL, canonical, sitemap and structured-data generation."
+        },
+        "crawlers": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "description": "The reviewed crawler list and the robots policy."
+        },
+        "config": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "description": "The configuration loader."
         }
       }
     }

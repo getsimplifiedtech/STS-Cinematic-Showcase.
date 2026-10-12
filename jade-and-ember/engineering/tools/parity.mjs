@@ -2,7 +2,7 @@
 //   node engineering/tools/parity.mjs normalise <verify-log>                 print the log with everything that legitimately varies between two runs removed
 //   node engineering/tools/parity.mjs compare <reference> <log> [--allow f]  compare two logs (either raw or already normalised); every line that differs
 //                                                                            must be pinned in the allow file with its reason, or the comparison fails
-// What is removed: timings, measured milliseconds, temporary paths, ports, the commit a manifest names, and the engine digest and seal of the verification record
+// What is removed: timings, measured milliseconds (and which event was slowest), temporary paths, ports, the commit a manifest names, and the engine digest and seal of the verification record
 // (the verifying code is the thing being changed, so its digest differs by construction). What is kept: every check result, every note, every "caught:" line (so the
 // self-test cases are counted line by line), the delivered tree hash and the candidate artifact digest.
 import { readFileSync } from 'node:fs';
@@ -15,6 +15,7 @@ export function normalise(text) {
       .replace(/\((\d+(?:\.\d+)?) s\)/g, '(T s)')
       .replace(/^(\s+(?:PASS|FAIL)\s+\S+)\s+\d+(?:\.\d+)? s\b/, '$1 T s')
       .replace(/\b\d+(?:\.\d+)? ms\b/g, 'N ms')
+      .replace(/slowest event: \w+/g, 'slowest event: EVENT')
       .replace(/, \d+ s\)/g, ', T s)')
       .replace(/\b\d+(?:\.\d+)? min\b/g, 'T min')
       .replace(/(\/tmp\/|\/var\/folders\/)\S+/g, 'TMP')

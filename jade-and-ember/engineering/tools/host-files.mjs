@@ -6,6 +6,7 @@ import { join, resolve } from 'node:path';
 import { assembleCandidate } from '../lib/site.mjs';
 import { buildCsp, loadPolicy, renderApache, renderHeadersFile, renderNginx } from '../lib/security.mjs';
 import { projectDir } from '../lib/git.mjs';
+import { project } from '../lib/project.mjs';
 
 const arg = (n) => { const i = process.argv.indexOf(n); return i > -1 ? process.argv[i + 1] : null; };
 const out = resolve(arg('--out') || join(projectDir, 'host'));
@@ -22,6 +23,6 @@ try {
   writeFileSync(join(out, 'htaccess'), renderApache(dir, policy, { https, hsts }));
   const meta = buildCsp(dir, policy, { https }).split('; ').filter((d) => !/^(frame-ancestors|report-uri|sandbox)\b/.test(d)).join('; ');
   writeFileSync(join(out, 'csp-meta.html'), `<!-- Only for a host that cannot send headers. Put inside <head>, before any script or stylesheet. frame-ancestors cannot be set by a meta tag, and a meta policy does not exist over file:// until the page is opened from a server. Not added to the delivered pages by default. -->\n<meta http-equiv="Content-Security-Policy" content="${meta.replace(/"/g, '&quot;')}">\n`);
-  writeFileSync(join(out, 'HOSTING.txt'), `Generated host files for the Jade & Ember static site (${https ? 'HTTPS' : 'plain HTTP'}${prefix ? `, under ${prefix}/` : ', domain root'}).\n_headers   Netlify, Cloudflare Pages\nnginx.conf  nginx (inside the server block)\nhtaccess    Apache with mod_headers (save as .htaccess in the site folder)\ncsp-meta.html  fallback for hosts that cannot set headers (weaker: see engineering/ENG-SECURITY.md)\nThe CSP hashes belong to the exact built pages: regenerate after every rebuild.\nNothing here deploys anything.\n`);
+  writeFileSync(join(out, 'HOSTING.txt'), `Generated host files for the ${project.name} static site (${https ? 'HTTPS' : 'plain HTTP'}${prefix ? `, under ${prefix}/` : ', domain root'}).\n_headers   Netlify, Cloudflare Pages\nnginx.conf  nginx (inside the server block)\nhtaccess    Apache with mod_headers (save as .htaccess in the site folder)\ncsp-meta.html  fallback for hosts that cannot set headers (weaker: see engineering/ENG-SECURITY.md)\nThe CSP hashes belong to the exact built pages: regenerate after every rebuild.\nNothing here deploys anything.\n`);
   console.log(`wrote ${out}: _headers, nginx.conf, htaccess, csp-meta.html, HOSTING.txt`);
 } finally { rmSync(dir, { recursive: true, force: true }); }

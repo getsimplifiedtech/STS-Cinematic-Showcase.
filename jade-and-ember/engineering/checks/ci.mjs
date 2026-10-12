@@ -4,6 +4,7 @@ import { existsSync, readFileSync, readdirSync } from 'node:fs';
 import { basename, dirname, join } from 'node:path';
 import { parse } from 'yaml';
 import { engDir, isMain, projectDir, readJson, repoRoot } from '../lib/git.mjs';
+import { project, workflowPath } from '../lib/project.mjs';
 import { satisfies } from '../lib/node-range.mjs';
 
 const FORBIDDEN_TEXT = [
@@ -93,8 +94,8 @@ export function checkCiFile(text, { docs = true } = {}) {
   return { problems, notes };
 }
 
-export function checkCi({ file = join(repoRoot, '.github', 'workflows', 'jade-and-ember-verify.yml') } = {}) {
-  if (!existsSync(file)) return { problems: ['the workflow file .github/workflows/jade-and-ember-verify.yml is missing'], notes: [] };
+export function checkCi({ file = workflowPath() } = {}) {
+  if (!existsSync(file)) return { problems: [`the workflow file .github/workflows/${project.ci.workflow} is missing`], notes: [] };
   const r = checkCiFile(readFileSync(file, 'utf8'));
   // the policy judges ONE workflow; a second file in the folder would be judged by nothing (G6-3 review, F11)
   const dir = dirname(file), others = existsSync(dir) ? readdirSync(dir).filter((f) => /\.ya?ml$/i.test(f) && join(dir, f) !== file) : [];

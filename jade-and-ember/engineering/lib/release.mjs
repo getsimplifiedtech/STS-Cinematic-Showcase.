@@ -85,7 +85,7 @@ export function collectContext(o = {}) {
     inventory: o.inventory || readJson(join(engDir, 'media-rights-inventory.json')),
     lock: o.lock || (() => { const t = readFileSync(join(root, 'package-lock.json')); return { sha256: sha256(t), packages: Object.keys(JSON.parse(t.toString('utf8')).packages || {}).filter(Boolean).length }; })(),
     dependencyPolicyProblems: o.dependencyPolicyProblems || checkDepsStatic({ root }).problems,
-    runtimeProblems: o.runtimeProblems || (() => { const dir = join(repoRoot, '.github', 'workflows'); const files = existsSync(dir) ? readdirSync(dir).filter((f) => /\.ya?ml$/i.test(f)).sort() : []; if (!files.includes('jade-and-ember-verify.yml')) return ['the workflow file jade-and-ember-verify.yml is missing']; return files.flatMap((f) => (f === 'jade-and-ember-verify.yml' ? checkCiFile(readFileSync(join(dir, f), 'utf8'), { docs: false }).problems : [`${f}: a workflow the CI policy does not judge`])); })(),
+    runtimeProblems: o.runtimeProblems || (() => { const dir = join(repoRoot, '.github', 'workflows'); const files = existsSync(dir) ? readdirSync(dir).filter((f) => /\.ya?ml$/i.test(f)).sort() : []; if (!files.includes(project.ci.workflow)) return [`the workflow file ${project.ci.workflow} is missing`]; return files.flatMap((f) => (f === project.ci.workflow ? checkCiFile(readFileSync(join(dir, f), 'utf8'), { docs: false }).problems : [`${f}: a workflow the CI policy does not judge`])); })(),
     policyExtras: o.policyExtras || null,
   };
 }

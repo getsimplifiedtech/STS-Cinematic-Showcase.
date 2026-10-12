@@ -9,7 +9,7 @@
 // The manifest can declare facts and ADD checks. It has no key that removes, skips or weakens a check of the base engineering, and the schema rejects unknown keys:
 // the same Base Engineering Framework serves every website offering (OP-2). It names no aesthetic value: the creative authority is pinned by reference only.
 import { existsSync, readFileSync } from 'node:fs';
-import { dirname, join, resolve } from 'node:path';
+import { dirname, join, relative, resolve, sep } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { validateSchema } from './schema.mjs';
 import { parseStrictJson } from './strict-json.mjs';
@@ -48,6 +48,9 @@ export function loadProject(root = findProjectRoot()) {
     governance: Object.freeze({ ...manifest.governance, approvalsPath: join(repoRoot, manifest.governance.approvalsLog) }),
     ci: manifest.ci,
     delivery: manifest.delivery,
+    markup: manifest.markup,
+    generators: manifest.generators,
+    engine: manifest.engine,
     baseline: manifest.baseline ?? null,
     creativeAuthority: manifest.creativeAuthority,
     projectChecks: manifest.checks.project,
@@ -56,6 +59,26 @@ export function loadProject(root = findProjectRoot()) {
 
 export const project = loadProject();
 
+// How reports name the frozen owner-approved reference ("v0.8"), and the verify workflow's place; the base engineering says 'baseline' when a project declares none.
+// The project's folder inside the repository, as a POSIX path (jade-and-ember): the prefix of its paths in repository-wide records and checksum files.
+export const projectFolder = relative(project.repoRoot, project.root).split(sep).join('/');
+// Where the engineering code and the project's records sit, relative to the project root, as POSIX paths (engineering).
+export const coreRel = relative(project.root, coreDir).split(sep).join('/');
+export const engRel = relative(project.root, project.engDir).split(sep).join('/');
+// The project's builder as [command, args]: {out} becomes the output folder and an argument that names a file inside the project root is made absolute, so the build
+// can be started from any working folder. null when the delivered folder is the project's source (delivery.build is null).
+export function buildCommand(root, out) {
+  const b = project.delivery.build;
+  if (!b) return null;
+  const [cmd, ...args] = b.command.map((t) => (t === '{out}' ? out : !t.startsWith('-') && existsSync(join(root, t)) ? join(root, t) : t));
+  return [cmd === 'node' ? process.execPath : cmd, args];
+}
+// The build command as a person would type it, for messages ("node build.mjs").
+export const buildCommandText = project.delivery.build ? project.delivery.build.command.filter((t) => t !== '--out' && t !== '{out}').join(' ') : null;
+export const stylesheet = project.delivery.stylesheet;
+export const baselineLabel = project.baseline?.label ?? 'baseline';
+export const workflowPath = (root = project.repoRoot) => join(root, '.github', 'workflows', project.ci.workflow);
+
 // Identifiers the project's records carry. The schema id of every record the engineering writes is namespaced by the project id (jade-and-ember/candidate@1), and the
 // release records are numbered with the project's suffix (REL-JE-001). For Jade & Ember the values are the ones the records have always had.
 export const schemaId = (name) => `${project.id}/${name}`;
@@ -63,3 +86,11 @@ export const recordPrefix = (kind) => `${kind}-${project.governance.recordIdSuff
 const esc = (x) => x.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 export const approvalIdRe = () => new RegExp(`^${esc(project.governance.approvalIdPrefix)}-\\d+$`);
 export const demonstrationIdRe = () => new RegExp(`^${esc(project.governance.demonstrationIdPrefix)}-\\d{3,}$`);
+
+// The markup contract (sts.engineering.json, markup). A check that needs a selector the project sets to null fails with a clear message: it never skips silently.
+export const markup = project.markup;
+export function selector(name) {
+  const v = markup.selectors[name];
+  if (v === null || v === undefined) throw new Error(`${project.name} declares no "${name}" (sts.engineering.json, markup.selectors.${name}), which this check needs to operate the page`);
+  return v;
+}

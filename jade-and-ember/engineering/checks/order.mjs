@@ -5,11 +5,12 @@
 import { reconcile } from '../lib/findings.mjs';
 import { withSite } from '../lib/runtime.mjs';
 import { isMain } from '../lib/git.mjs';
+import { markup } from '../lib/project.mjs';
 
-const collect = () => {
+const collect = (skipClass) => {
   const sel = 'h1, h2, h3, h4, h5, h6, a[href], button, [tabindex]:not([tabindex="-1"])';
   const name = (e) => `${e.tagName.toLowerCase()}${e.id ? '#' + e.id : ''} "${(e.innerText || e.getAttribute('aria-label') || '').trim().replace(/\s+/g, ' ').slice(0, 22)}"`;
-  return [...document.querySelectorAll(sel)].filter((e) => e.checkVisibility({ checkVisibilityCSS: true }) && !e.classList.contains('skip') && !e.closest('[aria-hidden="true"]')).map((e) => { const r = e.getBoundingClientRect(); return { n: name(e), x: r.left + scrollX, y: r.top + scrollY, w: r.width, h: r.height }; });
+  return [...document.querySelectorAll(sel)].filter((e) => e.checkVisibility({ checkVisibilityCSS: true }) && !e.classList.contains(skipClass) && !e.closest('[aria-hidden="true"]')).map((e) => { const r = e.getBoundingClientRect(); return { n: name(e), x: r.left + scrollX, y: r.top + scrollY, w: r.width, h: r.height }; });
 };
 
 export async function checkOrder({ root = null, browserName = 'chromium', pages: only = null } = {}) {
@@ -19,7 +20,7 @@ export async function checkOrder({ root = null, browserName = 'chromium', pages:
     const TOL = 4;
     for (const ctx of [{ name: 'desktop-1440', w: 1440, h: 900 }, { name: 'mobile-390', w: 390, h: 844 }]) for (const file of pages) {
       const { page, close } = await newPage({ viewport: { width: ctx.w, height: ctx.h } }, file);
-      const items = await page.evaluate(collect);
+      const items = await page.evaluate(collect, markup.selectors.skipLinkClass);
       for (let i = 1; i < items.length; i++) {
         const a = items[i - 1], b = items[i]; pairs++;
         const overlapV = Math.min(a.y + a.h, b.y + b.h) - Math.max(a.y, b.y);

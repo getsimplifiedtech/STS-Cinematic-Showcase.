@@ -20,6 +20,7 @@ import { ffmpegAvailable, flashStats } from '../lib/flash.mjs';
 import { withSite } from '../lib/runtime.mjs';
 import { assembleCandidate, pagesOf } from '../lib/site.mjs';
 import { engDir, isMain, listFiles, projectDir, readJson, repoRoot } from '../lib/git.mjs';
+import { selector, stylesheet } from '../lib/project.mjs';
 import { mediaRightsProblems } from '../lib/media-rights.mjs';
 import { standingRightsRecords } from '../lib/records.mjs';
 import { rmSync } from 'node:fs';
@@ -94,7 +95,7 @@ export function checkMediaStatic(root, cfgRoot = projectDir) {
     }
   }
   // CSS references
-  for (const m of readFileSync(join(root, 'styles.css'), 'utf8').matchAll(/url\(([^)]+)\)/g)) { const u = m[1].replace(/^['"]|['"]$/g, ''); if (u.startsWith('media/')) referenced.add(u.slice(6)); }
+  for (const m of readFileSync(join(root, stylesheet), 'utf8').matchAll(/url\(([^)]+)\)/g)) { const u = m[1].replace(/^['"]|['"]$/g, ''); if (u.startsWith('media/')) referenced.add(u.slice(6)); }
   for (const f of files) if (!referenced.has(f)) bad('orphan', f, `media/${f} is not used by any page or stylesheet`);
   for (const r of referenced) if (!files.includes(r)) bad('missing', r, `a page references media/${r}, which is not delivered`);
 
@@ -152,13 +153,13 @@ export async function checkMediaBrowser({ root = null, browserName = 'chromium',
       page.on('request', (r) => { if (/\.(webm|mp4)(\?|$)/.test(r.url())) media.push(new URL(r.url()).pathname); });
       if (init) await page.addInitScript(init);
       await page.goto(base + file); await page.waitForTimeout(settleMs);
-      const state = await page.evaluate(() => {
+      const state = await page.evaluate((pauseSelector) => {
         const long = document.getAnimations().filter((a) => { const t = a.effect?.getComputedTiming?.(); return a.playState === 'running' && t && (t.iterations === Infinity || t.endTime > 5000); });
         const running = document.getAnimations().filter((a) => a.playState === 'running');
         const vids = [...document.querySelectorAll('video')].map((v) => ({ paused: v.paused, sources: v.querySelectorAll('source').length + (v.getAttribute('src') ? 1 : 0) }));
-        const pause = document.querySelector('.pause');
+        const pause = document.querySelector(pauseSelector);
         return { running: running.length, long: long.length, vids, pauseVisible: !!pause && pause.checkVisibility({ checkVisibilityCSS: true }), scrollBehavior: getComputedStyle(document.documentElement).scrollBehavior, playingVideo: vids.some((v) => !v.paused) };
-      });
+      }, selector('pauseControl'));
       checks++;
       return { ctx, page, media, state, name };
     };
@@ -185,7 +186,7 @@ export async function checkMediaBrowser({ root = null, browserName = 'chromium',
         if (vp.width < 960 && r.media.length) bad('video-too-narrow', `a video was requested at ${vp.width} px; it is for 960 px and wider only`);
         if ((r.state.long || r.state.playingVideo) && !r.state.pauseVisible) bad('no-pause', 'something moves for more than 5 seconds and there is no visible Pause control (2.2.2)');
         if ((r.state.long || r.state.playingVideo) && r.state.pauseVisible) {
-          await r.page.click('.pause'); await r.page.waitForTimeout(500);
+          await r.page.click(selector('pauseControl')); await r.page.waitForTimeout(500);
           const after = await r.page.evaluate(() => ({ running: document.getAnimations().filter((a) => a.playState === 'running').length, playing: [...document.querySelectorAll('video')].some((v) => !v.paused) }));
           if (after.running || after.playing) bad('pause-ineffective', `Pause leaves ${after.running} animation(s) running and video ${after.playing ? 'playing' : 'stopped'}`);
         }

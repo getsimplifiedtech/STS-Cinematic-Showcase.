@@ -22,6 +22,7 @@ import { publicPathOf } from '../adapters/hosting/common.mjs';
 import { pagesOf } from '../lib/site.mjs';
 import { checkHostingAdapters } from './hosting-adapters.mjs';
 import { isMain, projectDir } from '../lib/git.mjs';
+import { coreRel, engRel, project } from '../lib/project.mjs';
 
 const STATIC_EXT = new Set(['.html', '.css', '.js', '.webp', '.webm', '.mp4', '.woff2', '.txt', '.xml', '.ico', '.svg', '.png', '.jpg', '.json', '.md']);
 const FORBIDDEN_NAMES = [/^vercel\.json$/i, /^\.vercel$/i, /^netlify\.toml$/i, /^wrangler\.(toml|json|jsonc)$/i, /^_worker\.js$/i, /^_routes\.json$/i, /^functions$/i, /^package(-lock)?\.json$/i, /^node_modules$/i, /^next\.config\./i, /^_redirects$/i, /^\.env/i, /^\.git/i];
@@ -61,9 +62,10 @@ export function checkHeadersFile(text, { root, policy = loadPolicy(), prefix = '
 const FORBIDDEN_IN_SOURCES = /vercel/i;
 export function checkNoVendor() {
   const problems = [];
-  const roots = ['src', 'config', 'build.mjs', 'styles.css', 'site.js', 'hero.js', 'menu.js', 'package.json', 'engineering/security.json', 'engineering/htmlvalidate.json', 'engineering/release'];
+  const D = project.delivery;
+  const roots = [...D.sourceRoots, D.configDir, ...D.sharedFiles, 'package.json', ...['security.json', 'htmlvalidate.json', 'release'].map((x) => `${engRel}/${x}`)];
   // seo.mjs names the hosts (Cloudflare Pages, Vercel, a plain server) only to choose the public URL style; it calls no host API and needs no host file.
-  const allowed = new Set(['engineering/checks/ci.mjs', 'engineering/checks/hosting.mjs', 'src/lib/seo.mjs']);
+  const allowed = new Set([`${coreRel}/checks/ci.mjs`, `${coreRel}/checks/hosting.mjs`, project.generators.seo].filter(Boolean));
   for (const r of roots) {
     const p = join(projectDir, r); let files;
     try { files = statSync(p).isDirectory() ? walk(p) : [p]; } catch { continue; }

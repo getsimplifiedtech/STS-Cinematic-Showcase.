@@ -4,7 +4,7 @@ import { join } from 'node:path';
 import { spawnSync } from 'node:child_process';
 import { listFiles, projectDir, readJson, sha256, tempDir, engDir } from './git.mjs';
 import { approvalsText as readApprovals } from './approvals.mjs';
-import { project } from './project.mjs';
+import { buildCommand, project } from './project.mjs';
 
 const D = project.delivery;
 const atPath = (root, rel) => join(root, ...rel.split('/'));
@@ -21,8 +21,8 @@ export function assembleCandidate(root = projectDir, label = 'candidate') {
   const dest = tempDir(label);
   for (const f of [...SHARED, ...D.assetFolders, D.configDir]) if (D.build || existsSync(join(root, f))) cpSync(join(root, f), join(dest, f), { recursive: true });
   if (!D.build) { for (const f of pagesOf(root)) cpSync(join(root, f), join(dest, f)); return dest; }
-  const [cmd, ...args] = D.build.command.map((t) => (t === '{out}' ? dest : t));
-  const r = spawnSync(cmd === 'node' ? process.execPath : cmd, args, { cwd: root, encoding: 'utf8' });
+  const [cmd, args] = buildCommand(root, dest);
+  const r = spawnSync(cmd, args, { cwd: root, encoding: 'utf8' });
   if (r.status !== 0) throw new Error(`the candidate build failed:\n${r.stdout}${r.stderr}`);
   return dest;
 }

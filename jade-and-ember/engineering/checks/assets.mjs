@@ -13,6 +13,7 @@ import { assembleCandidate, loadAllowlist, pagesOf, SHARED } from '../lib/site.m
 import { buildHashed, buildManifest, sha256hex, treeHash } from '../lib/hashed.mjs';
 import { runRegression } from '../lib/regression.mjs';
 import { baselineRecord, engDir, exportBaseline, isMain, listFiles, projectDir, readJson, repoRoot, tempDir } from '../lib/git.mjs';
+import { baselineLabel } from '../lib/project.mjs';
 
 // every local reference in pages and CSS resolves to a file in the folder
 export function refsResolve(dir) {
@@ -45,15 +46,15 @@ export function checkAssetsStatic({ root }) {
     if (!entry || allow.errors.length) return false;
     let text = readFileSync(join(root, f), 'utf8');
     for (const r of entry.normalize) text = text.replace(new RegExp(r.find, 'g'), r.replace);
-    if (sha256hex(text) !== sums[`jade-and-ember/${f}`]) return false;
-    notes.push(`${f} differs from the v0.8 checksum only as approved by ${entry.id} (${entry.approval || entry.workPackage})`);
+    if (sha256hex(text) !== sums[`${rec.projectPath}/${f}`]) return false;
+    notes.push(`${f} differs from the ${baselineLabel} checksum only as approved by ${entry.id} (${entry.approval || entry.workPackage})`);
     return true;
   };
-  const changed = Object.entries(fresh.files).filter(([f, e]) => sums[`jade-and-ember/${f}`] && sums[`jade-and-ember/${f}`] !== e.sha256 && !explained(f, e)).map(([f]) => f);
-  const missing = Object.keys(fresh.files).filter((f) => !sums[`jade-and-ember/${f}`]);
-  if (changed.length) problems.push(`delivered file(s) differ from the v0.8 baseline checksums: ${changed.join(', ')}`);
-  if (missing.length) problems.push(`delivered file(s) not in the v0.8 baseline: ${missing.join(', ')}`);
-  if (!changed.length && !missing.length) notes.push('every delivered file equals its v0.8 baseline checksum, or differs only as an approved allowlist entry explains; names and paths are unchanged');
+  const changed = Object.entries(fresh.files).filter(([f, e]) => sums[`${rec.projectPath}/${f}`] && sums[`${rec.projectPath}/${f}`] !== e.sha256 && !explained(f, e)).map(([f]) => f);
+  const missing = Object.keys(fresh.files).filter((f) => !sums[`${rec.projectPath}/${f}`]);
+  if (changed.length) problems.push(`delivered file(s) differ from the ${baselineLabel} baseline checksums: ${changed.join(', ')}`);
+  if (missing.length) problems.push(`delivered file(s) not in the ${baselineLabel} baseline: ${missing.join(', ')}`);
+  if (!changed.length && !missing.length) notes.push(`every delivered file equals its ${baselineLabel} baseline checksum, or differs only as an approved allowlist entry explains; names and paths are unchanged`);
   return { problems, notes, fresh };
 }
 
@@ -88,7 +89,7 @@ export async function checkAssets({ root = null, browser = true, browserName = '
       const sum = await runRegression({ baselineRoot: base, candidateRoot: h1, reportDir: join(engDir, '.reports', 'assets'), only: ['text', 'structure', 'styles', 'pixels', 'behaviour'], subset: { viewports: ['desktop-1440', 'tablet-820', 'mobile-390'], states: false, scenarios: /^hero: desktop|^hero: reduced|file:\/\/|^requests/ }, browserName });
       let compared = 0;
       for (const [layer, L] of Object.entries(sum.layers)) { compared += L.checked; L.problems.forEach((x) => problems.push(`hashed copy, ${layer}: ${x}`)); }
-      notes.push(`hashed copy in the browser equals v0.8: ${compared} comparisons (text, accessibility tree, computed styles, screenshots at 1440, 820, 390 px; hero video, reduced motion, requests, and every page opened from the folder over file://), 0 differences`);
+      notes.push(`hashed copy in the browser equals ${baselineLabel}: ${compared} comparisons (text, accessibility tree, computed styles, screenshots at 1440, 820, 390 px; hero video, reduced motion, requests, and every page opened from the folder over file://), 0 differences`);
     } else notes.push('browser comparison of the hashed copy skipped (no browser in this tier)');
     return { problems, notes };
   } finally { cleanup.forEach((d) => rmSync(d, { recursive: true, force: true })); if (own) rmSync(dir, { recursive: true, force: true }); }

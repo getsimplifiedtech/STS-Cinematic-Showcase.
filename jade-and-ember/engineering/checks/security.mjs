@@ -20,6 +20,7 @@ import { serveSite } from '../lib/server.mjs';
 import { launchBrowser } from '../lib/browser.mjs';
 import { runRegression } from '../lib/regression.mjs';
 import { engDir, exportBaseline, isMain, projectDir } from '../lib/git.mjs';
+import { baselineLabel, markup, selector } from '../lib/project.mjs';
 import { pathToFileURL } from 'node:url';
 
 const REQUIRED_CLOSED = ['object-src', 'base-uri', 'form-action', 'frame-ancestors', 'connect-src', 'manifest-src', 'worker-src'];
@@ -138,13 +139,13 @@ export async function checkSecurity({ root = null, browser = true, browserName =
         page.on('pageerror', (e) => noise.push(`pageerror: ${e.message}`));
         page.on('response', (r) => { if (r.status() >= 400) failed.push(`${r.status()} ${r.url()}`); });
         await page.goto(sv.base + file); await page.waitForTimeout(ctxDef.name === 'desktop' ? 3500 : 1500);
-        if (ctxDef.name === 'phone') { await page.click('.nav-toggle'); await page.waitForTimeout(150); await page.keyboard.press('Escape'); }
+        if (ctxDef.name === 'phone') { await page.click(selector('navToggle')); await page.waitForTimeout(150); await page.keyboard.press('Escape'); }
         if (ctxDef.name === 'desktop' && file === 'index.html') {
-          const hero = await page.evaluate(() => document.querySelector('[data-ambient-root]').className);
-          if (!/is-video/.test(hero)) problems.push(`index.html under the headers: the hero video did not start (${hero})`);
-          await page.click('.pause'); await page.waitForTimeout(300);
+          const hero = await page.evaluate((sel) => document.querySelector(sel).className, selector('ambientHero'));
+          if (!new RegExp(markup.heroStates.video).test(hero)) problems.push(`index.html under the headers: the hero video did not start (${hero})`);
+          await page.click(selector('pauseControl')); await page.waitForTimeout(300);
         }
-        if (file === 'menu.html') await page.evaluate(() => { const a = document.querySelector('.jump a'); a && a.click(); });
+        if (file === markup.probes.sectionJumpPage) await page.evaluate((jump) => { const a = document.querySelector(`${jump} a`); a && a.click(); }, selector('sectionJump'));
         await settleFonts(page);   // below-the-fold images are lazy: load them so a blocked one is counted
         const v = await page.evaluate(() => window.__v);
         const imgs = await page.evaluate(() => [...document.images].filter((i) => !(i.complete && i.naturalWidth > 0)).length);
@@ -168,7 +169,7 @@ export async function checkSecurity({ root = null, browser = true, browserName =
     const sum = await runRegression({ baselineRoot: baseExport, candidateRoot: dir, reportDir: join(engDir, '.reports', 'security'), only: ['text', 'structure', 'styles', 'pixels'], subset: { viewports: ['desktop-1440', 'tablet-820', 'mobile-390'], states: false }, candidateHeaders: () => headers, browserName });
     let compared = 0;
     for (const [layer, L] of Object.entries(sum.layers)) { compared += L.checked; L.problems.forEach((x) => problems.push(`under the headers, ${layer}: ${x}`)); }
-    notes.push(`candidate served WITH the headers equals v0.8 served plain: ${compared} comparisons (text, accessibility tree, computed styles, screenshots) at 1440, 820 and 390 px, 0 differences`);
+    notes.push(`candidate served WITH the headers equals ${baselineLabel} served plain: ${compared} comparisons (text, accessibility tree, computed styles, screenshots) at 1440, 820 and 390 px, 0 differences`);
     return { problems, notes };
   } finally {
     if (own) rmSync(dir, { recursive: true, force: true });

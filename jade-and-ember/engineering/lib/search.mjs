@@ -4,9 +4,12 @@
 // Everything returns readable problems; nothing here writes. They test TECHNICAL readiness, not rankings, citations or inclusion anywhere.
 import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
-import { CRAWLERS, KNOWN_AGENTS, blockedAgents, policyOf } from '../../src/lib/crawlers.mjs';
-import { addressText, baseOf, isReservedHost, publicUrl, urlStyleOf } from '../../src/lib/seo.mjs';
+import { project } from './project.mjs';
+import { generator } from './generators.mjs';
 import { serveSite } from './server.mjs';
+
+const { CRAWLERS, KNOWN_AGENTS, blockedAgents, policyOf } = generator('crawlers');
+const { addressText, baseOf, isReservedHost, publicUrl, urlStyleOf } = generator('seo');
 
 export const RIGHTS_CLAIM = /\b(royalty[- ]free|fully licen[cs]ed|licen[cs]ed (for|to|under)|rights[- ]cleared|copyright[- ]cleared|commercially (cleared|licen[cs]ed)|all rights (granted|reserved by us))\b/i;
 const DEMO_WORDING = /\b(fictional|sample|lorem|placeholder|example street|demonstration)\b/i;
@@ -155,7 +158,7 @@ export function robotsProblems({ text, cfg }) {
   const got = new Set(), want = new Set(blockedAgents(policy));
   for (const g of r.groups.slice(1)) {
     if (!g.rules.length || g.rules.some(([k, v]) => k !== 'disallow' || v !== '/')) p.push(`robots.txt: the group for ${g.agents.join(', ')} must be exactly "Disallow: /"`);
-    for (const a of g.agents) { if (!KNOWN_AGENTS.includes(a)) p.push(`robots.txt: ${a} is not in the reviewed crawler list (src/lib/crawlers.mjs)`); if (got.has(a)) p.push(`robots.txt: ${a} appears twice`); got.add(a); }
+    for (const a of g.agents) { if (!KNOWN_AGENTS.includes(a)) p.push(`robots.txt: ${a} is not in the reviewed crawler list (${project.generators.crawlers})`); if (got.has(a)) p.push(`robots.txt: ${a} appears twice`); got.add(a); }
   }
   for (const a of want) if (!got.has(a)) p.push(`robots.txt: the policy disallows ${a}'s class but ${a} is not blocked`);
   for (const a of got) if (!want.has(a)) p.push(`robots.txt: ${a} is blocked but its class is allowed by the policy`);

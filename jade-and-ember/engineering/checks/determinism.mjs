@@ -5,15 +5,18 @@
 //   4. the output carries no absolute paths, timestamps or machine names; UTF-8, LF line endings, one final newline
 //   5. the build sources contain no clock, random, environment or locale-dependent calls
 // Run: node engineering/checks/determinism.mjs
-import { cpSync, existsSync, readFileSync, readdirSync, rmSync, utimesSync, mkdirSync } from 'node:fs';
+import { cpSync, existsSync, readFileSync, readdirSync, rmSync, statSync, utimesSync, mkdirSync } from 'node:fs';
 import { join } from 'node:path';
 import { spawnSync } from 'node:child_process';
 import { hostname } from 'node:os';
 import { isMain, listFiles, projectDir, readJson, sha256, tempDir } from '../lib/git.mjs';
+import { buildCommand, buildCommandText, project } from '../lib/project.mjs';
+import { pagesOf } from '../lib/site.mjs';
 
 function build(root, out, env = {}, cwd = root) {
   mkdirSync(out, { recursive: true });
-  const r = spawnSync(process.execPath, [join(root, 'build.mjs'), '--out', out], { cwd, encoding: 'utf8', env: { ...process.env, ...env } });
+  const [cmd, args] = buildCommand(root, out);
+  const r = spawnSync(cmd, args, { cwd, encoding: 'utf8', env: { ...process.env, ...env } });
   return { status: r.status, text: r.stdout + r.stderr };
 }
 const digest = (dir) => Object.fromEntries(readdirSync(dir).sort().map((f) => [f, sha256(readFileSync(join(dir, f)))]));
@@ -22,7 +25,7 @@ const diffNames = (a, b) => [...new Set([...Object.keys(a), ...Object.keys(b)])]
 
 export function checkDeterminism({ root = projectDir } = {}) {
   const problems = [], notes = [];
-  const pages = readJson(join(root, 'config', 'site.json')).pages.map((p) => p.file);
+  const pages = pagesOf(root);
   const tmp = tempDir('determinism');
   try {
     // 1. two builds
@@ -35,7 +38,7 @@ export function checkDeterminism({ root = projectDir } = {}) {
 
     // 2. committed output
     const stale = pages.filter((f) => !existsSync(join(root, f)) || sha256(readFileSync(join(root, f))) !== da[f]);
-    if (stale.length) problems.push(`committed pages differ from a fresh build (run "node build.mjs"): ${stale.join(', ')}`);
+    if (stale.length) problems.push(`committed pages differ from a fresh build (run "${buildCommandText}"): ${stale.join(', ')}`);
     else notes.push('committed pages equal a fresh build');
 
     // 3. a different environment: copy of the project in another path with old timestamps, other zone, locale, cwd and NODE_ENV
@@ -67,7 +70,7 @@ export function checkDeterminism({ root = projectDir } = {}) {
 
     // 5. nondeterministic APIs in the build sources
     const forbidden = /\b(Date\.now|new Date|Math\.random|performance\.now|randomUUID|crypto\.random\w*|process\.env|os\.hostname|hostname\(\)|toLocale\w*|localeCompare|Intl\.)/;
-    const sources = ['build.mjs', ...listFiles(join(root, 'src')).map((f) => `src/${f}`)];
+    const sources = project.delivery.sourceRoots.flatMap((r) => (statSync(join(root, r)).isDirectory() ? listFiles(join(root, r)).map((f) => `${r}/${f}`) : [r]));
     for (const f of sources) {
       readFileSync(join(root, f), 'utf8').split('\n').forEach((line, i) => {
         if (forbidden.test(line.replace(/\/\/.*$/, ''))) problems.push(`${f}:${i + 1} uses a clock, random, environment or locale-dependent call: ${line.trim().slice(0, 80)}`);

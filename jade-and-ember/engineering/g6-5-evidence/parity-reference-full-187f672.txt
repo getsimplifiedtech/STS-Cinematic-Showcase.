@@ -149,7 +149,7 @@ PASS  check:assets (T s)
 
 == check:budgets: page-weight budgets, growth against v0.8, Core Web Vitals under throttling
   static: 5 pages measured; delivered 1977874 bytes (+0.02% against the v0.8 baseline of 1977386); largest page initial transfer 232252 bytes gzip
-  runtime (390 px, N ms / 1.6 Mbit/s / CPU x4, median of 3): worst LCP N ms (limit 2500), CLS 0 (limit 0.1), blocking N ms (limit 200), interaction handler time N ms (limit 200; END-TO-END N ms (input delay N ms + handler + presentation N ms; slowest event: keydown) is reported, not gated; N ms is the INP good reference), most requests 10, most bytes 174222
+  runtime (390 px, N ms / 1.6 Mbit/s / CPU x4, median of 3): worst LCP N ms (limit 2500), CLS 0 (limit 0.1), blocking N ms (limit 200), interaction handler time N ms (limit 200; END-TO-END N ms (input delay N ms + handler + presentation N ms; slowest event: EVENT) is reported, not gated; N ms is the INP good reference), most requests 10, most bytes 174222
 PASS  check:budgets (T s)
 
 == check:keyboard: Tab order, focus visibility, skip link, phone menu, target sizes (real key presses)

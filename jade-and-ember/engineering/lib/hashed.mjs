@@ -5,6 +5,7 @@ import { createHash } from 'node:crypto';
 import { copyFileSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { dirname, join, posix } from 'node:path';
 import { listFiles } from './git.mjs';
+import { stylesheet } from './project.mjs';
 import { pagesOf, SHARED } from './site.mjs';
 
 export const sha256hex = (buf) => createHash('sha256').update(buf).digest('hex');
@@ -44,8 +45,8 @@ export function buildHashed(srcRoot, outRoot) {
     if (/['"`][^'"`]*(?:media\/|fonts\/|\.(?:webp|webm|mp4|woff2))['"`]|['"`](?:media|fonts)\//.test(text.replace(/\/\*[\s\S]*?\*\//g, '').replace(/\/\/.*$/gm, ''))) throw new Error(`${js} names an asset file; it cannot be hashed safely`);
     map[js] = hashName(js, Buffer.from(text)); put(map[js], text);
   }
-  const css = rewrite(readFileSync(join(srcRoot, 'styles.css'), 'utf8'), map, '', 'css');
-  map['styles.css'] = hashName('styles.css', Buffer.from(css)); put(map['styles.css'], css);
+  const css = rewrite(readFileSync(join(srcRoot, stylesheet), 'utf8'), map, '', 'css');
+  map[stylesheet] = hashName(stylesheet, Buffer.from(css)); put(map[stylesheet], css);
   for (const page of pagesOf(srcRoot)) put(page, rewrite(readFileSync(join(srcRoot, page), 'utf8'), map, '', 'html'));
   return { map, files: Object.keys(map).length + pagesOf(srcRoot).length };
 }
