@@ -4,6 +4,8 @@ import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { adaptContextOptions, takeAdaptations } from '../lib/browser.mjs';
 import { SCOPE, engineChecks, renderMatrix } from '../lib/cross-catalogue.mjs';
+import { baselineLabel, coreDir, project, workflowPath } from '../lib/project.mjs';
+import { entryProblems, loadEntries } from '../lib/registry.mjs';
 import { checkD11 } from './d11.mjs';
 import { checkCiFile } from './ci.mjs';
 import { loadPolicy } from '../lib/security.mjs';
@@ -16,18 +18,25 @@ import { readFileSync as rf, writeFileSync, rmSync } from 'node:fs';
 import { projectDir, readJson } from '../lib/git.mjs';
 import { engDir, isMain, repoRoot } from '../lib/git.mjs';
 
-const verifyIds = () => [...readFileSync(join(engDir, 'verify.mjs'), 'utf8').matchAll(/\['(check:[a-z0-9-]+)'/g)].map((m) => m[1]);
-const runnerIds = () => [...readFileSync(join(engDir, 'cross-browser.mjs'), 'utf8').matchAll(/^\s+'(check:[a-z0-9-]+)': \(\) =>/gm)].map((m) => m[1]);
+// what the verifier runs and what the cross-browser runner runs are both read from the check registry; the runner source must not carry a list of its own
+const entriesNow = () => loadEntries({ coreRoot: coreDir, manifest: project.manifest, label: baselineLabel });
+const verifyIds = () => entriesNow().map((e) => e.id);
+const crossSource = () => readFileSync(join(engDir, 'cross-browser.mjs'), 'utf8');
+const runnerIds = () => [...crossSource().matchAll(/^\s+'(check:[a-z0-9-]+)': \(\) =>/gm).map((m) => m[1]), ...(/loadEntries\(/.test(crossSource()) ? entriesNow().filter((e) => e.scope === 'engine').map((e) => e.id) : [])];
 const clone = (o) => JSON.parse(JSON.stringify(o));
-const wf = readFileSync(join(repoRoot, '.github', 'workflows', 'jade-and-ember-verify.yml'), 'utf8');
+const wf = readFileSync(workflowPath(), 'utf8');
 
 // [name, async () => problems[], expected regex | null (must find nothing)]
 const cases = [
-  ['catalogue: every check of verify.mjs is classified', () => [...new Set(verifyIds())].filter((id) => !SCOPE[id]).map((id) => `${id} is in verify.mjs but not classified in cross-catalogue.mjs`), null],
-  ['catalogue: nothing classified that verify.mjs does not run', () => Object.keys(SCOPE).filter((id) => !verifyIds().includes(id)).map((id) => `${id} is classified but verify.mjs does not run it`), null],
+  ['catalogue: every check the verifier runs is classified', () => [...new Set(verifyIds())].filter((id) => !SCOPE[id]).map((id) => `${id} is in the registry but not classified in the catalogue`), null],
+  ['catalogue: nothing classified that the verifier does not run', () => Object.keys(SCOPE).filter((id) => !verifyIds().includes(id)).map((id) => `${id} is classified but the verifier does not run it`), null],
   ['catalogue: every browser-driven check has a runner in cross-browser.mjs', () => engineChecks().filter((id) => !runnerIds().includes(id)).map((id) => `${id} is browser-driven but the cross-browser runner does not run it`), null],
   ['catalogue: the runner runs nothing that is not browser-driven', () => runnerIds().filter((id) => !engineChecks().includes(id)).map((id) => `${id} is run by the runner but not classified as browser-driven`), null],
   ['catalogue: every not-applicable classification states its reason', () => Object.entries(SCOPE).filter(([, [s, r]]) => s !== 'engine' && String(r).length < 25).map(([id]) => `${id} has no real reason`), null],
+  ['registry: an entry with no scope is refused', () => entryProblems({ id: 'check:x', tier: 'fast', describe: 'x' }), /scope must be one of/],
+  ['registry: a check that does not run in every engine must say why', () => entryProblems({ id: 'check:x', tier: 'fast', scope: 'static', describe: 'x', reason: 'no' }), /states a real reason/],
+  ['registry: a project cannot list a check twice or follow one that does not exist', () => { try { loadEntries({ coreRoot: coreDir, manifest: { ...project.manifest, checks: { project: [{ id: 'check:keyboard', module: 'a.mjs', export: 'a', tier: 'full', after: 'check:nothing', scope: 'engine', describe: 'x' }] } } }); return []; } catch (e) { return [e.message]; } }, /listed twice|not in the registry/],
+  ['registry: a project check is added after the check it names and the base list is unchanged', () => { const base = loadEntries({ coreRoot: coreDir, manifest: { ...project.manifest, checks: { project: [] }, industry: null } }).map((e) => e.id); const e = loadEntries({ coreRoot: coreDir, manifest: { ...project.manifest, checks: { project: [{ id: 'check:extra', module: 'a.mjs', export: 'a', tier: 'full', after: 'check:order', scope: 'static', reason: 'an invented project check for this test; no browser', describe: 'x' }] }, industry: null } }).map((x) => x.id); return e.filter((i) => i !== 'check:extra').join() === base.join() && e[e.indexOf('check:order') + 1] === 'check:extra' ? [] : ['the merged list is not the base list plus the new check after check:order']; }, null],
   ['catalogue: a missing classification would be caught', () => { const bad = { ...SCOPE }; delete bad['check:keyboard']; return Object.keys(SCOPE).filter((id) => !bad[id]); }, /check:keyboard/],
   ['matrix: lists every check exactly once', () => { const rows = renderMatrix('firefox', Object.fromEntries(engineChecks().map((id) => [id, { state: 'pass', detail: '1 s' }]))); const p = []; for (const id of Object.keys(SCOPE)) if (rows.filter((r) => r.includes(id.padEnd(22))).length !== 1) p.push(`${id} appears ${rows.filter((r) => r.includes(id.padEnd(22))).length} times`); if (rows.some((r) => r.includes('MISSING'))) p.push('a MISSING row with complete results'); return p; }, null],
   ['matrix: a check the runner forgot is shown as MISSING, never as a pass', () => { const res = Object.fromEntries(engineChecks().map((id) => [id, { state: 'pass', detail: '1 s' }])); delete res['check:phone']; return renderMatrix('webkit', res).filter((r) => /MISSING/.test(r) && /check:phone/.test(r)); }, /MISSING/],

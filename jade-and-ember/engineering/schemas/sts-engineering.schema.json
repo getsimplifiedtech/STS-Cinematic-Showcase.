@@ -15,7 +15,8 @@
     "ci",
     "markup",
     "engine",
-    "generators"
+    "generators",
+    "industry"
   ],
   "additionalProperties": false,
   "properties": {
@@ -276,7 +277,8 @@
               "export",
               "tier",
               "after",
-              "description"
+              "scope",
+              "describe"
             ],
             "additionalProperties": false,
             "properties": {
@@ -306,17 +308,39 @@
                 ],
                 "description": "The id of the check this one follows in the report; null puts it first."
               },
-              "description": {
-                "type": "string",
-                "minLength": 1
+              "scope": {
+                "enum": [
+                  "static",
+                  "engine",
+                  "chromium-only"
+                ],
+                "description": "static: no browser; engine: browser-driven, run in every engine; chromium-only: cannot run elsewhere (say why in reason)."
               },
-              "descriptionFast": {
+              "reason": {
                 "type": "string",
-                "minLength": 1
+                "description": "Why a check does not run in every engine (required unless scope is engine)."
+              },
+              "describe": {
+                "type": "string",
+                "minLength": 1,
+                "description": "The line the report announces the check with."
               },
               "browser": {
                 "type": "boolean",
-                "description": "The check takes the browser name."
+                "description": "The check takes { browserName }."
+              },
+              "needs": {
+                "type": "array",
+                "items": {
+                  "enum": [
+                    "baseline",
+                    "builder",
+                    "industry",
+                    "generator:seo",
+                    "generator:crawlers",
+                    "generator:config"
+                  ]
+                }
               }
             }
           }
@@ -530,6 +554,14 @@
           "description": "The configuration loader."
         }
       }
+    },
+    "industry": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "pattern": "^[a-z][a-z0-9-]{1,30}$",
+      "description": "The industry adapter (engineering/adapters/industry/<id>/): industry-specific structured data, configuration schemas and component contracts. null for a project with none. The adapter only adds; the base engineering is the same for every industry."
     }
   }
 }

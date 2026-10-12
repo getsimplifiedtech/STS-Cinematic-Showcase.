@@ -89,7 +89,10 @@
    "summary": "npm run verify: ordered checks, one summary, exit code, and the .reports/verify.json report (mode, commit, dirty, assetsTree) the release gate reads.",
    "paths": [
     "jade-and-ember/engineering/verify.mjs",
-    "jade-and-ember/engineering/tools/parity.mjs"
+    "jade-and-ember/engineering/tools/parity.mjs",
+    "jade-and-ember/engineering/checks.json",
+    "jade-and-ember/engineering/lib/registry.mjs",
+    "jade-and-ember/engineering/checks/runners.mjs"
    ],
    "target": "engineering/core/verify.mjs",
    "external": [
@@ -101,7 +104,7 @@
    ],
    "redesign": {
     "level": "parameterise",
-    "notes": "The check list is 38 hard-coded imports and registrations; it becomes a registry (framework checks plus project checks) selected by the manifest. The report is the evidence the release gate trusts (finding RG-08): it must become authentic and bound to the candidate artifact digest."
+    "notes": "The check list is 38 hard-coded imports and registrations; it becomes a registry (framework checks plus project checks) selected by the manifest. The report is the evidence the release gate trusts (finding RG-08): it must become authentic and bound to the candidate artifact digest. G6-5 (APR-JE-046): the check list is a registry now (checks.json, the industry adapter's descriptor, the project manifest's checks.project, merged by lib/registry.mjs; bound to functions by checks/runners.mjs); verify.mjs, the cross-browser runner and the verification record's expected check list all read it."
    },
    "verify": "Runs the generic fixture and Jade & Ember with the same runner; the report is rejected when forged or incomplete (Gate 6 dry-run scenarios).",
    "masterSpecs": [
@@ -253,9 +256,6 @@
    "name": "Configuration validation and component contracts",
    "summary": "Validates configuration against JSON Schemas before the build; renders every component against contracts; the configuration loader.",
    "paths": [
-    "jade-and-ember/engineering/lib/config-schema.mjs",
-    "jade-and-ember/engineering/checks/schema.mjs",
-    "jade-and-ember/engineering/checks/contracts.mjs",
     "jade-and-ember/engineering/schemas/site.schema.json",
     "jade-and-ember/engineering/schemas/client.schema.json",
     "jade-and-ember/src/lib/config.mjs",
@@ -294,7 +294,11 @@
     "jade-and-ember/src/pages/menu.mjs",
     "jade-and-ember/engineering/schemas/copy.schema.json",
     "jade-and-ember/engineering/schemas/menu.schema.json",
-    "jade-and-ember/engineering/contracts/components.json"
+    "jade-and-ember/engineering/contracts/components.json",
+    "jade-and-ember/engineering/lib/config-schema.mjs",
+    "jade-and-ember/engineering/checks/schema.mjs",
+    "jade-and-ember/engineering/checks/contracts.mjs",
+    "jade-and-ember/engineering/adapters/industry/restaurant/adapter.json"
    ],
    "target": "engineering/adapters/industry/restaurant/",
    "external": [
@@ -305,7 +309,7 @@
    ],
    "redesign": {
     "level": "split",
-    "notes": "Stays with restaurant projects. Also receives, from FM-15, the Restaurant JSON-LD (jsonLdFor, validateRestaurant, hoursSpecs) and the BUSINESS fixtures. Master spec 02 names the industry value site_type.restaurant_hospitality; the adapter id should align with it."
+    "notes": "Stays with restaurant projects. Also receives, from FM-15, the Restaurant JSON-LD (jsonLdFor, validateRestaurant, hoursSpecs) and the BUSINESS fixtures. Master spec 02 names the industry value site_type.restaurant_hospitality; the adapter id should align with it. G6-5 (APR-JE-046): the adapter is now a seam. adapters/industry/restaurant/adapter.json declares its checks (check:schema, check:contracts) and its structured-data type; the base engineering asks the project's industry adapter and never names a restaurant (D-P4-2). The configuration-schema and component-contract checks moved here from FM-08 because they hard-code the restaurant configuration (menu, copy) and component set; FM-08 keeps the generic site and client schemas."
    },
    "verify": "The adapter passes its own contract tests on the fixture restaurant; a non-restaurant project loads the core without the adapter present.",
    "masterSpecs": [

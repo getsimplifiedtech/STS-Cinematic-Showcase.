@@ -7,8 +7,8 @@
 import { existsSync, readFileSync, readdirSync, statSync } from 'node:fs';
 import { join } from 'node:path';
 import { canonicalJson, sha } from './candidate.mjs';
-import { engDir } from './git.mjs';
-import { schemaId } from './project.mjs';
+import { coreDir, loadProject, project, schemaId } from './project.mjs';
+import { registryIds } from './registry.mjs';
 
 export const VERIFY_SCHEMA = schemaId('verification@1');
 
@@ -18,7 +18,7 @@ export const VERIFY_SCHEMA = schemaId('verification@1');
 // the evidence folders, the governance ledgers and documents (recording or reviewing a release must not invalidate a verification).
 // Exclusions are EXACT paths, not names matched at any depth (a folder that happened to be called `files` could otherwise hide code; G6-2 review, F6).
 const EXCLUDE_PATH = new Set(['.reports', 'node_modules', 'evidence', 'g6-1-evidence', 'g6-2-evidence', 'release/approvals', 'release/evidence', 'release/deployments', 'release/reviewers.json', 'release/demonstrations.json', 'framework-migration-matrix.json', 'gate5-closure.json', 'external-links-verification.json', 'supply-chain-verification.json']);
-export function engineFiles(eng = engDir) {
+export function engineFiles(eng = coreDir) {
   const out = [];
   const walk = (base, rel, label, exclude = null) => {
     const d = rel ? join(base, rel) : base;
@@ -30,19 +30,20 @@ export function engineFiles(eng = engDir) {
     }
   };
   walk(eng, '', '', EXCLUDE_PATH);
-  const project = join(eng, '..'), repo = join(eng, '..', '..');
-  for (const sub of ['src/lib', 'tests', 'tools']) if (existsSync(join(project, sub))) walk(project, sub, 'project/');
-  for (const f of ['build.mjs', 'serve.py', 'package.json']) if (existsSync(join(project, f))) out.push(`project/${f}`);
+  const proj = eng === coreDir ? project : loadProject(join(eng, '..')), root = proj.root, repo = proj.repoRoot;   // the project that owns this engineering folder (a throwaway copy has its own)
+  for (const sub of proj.engine.projectFolders) if (existsSync(join(root, sub))) walk(root, sub, 'project/');
+  for (const f of proj.engine.projectFiles) if (existsSync(join(root, f))) out.push(`project/${f}`);
   if (existsSync(join(repo, '.github', 'workflows'))) walk(repo, '.github/workflows', 'repo/');
   return out.sort();
 }
-const pathOf = (eng, f) => (f.startsWith('project/') ? join(eng, '..', f.slice(8)) : f.startsWith('repo/') ? join(eng, '..', '..', f.slice(5)) : join(eng, f));
-export function engineDigest(eng = engDir) {
+const pathOf = (eng, f) => { const proj = eng === coreDir ? project : loadProject(join(eng, '..')); return f.startsWith('project/') ? join(proj.root, f.slice(8)) : f.startsWith('repo/') ? join(proj.repoRoot, f.slice(5)) : join(eng, f); };
+export function engineDigest(eng = coreDir) {
   return sha(engineFiles(eng).map((f) => `${sha(readFileSync(pathOf(eng, f)))}  ${f}`).join('\n') + '\n');
 }
 
-// Every check id verify.mjs defines (a full run must contain all of them), read from its source so a check added later is expected automatically.
-export const expectedCheckIds = (eng = engDir) => [...new Set([...readFileSync(join(eng, 'verify.mjs'), 'utf8').matchAll(/\['(check:[a-z0-9-]+)'/g)].map((m) => m[1]))].sort();
+// Every check id the verifier defines (a full run must contain all of them), read from the check registry (checks.json, the project's industry adapter and its manifest)
+// so a check added later is expected automatically.
+export const expectedCheckIds = (eng = coreDir) => registryIds({ coreRoot: eng, manifest: (eng === coreDir ? project : loadProject(join(eng, '..'))).manifest });
 export const registryDigest = (ids) => sha(canonicalJson([...ids].sort()));
 
 export const sealOf = (rec) => { const { seal, ...rest } = rec; return sha(canonicalJson(rest)); };

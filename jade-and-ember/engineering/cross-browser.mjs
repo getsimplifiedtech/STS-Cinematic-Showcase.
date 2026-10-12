@@ -11,22 +11,9 @@ import { takeAdaptations, launchBrowser } from './lib/browser.mjs';
 import { engineChecks, renderMatrix, SCOPE } from './lib/cross-catalogue.mjs';
 import { setEngine } from './lib/findings.mjs';
 import { engDir, projectDir } from './lib/git.mjs';
-import { stylesheet } from './lib/project.mjs';
-import { checkMedia } from './checks/media.mjs';
-import { checkSeo } from './checks/seo.mjs';
-import { checkPrivacy } from './checks/privacy.mjs';
-import { checkSecurity } from './checks/security.mjs';
-import { checkD11 } from './checks/d11.mjs';
-import { checkSupports } from './checks/supports.mjs';
-import { checkAssets } from './checks/assets.mjs';
-import { checkKeyboard } from './checks/keyboard.mjs';
-import { checkReflow } from './checks/reflow.mjs';
-import { checkForcedColors } from './checks/forced-colors.mjs';
-import { checkA11yTree } from './checks/a11y-tree.mjs';
-import { checkOrder } from './checks/order.mjs';
-import { checkPhone } from './checks/phone.mjs';
-import { checkPortability } from './checks/portability.mjs';
-import { checkRegression } from './checks/regression.mjs';
+import { baselineLabel, coreDir, project, stylesheet } from './lib/project.mjs';
+import { loadEntries } from './lib/registry.mjs';
+import { runEntry } from './checks/runners.mjs';
 
 const arg = (n, d = null) => { const i = process.argv.indexOf(n); return i > -1 ? process.argv[i + 1] : d; };
 const engine = arg('--engine', 'chromium');
@@ -35,23 +22,8 @@ setEngine(engine);
 const only = arg('--only') ? arg('--only').split(',') : null;
 const limitMs = Number(arg('--timeout-minutes', 12)) * 60000;
 
-const RUN = {
-  'check:media': () => checkMedia({ browser: true, browserName: engine }),
-  'check:seo': () => checkSeo({ browser: true, browserName: engine }),
-  'check:privacy': () => checkPrivacy({ browser: true, browserName: engine }),
-  'check:security': () => checkSecurity({ browser: true, browserName: engine }),
-  'check:d11': () => checkD11({ browserName: engine }),
-  'check:supports': () => checkSupports({ browserName: engine }),
-  'check:assets': () => checkAssets({ browser: true, browserName: engine }),
-  'check:keyboard': () => checkKeyboard({ browserName: engine }),
-  'check:reflow': () => checkReflow({ browserName: engine }),
-  'check:forced-colors': () => checkForcedColors({ browserName: engine }),
-  'check:a11y-tree': () => checkA11yTree({ browserName: engine }),
-  'check:order': () => checkOrder({ browserName: engine }),
-  'check:phone': () => checkPhone({ browserName: engine }),
-  'check:portability': () => checkPortability({ browserName: engine }),
-  'check:regression': () => checkRegression({ browserName: engine, strictEnv: false }),
-};
+// The runnable checks are the registry's engine-scope entries (checks.json, the industry adapter, the project manifest), called with the same arguments the Chromium job uses.
+const RUN = Object.fromEntries(loadEntries({ coreRoot: coreDir, manifest: project.manifest, label: baselineLabel }).filter((e) => e.scope === 'engine').map((e) => [e.id, () => runEntry(e, { fast: false, browserName: engine, strictEnv: false })]));
 
 // ---- 1. capabilities of the engine, and the CSS features the stylesheet actually uses
 const FEATURES = [

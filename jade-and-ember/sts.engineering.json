@@ -80,6 +80,7 @@
     "crawlers": "src/lib/crawlers.mjs",
     "config": "src/lib/config.mjs"
   },
+  "industry": "restaurant",
   "baseline": {
     "label": "v0.8",
     "record": "baseline.json"
@@ -100,6 +101,37 @@
     ]
   },
   "checks": {
-    "project": []
+    "project": [
+      {
+        "id": "check:framework-matrix",
+        "module": "engineering/checks/framework-matrix.mjs",
+        "export": "checkFrameworkMatrix",
+        "tier": "fast",
+        "after": "check:release",
+        "scope": "static",
+        "reason": "extraction matrix completeness over the repository files; no browser",
+        "describe": "Phase 8: the framework extraction and migration matrix classifies every file of the repository, every reference resolves, the generated Markdown is current (an assessment; nothing is extracted)"
+      },
+      {
+        "id": "check:d11",
+        "module": "engineering/checks/d11.mjs",
+        "export": "checkD11",
+        "tier": "full",
+        "after": "check:order",
+        "scope": "engine",
+        "describe": "D-11: the engine honours the style-attribute hashes (photographs keep their crop under the headers) and blocks an unlisted inline style",
+        "browser": true
+      },
+      {
+        "id": "check:supports",
+        "module": "engineering/checks/supports.mjs",
+        "export": "checkSupports",
+        "tier": "full",
+        "after": "check:d11",
+        "scope": "engine",
+        "describe": "The approved WebKit text-spacing correction (@supports hanging-punctuation) applies exactly where the engine supports it, as recorded, and the rule is in the stylesheet",
+        "browser": true
+      }
+    ]
   }
 }
