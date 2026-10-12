@@ -1,0 +1,366 @@
+{
+ "schema": "sts/parity-expected-differences@1",
+ "reference": "parity-reference-full-187f672.txt",
+ "differences": [
+  {
+   "id": "log-frame",
+   "reason": "Not a check result: the npm script banner, a blank line, or the exit-code line my capture appended to the log.",
+   "was": "> jade-and-ember@0.9.0-dev verify",
+   "now": null
+  },
+  {
+   "id": "log-frame",
+   "reason": "Not a check result: the npm script banner, a blank line, or the exit-code line my capture appended to the log.",
+   "was": "> node engineering/verify.mjs",
+   "now": null
+  },
+  {
+   "id": "log-frame",
+   "reason": "Not a check result: the npm script banner, a blank line, or the exit-code line my capture appended to the log.",
+   "was": "",
+   "now": null
+  },
+  {
+   "id": "new-check-project",
+   "reason": "New core check:project (G6-5 step 6, review fixes in step 8).",
+   "was": null,
+   "now": "== check:project: project manifest valid; a manifest cannot remove or relax a check; reusable files free of project-specific values (purity ratchet)"
+  },
+  {
+   "id": "new-check-project",
+   "reason": "New core check:project (G6-5 step 6, review fixes in step 8).",
+   "was": null,
+   "now": "  Jade & Ember: the manifest is valid and every file, folder and module it names exists (3 project check(s) added to the base engineering)"
+  },
+  {
+   "id": "new-check-project",
+   "reason": "New core check:project (G6-5 step 6, review fixes in step 8).",
+   "was": null,
+   "now": "  18 attempts to remove, skip, relax or stop vouching for a base check through the manifest were refused; the offering changes nothing; the base checks keep their order"
+  },
+  {
+   "id": "new-check-project",
+   "reason": "New core check:project (G6-5 step 6, review fixes in step 8).",
+   "was": null,
+   "now": "  the purity scanner finds 9 planted project-specific values and ignores a comment"
+  },
+  {
+   "id": "new-check-project",
+   "reason": "New core check:project (G6-5 step 6, review fixes in step 8).",
+   "was": null,
+   "now": "  the purity ratchet refuses 5 wrong allowlists and accepts the exact one"
+  },
+  {
+   "id": "new-check-project",
+   "reason": "New core check:project (G6-5 step 6, review fixes in step 8).",
+   "was": null,
+   "now": "  purity review: 112 reusable files scanned; 58 remaining project-specific values, all listed in purity-allow.json with a reason (16 entries, ratchet 58)"
+  },
+  {
+   "id": "new-check-project",
+   "reason": "New core check:project (G6-5 step 6, review fixes in step 8).",
+   "was": null,
+   "now": "PASS  check:project (T s)"
+  },
+  {
+   "id": "log-frame",
+   "reason": "Not a check result: the npm script banner, a blank line, or the exit-code line my capture appended to the log.",
+   "was": null,
+   "now": ""
+  },
+  {
+   "id": "g6-5-registry-cases",
+   "reason": "check:selftest-gate5 reads the check list from the registry instead of verify.mjs (two catalogue cases renamed), gained four registry cases and one case split in two (25 -> 30 cases).",
+   "was": "  held: catalogue: every check of verify.mjs is classified",
+   "now": null
+  },
+  {
+   "id": "g6-5-registry-cases",
+   "reason": "check:selftest-gate5 reads the check list from the registry instead of verify.mjs (two catalogue cases renamed), gained four registry cases and one case split in two (25 -> 30 cases).",
+   "was": "  held: catalogue: nothing classified that verify.mjs does not run",
+   "now": null
+  },
+  {
+   "id": "g6-5-registry-cases",
+   "reason": "check:selftest-gate5 reads the check list from the registry instead of verify.mjs (two catalogue cases renamed), gained four registry cases and one case split in two (25 -> 30 cases).",
+   "was": null,
+   "now": "  held: catalogue: every check the verifier runs is classified"
+  },
+  {
+   "id": "g6-5-registry-cases",
+   "reason": "check:selftest-gate5 reads the check list from the registry instead of verify.mjs (two catalogue cases renamed), gained four registry cases and one case split in two (25 -> 30 cases).",
+   "was": null,
+   "now": "  held: catalogue: nothing classified that the verifier does not run"
+  },
+  {
+   "id": "g6-5-registry-cases",
+   "reason": "check:selftest-gate5 reads the check list from the registry instead of verify.mjs (two catalogue cases renamed), gained four registry cases and one case split in two (25 -> 30 cases).",
+   "was": null,
+   "now": "  caught: registry: an entry with no scope is refused"
+  },
+  {
+   "id": "g6-5-registry-cases",
+   "reason": "check:selftest-gate5 reads the check list from the registry instead of verify.mjs (two catalogue cases renamed), gained four registry cases and one case split in two (25 -> 30 cases).",
+   "was": null,
+   "now": "  caught: registry: a check that does not run in every engine must say why"
+  },
+  {
+   "id": "g6-5-registry-cases",
+   "reason": "check:selftest-gate5 reads the check list from the registry instead of verify.mjs (two catalogue cases renamed), gained four registry cases and one case split in two (25 -> 30 cases).",
+   "was": null,
+   "now": "  caught: registry: a project cannot list a check twice"
+  },
+  {
+   "id": "g6-5-registry-cases",
+   "reason": "check:selftest-gate5 reads the check list from the registry instead of verify.mjs (two catalogue cases renamed), gained four registry cases and one case split in two (25 -> 30 cases).",
+   "was": null,
+   "now": "  caught: registry: a project cannot follow a check that does not exist"
+  },
+  {
+   "id": "g6-5-registry-cases",
+   "reason": "check:selftest-gate5 reads the check list from the registry instead of verify.mjs (two catalogue cases renamed), gained four registry cases and one case split in two (25 -> 30 cases).",
+   "was": null,
+   "now": "  held: registry: a project check is added after the check it names and the base list is unchanged"
+  },
+  {
+   "id": "g6-5-registry-cases",
+   "reason": "check:selftest-gate5 reads the check list from the registry instead of verify.mjs (two catalogue cases renamed), gained four registry cases and one case split in two (25 -> 30 cases).",
+   "was": "  25 harness tests run in T s",
+   "now": null
+  },
+  {
+   "id": "g6-5-registry-cases",
+   "reason": "check:selftest-gate5 reads the check list from the registry instead of verify.mjs (two catalogue cases renamed), gained four registry cases and one case split in two (25 -> 30 cases).",
+   "was": null,
+   "now": "  30 harness tests run in T s"
+  },
+  {
+   "id": "new-check-selftest-generic",
+   "reason": "New core check:selftest-generic: the engineering run on a second project (G6-5 step 7).",
+   "was": null,
+   "now": "== check:selftest-generic: generic fixture: the engineering runs on a second project (manifest, ids, registry, extension point, planted defects)"
+  },
+  {
+   "id": "new-check-selftest-generic",
+   "reason": "New core check:selftest-generic: the engineering run on a second project (G6-5 step 7).",
+   "was": null,
+   "now": "  held: identity: the fixture is another project (id, name and every record prefix differ)"
+  },
+  {
+   "id": "new-check-selftest-generic",
+   "reason": "New core check:selftest-generic: the engineering run on a second project (G6-5 step 7).",
+   "was": null,
+   "now": "  held: isolation: the fixture tree names nothing of the default project (name, id, record prefixes, baseline label)"
+  },
+  {
+   "id": "new-check-project",
+   "reason": "New core check:project (G6-5 step 6, review fixes in step 8).",
+   "was": null,
+   "now": "  held: manifest: the fixture manifest is valid and every file it names exists"
+  },
+  {
+   "id": "new-check-selftest-generic",
+   "reason": "New core check:selftest-generic: the engineering run on a second project (G6-5 step 7).",
+   "was": null,
+   "now": "  held: manifest: every attempt to remove, skip or relax a base check is refused for the fixture too"
+  },
+  {
+   "id": "new-check-selftest-generic",
+   "reason": "New core check:selftest-generic: the engineering run on a second project (G6-5 step 7).",
+   "was": null,
+   "now": "  held: registry: the fixture has every base check and none of the default project's own three"
+  },
+  {
+   "id": "new-check-selftest-generic",
+   "reason": "New core check:selftest-generic: the engineering run on a second project (G6-5 step 7).",
+   "was": null,
+   "now": "  held: registry: what the fixture does not declare (baseline, builder, industry) is exactly what makes checks not applicable"
+  },
+  {
+   "id": "new-check-selftest-generic",
+   "reason": "New core check:selftest-generic: the engineering run on a second project (G6-5 step 7).",
+   "was": null,
+   "now": "  held: runner: a check whose need the fixture does not meet reports \"not applicable\" and neither passes nor fails"
+  },
+  {
+   "id": "new-check-selftest-generic",
+   "reason": "New core check:selftest-generic: the engineering run on a second project (G6-5 step 7).",
+   "was": null,
+   "now": "  held: derivation: record ids, schema ids and test host names come from the fixture manifest"
+  },
+  {
+   "id": "new-check-selftest-generic",
+   "reason": "New core check:selftest-generic: the engineering run on a second project (G6-5 step 7).",
+   "was": null,
+   "now": "  held: site: the page list is read from the fixture's own page registry"
+  },
+  {
+   "id": "new-check-selftest-generic",
+   "reason": "New core check:selftest-generic: the engineering run on a second project (G6-5 step 7).",
+   "was": null,
+   "now": "  held: markup: a selector the fixture declares is returned; one it does not declare fails loudly, naming the project and the key"
+  },
+  {
+   "id": "new-check-selftest-generic",
+   "reason": "New core check:selftest-generic: the engineering run on a second project (G6-5 step 7).",
+   "was": null,
+   "now": "  held: industry: a project with no industry adapter gets a clear refusal, never another industry's schema"
+  },
+  {
+   "id": "new-check-selftest-generic",
+   "reason": "New core check:selftest-generic: the engineering run on a second project (G6-5 step 7).",
+   "was": null,
+   "now": "  held: builder and baseline: a project without them is told so, with no fallback to another project's"
+  },
+  {
+   "id": "new-check-selftest-generic",
+   "reason": "New core check:selftest-generic: the engineering run on a second project (G6-5 step 7).",
+   "was": null,
+   "now": "  held: noise: with no hero preload declared, no console message is ever classed as the known engine warning"
+  },
+  {
+   "id": "new-check-selftest-generic",
+   "reason": "New core check:selftest-generic: the engineering run on a second project (G6-5 step 7).",
+   "was": null,
+   "now": "  held: engine digest: the fixture manifest is part of what the verification record covers"
+  },
+  {
+   "id": "new-check-selftest-generic",
+   "reason": "New core check:selftest-generic: the engineering run on a second project (G6-5 step 7).",
+   "was": null,
+   "now": "  held: default: with no project set the engineering is still bound to the default project"
+  },
+  {
+   "id": "new-check-selftest-generic",
+   "reason": "New core check:selftest-generic: the engineering run on a second project (G6-5 step 7).",
+   "was": null,
+   "now": "  held: check:html: the fixture's pages are valid HTML and the check passes"
+  },
+  {
+   "id": "new-check-selftest-generic",
+   "reason": "New core check:selftest-generic: the engineering run on a second project (G6-5 step 7).",
+   "was": null,
+   "now": "  held: check:secrets: the fixture tree holds no credential and the check passes"
+  },
+  {
+   "id": "new-check-selftest-generic",
+   "reason": "New core check:selftest-generic: the engineering run on a second project (G6-5 step 7).",
+   "was": null,
+   "now": "  caught: check:html: an image without alt text and an unclosed element planted in a fixture page are caught"
+  },
+  {
+   "id": "new-check-selftest-generic",
+   "reason": "New core check:selftest-generic: the engineering run on a second project (G6-5 step 7).",
+   "was": null,
+   "now": "  caught: check:secrets: a credential-shaped string planted in a fixture page is caught"
+  },
+  {
+   "id": "new-check-selftest-generic",
+   "reason": "New core check:selftest-generic: the engineering run on a second project (G6-5 step 7).",
+   "was": null,
+   "now": "  caught: manifest: an unknown key in the fixture manifest is refused by the loader"
+  },
+  {
+   "id": "new-check-selftest-generic",
+   "reason": "New core check:selftest-generic: the engineering run on a second project (G6-5 step 7).",
+   "was": null,
+   "now": "  caught: manifest: a file the fixture manifest names but the fixture lacks is reported"
+  },
+  {
+   "id": "new-check-selftest-generic",
+   "reason": "New core check:selftest-generic: the engineering run on a second project (G6-5 step 7).",
+   "was": null,
+   "now": "  caught: manifest: a missing approvals log is reported"
+  },
+  {
+   "id": "new-check-selftest-generic",
+   "reason": "New core check:selftest-generic: the engineering run on a second project (G6-5 step 7).",
+   "was": null,
+   "now": "  held: extension point: a check the fixture adds through its own manifest is placed where it asks and is run from the fixture"
+  },
+  {
+   "id": "new-check-selftest-generic",
+   "reason": "New core check:selftest-generic: the engineering run on a second project (G6-5 step 7).",
+   "was": null,
+   "now": "  caught: extension point: a failing check the fixture adds is reported as a failure"
+  },
+  {
+   "id": "new-check-selftest-generic",
+   "reason": "New core check:selftest-generic: the engineering run on a second project (G6-5 step 7).",
+   "was": null,
+   "now": "  held: standards: only a rule set that names no project falls back to the engineering; a project's own records never do"
+  },
+  {
+   "id": "new-check-selftest-generic",
+   "reason": "New core check:selftest-generic: the engineering run on a second project (G6-5 step 7).",
+   "was": null,
+   "now": "  held: record: a check that was not applicable is listed in the sealed record, and a release record cannot carry one"
+  },
+  {
+   "id": "new-check-selftest-generic",
+   "reason": "New core check:selftest-generic: the engineering run on a second project (G6-5 step 7).",
+   "was": null,
+   "now": "  held: registry: two checks that follow the same check keep the order they were declared in, and a check that follows nothing is refused"
+  },
+  {
+   "id": "new-check-selftest-generic",
+   "reason": "New core check:selftest-generic: the engineering run on a second project (G6-5 step 7).",
+   "was": null,
+   "now": "  caught: extension point: a fixture check placed after a check that does not exist is refused when the registry is built"
+  },
+  {
+   "id": "new-check-selftest-generic",
+   "reason": "New core check:selftest-generic: the engineering run on a second project (G6-5 step 7).",
+   "was": null,
+   "now": "  28 generic-fixture tests run in T s (project: Quillfeather Letterpress, a second project that shares no value with Jade & Ember)"
+  },
+  {
+   "id": "new-check-selftest-generic",
+   "reason": "New core check:selftest-generic: the engineering run on a second project (G6-5 step 7).",
+   "was": null,
+   "now": "PASS  check:selftest-generic (T s)"
+  },
+  {
+   "id": "new-check-project",
+   "reason": "New core check:project (G6-5 step 6, review fixes in step 8).",
+   "was": null,
+   "now": "  PASS  check:project T s"
+  },
+  {
+   "id": "new-check-selftest-generic",
+   "reason": "New core check:selftest-generic: the engineering run on a second project (G6-5 step 7).",
+   "was": null,
+   "now": "  PASS  check:selftest-generic T s"
+  },
+  {
+   "id": "check-count",
+   "reason": "Two checks added (check:project, check:selftest-generic): the record lists and the run counts 42 instead of 40 (fast 24 instead of 22).",
+   "was": "  verification record: full run, candidate 69f9f18fd5e119786e512125741fa2bd0c398857d7609c74784051937028f640, engine ENGINE\u2026, 40 checks, seal SEAL",
+   "now": null
+  },
+  {
+   "id": "check-count",
+   "reason": "Two checks added (check:project, check:selftest-generic): the record lists and the run counts 42 instead of 40 (fast 24 instead of 22).",
+   "was": null,
+   "now": "  verification record: full run, candidate 69f9f18fd5e119786e512125741fa2bd0c398857d7609c74784051937028f640, engine ENGINE\u2026, 42 checks, seal SEAL"
+  },
+  {
+   "id": "check-count",
+   "reason": "Two checks added (check:project, check:selftest-generic): the record lists and the run counts 42 instead of 40 (fast 24 instead of 22).",
+   "was": "verify passed (40 of 40 checks)",
+   "now": null
+  },
+  {
+   "id": "check-count",
+   "reason": "Two checks added (check:project, check:selftest-generic): the record lists and the run counts 42 instead of 40 (fast 24 instead of 22).",
+   "was": null,
+   "now": "verify passed (42 of 42 checks)"
+  },
+  {
+   "id": "log-frame",
+   "reason": "Not a check result: the npm script banner, a blank line, or the exit-code line my capture appended to the log.",
+   "was": null,
+   "now": "exit 0"
+  }
+ ]
+}

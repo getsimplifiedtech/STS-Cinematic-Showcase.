@@ -777,7 +777,8 @@
     "jade-and-ember/engineering/tools/host-bundle.mjs",
     "jade-and-ember/engineering/G6-4-REPORT.md",
     "jade-and-ember/engineering/g6-4-evidence/",
-    "jade-and-ember/engineering/checks/hosting-adapters.mjs"
+    "jade-and-ember/engineering/checks/hosting-adapters.mjs",
+    "jade-and-ember/engineering/G6-5-REPORT.md"
    ],
    "target": "engineering/adapters/hosting/{cloudflare-pages,vercel,static}/",
    "external": [
@@ -1747,7 +1748,7 @@
    "size": "large",
    "verification": "Parity: delivered tree hash 9061a227…, reports identical, 100% of the dry-run scenarios, the self-test case counts reconciled to the generic fixture.",
    "blocks": [],
-   "status": "authorised by APR-JE-046; in progress",
+   "status": "implemented and verified locally (G6-5-REPORT.md); awaiting owner review; not closed",
    "scope": {
     "repository": "getsimplifiedtech/STS-Cinematic-Showcase.",
     "branch": "feature/jade-and-ember-v0.9",
