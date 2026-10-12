@@ -8,8 +8,14 @@ import { project } from './project.mjs';
 const load = async (name) => (project.generators[name] ? import(pathToFileURL(join(project.root, ...project.generators[name].split('/'))).href) : null);
 export const generators = Object.freeze({ seo: await load('seo'), crawlers: await load('crawlers'), config: await load('config') });
 
+// A module may take what it needs from a generator when it is imported (const { publicUrl } = generator('seo')). A project without that generator still imports the module;
+// what it took is a stand-in that refuses, with the manifest's name for the problem, the moment a check calls it or reads from it.
+const refusal = (name) => `${project.name} declares no "${name}" generator (sts.engineering.json, generators.${name}), which this check needs`;
+const absent = (name) => {
+  const stop = () => { throw new Error(refusal(name)); };
+  const stub = new Proxy(function absentGenerator() {}, { apply: stop, construct: stop, get: (t, k) => (typeof k === 'symbol' ? undefined : stop()) });
+  return new Proxy({}, { get: (t, k) => (typeof k === 'symbol' || k === 'then' ? undefined : stub) });
+};
 export function generator(name) {
-  const g = generators[name];
-  if (!g) throw new Error(`${project.name} declares no "${name}" generator (sts.engineering.json, generators.${name}), which this check needs`);
-  return g;
+  return generators[name] || absent(name);
 }

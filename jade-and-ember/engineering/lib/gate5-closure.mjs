@@ -2,6 +2,7 @@
 // owner asked to have verified before Gate 5 is closed, against the approvals log, git, CI.md, the migration matrix and the release gate.
 // It approves nothing. Gate 5 is closed by the owner, and this module only reports whether the record supports that.
 import { execFileSync } from 'node:child_process';
+import { workflowPath } from './project.mjs';
 import { existsSync, readFileSync, readdirSync } from 'node:fs';
 import { join } from 'node:path';
 import { engDir, projectDir, readJson, repoRoot } from './git.mjs';
@@ -105,7 +106,7 @@ export function verifyClosure({ framework = process.env.STS_FRAMEWORK_DIR || '/h
   const onMain = tryGit(['merge-base', '--is-ancestor', 'HEAD', 'origin/main']);
   add('merge', merges.ok && merges.out === '' && !onMain.ok, `merge commits on this branch since origin/main: ${merges.ok ? merges.out.split('\n').filter(Boolean).length : 'unknown'}; HEAD is ${onMain.ok ? 'ON' : 'not on'} origin/main`);
   add('release folder', !existsSync(join(projectDir, 'release')) && !existsSync(join(projectDir, 'host')), 'no release/ or host/ output folder exists');
-  const wf = readFileSync(join(repoRoot, '.github', 'workflows', 'jade-and-ember-verify.yml'), 'utf8');
+  const wf = readFileSync(workflowPath(), 'utf8');
   add('workflow', /permissions:\s*\n\s*contents:\s*read/.test(wf) && !/\benvironment\s*:|secrets\.|GITHUB_TOKEN|id-token/.test(wf) && !/pull_request_target|workflow_run|schedule\s*:/.test(wf), 'the workflow is read-only, has no environment, secret or token, and no privileged or scheduled trigger (the full scan is part of check:release-dryrun)');
 
   // 6. the Gate 6 work packages are consistent with the approved decisions

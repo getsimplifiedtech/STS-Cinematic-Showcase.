@@ -260,6 +260,14 @@
    "selftest": true
   },
   {
+   "id": "check:selftest-generic",
+   "tier": "fast",
+   "scope": "static",
+   "reason": "a second project run through the reusable engineering in child processes; no browser",
+   "describe": "generic fixture: the engineering runs on a second project (manifest, ids, registry, extension point, planted defects)",
+   "selftest": true
+  },
+  {
    "id": "check:selftest-evidence",
    "tier": "full",
    "scope": "chromium-only",

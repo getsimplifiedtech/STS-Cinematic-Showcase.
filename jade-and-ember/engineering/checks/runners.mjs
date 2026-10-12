@@ -39,6 +39,7 @@ import { checkEvidence } from './evidence.mjs';
 import { checkSelftestEvidence } from './selftest-evidence.mjs';
 import { checkSelftestGate5 } from './selftest-gate5.mjs';
 import { checkSelftestGate6 } from './selftest-gate6.mjs';
+import { checkSelftestGeneric } from './selftest-generic.mjs';
 import { checkSelftestGate3 } from './selftest-gate3.mjs';
 import { checkRegression } from './regression.mjs';
 import { checkSelftest } from './selftest.mjs';
@@ -79,6 +80,7 @@ export const CORE = {
   'check:selftest-gate3': (ctx) => checkSelftestGate3(),
   'check:selftest-gate5': (ctx) => checkSelftestGate5(),
   'check:selftest-gate6': (ctx) => checkSelftestGate6(),
+  'check:selftest-generic': (ctx) => checkSelftestGeneric(),
   'check:selftest-evidence': (ctx) => checkSelftestEvidence(),
   'check:selftest-gate4': (ctx) => checkSelftestGate4(),
 };

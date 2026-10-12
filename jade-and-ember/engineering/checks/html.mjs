@@ -6,11 +6,11 @@ import { readFileSync, rmSync } from 'node:fs';
 import { join } from 'node:path';
 import { HtmlValidate } from 'html-validate';
 import { assembleCandidate, pagesOf } from '../lib/site.mjs';
-import { buildClient } from '../lib/fixtures.mjs';
-import { engDir, isMain, projectDir, readJson } from '../lib/git.mjs';
+import { buildClient, hasClientBuild } from '../lib/fixtures.mjs';
+import { isMain, projectDir, readJson, standard } from '../lib/git.mjs';
 import { reconcile } from '../lib/findings.mjs';
 
-export async function validateHtml(files, label, cfg = readJson(join(engDir, 'htmlvalidate.json'))) {
+export async function validateHtml(files, label, cfg = readJson(standard('htmlvalidate.json'))) {
   const problems = [];
   for (const [rule, v] of Object.entries(cfg.rules)) if (v === 'off' && !cfg.disabled[rule]) problems.push(`rule ${rule} is switched off without a recorded reason`);
   const hv = new HtmlValidate({ extends: cfg.extends, rules: cfg.rules });
@@ -35,10 +35,11 @@ export async function checkHtml({ root = null } = {}) {
   const dir = root || assembleCandidate(projectDir, 'html');
   const cleanup = [];
   try {
-    const cfg = readJson(join(engDir, 'htmlvalidate.json'));
+    const cfg = readJson(standard('htmlvalidate.json'));
     const demo = await validateHtml(pagesOf(dir).map((f) => [f, readFileSync(join(dir, f), 'utf8')]), 'demonstration');
-    const fx = buildClient({}); cleanup.push(fx.root);
-    const client = fx.status === 0 ? await validateHtml(pagesOf(fx.dir).map((f) => [f, readFileSync(join(fx.dir, f), 'utf8')]), 'client build') : { problems: [`the client fixture failed to build: ${fx.text.slice(0, 200)}`], count: 0 };
+    const fx = hasClientBuild ? buildClient({}) : null;
+    if (fx) cleanup.push(fx.root);
+    const client = !fx ? { problems: [], count: 0 } : fx.status === 0 ? await validateHtml(pagesOf(fx.dir).map((f) => [f, readFileSync(join(fx.dir, f), 'utf8')]), 'client build') : { problems: [`the client fixture failed to build: ${fx.text.slice(0, 200)}`], count: 0 };
     const tel = await probeTelWrapping(pagesOf(dir).map((f) => [f, readFileSync(join(dir, f), 'utf8')]));
     const known = reconcile('html', tel ? [{ key: 'html:tel-non-breaking', detail: `${tel} phone number(s) can wrap across lines (html-validate tel-non-breaking)`, value: tel }] : []);
     return { problems: [...demo.problems, ...client.problems, ...known.problems], notes: [...known.notes, `${demo.count} demonstration pages and ${client.count} client-build pages pass html-validate (${cfg.extends.join(', ')}); ${Object.keys(cfg.disabled).length} rules switched off, each with a recorded reason`] };

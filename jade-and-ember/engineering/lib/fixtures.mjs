@@ -12,4 +12,5 @@ export const clientBuild = () => {
   return mod;
 };
 export const buildClient = (options) => clientBuild().buildClient(options);
+export const hasClientBuild = Boolean(mod);
 export const BUSINESS = mod ? mod.BUSINESS : null;

@@ -1,17 +1,19 @@
 // Helpers shared by the checks: repository paths, git, the frozen baseline export, and a few small utilities. No dependencies.
 import { execFileSync } from 'node:child_process';
 import { createHash } from 'node:crypto';
-import { readFileSync, mkdtempSync, mkdirSync, readdirSync, statSync, writeFileSync } from 'node:fs';
+import { existsSync, readFileSync, mkdtempSync, mkdirSync, readdirSync, statSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { dirname, join, relative, resolve } from 'node:path';
 import { pathToFileURL } from 'node:url';
-import { project } from './project.mjs';
+import { coreDir, project } from './project.mjs';
 
 // Where the project is: read from its manifest (lib/project.mjs), not from the position of this file. projectDir is the project root, engDir the folder of its
 // records and policies, repoRoot the repository root.
 export const projectDir = project.root;
 export const engDir = project.engDir;
 export const repoRoot = project.repoRoot;
+// A base standard (the HTML-validation rules, for example) is the engineering's own: a project may carry its own copy in its engineering folder; otherwise the engineering's default applies.
+export const standard = (...parts) => { const own = join(engDir, ...parts); return existsSync(own) ? own : join(coreDir, ...parts); };
 // True when the module is being run directly (node file.mjs) rather than imported. Works on every platform.
 export const isMain = (metaUrl) => Boolean(process.argv[1]) && pathToFileURL(resolve(process.argv[1])).href === metaUrl;
 export const readJson = (p) => JSON.parse(readFileSync(p, 'utf8'));

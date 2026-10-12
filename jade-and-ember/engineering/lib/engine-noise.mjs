@@ -4,5 +4,5 @@
 //            which is the whole purpose of the attribute: the hero image has one preload per art direction and only one can match.
 import { markup } from './project.mjs';
 
-const PRELOAD_MEDIA = new RegExp(`Preload of \\S*${markup.heroPreloadPattern} was ignored due to unknown .as. or .type. values, or non-matching .media. attribute`);   // the project's own hero preloads (sts.engineering.json, markup.heroPreloadPattern)
+const PRELOAD_MEDIA = markup.heroPreloadPattern === null ? /(?!)/ : new RegExp(`Preload of \\S*${markup.heroPreloadPattern} was ignored due to unknown .as. or .type. values, or non-matching .media. attribute`);   // the project's own hero preloads (sts.engineering.json, markup.heroPreloadPattern)
 export const engineNoise = (engine, text) => (engine === 'firefox' && PRELOAD_MEDIA.test(text) ? 'F-G5-02' : null);

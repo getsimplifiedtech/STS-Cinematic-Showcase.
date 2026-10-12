@@ -59,7 +59,7 @@
   {
    "file": "lib/release-dryrun-scenarios.mjs",
    "rule": "project-name",
-   "max": 11,
+   "max": 7,
    "reason": "Dry-run scenario catalogue (one blocking scenario per RG finding): titles and edits name the demonstration project's files, records and hosts. Per-project test material; the runner is generic and reads project names from the manifest."
   },
   {

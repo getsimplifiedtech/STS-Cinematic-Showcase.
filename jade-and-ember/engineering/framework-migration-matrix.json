@@ -741,7 +741,9 @@
     "jade-and-ember/engineering/checks/selftest-gate5.mjs",
     "jade-and-ember/engineering/checks/selftest-gate6.mjs",
     "jade-and-ember/engineering/checks/selftest-evidence.mjs",
-    "jade-and-ember/engineering/lib/evidence-fixtures.mjs"
+    "jade-and-ember/engineering/lib/evidence-fixtures.mjs",
+    "jade-and-ember/engineering/checks/selftest-generic.mjs",
+    "jade-and-ember/engineering/fixtures/generic/"
    ],
    "target": "engineering/fixtures/ and engineering/tests/",
    "external": [

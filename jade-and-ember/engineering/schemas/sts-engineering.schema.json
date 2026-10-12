@@ -216,7 +216,7 @@
         },
         "sourceRoots": {
           "type": "array",
-          "minItems": 1,
+          "minItems": 0,
           "uniqueItems": true,
           "items": {
             "type": "string"
@@ -466,12 +466,18 @@
           "additionalProperties": false,
           "properties": {
             "video": {
-              "type": "string",
+              "type": [
+                "string",
+                "null"
+              ],
               "pattern": "^[A-Za-z0-9_-]+$",
-              "description": "The class on the hero element once the video plays."
+              "description": "The class on the hero element once the video plays. null when the project has no hero."
             },
             "poster": {
-              "type": "string",
+              "type": [
+                "string",
+                "null"
+              ],
               "pattern": "^[A-Za-z0-9_-]+$",
               "description": "The class once the poster takes over where video cannot play."
             }
@@ -502,7 +508,10 @@
           }
         },
         "heroPreloadPattern": {
-          "type": "string",
+          "type": [
+            "string",
+            "null"
+          ],
           "minLength": 1,
           "description": "A regular expression (source text, no slashes) for the hero image paths the Home page preloads once per art direction; Firefox's known warning about a non-matching media-qualified preload is recognised only for these (F-G5-02)."
         }
