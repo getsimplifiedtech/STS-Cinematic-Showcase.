@@ -55,6 +55,8 @@ export function buildVerificationRecord({ mode, results, candidate, engine, regi
     engineDigest: engine, registryDigest: registry,
     source: { commit, dirty },
     checks: results.map((r) => ({ id: r.id, passed: r.passed, seconds: r.seconds })),
+    // a check the project cannot run (it lacks what the check needs) is not a pass: it is listed here, only when there is one, and a release record cannot carry one
+    ...(results.some((r) => r.notApplicable) ? { notApplicable: results.filter((r) => r.notApplicable).map((r) => r.id) } : {}),
     environment: { node: process.version, platform: process.platform, runner: env.GITHUB_ACTIONS === 'true' ? 'github-actions' : 'local', runId: env.GITHUB_ACTIONS === 'true' ? String(env.GITHUB_RUN_ID || '') : null },
     startedAt, finishedAt,
   };
@@ -68,7 +70,7 @@ export function validateVerification(rec, expect) {
   if (!rec || typeof rec !== 'object' || Array.isArray(rec)) return ['no verification record: run npm run verify'];
   if (rec.schema !== VERIFY_SCHEMA) return [`not a verification record (schema ${JSON.stringify(rec.schema)}): the old report format is not accepted, run npm run verify`];
   // a closed record: no field the verifier did not write (the seal would cover it, so a stray field is a sign of a hand-built record; G6-2 review, F10)
-  const KEYS = ['schema', 'mode', 'passed', 'candidate', 'channel', 'version', 'engineDigest', 'registryDigest', 'source', 'checks', 'environment', 'startedAt', 'finishedAt', 'seal'];
+  const KEYS = ['schema', 'mode', 'passed', 'candidate', 'channel', 'version', 'engineDigest', 'registryDigest', 'source', 'checks', 'notApplicable', 'environment', 'startedAt', 'finishedAt', 'seal'];
   const extraKeys = Object.keys(rec).filter((k) => !KEYS.includes(k));
   if (extraKeys.length) bad(`it carries fields the verifier does not write (${extraKeys.join(', ')})`);
   const env = rec.environment || {};
@@ -87,6 +89,7 @@ export function validateVerification(rec, expect) {
   if (missing.length) bad(`incomplete: ${missing.length} check(s) the verifier defines are missing (${missing.slice(0, 4).join(', ')}${missing.length > 4 ? ', …' : ''})`);
   if (extra.length) bad(`it lists checks the verifier does not define (${extra.slice(0, 3).join(', ')})`);
   if (new Set(ids).size !== ids.length) bad('a check is listed twice');
+  if (rec.notApplicable !== undefined) bad(`checks that were not applicable to the project, so not run: ${Array.isArray(rec.notApplicable) ? rec.notApplicable.slice(0, 4).join(', ') : '(malformed)'}; a release record needs every check to apply`);
   const failing = checks.filter((c) => c.passed !== true).map((c) => c.id);
   if (failing.length) bad(`failing checks: ${failing.slice(0, 4).join(', ')}`);
   if (rec.registryDigest !== registryDigest(expect.ids)) bad('registryDigest is not the digest of the checks the verifier defines');

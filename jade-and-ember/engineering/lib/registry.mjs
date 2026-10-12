@@ -47,10 +47,13 @@ export function loadEntries({ coreRoot, manifest, label = 'baseline' }) {
   }
   for (const e of manifest.checks.project) extra.push({ ...e, owner: 'project', base: null });
   const list = [...core];
+  const lastAfter = new Map();   // anchor -> the check last placed after it, so two checks with one anchor keep the order they were declared in
   for (const e of extra) {
-    const at = e.after === null || e.after === undefined ? -1 : list.findIndex((x) => x.id === e.after);
-    if (e.after !== null && at < 0) { problems.push(`${e.owner} check ${e.id}: it follows ${e.after}, which is not in the registry at that point`); continue; }
+    if (typeof e.after !== 'string') { problems.push(`${e.owner} check ${e.id}: it must name the check it follows (after); a check cannot be placed before the base checks`); continue; }
+    const at = list.findIndex((x) => x.id === (lastAfter.get(e.after) || e.after));
+    if (list.findIndex((x) => x.id === e.after) < 0) { problems.push(`${e.owner} check ${e.id}: it follows ${e.after}, which is not in the registry at that point`); continue; }
     list.splice(at + 1, 0, e);
+    lastAfter.set(e.after, e.id);
   }
   const ids = list.map((e) => e.id);
   for (const id of new Set(ids.filter((x, i) => ids.indexOf(x) !== i))) problems.push(`check ${id} is listed twice`);

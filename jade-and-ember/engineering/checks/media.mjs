@@ -209,6 +209,7 @@ export async function checkMedia({ root = null, browser = true, browserName = 'c
     const s = checkMediaStatic(dir);
     const notes = [`static: ${s.stats.files} media files and ${s.stats.pages} pages checked (format, dimensions, alt text, loading, video attributes, provenance); video container, codec, size, duration and silence read from the files`];
     let measured = s.measured;
+    if (!industry) notes.push('not run: the configuration-dimension, hero-video format and video-serve checks (the project declares no industry adapter that says what its media are)');
     // flashing (2.3.1): every video file, when ffmpeg is on the machine
     if (ffmpegAvailable()) {
       const copy = industry ? industry.declaredMedia(projectDir).video : null;

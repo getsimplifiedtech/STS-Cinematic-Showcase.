@@ -19,7 +19,7 @@ import { assembleCandidate } from '../lib/site.mjs';
 import { buildManifest } from '../lib/hashed.mjs';
 import { RETIRED_ROW, attachBuild, buildReleaseManifest, collectContext, evaluateGate, loadReleasePolicy } from '../lib/release.mjs';
 import { validateSchema } from '../lib/schema.mjs';
-import { engDir, isMain, projectDir, readJson, standard } from '../lib/git.mjs';
+import { engDir, isMain, projectDir, readJson } from '../lib/git.mjs';
 import { readFileSync } from 'node:fs';
 import { greenClientContext, greenDemoContext } from '../lib/release-fixtures.mjs';
 import { EXPECTED_DETAIL, EXPECTED_REASON, RELEASE_CASES } from '../lib/release-cases.mjs';
@@ -59,7 +59,7 @@ export async function checkRelease({ root = null } = {}) {
     // manifest
     const m1 = buildReleaseManifest(ctx, { siteDir: dir }), m2 = buildReleaseManifest(ctx, { siteDir: dir });
     if (JSON.stringify(m1) !== JSON.stringify(m2)) problems.push('the release manifest is not deterministic');
-    const schema = readJson(standard('release', 'release-manifest.schema.json'));
+    const schema = readJson(join(engDir, 'release', 'release-manifest.schema.json'));
     const ours = validateSchema(m1, schema, 'manifest');
     ours.forEach((e) => problems.push(`manifest does not fit its schema: ${e}`));
     const ajv = new Ajv({ strict: true, allErrors: true }); const ok = ajv.compile(schema)(m1);

@@ -11,11 +11,11 @@ import { createHash } from 'node:crypto';
 import { existsSync, lstatSync, readFileSync, readdirSync } from 'node:fs';
 import { join, posix } from 'node:path';
 import { spawnSync } from 'node:child_process';
-import { engDir, readJson, repoRoot, standard } from './git.mjs';
+import { engDir, readJson, repoRoot } from './git.mjs';
 import { projectFolder } from './project.mjs';
 import { parseStrictJson } from './strict-json.mjs';
 
-export const loadSpec = () => readJson(standard('release', 'evidence-spec.json'));
+export const loadSpec = () => readJson(join(engDir, 'release', 'evidence-spec.json'));
 const sha256 = (b) => createHash('sha256').update(b).digest('hex');
 const HEX40 = /^[0-9a-f]{40}$/, HEX64 = /^[0-9a-f]{64}$/;
 const isDate = (s) => typeof s === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(s) && !Number.isNaN(Date.parse(`${s}T00:00:00Z`)) && new Date(`${s}T00:00:00Z`).toISOString().slice(0, 10) === s;

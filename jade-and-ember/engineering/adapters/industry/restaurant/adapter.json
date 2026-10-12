@@ -2,18 +2,6 @@
  "schema": "sts/industry-adapter@1",
  "id": "restaurant",
  "title": "Restaurant (hospitality)",
- "structuredData": {
-  "schemaType": "Restaurant",
-  "allowedTypes": [
-   "Restaurant",
-   "FoodEstablishment",
-   "CafeOrCoffeeShop",
-   "BarOrPub",
-   "Bakery",
-   "FastFoodRestaurant"
-  ],
-  "module": "structured-data.mjs"
- },
  "$comment": "G6-5 (APR-JE-046, D-P4-2): the first industry adapter. It holds what only a restaurant site has: its JSON-LD type and fields, its configuration schemas (menu, copy) and its component contracts (dish, menu category, hours, owner note, steps). The base engineering asks the adapter; it never names a restaurant. A project of another industry declares its own adapter (or none) and the same base checks run.",
  "checks": [
   {

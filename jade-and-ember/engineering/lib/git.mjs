@@ -12,8 +12,15 @@ import { coreDir, project } from './project.mjs';
 export const projectDir = project.root;
 export const engDir = project.engDir;
 export const repoRoot = project.repoRoot;
-// A base standard (the HTML-validation rules, for example) is the engineering's own: a project may carry its own copy in its engineering folder; otherwise the engineering's default applies.
-export const standard = (...parts) => { const own = join(engDir, ...parts); return existsSync(own) ? own : join(coreDir, ...parts); };
+// A base standard is a rule set that names nothing of any project (today: the HTML-validation rules). A project may carry its own copy in its engineering folder; otherwise the
+// engineering's default applies. Anything else in the engineering folder (page lists, budgets, evidence specifications, schemas that carry the project's id) is the project's own and has NO
+// fallback: a project that lacks it fails loudly rather than being judged by another project's values.
+const STANDARDS = new Set(['htmlvalidate.json']);
+export const standard = (...parts) => {
+  if (!STANDARDS.has(parts.join('/'))) throw new Error(`${parts.join('/')} is not a base standard: it belongs to the project (engineering/${parts.join('/')})`);
+  const own = join(engDir, ...parts);
+  return existsSync(own) ? own : join(coreDir, ...parts);
+};
 // True when the module is being run directly (node file.mjs) rather than imported. Works on every platform.
 export const isMain = (metaUrl) => Boolean(process.argv[1]) && pathToFileURL(resolve(process.argv[1])).href === metaUrl;
 export const readJson = (p) => JSON.parse(readFileSync(p, 'utf8'));

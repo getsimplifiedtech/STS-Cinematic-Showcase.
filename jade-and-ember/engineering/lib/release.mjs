@@ -10,7 +10,7 @@ import { existsSync, readFileSync, readdirSync } from 'node:fs';
 import { join } from 'node:path';
 import { execFileSync } from 'node:child_process';
 import { createHash } from 'node:crypto';
-import { engDir, projectDir, readJson, repoRoot, sha256, standard } from './git.mjs';
+import { engDir, projectDir, readJson, repoRoot, sha256 } from './git.mjs';
 import { project, schemaId } from './project.mjs';
 import { loadApprovals } from './approvals.mjs';
 import { isReservedHost } from './hosts.mjs';
@@ -29,7 +29,7 @@ import { verifyAuthenticity } from './authenticity.mjs';
 import { checkCiFile } from '../checks/ci.mjs';
 import { checkDepsStatic } from '../checks/deps.mjs';
 
-export const loadReleasePolicy = () => readJson(standard('release', 'policy.json'));
+export const loadReleasePolicy = () => readJson(join(engDir, 'release', 'policy.json'));
 export { searchDigest, searchFilesPresent };
 const sha = (s) => createHash('sha256').update(s).digest('hex');
 const git = (args, cwd = repoRoot) => execFileSync('git', args, { cwd, encoding: 'utf8' }).trim();

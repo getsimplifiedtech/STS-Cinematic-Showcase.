@@ -7,7 +7,7 @@
 // The scanner itself (lib/purity.mjs) and this file name the forbidden words by design and are not scanned. The project's own source folders are the project's.
 // Run: node engineering/checks/project.mjs
 import { existsSync, readdirSync, readFileSync, statSync } from 'node:fs';
-import { join } from 'node:path';
+import { join, resolve, sep } from 'node:path';
 import { coreDir, loadProject, manifestSchema, project } from '../lib/project.mjs';
 import { validateSchema } from '../lib/schema.mjs';
 import { loadEntries } from '../lib/registry.mjs';
@@ -41,13 +41,27 @@ export function manifestProblems(p = project) {
   for (const f of [...m.engine.projectFolders, ...m.engine.projectFiles]) need(root, f, 'engine.projectFolders/projectFiles');
   for (const c of m.checks.project) need(root, c.module, `checks.project ${c.id}`);
   if (m.industry && !existsSync(join(coreDir, 'adapters', 'industry', m.industry, 'adapter.json'))) out.push(`industry "${m.industry}" has no adapter in the engineering (adapters/industry/${m.industry}/adapter.json)`);
+  // what the manifest makes the engineering execute or compare must be covered by the verification record's engine digest, and by the vendor-free scan of the sources
+  const inEng = (rel) => resolve(root, rel).startsWith(`${resolve(eng)}${sep}`);
+  const covered = (rel) => inEng(rel) || m.engine.projectFiles.includes(rel) || m.engine.projectFolders.some((f) => rel === f || rel.startsWith(`${f}/`));
+  if (!m.engine.projectFiles.includes('sts.engineering.json')) out.push('engine.projectFiles must list sts.engineering.json: the manifest is part of what the verification record vouches for');
+  const executed = [...Object.values(m.generators).filter(Boolean), m.fixtures.clientBuild, m.baseline && m.baseline.regression, ...m.checks.project.map((c) => c.module)].filter(Boolean);
+  for (const rel of executed) if (!covered(rel)) out.push(`${rel} is run by the engineering but is covered by neither engine.projectFolders/projectFiles nor the engineering folder (its changes would not change the engine digest)`);
+  const b = m.delivery.build;
+  if (b) {
+    if (!b.command.includes('{out}')) out.push('delivery.build.command must contain {out} (the folder the build writes to)');
+    const script = b.command.find((t) => /\.[cm]?js$/.test(t));
+    if (script && !covered(script)) out.push(`the build script ${script} is covered by neither engine.projectFolders/projectFiles nor the engineering folder`);
+    if (!(m.delivery.sourceRoots || []).length) out.push('delivery.sourceRoots must list the sources of a project that has a builder (the vendor-free scan reads them)');
+  }
+  if (m.baseline && !m.baseline.regression) out.push('a project with a baseline must name its regression recipe (baseline.regression); without it the behaviour layer would compare nothing');
   try { loadEntries({ coreRoot: coreDir, manifest: m, label: p.baseline?.label }); } catch (e) { out.push(e.message); }
   return out;
 }
 
 // ---- 2. a manifest cannot subtract ------------------------------------------------------------------------------------------------------------------------------
 // Each case edits a copy of the project's manifest; the manifest must then be refused (by the schema or by the registry), or must leave the base checks exactly as they were.
-const extraCheck = (o = {}) => ({ id: 'check:extra-g65', module: 'engineering/checks/project.mjs', export: 'checkProject', tier: 'fast', scope: 'static', reason: 'a synthetic project check for the negative case; no browser', describe: 'synthetic', ...o });
+const extraCheck = (o = {}) => ({ after: 'check:html', id: 'check:extra-g65', module: 'engineering/checks/project.mjs', export: 'checkProject', tier: 'fast', scope: 'static', reason: 'a synthetic project check for the negative case; no browser', describe: 'synthetic', ...o });
 export const SUBTRACT_CASES = [
   { n: 'a key that disables a check', edit: (m) => { m.checks.skip = ['check:delivery']; } },
   { n: 'a key that disables a base check inside checks.project', edit: (m) => { m.checks.disable = ['check:html']; } },
@@ -55,6 +69,7 @@ export const SUBTRACT_CASES = [
   { n: 'a project check that re-declares a base check (to replace it)', edit: (m) => { m.checks.project.push(extraCheck({ id: 'check:delivery' })); } },
   { n: 'a project check placed after a check that does not exist', edit: (m) => { m.checks.project.push(extraCheck({ after: 'check:no-such-check' })); } },
   { n: 'a project check with a tier that is neither fast nor full', edit: (m) => { m.checks.project.push(extraCheck({ tier: 'never' })); } },
+  { n: 'a project check that names no check to follow (it would run before the base checks)', edit: (m) => { const c = extraCheck(); delete c.after; m.checks.project.push(c); } },
   { n: 'a project check that is not classified for the cross-browser matrix', edit: (m) => { m.checks.project.push(extraCheck({ scope: 'maybe' })); } },
   { n: 'a project check outside the engines with no reason', edit: (m) => { m.checks.project.push(extraCheck({ scope: 'chromium-only', reason: 'n/a' })); } },
   { n: 'a project check with an unknown need', edit: (m) => { m.checks.project.push(extraCheck({ needs: ['everything'] })); } },
@@ -62,6 +77,26 @@ export const SUBTRACT_CASES = [
   { n: 'an unknown key in the engine section (a skipped file)', edit: (m) => { m.engine.skip = ['lib/authenticity.mjs']; } },
   { n: 'a creative value in the manifest (the creative authority is pinned by reference only)', edit: (m) => { m.creativeAuthority.palette = ['#000000']; } },
 ];
+
+// Attempts to shrink what is vouched for rather than what runs: each must make the manifest review fail (these apply to a project that has a builder and a baseline, as the default does).
+export const SHRINK_CASES = [
+  { n: 'engine.projectFiles emptied (the manifest drops out of the engine digest)', applies: () => true, edit: (m) => { m.engine.projectFiles = []; } },
+  { n: 'engine.projectFolders emptied (the generators drop out of the engine digest)', applies: (m) => Object.values(m.generators).some((g) => g && !g.startsWith('engineering/')), edit: (m) => { m.engine.projectFolders = []; } },
+  { n: 'delivery.sourceRoots emptied for a project with a builder', applies: (m) => Boolean(m.delivery.build), edit: (m) => { m.delivery.sourceRoots = []; } },
+  { n: 'a build command that never says where to write ({out} removed)', applies: (m) => Boolean(m.delivery.build), edit: (m) => { m.delivery.build.command = m.delivery.build.command.filter((t) => t !== '{out}'); } },
+  { n: 'a baseline without a regression recipe', applies: (m) => Boolean(m.baseline), edit: (m) => { delete m.baseline.regression; } },
+];
+
+export function shrinkProblems(p = project) {
+  const out = [];
+  for (const c of SHRINK_CASES) {
+    if (!c.applies(p.manifest)) continue;
+    const m = clone(p.manifest);
+    c.edit(m);
+    if (!manifestProblems({ ...p, manifest: m }).length) out.push(`${c.n}: the manifest review accepted it`);
+  }
+  return out;
+}
 
 export function subtractionProblems(p = project) {
   const out = [];
@@ -163,9 +198,9 @@ export function checkProject({ manifest = project, withPurity = true } = {}) {
   const mp = manifestProblems(manifest);
   problems.push(...mp);
   if (!mp.length) notes.push(`${manifest.name}: the manifest is valid and every file, folder and module it names exists (${manifest.manifest.checks.project.length} project check(s) added to the base engineering)`);
-  const sp = subtractionProblems(manifest);
+  const sp = [...subtractionProblems(manifest), ...shrinkProblems(manifest)];
   problems.push(...sp);
-  if (!sp.length) notes.push(`${SUBTRACT_CASES.length} attempts to remove, skip or relax a base check through the manifest were refused; the offering changes nothing; the base checks keep their order`);
+  if (!sp.length) notes.push(`${SUBTRACT_CASES.length + SHRINK_CASES.filter((c) => c.applies(manifest.manifest)).length} attempts to remove, skip, relax or stop vouching for a base check through the manifest were refused; the offering changes nothing; the base checks keep their order`);
   const cp = scannerProblems();
   problems.push(...cp);
   if (!cp.length) notes.push(`the purity scanner finds ${SCANNER_CASES.filter((c) => c[2]).length} planted project-specific values and ignores a comment`);

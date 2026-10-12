@@ -43,12 +43,12 @@ for (const [id, what, run] of checks) {
   r.notes.forEach((n) => console.log('  ' + n));
   r.problems.forEach((p) => console.log('  - ' + p));
   const secs = ((Date.now() - t0) / 1000).toFixed(1);
-  console.log(`${r.problems.length ? 'FAIL' : 'PASS'}  ${id} (${secs} s)`);
-  results.push({ id, passed: r.problems.length === 0, seconds: Number(secs), problems: r.problems, notes: r.notes });
+  console.log(`${r.problems.length ? 'FAIL' : r.notApplicable ? 'N/A ' : 'PASS'}  ${id} (${secs} s)`);
+  results.push({ id, passed: r.problems.length === 0, seconds: Number(secs), problems: r.problems, notes: r.notes, ...(r.notApplicable ? { notApplicable: r.notApplicable } : {}) });
 }
 
 console.log('\n== summary');
-for (const r of results) console.log(`  ${r.passed ? 'PASS' : 'FAIL'}  ${r.id.padEnd(18)} ${String(r.seconds).padStart(6)} s${r.passed ? '' : `   ${r.problems.length} problem(s)`}`);
+for (const r of results) console.log(`  ${!r.passed ? 'FAIL' : r.notApplicable ? 'N/A ' : 'PASS'}  ${r.id.padEnd(18)} ${String(r.seconds).padStart(6)} s${r.passed ? '' : `   ${r.problems.length} problem(s)`}`);
 console.log(`\n  Not covered yet (planned for later gates, or manual): ${NOT_YET.join('; ')}.`);
 const failed = results.filter((r) => !r.passed).length;
 mkdirSync(join(engDir, '.reports'), { recursive: true });

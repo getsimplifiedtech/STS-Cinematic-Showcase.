@@ -72,7 +72,7 @@ export const engRel = relative(project.root, project.engDir).split(sep).join('/'
 export function buildCommand(root, out) {
   const b = project.delivery.build;
   if (!b) return null;
-  const [cmd, ...args] = b.command.map((t) => (t === '{out}' ? out : !t.startsWith('-') && existsSync(join(root, t)) ? join(root, t) : t));
+  const [cmd, ...args] = b.command.map((t) => (t === '{out}' ? out : !t.startsWith('-') && /\.[cm]?js$/.test(t) && existsSync(join(root, t)) ? join(root, t) : t));
   return [cmd === 'node' ? process.execPath : cmd, args];
 }
 // The build command as a person would type it, for messages ("node build.mjs").

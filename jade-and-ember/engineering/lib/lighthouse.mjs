@@ -9,12 +9,12 @@ import { spawn } from 'node:child_process';
 import { existsSync, mkdirSync, mkdtempSync, readdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
-import { projectDir, readJson, standard } from './git.mjs';
+import { engDir, projectDir, readJson } from './git.mjs';
 import { serveSite } from './server.mjs';
 
 export const AGGREGATIONS = ['optimistic', 'median', 'pessimistic'];
 export const LEVELS = ['off', 'warn', 'error'];
-export const loadConfig = (file = standard('lighthouse.json')) => readJson(file);
+export const loadConfig = (file = join(engDir, 'lighthouse.json')) => readJson(file);
 
 // ---- configuration: well formed, and never below the recorded floor -----------------------------------------------------------------------------------------
 export function validateConfig(cfg) {

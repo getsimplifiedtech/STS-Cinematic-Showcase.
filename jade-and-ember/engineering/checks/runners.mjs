@@ -6,89 +6,53 @@ import { pathToFileURL } from 'node:url';
 import { coreDir, project } from '../lib/project.mjs';
 import { unmetNeeds } from '../lib/registry.mjs';
 
-import { checkBaseline } from './baseline.mjs';
-import { checkDeterminism } from './determinism.mjs';
-import { checkAuthority } from './authority.mjs';
-import { checkDelivery } from './delivery.mjs';
-import { checkProject } from './project.mjs';
-import { checkMedia } from './media.mjs';
-import { checkBudgets } from './budgets.mjs';
-import { checkKeyboard } from './keyboard.mjs';
-import { checkReflow } from './reflow.mjs';
-import { checkForcedColors } from './forced-colors.mjs';
-import { checkA11yTree } from './a11y-tree.mjs';
-import { checkOrder } from './order.mjs';
-import { checkSelftestGate2 } from './selftest-gate2.mjs';
-import { checkSecurity } from './security.mjs';
-import { checkPrivacy } from './privacy.mjs';
-import { checkDeps } from './deps.mjs';
-import { checkSecrets } from './secrets.mjs';
-import { checkTokens } from './tokens.mjs';
-import { checkAssets } from './assets.mjs';
-import { checkPortability } from './portability.mjs';
-import { checkCi } from './ci.mjs';
-import { checkHtml } from './html.mjs';
-import { checkLinks } from './links.mjs';
-import { checkSeo } from './seo.mjs';
-import { checkRelease } from './release.mjs';
-import { checkReleaseDryRun } from './release-dryrun.mjs';
-import { checkHosting } from './hosting.mjs';
-import { checkSelftestGate4 } from './selftest-gate4.mjs';
-import { checkPhone } from './phone.mjs';
-import { checkEvidence } from './evidence.mjs';
-import { checkSelftestEvidence } from './selftest-evidence.mjs';
-import { checkSelftestGate5 } from './selftest-gate5.mjs';
-import { checkSelftestGate6 } from './selftest-gate6.mjs';
-import { checkSelftestGeneric } from './selftest-generic.mjs';
-import { checkSelftestGate3 } from './selftest-gate3.mjs';
-import { checkRegression } from './regression.mjs';
-import { checkSelftest } from './selftest.mjs';
 
+// Each check is imported when it is run, so a project pays for (and depends on the records of) only the checks it runs.
 // ctx: { fast, browserName, strictEnv, framework }
 export const CORE = {
-  'check:baseline': (ctx) => checkBaseline(),
-  'check:determinism': (ctx) => checkDeterminism(),
-  'check:delivery': (ctx) => checkDelivery(),
-  'check:project': (ctx) => checkProject(),
-  'check:authority': (ctx) => checkAuthority({ framework: ctx.framework }),
-  'check:media': (ctx) => checkMedia({ browser: !ctx.fast, browserName: ctx.browserName }),
-  'check:tokens': (ctx) => checkTokens(),
-  'check:secrets': (ctx) => checkSecrets(),
-  'check:deps': (ctx) => checkDeps(),
-  'check:ci': (ctx) => checkCi(),
-  'check:html': (ctx) => checkHtml(),
-  'check:links': (ctx) => checkLinks(),
-  'check:seo': (ctx) => checkSeo({ browser: !ctx.fast, browserName: ctx.browserName }),
-  'check:release': (ctx) => checkRelease(),
-  'check:evidence': (ctx) => checkEvidence(),
-  'check:hosting': (ctx) => checkHosting(),
-  'check:privacy': (ctx) => checkPrivacy({ browser: !ctx.fast, browserName: ctx.browserName }),
-  'check:security': (ctx) => checkSecurity({ browser: !ctx.fast, browserName: ctx.browserName }),
-  'check:assets': (ctx) => checkAssets({ browser: !ctx.fast, browserName: ctx.browserName }),
-  'check:budgets': (ctx) => checkBudgets({ browser: !ctx.fast, browserName: ctx.browserName }),
-  'check:keyboard': (ctx) => checkKeyboard({ browserName: ctx.browserName }),
-  'check:reflow': (ctx) => checkReflow({ browserName: ctx.browserName }),
-  'check:forced-colors': (ctx) => checkForcedColors({ browserName: ctx.browserName }),
-  'check:a11y-tree': (ctx) => checkA11yTree({ browserName: ctx.browserName }),
-  'check:order': (ctx) => checkOrder({ browserName: ctx.browserName }),
-  'check:phone': (ctx) => checkPhone({ browserName: ctx.browserName }),
-  'check:portability': (ctx) => checkPortability({ browserName: ctx.browserName }),
-  'check:release-dryrun': (ctx) => checkReleaseDryRun(),
-  'check:regression': (ctx) => checkRegression({ browserName: ctx.browserName, strictEnv: ctx.strictEnv }),
-  'check:selftest': (ctx) => checkSelftest(),
-  'check:selftest-gate2': (ctx) => checkSelftestGate2(),
-  'check:selftest-gate3': (ctx) => checkSelftestGate3(),
-  'check:selftest-gate5': (ctx) => checkSelftestGate5(),
-  'check:selftest-gate6': (ctx) => checkSelftestGate6(),
-  'check:selftest-generic': (ctx) => checkSelftestGeneric(),
-  'check:selftest-evidence': (ctx) => checkSelftestEvidence(),
-  'check:selftest-gate4': (ctx) => checkSelftestGate4(),
+  'check:baseline': async (ctx) => (await import('./baseline.mjs')).checkBaseline(),
+  'check:determinism': async (ctx) => (await import('./determinism.mjs')).checkDeterminism(),
+  'check:delivery': async (ctx) => (await import('./delivery.mjs')).checkDelivery(),
+  'check:project': async (ctx) => (await import('./project.mjs')).checkProject(),
+  'check:authority': async (ctx) => (await import('./authority.mjs')).checkAuthority({ framework: ctx.framework }),
+  'check:media': async (ctx) => (await import('./media.mjs')).checkMedia({ browser: !ctx.fast, browserName: ctx.browserName }),
+  'check:tokens': async (ctx) => (await import('./tokens.mjs')).checkTokens(),
+  'check:secrets': async (ctx) => (await import('./secrets.mjs')).checkSecrets(),
+  'check:deps': async (ctx) => (await import('./deps.mjs')).checkDeps(),
+  'check:ci': async (ctx) => (await import('./ci.mjs')).checkCi(),
+  'check:html': async (ctx) => (await import('./html.mjs')).checkHtml(),
+  'check:links': async (ctx) => (await import('./links.mjs')).checkLinks(),
+  'check:seo': async (ctx) => (await import('./seo.mjs')).checkSeo({ browser: !ctx.fast, browserName: ctx.browserName }),
+  'check:release': async (ctx) => (await import('./release.mjs')).checkRelease(),
+  'check:evidence': async (ctx) => (await import('./evidence.mjs')).checkEvidence(),
+  'check:hosting': async (ctx) => (await import('./hosting.mjs')).checkHosting(),
+  'check:privacy': async (ctx) => (await import('./privacy.mjs')).checkPrivacy({ browser: !ctx.fast, browserName: ctx.browserName }),
+  'check:security': async (ctx) => (await import('./security.mjs')).checkSecurity({ browser: !ctx.fast, browserName: ctx.browserName }),
+  'check:assets': async (ctx) => (await import('./assets.mjs')).checkAssets({ browser: !ctx.fast, browserName: ctx.browserName }),
+  'check:budgets': async (ctx) => (await import('./budgets.mjs')).checkBudgets({ browser: !ctx.fast, browserName: ctx.browserName }),
+  'check:keyboard': async (ctx) => (await import('./keyboard.mjs')).checkKeyboard({ browserName: ctx.browserName }),
+  'check:reflow': async (ctx) => (await import('./reflow.mjs')).checkReflow({ browserName: ctx.browserName }),
+  'check:forced-colors': async (ctx) => (await import('./forced-colors.mjs')).checkForcedColors({ browserName: ctx.browserName }),
+  'check:a11y-tree': async (ctx) => (await import('./a11y-tree.mjs')).checkA11yTree({ browserName: ctx.browserName }),
+  'check:order': async (ctx) => (await import('./order.mjs')).checkOrder({ browserName: ctx.browserName }),
+  'check:phone': async (ctx) => (await import('./phone.mjs')).checkPhone({ browserName: ctx.browserName }),
+  'check:portability': async (ctx) => (await import('./portability.mjs')).checkPortability({ browserName: ctx.browserName }),
+  'check:release-dryrun': async (ctx) => (await import('./release-dryrun.mjs')).checkReleaseDryRun(),
+  'check:regression': async (ctx) => (await import('./regression.mjs')).checkRegression({ browserName: ctx.browserName, strictEnv: ctx.strictEnv }),
+  'check:selftest': async (ctx) => (await import('./selftest.mjs')).checkSelftest(),
+  'check:selftest-gate2': async (ctx) => (await import('./selftest-gate2.mjs')).checkSelftestGate2(),
+  'check:selftest-gate3': async (ctx) => (await import('./selftest-gate3.mjs')).checkSelftestGate3(),
+  'check:selftest-gate5': async (ctx) => (await import('./selftest-gate5.mjs')).checkSelftestGate5(),
+  'check:selftest-gate6': async (ctx) => (await import('./selftest-gate6.mjs')).checkSelftestGate6(),
+  'check:selftest-generic': async (ctx) => (await import('./selftest-generic.mjs')).checkSelftestGeneric(),
+  'check:selftest-evidence': async (ctx) => (await import('./selftest-evidence.mjs')).checkSelftestEvidence(),
+  'check:selftest-gate4': async (ctx) => (await import('./selftest-gate4.mjs')).checkSelftestGate4(),
 };
 
 // Runs one registry entry. A need the project does not meet makes the check not applicable: it says so in its notes and does not pass or fail anything.
 export async function runEntry(e, ctx) {
   const unmet = unmetNeeds(e, project.manifest);
-  if (unmet.length) return { problems: [], notes: [`not applicable to ${project.name}: it needs ${unmet.join(', ')}, which the project does not declare`] };
+  if (unmet.length) return { problems: [], notes: [`not applicable to ${project.name}: it needs ${unmet.join(', ')}, which the project does not declare`], notApplicable: unmet };
   if (e.owner === 'core') {
     if (!CORE[e.id]) throw new Error(`${e.id} is in checks.json but has no runner in checks/runners.mjs`);
     return CORE[e.id](ctx);

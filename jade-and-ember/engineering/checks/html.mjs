@@ -42,7 +42,7 @@ export async function checkHtml({ root = null } = {}) {
     const client = !fx ? { problems: [], count: 0 } : fx.status === 0 ? await validateHtml(pagesOf(fx.dir).map((f) => [f, readFileSync(join(fx.dir, f), 'utf8')]), 'client build') : { problems: [`the client fixture failed to build: ${fx.text.slice(0, 200)}`], count: 0 };
     const tel = await probeTelWrapping(pagesOf(dir).map((f) => [f, readFileSync(join(dir, f), 'utf8')]));
     const known = reconcile('html', tel ? [{ key: 'html:tel-non-breaking', detail: `${tel} phone number(s) can wrap across lines (html-validate tel-non-breaking)`, value: tel }] : []);
-    return { problems: [...demo.problems, ...client.problems, ...known.problems], notes: [...known.notes, `${demo.count} demonstration pages and ${client.count} client-build pages pass html-validate (${cfg.extends.join(', ')}); ${Object.keys(cfg.disabled).length} rules switched off, each with a recorded reason`] };
+    return { problems: [...demo.problems, ...client.problems, ...known.problems], notes: [...known.notes, ...(fx ? [] : ['not run: validation of an indexable client build (the project declares no client-build recipe)']), `${demo.count} demonstration pages and ${client.count} client-build pages pass html-validate (${cfg.extends.join(', ')}); ${Object.keys(cfg.disabled).length} rules switched off, each with a recorded reason`] };
   } finally { cleanup.forEach((d) => rmSync(d, { recursive: true, force: true })); if (own) rmSync(dir, { recursive: true, force: true }); }
 }
 

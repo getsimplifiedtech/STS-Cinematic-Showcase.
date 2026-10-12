@@ -14,6 +14,7 @@ import { coreDir, loadProject, project } from '../lib/project.mjs';
 import { loadEntries, unmetNeeds } from '../lib/registry.mjs';
 import { isMain } from '../lib/git.mjs';
 import { manifestProblems, subtractionProblems } from './project.mjs';
+import { buildVerificationRecord, validateVerification } from '../lib/verification.mjs';
 
 export const FIXTURE = join(coreDir, 'fixtures', 'generic');
 const fx = loadProject(FIXTURE);
@@ -125,7 +126,7 @@ const { checkHtml } = await L('checks/html.mjs'); const { repoRoot } = await L('
   ['check:secrets: the fixture tree holds no credential and the check passes', () => withCopy((d) => inProject(d, `
 const { checkSecrets } = await L('checks/secrets.mjs'); out(checkSecrets({ history: false }).problems);`)), null],
   ['check:html: an image without alt text and an unclosed element planted in a fixture page are caught', () => withCopy((d) => { editFile(d, 'services.html', (t) => t.replace('<h1>Services</h1>', '<h1>Services<img src="x.png"><div>')); return inProject(d, `
-const { checkHtml } = await L('checks/html.mjs'); const { repoRoot } = await L('lib/git.mjs'); const r = await checkHtml({ root: repoRoot }); out(r.problems);`); }), /alt|close|element|img/i],
+const { checkHtml } = await L('checks/html.mjs'); const { repoRoot } = await L('lib/git.mjs'); const r = await checkHtml({ root: repoRoot }); out(r.problems);`); }), /services\.html:\d+:\d+ wcag\/h37/],
   ['check:secrets: a credential-shaped string planted in a fixture page is caught', () => withCopy((d) => { editFile(d, 'index.html', (t) => t.replace('</main>', `<p>${'AKIA'}${'IOSFODNN7EXAMPLE'}</p></main>`)); return inProject(d, `
 const { checkSecrets } = await L('checks/secrets.mjs'); out(checkSecrets({ history: false }).problems);`); }), /aws-access-key/],
   ['manifest: an unknown key in the fixture manifest is refused by the loader', () => withCopy((d) => { editManifest(d, (m) => { m.skipChecks = ['check:html']; }); return inProject(d, `
@@ -136,6 +137,32 @@ const { project } = await L('lib/project.mjs'); const { manifestProblems } = awa
 const { project } = await L('lib/project.mjs'); const { manifestProblems } = await L('checks/project.mjs'); out(manifestProblems(project));`); }), /approvalsLog.*does not exist/],
   ['extension point: a check the fixture adds through its own manifest is placed where it asks and is run from the fixture', () => withCopy((d) => { addExtra(d, "({ problems: [], notes: ['ran'] })"); return runExtra(d); }), null],
   ['extension point: a failing check the fixture adds is reported as a failure', () => withCopy((d) => { addExtra(d, "({ problems: ['planted'], notes: ['ran'] })"); return runExtra(d); }), /fixture check reported: planted/],
+  ['standards: only a rule set that names no project falls back to the engineering; a project\'s own records never do', () => inProject(FIXTURE, `
+const g = await L('lib/git.mjs'); const e = await L('lib/evidence.mjs'); const p = [];
+if (!/htmlvalidate\\.json$/.test(g.standard('htmlvalidate.json'))) p.push('the HTML rules did not resolve');
+for (const f of [['release', 'evidence-spec.json'], ['lighthouse.json'], ['budgets.json']]) { try { g.standard(...f); p.push(f.join('/') + ' fell back to another project'); } catch (x) { /* refused */ } }
+try { e.loadSpec(); p.push('the evidence specification of another project was used'); } catch (x) { if (x.code !== 'ENOENT') p.push('unexpected: ' + x.message); }
+out(p);`), null],
+  ['record: a check that was not applicable is listed in the sealed record, and a release record cannot carry one', () => {
+    const base = { mode: 'full', candidate: { digest: 'c', channel: 'demonstration', version: '0' }, engine: 'e', registry: 'r', commit: 'a'.repeat(40), dirty: false, startedAt: 't', finishedAt: 't', env: {} };
+    const withNa = buildVerificationRecord({ ...base, results: [{ id: 'check:a', passed: true, seconds: 1 }, { id: 'check:b', passed: true, seconds: 1, notApplicable: ['baseline'] }] });
+    const without = buildVerificationRecord({ ...base, results: [{ id: 'check:a', passed: true, seconds: 1 }] });
+    const p = [];
+    if (!withNa.notApplicable || withNa.notApplicable.join() !== 'check:b') p.push('the record does not list the not-applicable check');
+    if ('notApplicable' in without) p.push('a record with nothing not applicable carries the field (the default project\'s records would change)');
+    const issues = validateVerification(withNa, { candidate: 'c', engineDigest: 'e', ids: ['check:a', 'check:b'] }).join('\n');
+    if (!/not applicable to the project/.test(issues)) p.push('a release record with a not-applicable check was not refused');
+    return p;
+  }, null],
+  ['registry: two checks that follow the same check keep the order they were declared in, and a check that follows nothing is refused', () => {
+    const mk = (id, after) => ({ id, module: 'a.mjs', export: 'a', tier: 'fast', after, scope: 'static', reason: 'a synthetic check for the order case; no browser', describe: 'x' });
+    const m = { ...fx.manifest, checks: { project: [mk('check:one', 'check:html'), mk('check:two', 'check:html')] } };
+    const ids = loadEntries({ coreRoot: coreDir, manifest: m }).map((e) => e.id);
+    const at = ids.indexOf('check:html'), p = [];
+    if (ids[at + 1] !== 'check:one' || ids[at + 2] !== 'check:two') p.push(`order after check:html: ${ids.slice(at, at + 3).join(', ')}`);
+    try { loadEntries({ coreRoot: coreDir, manifest: { ...fx.manifest, checks: { project: [mk('check:early', null)] } } }); p.push('a check that follows nothing was accepted'); } catch (e) { if (!/must name the check it follows/.test(e.message)) p.push(e.message); }
+    return p;
+  }, null],
   ['extension point: a fixture check placed after a check that does not exist is refused when the registry is built', () => withCopy((d) => { addExtra(d, "({ problems: [], notes: [] })"); editManifest(d, (m) => { m.checks.project[0].after = 'check:nothing'; }); return inProject(d, `
 const { loadEntries } = await L('lib/registry.mjs'); const { coreDir, project } = await L('lib/project.mjs');
 try { loadEntries({ coreRoot: coreDir, manifest: project.manifest }); out([]); } catch (e) { out([e.message]); }`); }), /which is not in the registry/],

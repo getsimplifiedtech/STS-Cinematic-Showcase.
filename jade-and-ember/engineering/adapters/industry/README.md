@@ -2,13 +2,13 @@
 
 An industry adapter holds what only one kind of business has, so that the base engineering can serve every website offering (Essential, Premium, Cinematic) and every industry
 with the same checks. The base engineering asks the adapter named by the project manifest (`sts.engineering.json`, `industry`); it never names an industry. A project with
-no adapter sets `industry: null`; the checks that need one report themselves not applicable.
+no adapter sets `industry: null`. Then the checks an adapter adds do not exist for that project, and the checks that use an adapter's knowledge (media, structured data) say in their notes what they did not run. The manifest is part of the engine digest, so removing an adapter is part of a sealed, reviewable change.
 
 An adapter is a folder `adapters/industry/<id>/` with two files.
 
 | File | Holds |
 |---|---|
-| `adapter.json` | `id`, `title`, the structured-data type, and `checks`: the checks the industry adds to the registry, in the registry's entry shape (`id`, `module` relative to the engineering folder, `export`, `tier`, `after`, `scope`, `reason`, `describe`, `needs`). They are merged into the report after the check each one names. |
+| `adapter.json` | `id`, `title`, and `checks`: the checks the industry adds to the registry, in the registry's entry shape (`id`, `module` relative to the engineering folder, `export`, `tier`, `after`, `scope`, `reason`, `describe`, `needs`). They are merged into the report after the check each one names. |
 | `index.mjs` | `id`; `schemaType`; `allowedTypes` (the schema.org types the Home page's JSON-LD may carry); `summary` (how `check:seo` names what the structured data must match); `businessNoun`; `fieldProblems(ld, cfg)` and `pageProblems(ld, cfg)` (fields only this industry has and the page links that tie the data to the site); `llmsFacts` and `llmsFactProblems(fact, biz)` (extra fact lines of `llms.txt`). |
 
 What stays out of an adapter: anything an aesthetic decision would change. The adapter validates data; it never sets a colour, a font or a layout, and the creative authority
