@@ -163,7 +163,7 @@ export async function checkPortability({ root = null, browserName = 'chromium', 
           const bundle = join(holder2, 'bundle');
           renderBundle(adapterId, { siteDir: delivered, outDir: bundle, urlStyle: 'clean' });
           const prof = profileOf(bundle), site = join(bundle, readManifest(bundle).siteRoot);
-          const sv2 = serveSite(site, { profile: prof });
+          const sv2 = serveSite(site, { profile: prof, plainHttp: true });   // the walk is plain http on a loopback address: the HTTPS-only headers are tested in check:hosting, not here (WebKit would upgrade every request to https)
           const r = await walkSite({ browser, dir: site, label: `${adapterId} bundle (simulation profile)`, start: sv2.base, prefixCheck: sv2.origin + '/', video: prof.ranges ? 'expect' : 'either', clean: true });
           problems.push(...r.problems); preloadPerLoad = Math.max(preloadPerLoad, r.preloadPerLoad || 0); sv2.close();
         }

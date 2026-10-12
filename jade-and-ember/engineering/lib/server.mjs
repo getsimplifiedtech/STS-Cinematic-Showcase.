@@ -15,7 +15,20 @@ const TYPES = { '.html': 'text/html; charset=utf-8', '.js': 'text/javascript; ch
 //            'vercel-default'    Vercel without cleanUrls: /menu.html is served as it is and /menu is not found
 //          profile: a hosting adapter's simulation profile (engineering/adapters/hosting/profiles.mjs). The host-file rules of the bundle are APPLIED to every request: redirects, clean
 //            URLs, the not-found behaviour, the generated headers, Range support. Domain root only. It models documented behaviour, not the live service; the profile lists what it does not model.
-export function serveSite(root, { prefix = '/', pretty = false, ranges = true, headers = null, host = 'static', profile = null } = {}) {
+//          plainHttp: with a profile, the response headers are the profile's minus the two HTTPS-only parts (withoutHttpsOnly). The simulation is reached over http://127.0.0.1, where
+//            Strict-Transport-Security has no meaning and `upgrade-insecure-requests` makes some engines (WebKit) request every subresource and navigation over https from a server
+//            that speaks no TLS. Chromium exempts loopback from the upgrade, so a Chromium-only run would never show it. Everything else, the hashed CSP included, is kept.
+export const HTTPS_ONLY_CSP = ['upgrade-insecure-requests'];
+export function withoutHttpsOnly(h) {
+  const out = {};
+  for (const [k, v] of Object.entries(h)) {
+    const key = k.toLowerCase();
+    if (key === 'strict-transport-security') continue;
+    out[k] = key === 'content-security-policy' ? String(v).split(';').map((d) => d.trim()).filter((d) => d && !HTTPS_ONLY_CSP.includes(d.split(/\s+/)[0].toLowerCase())).join('; ') : v;
+  }
+  return out;
+}
+export function serveSite(root, { prefix = '/', pretty = false, ranges = true, headers = null, host = 'static', profile = null, plainHttp = false } = {}) {
   const cleanHost = host === 'cloudflare-pages' || host === 'vercel-clean';
   if (cleanHost) pretty = true;
   const log = [];
@@ -31,7 +44,7 @@ export function serveSite(root, { prefix = '/', pretty = false, ranges = true, h
         const red = profile.redirect(p);
         if (red) return send(red.status, { location: red.location + url.search, 'content-length': 0 }, '');
         const r = profile.resolve(p);
-        const h = profile.headers(p, { kind: r.kind, status: r.status });
+        const h = plainHttp ? withoutHttpsOnly(profile.headers(p, { kind: r.kind, status: r.status })) : profile.headers(p, { kind: r.kind, status: r.status });
         if (!r.file) return send(r.status, { 'content-type': 'text/html; charset=utf-8', ...h }, '<!doctype html><title>Not found</title><p>The platform\'s own not-found page.</p>');
         const target = normalize(join(root, r.file));
         if (target !== root && !target.startsWith(root + sep)) return send(403, {}, 'forbidden');

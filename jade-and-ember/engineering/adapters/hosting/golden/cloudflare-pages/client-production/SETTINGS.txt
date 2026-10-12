@@ -18,5 +18,6 @@ NOT OBSERVED ON A LIVE HOST (each is an unverified assumption until a separately
   - the content types served for .xml, .txt, .webm, .mp4 and .woff2
   - Range support for the hero video: the documentation says 200 is returned, which Safari cannot seek (HR-12)
   - that the deployed bytes equal the staged bytes (checklist C-07)
+  - that request paths are matched case-sensitively, so /Menu is not answered from menu.html (modelled; the pages read do not say, and nothing was observed live)
   - compression and caching at the edge
   - HSTS: that the header is sent as written and not changed by a zone setting

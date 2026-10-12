@@ -14,8 +14,8 @@
     {
       "path": "SETTINGS.txt",
       "role": "doc",
-      "sha256": "0460f40fdcf78c1fef79ca6d17d568cf8dea2f0ea728af7cca0e3be95d17c92a",
-      "bytes": 2498
+      "sha256": "b08f98fa1f69563bdb30f954905a76caea091720aca1161e9e353bd48c47aaf4",
+      "bytes": 2660
     },
     {
       "path": "site/404.html",
@@ -118,6 +118,7 @@
       "the content types served for .xml, .txt, .webm, .mp4 and .woff2",
       "Range support for the hero video: the documentation says 200 is returned, which Safari cannot seek (HR-12)",
       "that the deployed bytes equal the staged bytes (checklist C-07)",
+      "that request paths are matched case-sensitively, so /Menu is not answered from menu.html (modelled; the pages read do not say, and nothing was observed live)",
       "compression and caching at the edge",
       "HSTS: that the header is sent as written and not changed by a zone setting"
     ],

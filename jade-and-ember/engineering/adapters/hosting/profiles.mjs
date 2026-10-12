@@ -1,14 +1,13 @@
 // Simulation profiles (G6-4, APR-JE-044). A profile is part of an adapter: it APPLIES the generated host files to requests so the checks can walk the bundle the way a visitor
 // would, and it says in plain words what it models and what it does not. It is a SIMULATION OF DOCUMENTED BEHAVIOUR, not a test of the real service: nothing here was observed
 // on a live host. Every assumption that the provider documentation does not settle is listed in `assumptions` and ends up in the report.
-import { existsSync, lstatSync, readFileSync } from 'node:fs';
+import { existsSync, readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { parseStrictJson } from '../../lib/strict-json.mjs';
 import { parseHeadersFile } from './cloudflare-pages.mjs';
 import { parseNginx } from './static.mjs';
-import { AdapterError, MANIFEST, NOT_FOUND_PAGE, readManifest } from './common.mjs';
+import { AdapterError, MANIFEST, NOT_FOUND_PAGE, diskIo, exactFile, readManifest } from './common.mjs';
 
-const isFile = (p) => { try { return lstatSync(p).isFile(); } catch { return false; } };
 // a request path that tries to leave the site folder is never a file
 const safe = (rel) => typeof rel === 'string' && !rel.startsWith('/') && !rel.includes('\\') && !rel.includes('\u0000') && !rel.split('/').some((s) => s === '..');
 const NF = (rel) => rel === NOT_FOUND_PAGE || rel === NOT_FOUND_PAGE.replace(/\.html$/, '');   // /404 and /404.html have no address of their own: they are answered as any unknown path
@@ -25,10 +24,10 @@ function vercelSource(source) {
   return new RegExp(`^${source.replace('(.*)', '\u0000').replace(/[.+?^${}|[\]\\]/g, '\\$&').replace('\u0000', '.*')}$`);
 }
 
-export function cloudflareProfile(siteDir) {
+export function cloudflareProfile(siteDir, io = diskIo) {
   const headersText = existsSync(join(siteDir, '_headers')) ? readFileSync(join(siteDir, '_headers'), 'utf8') : '';
   const rules = parseHeadersFile(headersText).rules.map((r) => ({ re: pagesPattern(r.path), headers: r.headers })).filter((r) => r.re);
-  const exists = (rel) => safe(rel) && rel !== '_headers' && rel !== '_redirects' && isFile(join(siteDir, rel));   // the _headers file is parsed, never served (CF-04)
+  const exists = (rel) => safe(rel) && rel !== '_headers' && rel !== '_redirects' && exactFile(siteDir, rel, io);   // the _headers file is parsed, never served (CF-04)
   return {
     id: 'cloudflare-pages', siteDir, ranges: false,
     redirect(p) {
@@ -56,14 +55,14 @@ export function cloudflareProfile(siteDir) {
     },
     models: ['extension-less page URLs and the 308 from the .html form (CF-08)', 'the _headers rules applied to the REQUEST path, several matching rules combined, repeated headers joined with a comma (CF-02, CF-03)', 'unknown paths: 404.html when present, otherwise the home page with 200 (CF-10, CF-11)', 'Range requests answered with 200 (CF-12)', 'redirects carry no _headers headers (CF-06)', 'the platform default headers (CF-14, CF-15)'],
     doesNotModel: ['compression (CF-13), ETag and 304 handling, edge caching and purge behaviour', 'HTTP to HTTPS redirects, TLS, www and the domain', 'the exact redirect status code (308 is assumed; the page says only "redirected")', 'a request for /menu/ (modelled as not found; the documentation does not say)', 'content types for .xml, .txt, .webm, .mp4 and .woff2 (the local server\'s table is used)', 'headers on the 404.html response (assumed to follow the same rules as any asset)', 'zone features that rewrite HTML (Rocket Loader, email obfuscation, analytics beacon)'],
-    assumptions: ['redirect status 308', '/menu/, /index, /404 and /404.html are answered as unknown paths', 'the 404.html response has status 404 (the documentation says only that the page is displayed)', 'the _headers rules apply to the 404.html response', 'a header set in _headers replaces the platform default of the same name (the documentation: "override what Cloudflare ordinarily sends")'],
+    assumptions: ['request paths are matched case-sensitively (/Menu is not answered from menu.html)', 'redirect status 308', '/menu/, /index, /404 and /404.html are answered as unknown paths', 'the 404.html response has status 404 (the documentation says only that the page is displayed)', 'the _headers rules apply to the 404.html response', 'a header set in _headers replaces the platform default of the same name (the documentation: "override what Cloudflare ordinarily sends")'],
   };
 }
 
-export function vercelProfile(bundleDir, siteDir) {
+export function vercelProfile(bundleDir, siteDir, io = diskIo) {
   const j = parseStrictJson(readFileSync(join(bundleDir, 'vercel.json'), 'utf8'));
   const entries = (j.headers || []).map((e) => ({ re: vercelSource(e.source), headers: e.headers }));
-  const exists = (rel) => safe(rel) && isFile(join(siteDir, rel));
+  const exists = (rel) => safe(rel) && exactFile(siteDir, rel, io);
   const clean = j.cleanUrls === true;
   return {
     id: 'vercel', siteDir, ranges: true,
@@ -94,13 +93,13 @@ export function vercelProfile(bundleDir, siteDir) {
     },
     models: ['cleanUrls: the 308 from /x.html, /index.html and /x/index to the clean path (VC-01, VC-02)', 'trailingSlash false: the 308 from /x/ to /x (VC-03)', 'every matching headers entry applied to the request path, a repeated key set again (VC-05)', 'unknown paths: 404.html when present, otherwise a platform 404 page'],
     doesNotModel: ['the status code of a response served from 404.html (404 is assumed; the documentation results did not state it, VC-14)', 'whether a 404.html is used on every unknown path, and what the platform 404 page looks like', 'the platform default headers, above all Strict-Transport-Security (a platform default of max-age=63072000 may or may not be overridden by vercel.json: VC-15)', 'compression, ETag, edge caching, HTTP to HTTPS redirects, TLS, the domain', 'Deployment Protection and the automatic preview X-Robots-Tag (VC-16)', 'Range support (assumed: 206 as for any static file)', 'content types for .xml, .txt, .webm, .mp4 and .woff2 (the local server\'s table is used)', 'header-source matching exactly as the platform implements it (the open-source routing code is modelled, the platform is expected but not proven to match)'],
-    assumptions: ['a 404.html response has status 404', 'Range requests are answered with 206', 'the open-source routing library behaves as the platform does'],
+    assumptions: ['request paths are matched case-sensitively (/Menu is not answered from menu.html)', 'a 404.html response has status 404', 'Range requests are answered with 206', 'the open-source routing library behaves as the platform does'],
   };
 }
 
-export function staticProfile(bundleDir, siteDir) {
+export function staticProfile(bundleDir, siteDir, io = diskIo) {
   const nginx = existsSync(join(bundleDir, 'nginx.conf')) ? parseNginx(readFileSync(join(bundleDir, 'nginx.conf'), 'utf8')) : [];
-  const exists = (rel) => safe(rel) && isFile(join(siteDir, rel));
+  const exists = (rel) => safe(rel) && exactFile(siteDir, rel, io);
   const fixed = {}; for (const [k, v] of nginx) fixed[k.toLowerCase()] = v;
   return {
     id: 'static', siteDir, ranges: true,
@@ -114,12 +113,12 @@ export function staticProfile(bundleDir, siteDir) {
   };
 }
 
-export function profileOf(bundleDir) {
+export function profileOf(bundleDir, io = diskIo) {
   const m = readManifest(bundleDir);
   const siteDir = join(bundleDir, m.siteRoot);
-  if (m.adapter === 'cloudflare-pages') return cloudflareProfile(siteDir);
-  if (m.adapter === 'vercel') return vercelProfile(bundleDir, siteDir);
-  if (m.adapter === 'static') return staticProfile(bundleDir, siteDir);
+  if (m.adapter === 'cloudflare-pages') return cloudflareProfile(siteDir, io);
+  if (m.adapter === 'vercel') return vercelProfile(bundleDir, siteDir, io);
+  if (m.adapter === 'static') return staticProfile(bundleDir, siteDir, io);
   throw new AdapterError('adapter', `unknown adapter ${m.adapter}`);
 }
 void MANIFEST;

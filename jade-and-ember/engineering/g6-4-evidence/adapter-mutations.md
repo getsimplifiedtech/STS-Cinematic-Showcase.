@@ -102,3 +102,13 @@ Each row breaks one guard of the adapter code (one line changed in place; the fi
 | N35 | cloudflare profile: platform defaults not applied | caught |
 
 96 mutants: 93 caught, 3 survive for the stated reasons (one equivalent, two redundant defences in depth).
+
+## CI correction (macOS and WebKit)
+
+After the CI findings of run 76, three further single-line breakages were made to the corrected code and `check:hosting-adapters` was run on each; all three are caught, and the files were restored afterwards (`git diff` shows only the intended change).
+
+| Mutant | Breakage | Result |
+|---|---|---|
+| M-CI-1 | `exactFile` stats the joined path without checking the folder listing (the macOS defect) | caught: the exactFile unit cases and the profile cases on the case-folding stand-in fail |
+| M-CI-2 | `withoutHttpsOnly` keeps `upgrade-insecure-requests` (the WebKit defect) | caught: the plain-http header comparison fails on every path |
+| M-CI-3 | `check:portability` serves the adapter profiles without `plainHttp: true` | caught: the source pin fails |

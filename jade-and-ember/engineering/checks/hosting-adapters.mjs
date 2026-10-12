@@ -2,16 +2,16 @@
 //   node engineering/checks/hosting-adapters.mjs [--update-golden]
 // Everything is local and synthetic: an invented fixture site, the real Jade & Ember site as a delivered folder, throwaway bundles, an in-process simulation server. Nothing
 // contacts a host or a provider, and no result here is evidence of live behaviour: every behaviour only a live check can settle is marked unverified in the adapters.
-import { appendFileSync, cpSync, existsSync, mkdirSync, mkdtempSync, readFileSync, readdirSync, rmSync, symlinkSync, writeFileSync } from 'node:fs';
+import { appendFileSync, cpSync, existsSync, lstatSync, mkdirSync, mkdtempSync, readFileSync, readdirSync, rmSync, symlinkSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { dirname, join } from 'node:path';
 import { buildCsp, httpsHeaders, loadPolicy, renderApache, renderHeadersFile, renderNginx } from '../lib/security.mjs';
 import { buildClient } from '../lib/client-fixture.mjs';
 import { assembleCandidate } from '../lib/site.mjs';
-import { serveSite } from '../lib/server.mjs';
+import { serveSite, withoutHttpsOnly } from '../lib/server.mjs';
 import { isMain } from '../lib/git.mjs';
 import { ADAPTERS, MANIFEST, checkBundle, profileOf, readManifest, renderBundle, verifyServed } from '../adapters/hosting/index.mjs';
-import { composeHeaders, describeSite, sha256, walkFiles } from '../adapters/hosting/common.mjs';
+import { composeHeaders, describeSite, diskIo, exactFile, sha256, walkFiles } from '../adapters/hosting/common.mjs';
 import { writeFixtureSite } from '../adapters/hosting/fixture.mjs';
 import { checkHeadersFile as cfCheckImport, parseHeadersFile } from '../adapters/hosting/cloudflare-pages.mjs';
 import { parseApache, parseNginx } from '../adapters/hosting/static.mjs';
@@ -461,6 +461,51 @@ export async function checkHostingAdapters({ updateGolden = false } = {}) {
       for (const path of ['/..%2fvercel.json', '/..%2fbundle.manifest.json', '/%2e%2e%2fSETTINGS.txt', '/..%5cvercel.json', '/fonts/..%2f..%2fvercel.json']) { const r = await raw(path); if (r.status === 200 && /cleanUrls|noCredential|SYNTHETIC STAGING/.test(r.body)) problems.push(`the simulation server served a file outside the site folder for ${path}`); }
       sv.close();
     }
+    // 6a. a host looks files up with the case it is given (found by CI on macOS, where the disk folds case and /Menu was answered from menu.html). A case-folding stand-in for the disk
+    //     proves it on any machine: the stand-in must itself fold (or the test proves nothing), and no profile may answer a differently-cased path.
+    {
+      const fold = { list: diskIo.list, isFile: (path) => { const dir = dirname(path), want = path.slice(dir.length + 1).toLowerCase(); try { return readdirSync(dir).some((n) => n.toLowerCase() === want && lstatSync(join(dir, n)).isFile()); } catch { return false; } } };
+      const site = writeFixtureSite(join(t('case-site'), 'site'), {}), out = t('case');
+      if (!fold.isFile(join(site, 'INDEX.HTML'))) problems.push('case test: the case-folding stand-in does not fold, so the test would prove nothing');
+      if (!exactFile(site, 'index.html') || exactFile(site, 'INDEX.HTML') || exactFile(site, 'Index.html') || exactFile(site, '') || exactFile(site, 'fonts') || exactFile(site, 'nope/../index.html')) problems.push('case test: exactFile must find index.html and nothing that differs in case, empty, a folder or a path through a missing folder');
+      if (exactFile(site, 'INDEX.HTML', fold) || !exactFile(site, 'index.html', fold)) problems.push('case test: exactFile must stay exact when the disk folds case');
+      for (const id of ['cloudflare-pages', 'vercel', 'static']) {
+        const own = writeFixtureSite(join(t(`case-site-${id}`), 'site'), { urlStyle: URL_STYLE[id] });
+        renderBundle(id, { siteDir: own, outDir: join(out, id), urlStyle: URL_STYLE[id], baseUrl: 'https://fixture-bakery.example', policy });
+        const m = readManifest(join(out, id)), pages = readdirSync(join(out, id, m.siteRoot)).filter((f) => f.endsWith('.html') && f !== '404.html');
+        const prof = profileOf(join(out, id), fold), real = profileOf(join(out, id));
+        const variants = ['/Index.html', '/INDEX.HTML', '/Styles.css', '/STYLES.CSS', '/Fonts/x', ...pages.flatMap((f) => [`/${f[0].toUpperCase()}${f.slice(1)}`, `/${f.toUpperCase()}`, `/${f[0].toUpperCase()}${f.replace(/\.html$/, '').slice(1)}`])];
+        for (const v of variants) { const r = prof.resolve(v), red = prof.redirect(v); if ((red === null || red === undefined) && r.kind === 'file') problems.push(`case test: ${id} answers ${v} from ${r.file} on a case-folding disk (a host is case-sensitive)`); }
+        for (const f of pages.filter((x) => x !== 'index.html')) { const a = prof.resolve(`/${f.replace(/\.html$/, '')}`), b = real.resolve(`/${f.replace(/\.html$/, '')}`); if (id !== 'static' && (a.file !== b.file || a.status !== b.status)) problems.push(`case test: ${id} resolves /${f.replace(/\.html$/, '')} differently on a case-folding disk`); }
+      }
+    }
+    // 6b. the simulation's plain-http transport removes exactly the two HTTPS-only parts and nothing else (found by CI in WebKit, which upgrades every request from a loopback page to https)
+    {
+      const site = writeFixtureSite(join(t('plain-site'), 'site'), {}), out = t('plain');
+      for (const id of ['cloudflare-pages', 'vercel']) {
+        renderBundle(id, { siteDir: site, outDir: join(out, id), urlStyle: 'clean', baseUrl: 'https://fixture-bakery.example', policy });
+        const root = join(out, id, readManifest(join(out, id)).siteRoot);
+        const full = serveSite(root, { profile: profileOf(join(out, id)) }), plain = serveSite(root, { profile: profileOf(join(out, id)), plainHttp: true });
+        try {
+          for (const path of ['/', '/styles.css', '/no-such-page-g64']) {
+            const a = await fetch(full.origin + path, { redirect: 'manual' }), b = await fetch(plain.origin + path, { redirect: 'manual' });
+            const ha = Object.fromEntries([...a.headers]), hb = Object.fromEntries([...b.headers]);
+            if (!/upgrade-insecure-requests/.test(ha['content-security-policy'] || '') || !ha['strict-transport-security']) problems.push(`plain transport: ${id} ${path}: the full simulation lacks the HTTPS-only parts it should model`);
+            if (hb['strict-transport-security'] || /upgrade-insecure-requests/.test(hb['content-security-policy'] || '')) problems.push(`plain transport: ${id} ${path}: the plain-http simulation still carries an HTTPS-only part`);
+            const strip = (h) => ({ ...h, 'content-security-policy': (h['content-security-policy'] || '').replace(/(^|; )upgrade-insecure-requests(?=;|$)/, '').replace(/^; /, ''), 'strict-transport-security': undefined });
+            const ea = strip(ha), eb = { ...hb, 'strict-transport-security': undefined };
+            for (const k of new Set([...Object.keys(ea), ...Object.keys(eb)])) if (k !== 'date' && k !== 'connection' && k !== 'keep-alive' && ea[k] !== eb[k]) problems.push(`plain transport: ${id} ${path}: header ${k} differs beyond the two HTTPS-only parts`);
+            if (path === '/' && !/script-src [^;]*'sha256-/.test(hb['content-security-policy'] || '') && /script-src [^;]*'sha256-/.test(ha['content-security-policy'] || '')) problems.push(`plain transport: ${id}: the hashed script-src was lost`);
+          }
+        } finally { full.close(); plain.close(); }
+      }
+      const csp = "default-src 'self'; upgrade-insecure-requests; connect-src 'self' https://upgrade-insecure-requests.example";
+      const w = withoutHttpsOnly({ 'Content-Security-Policy': csp, 'STRICT-TRANSPORT-SECURITY': 'max-age=31536000', 'X-Frame-Options': 'DENY' });
+      if (w['Content-Security-Policy'] !== "default-src 'self'; connect-src 'self' https://upgrade-insecure-requests.example" || 'STRICT-TRANSPORT-SECURITY' in w || w['X-Frame-Options'] !== 'DENY') problems.push(`plain transport: withoutHttpsOnly mishandled its input: ${JSON.stringify(w)}`);
+      if (withoutHttpsOnly({ 'content-security-policy': 'upgrade-insecure-requests' })['content-security-policy'] !== '') problems.push('plain transport: a CSP of only upgrade-insecure-requests must become empty');
+      // the browser walk (check:portability) must use that transport: the other engines are not available to this check, so the call is pinned in the source
+      if (!/serveSite\(site, \{ profile: prof, plainHttp: true \}\)/.test(readFileSync(join(engDir, 'checks', 'portability.mjs'), 'utf8'))) problems.push('plain transport: check:portability must serve the adapter profiles with plainHttp: true (WebKit upgrades every request to https otherwise)');
+    }
     // 7. the shipped host-file generators still carry the corrected default
     const demo = assembleCandidate(undefined, 'hosting-hsts');
     temps.push(demo);
@@ -469,6 +514,7 @@ export async function checkHostingAdapters({ updateGolden = false } = {}) {
       const stripped = tmp('hsts-stripped'); temps.push(stripped); cpSync(demo, join(stripped, 's'), { recursive: true }); rmrf(join(stripped, 's', 'config'));
       if (renderHeadersFile(demo, policy, { https: true }) !== renderHeadersFile(join(stripped, 's'), policy, { https: true })) problems.push('renderHeadersFile writes different bytes for the build (with config/) and for the unpacked site (without it): the package verifier would refuse every release package');
     }
+    notes.push('case-sensitive file lookup in every profile, proved against a case-folding disk stand-in (a macOS CI finding); the simulation\'s plain-http transport removes exactly Strict-Transport-Security and upgrade-insecure-requests (a WebKit CI finding)');
     notes.push('the release package\'s host files (_headers, nginx.conf, htaccess) carry Strict-Transport-Security: max-age=31536000 with no includeSubDomains');
   } catch (e) { problems.push(`the adapter tests crashed: ${e.stack?.split('\n').slice(0, 3).join(' | ') || e.message}`); }
   finally { for (const d of temps) rmrf(d); }

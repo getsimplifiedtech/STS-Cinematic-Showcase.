@@ -14,8 +14,8 @@
     {
       "path": "SETTINGS.txt",
       "role": "doc",
-      "sha256": "25ed523b1d5daa67f446373cd541dca5bc3fb9a8a8f5988809c9338e2716a93f",
-      "bytes": 2737
+      "sha256": "09ed6b1656efeb81208bbb87882107afca60228aab33f73a6514a7d96fddf0a0",
+      "bytes": 2899
     },
     {
       "path": "site/404.html",
@@ -118,6 +118,7 @@
       "that the routing library's /index and /x/index redirects (modelled) are what the platform does",
       "the content types served for .xml, .txt, .webm, .mp4 and .woff2",
       "Range support for the hero video",
+      "that request paths are matched case-sensitively, so /Menu is not answered from menu.html (modelled; the pages read do not say, and nothing was observed live)",
       "that the deployed bytes equal the staged bytes (checklist C-07)",
       "Deployment Protection state (whether previews are protected by default was reported inconsistently, HR-14) and the preview X-Robots-Tag (VC-16)"
     ],

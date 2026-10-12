@@ -42,6 +42,8 @@ Every bundle also holds `SETTINGS.txt` (the dashboard settings a person applies,
 
 `profiles.mjs` applies a bundle's generated rules to requests (`lib/server.mjs` option `profile`): redirects, clean URLs, the not-found behaviour, header rules, Range. They are **a simulation of documented behaviour, not a test of the live service**; each profile lists what it models and what it does not (compression, edge caching, TLS, the exact redirect status, headers on the 404 response, the platform's default HSTS ...). `check:portability` walks the real site, with real clicks, under the Cloudflare Pages and Vercel profiles.
 
+Two properties of the simulation exist because CI found them on other machines than the one the profiles were written on: (1) **file lookup is case-sensitive** (`exactFile` in `common.mjs`: every path segment must appear in the folder listing exactly as requested), because a plain `stat` on macOS or Windows folds case and answered `/Menu` from `menu.html`; (2) **`plainHttp`** (`serveSite` option, used only by the browser walk in `check:portability`) leaves out the two HTTPS-only parts of the policy, `upgrade-insecure-requests` and `Strict-Transport-Security`, because the walk is plain `http://127.0.0.1` and WebKit upgrades every request from such a page to https. `check:hosting` still asserts the full header set of every profile, those two parts included.
+
 Two documented behaviours worth knowing: Cloudflare Pages is documented to answer Range requests **with 200, not 206** (CF-12), which matters for the hero video on Safari; and Pages treats a site with no top-level `404.html` as a single-page application (CF-10).
 
 ## Provider facts

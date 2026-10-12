@@ -111,6 +111,21 @@ export function writeBundle({ outDir, adapter, site, siteRoot, extra, options, s
 }
 export const readManifest = (bundleDir) => JSON.parse(readFileSync(join(bundleDir, MANIFEST), 'utf8'));
 
+// ---- file lookup the way a host does it: case-sensitive. Cloudflare Pages and Vercel serve /Menu only if a file is named exactly Menu(.html); a stat on macOS (APFS) or Windows (NTFS)
+// folds the case and would answer /Menu from menu.html. So every path segment must appear in the folder's listing exactly as requested (no case folding, no Unicode normalisation).
+// io is injectable so the rule is tested on a Linux disk against a case-folding stand-in.
+export const diskIo = { list: (dir) => readdirSync(dir), isFile: (p) => { try { return lstatSync(p).isFile(); } catch { return false; } } };
+export function exactFile(siteDir, rel, io = diskIo) {
+  if (typeof rel !== 'string' || rel === '') return false;
+  let at = siteDir;
+  for (const part of rel.split('/')) {
+    let names; try { names = io.list(at); } catch { return false; }
+    if (!names.includes(part)) return false;
+    at = join(at, part);
+  }
+  return io.isFile(at);
+}
+
 // ---- the deployed-bytes comparison (D-P3-3, live checklist C-07): pure, so it can be run against bytes fetched later by something that holds no credential.
 // served: Map of public path -> Buffer. Every PAGE and every site file must be byte-identical to the bundle's at its PUBLIC address; the .html form of a page must not be
 // served at all under clean URLs (it is a redirect), and nothing the bundle does not serve may be served. 404.html has no address of its own: it answers unknown paths.

@@ -18,5 +18,6 @@ NOT OBSERVED ON A LIVE HOST (each is an unverified assumption until a separately
   - that the routing library's /index and /x/index redirects (modelled) are what the platform does
   - the content types served for .xml, .txt, .webm, .mp4 and .woff2
   - Range support for the hero video
+  - that request paths are matched case-sensitively, so /Menu is not answered from menu.html (modelled; the pages read do not say, and nothing was observed live)
   - that the deployed bytes equal the staged bytes (checklist C-07)
   - Deployment Protection state (whether previews are protected by default was reported inconsistently, HR-14) and the preview X-Robots-Tag (VC-16)
