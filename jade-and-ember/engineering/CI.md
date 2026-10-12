@@ -139,7 +139,7 @@ Other notes: GitHub warned that `actions/checkout` and `actions/setup-node` v4 t
 |---|---|---|
 | 8 (`38074449819`) | `2a52156` | Chromium 156.0.8078.4, budget profile, click then Escape, `pointerover` delay (median / worst), milliseconds: baseline probe **0.4 / 0.7**; + response-body hook **0.7 / 0.7**; + `tests/serve.mjs` server **0.7 / 0.9**; + the budget check's observer script **0.8 / 1.4**; all three together **0.9 / 1.4** (worst delay of any event 4.5 to 5.4). In the same job `check:budgets` reported 753 ms for `pointerover`. |
 | 55 (`38184281187`) | `0aebcb0` (G6-2 report, CI records) | **cancelled** | Superseded by the next push; not claimed as a success |
-| 56 (`38184291802`) | `485e513` (G6-2 documentation, branch head at G6-2 closure) | **success, all seven jobs** | Confirmed from the API: Chromium `verify` on Node 24.21.0 (15 min 16 s), `lighthouse`, Firefox, WebKit, macOS fast checks, external links, supply chain report (`APR-JE-040`) |
+| 56 (`38184291802`) | `485e513` (G6-2 documentation, branch head at G6-2 closure) | **success, all seven jobs** | Confirmed from the API: Chromium `verify` on Node 24.21.0 (15 min 24 s), `lighthouse`, Firefox, WebKit, macOS fast checks, external links, supply chain report (`APR-JE-040`) |
 | 57 (`38185767397`) | `348dd8c` (G6-2 closure and G6-3 authorisation, APR-JE-040; governance data only) | **success** | Confirmed from the API at run level |
 | 58 (`38187481009`) | `8111764` (G6-3 work in progress) | **cancelled** | Superseded by the next push; not claimed as a success |
 | 59 (`38187770537`) | `c7cdda1` (G6-3 self-tests, crawler evaluation, SBOM digest in verify) | **success** | Confirmed from the API at run level |
