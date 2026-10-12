@@ -13,7 +13,9 @@ const TYPES = { '.html': 'text/html; charset=utf-8', '.js': 'text/javascript; ch
 //            'cloudflare-pages'  /menu serves menu.html; a request for /menu.html is redirected (308) to /menu and /index.html to /
 //            'vercel-clean'      Vercel with "cleanUrls": true: the same behaviour as above
 //            'vercel-default'    Vercel without cleanUrls: /menu.html is served as it is and /menu is not found
-export function serveSite(root, { prefix = '/', pretty = false, ranges = true, headers = null, host = 'static' } = {}) {
+//          profile: a hosting adapter's simulation profile (engineering/adapters/hosting/profiles.mjs). The host-file rules of the bundle are APPLIED to every request: redirects, clean
+//            URLs, the not-found behaviour, the generated headers, Range support. Domain root only. It models documented behaviour, not the live service; the profile lists what it does not model.
+export function serveSite(root, { prefix = '/', pretty = false, ranges = true, headers = null, host = 'static', profile = null } = {}) {
   const cleanHost = host === 'cloudflare-pages' || host === 'vercel-clean';
   if (cleanHost) pretty = true;
   const log = [];
@@ -25,6 +27,20 @@ export function serveSite(root, { prefix = '/', pretty = false, ranges = true, h
       let p = decodeURIComponent(url.pathname);
       log.push({ url: req.url, method: req.method });
       // a directory URL without its trailing slash is redirected, as every static host does
+      if (profile) {
+        const red = profile.redirect(p);
+        if (red) return send(red.status, { location: red.location + url.search, 'content-length': 0 }, '');
+        const r = profile.resolve(p);
+        const h = profile.headers(p, { kind: r.kind, status: r.status });
+        if (!r.file) return send(r.status, { 'content-type': 'text/html; charset=utf-8', ...h }, '<!doctype html><title>Not found</title><p>The platform\'s own not-found page.</p>');
+        const body = await readFile(join(root, r.file)), type = TYPES[extname(r.file)] || 'application/octet-stream';
+        const m = profile.ranges ? /^bytes=(\d*)-(\d*)$/.exec(req.headers.range || '') : null;
+        if (m && (m[1] || m[2]) && r.status === 200) {
+          const start = m[1] ? +m[1] : Math.max(0, body.length - +m[2]), end = m[1] && m[2] ? Math.min(+m[2], body.length - 1) : body.length - 1;
+          return send(206, { 'content-type': type, 'accept-ranges': 'bytes', 'content-range': `bytes ${start}-${end}/${body.length}`, 'content-length': end - start + 1, ...h }, body.subarray(start, end + 1));
+        }
+        return send(r.status, { 'content-type': type, ...(profile.ranges ? { 'accept-ranges': 'bytes' } : {}), 'content-length': body.length, ...h }, body);
+      }
       if (pre !== '/' && p === pre.slice(0, -1)) return send(301, { location: pre + url.search }, '');
       if (!p.startsWith(pre)) return send(404, { 'content-type': 'text/plain' }, 'not found');
       let rel = p.slice(pre.length);

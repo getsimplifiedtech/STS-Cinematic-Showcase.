@@ -1,0 +1,19 @@
+Settings for cloudflare-pages: SYNTHETIC STAGING INSTRUCTIONS. This bundle holds no credential, account, project or team identifier and cannot deploy anything.
+
+* Deployment method: Git integration (the STS default, D-P3-3) with framework preset None and the output directory below, or Direct Upload of this bundle. Direct Upload cannot be switched to Git integration later (CF-20): decide per client.
+* Framework preset / build command: None. Leave the build command blank (CF-22); the same page also says to use `exit 0` when no preset is used (CF-23): use whichever the dashboard accepts. No install step, no environment variables.
+* Build output directory: site
+* Custom domain: None: the demonstration is never published on a client domain. Do not enable zone features that rewrite HTML (email address obfuscation, Rocket Loader, automatic minification, injected analytics): the CSP allows only the hashed inline script (HR-08).
+* Preview deployments: Public by default (CF-19). None is authorised (D-P3-5). If one is ever authorised, protect it with Cloudflare Access and keep X-Robots-Tag: noindex.
+
+Provider facts this adapter rests on: CF-01, CF-02, CF-03, CF-04, CF-05, CF-06, CF-08, CF-09, CF-10, CF-11, CF-12, CF-17, CF-18 (engineering/hosting/provider-facts.json).
+
+NOT OBSERVED ON A LIVE HOST (each is an unverified assumption until a separately authorised live check records it):
+  - the status of the redirect from /menu.html to /menu (308 is assumed)
+  - what /menu/ does (HR-03)
+  - whether the _headers rules apply to the 404.html response and to the home-page fallback
+  - the content types served for .xml, .txt, .webm, .mp4 and .woff2
+  - Range support for the hero video: the documentation says 200 is returned, which Safari cannot seek (HR-12)
+  - that the deployed bytes equal the staged bytes (checklist C-07)
+  - compression and caching at the edge
+  - HSTS: that the header is sent as written and not changed by a zone setting

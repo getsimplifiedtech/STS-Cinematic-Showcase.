@@ -9,18 +9,20 @@
 //                trailing slash, which every static host redirects
 //   pretty       extension-less URLs (/menu) as Netlify, Cloudflare Pages and similar hosts serve them
 //   no-range     a server without HTTP Range support (a minimal host): the pages still work, the video plays or the poster and push take over
+//   adapters     the folder staged by the Cloudflare Pages and the Vercel adapter and served by that adapter's simulation profile (G6-4)
 //   query        a query string and fragments on every page
 // Static: file names are plain ASCII without spaces, unique ignoring case, short; no symlinks or hidden files; every link relative; no <base>.
 // Supported URL conventions: .html file URLs, extension-less file URLs, directory URLs with a trailing slash. Not supported (documented): pretty URLs
 // WITH a trailing slash (/menu/), because the pages use plain relative links.
 // Over file:// Chromium reports a CORS error for the two font preloads (the fonts still load from the stylesheet): known finding F-G3-01.
 import { engineNoise } from '../lib/engine-noise.mjs';
-import { mkdirSync, readFileSync, rmSync, writeFileSync, readdirSync, lstatSync } from 'node:fs';
+import { cpSync, mkdirSync, readFileSync, rmSync, writeFileSync, readdirSync, lstatSync } from 'node:fs';
 import { join } from 'node:path';
 import { pathToFileURL } from 'node:url';
 import { launchBrowser } from '../lib/browser.mjs';
 import { reconcile } from '../lib/findings.mjs';
 import { serveSite } from '../lib/server.mjs';
+import { profileOf, readManifest, renderBundle } from '../adapters/hosting/index.mjs';
 import { assembleCandidate, pagesOf, SHARED } from '../lib/site.mjs';
 import { unzipTo, zipFolder } from '../lib/zip.mjs';
 import { settleFonts } from '../lib/runtime.mjs';
@@ -54,7 +56,7 @@ async function walkSite(args) {
   // A defect can make the walk itself impossible (a page that cannot be clicked through): that is reported as a problem, not a crash.
   try { return await walkSiteInner(args); } catch (e) { return { problems: [`${args.label}: the walk could not complete: ${String(e.message).split('\n')[0]}`], fontNoise: 0, perLoad: 0 }; }
 }
-async function walkSiteInner({ browser, dir, label, start, prefixCheck, video = 'expect' }) {
+async function walkSiteInner({ browser, dir, label, start, prefixCheck, video = 'expect', clean = false }) {
   const problems = [];
   let fontNoise = 0, loadsSeen = 0, fontsFailed = 0, corsBlocked = 0, preloadMedia = 0;
   const engine = browser.browserType().name();
@@ -76,7 +78,7 @@ async function walkSiteInner({ browser, dir, label, start, prefixCheck, video = 
     const tag = (f) => `${label} ${mobile ? 'phone' : 'desktop'} ${f}`;
     const verifyPage = async (f) => {
       const here = new URL(page.url()).pathname;
-      if (!decodeURIComponent(here).endsWith(f === 'index.html' ? /(index\.html|\/)$/.test(here) ? here.slice(-1) === '/' ? '/' : 'index.html' : f : f)) bad(`${tag(f)}: landed on ${here}`);
+      if (clean && f !== 'index.html' && decodeURIComponent(here).endsWith(`/${f.replace(/\.html$/, '')}`)) { /* a clean-URL host (Cloudflare Pages, Vercel cleanUrls) redirected the .html link to the extension-less address */ } else if (!decodeURIComponent(here).endsWith(f === 'index.html' ? /(index\.html|\/)$/.test(here) ? here.slice(-1) === '/' ? '/' : 'index.html' : f : f)) bad(`${tag(f)}: landed on ${here}`);
       if ((await page.title()) !== titleOf(dir, f)) bad(`${tag(f)}: title "${await page.title()}" differs from the built page`);
       if ((await page.locator('h1').first().innerText()).replace(/\s+/g, ' ').trim() !== h1Of(dir, f)) bad(`${tag(f)}: h1 differs from the built page`);
       await settleFonts(page);
@@ -118,7 +120,7 @@ async function walkSiteInner({ browser, dir, label, start, prefixCheck, video = 
   return { problems, fontNoise, fontsFailed, corsBlocked, preloadMedia, preloadPerLoad: loadsSeen ? Math.ceil(preloadMedia / loadsSeen) : 0, perLoad: loadsSeen ? Math.ceil(fontNoise / loadsSeen) : 0 };
 }
 
-export async function checkPortability({ root = null, browserName = 'chromium' } = {}) {
+export async function checkPortability({ root = null, browserName = 'chromium', adapters = true } = {}) {
   const own = !root;
   const dir = root || assembleCandidate(projectDir, 'portability');
   const cleanup = [];
@@ -151,6 +153,21 @@ export async function checkPortability({ root = null, browserName = 'chromium' }
         const r = await walkSite({ browser, dir, label, start: startOf(sv.base), prefixCheck: sub ? sv.base : sv.origin + '/', video: opt.ranges === false ? 'either' : 'expect' });
         problems.push(...r.problems); preloadPerLoad = Math.max(preloadPerLoad, r.preloadPerLoad || 0); sv.close();
       }
+      // the same delivered folder, staged by each hosting adapter and served by that adapter's simulation profile (G6-4): Cloudflare Pages (clean URLs and the .html redirect, the
+      // _headers rules applied, Range answered with 200) and Vercel (cleanUrls, trailingSlash false, the vercel.json headers). A simulation of documented behaviour, not the live service.
+      if (adapters) {
+        const delivered = tempDir('portability-delivered'); cleanup.push(delivered);
+        cpSync(dir, delivered, { recursive: true }); rmSync(join(delivered, 'config'), { recursive: true, force: true });
+        for (const adapterId of ['cloudflare-pages', 'vercel']) {
+          const holder2 = tempDir('portability-bundle'); cleanup.push(holder2);
+          const bundle = join(holder2, 'bundle');
+          renderBundle(adapterId, { siteDir: delivered, outDir: bundle, urlStyle: 'clean' });
+          const prof = profileOf(bundle), site = join(bundle, readManifest(bundle).siteRoot);
+          const sv2 = serveSite(site, { profile: prof });
+          const r = await walkSite({ browser, dir: site, label: `${adapterId} bundle (simulation profile)`, start: sv2.base, prefixCheck: sv2.origin + '/', video: prof.ranges ? 'expect' : 'either', clean: true });
+          problems.push(...r.problems); preloadPerLoad = Math.max(preloadPerLoad, r.preloadPerLoad || 0); sv2.close();
+        }
+      }
       // pretty URLs entered directly, query strings and fragments
       const sv = serveSite(dir, { prefix: '/clients/acme/jade-and-ember/', pretty: true });
       const ctx = await browser.newContext({ viewport: { width: 1280, height: 800 }, reducedMotion: 'reduce' });
@@ -167,6 +184,7 @@ export async function checkPortability({ root = null, browserName = 'chromium' }
       }
       await ctx.close(); sv.close();
     } finally { await browser.close(); }
+    if (adapters) notes.push('the same delivered folder, staged by the Cloudflare Pages and Vercel adapters and served by each adapter\'s simulation profile (clean URLs and the .html redirect, the generated header rules applied, Range answered as that host documents): every page walked on desktop and phone with real clicks, no failed request, no error (a simulation of documented behaviour, not the live service)');
     notes.push('serving conventions walked with real clicks on every page, desktop and phone menu, brand and footer links, Back and Forward: extracted ZIP over file:// (path with spaces, &, em dash, #, brackets), domain root, /clients/acme/jade-and-ember/, the directory URL without a trailing slash (host redirect), extension-less URLs, a server without Range support, query strings and fragments');
     if (preloadPerLoad) measured.push({ key: 'portability:preload-media-warning', detail: `${browserName} writes ${preloadPerLoad} console warning(s) per load of the Home page, "Preload of .../media/hero-wok*.webp was ignored due to unknown as or type values, or non-matching media attribute": the Home page has one media-qualified hero preload per art direction and only one can match; the one that matches is used`, value: preloadPerLoad });
     const r = reconcile('portability', measured);

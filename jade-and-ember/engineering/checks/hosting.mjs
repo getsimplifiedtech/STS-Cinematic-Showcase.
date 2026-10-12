@@ -17,12 +17,14 @@ import { join, relative, extname } from 'node:path';
 import { assembleCandidate } from '../lib/site.mjs';
 import { buildClient } from '../lib/client-fixture.mjs';
 import { buildCsp, loadPolicy, noindexState, renderHeadersFile, robotsHeaders } from '../lib/security.mjs';
+import { PAGES_LIMITS, checkHeadersFile as cfCheck, parseHeadersFile } from '../adapters/hosting/cloudflare-pages.mjs';
+import { publicPathOf } from '../adapters/hosting/common.mjs';
+import { pagesOf } from '../lib/site.mjs';
+import { checkHostingAdapters } from './hosting-adapters.mjs';
 import { isMain, projectDir } from '../lib/git.mjs';
 
-export const PAGES_LIMITS = { rules: 100, lineChars: 2000, files: 20000, fileBytes: 25 * 1024 * 1024 };
 const STATIC_EXT = new Set(['.html', '.css', '.js', '.webp', '.webm', '.mp4', '.woff2', '.txt', '.xml', '.ico', '.svg', '.png', '.jpg', '.json', '.md']);
 const FORBIDDEN_NAMES = [/^vercel\.json$/i, /^\.vercel$/i, /^netlify\.toml$/i, /^wrangler\.(toml|json|jsonc)$/i, /^_worker\.js$/i, /^_routes\.json$/i, /^functions$/i, /^package(-lock)?\.json$/i, /^node_modules$/i, /^next\.config\./i, /^_redirects$/i, /^\.env/i, /^\.git/i];
-const TOKEN = /^[!#$%&'*+.^_`|~0-9A-Za-z-]+$/;
 
 export function walk(dir) { const out = []; for (const e of readdirSync(dir, { withFileTypes: true })) { const p = join(dir, e.name); if (e.isDirectory()) out.push(...walk(p)); else out.push(p); } return out; }
 
@@ -49,66 +51,11 @@ export function checkFolder(dir, { client = false, label = 'site' } = {}) {
   return { problems, files: all.length, pages: pages.length };
 }
 
-// Parses a Cloudflare/Netlify style _headers file into rules.
-export function parseHeadersFile(text) {
-  const rules = []; let cur = null; const problems = [];
-  text.split('\n').forEach((line, i) => {
-    if (!line.trim() || line.trimStart().startsWith('#')) return;
-    if (/^\s/.test(line)) {
-      if (!cur) { problems.push(`line ${i + 1}: a header with no rule above it`); return; }
-      const m = line.trim().match(/^([^:\s]+):\s?(.*)$/);
-      if (!m) { problems.push(`line ${i + 1}: not "Name: value"`); return; }
-      cur.headers.push([m[1], m[2]]);
-    } else { cur = { path: line.trim(), headers: [], line: i + 1 }; rules.push(cur); }
-  });
-  return { rules, problems };
-}
-
-export function checkHeadersFile(text, { root, policy = loadPolicy(), prefix = '', label = 'headers' } = {}) {
-  const problems = [], { rules, problems: parse } = parseHeadersFile(text);
-  parse.forEach((p) => problems.push(`${label}: ${p}`));
-  if (rules.length > PAGES_LIMITS.rules) problems.push(`${label}: ${rules.length} rules exceed the Pages limit of ${PAGES_LIMITS.rules}`);
-  text.split('\n').forEach((l, i) => { if (l.length > PAGES_LIMITS.lineChars) problems.push(`${label}: line ${i + 1} is ${l.length} characters (limit ${PAGES_LIMITS.lineChars})`); });
-  const security = new Set(Object.keys({ ...policy.headers, ...policy.httpsOnlyHeaders, 'Content-Security-Policy': 1 }).map((s) => s.toLowerCase()));
-  const seen = new Map();
-  for (const r of rules) {
-    if (!r.path.startsWith(prefix + '/') && r.path !== prefix) problems.push(`${label}: rule "${r.path}" does not start at "${prefix}/"`);
-    if (/\s/.test(r.path)) problems.push(`${label}: rule "${r.path}" contains whitespace`);
-    const names = new Set();
-    for (const [k, v] of r.headers) {
-      if (!TOKEN.test(k)) problems.push(`${label}: "${k}" is not a valid header name`);
-      if (names.has(k.toLowerCase())) problems.push(`${label}: rule "${r.path}" repeats ${k}`);
-      names.add(k.toLowerCase());
-      if (/[\r\n]/.test(v)) problems.push(`${label}: control characters in ${k}`);
-      if (/immutable/i.test(v)) problems.push(`${label}: ${k} uses immutable for unhashed file names (rule "${r.path}")`);
-      seen.set(k.toLowerCase(), (seen.get(k.toLowerCase()) || 0) + 1);
-      if (security.has(k.toLowerCase()) && r.path !== `${prefix}/*`) problems.push(`${label}: security header ${k} in rule "${r.path}" (must be only in the "/*" rule, or Cloudflare would send it twice)`);
-      if (k.toLowerCase() === 'cache-control' && r.path === `${prefix}/*`) problems.push(`${label}: Cache-Control in the catch-all rule would join with the narrower rules`);
-    }
-  }
-  for (const name of security) if (!seen.has(name)) problems.push(`${label}: ${name} is missing`);
-  // The demonstration's noindex defence in depth (Gate 5 Phase 4): the header is in the "/*" rule, exactly once, with the policy's value, when every built
-  // page is noindex; and an indexable build never carries it, in any rule.
-  if (root) {
-    const { $comment, ...wanted } = policy.noindexHeaders || {};
-    const state = noindexState(root);
-    for (const [name, value] of Object.entries(wanted)) {
-      const where = rules.filter((r) => r.headers.some(([k]) => k.toLowerCase() === name.toLowerCase()));
-      const all = rules.flatMap((r) => r.headers.filter(([k]) => k.toLowerCase() === name.toLowerCase()).map(([, v]) => [r.path, v]));
-      if (state === 'all') {
-        if (!all.length) problems.push(`${label}: the demonstration is noindex but the ${name} header is missing (defence in depth if a host rewrites the HTML)`);
-        else {
-          if (all.length > 1) problems.push(`${label}: ${name} appears ${all.length} times (Cloudflare joins matching rules, so it would be sent twice)`);
-          for (const [path, v] of all) { if (path !== `${prefix}/*`) problems.push(`${label}: ${name} in rule "${path}" (must be only in the "/*" rule)`); if (v !== value) problems.push(`${label}: ${name} is "${v}", the policy says "${value}"`); }
-        }
-      } else if (state === 'none' && all.length) problems.push(`${label}: ${name} appears in an indexable build (${where.map((r) => r.path).join(', ')}): it would keep the real site out of search results`);
-      else if (state === 'mixed') problems.push(`${label}: only some pages carry the robots noindex meta tag`);
-    }
-  }
-  const catchAll = rules.find((r) => r.path === `${prefix}/*`);
-  const csp = catchAll?.headers.find(([k]) => k.toLowerCase() === 'content-security-policy')?.[1];
-  if (root && csp !== buildCsp(root, policy, { https: true })) problems.push(`${label}: the CSP in the file is not the policy computed from the built pages (regenerate it after every rebuild)`);
-  return problems;
+// The _headers parser and checker now live with the Cloudflare Pages adapter (G6-4); these are kept here with their original signatures so every caller keeps working.
+export { PAGES_LIMITS, parseHeadersFile };
+export function checkHeadersFile(text, { root, policy = loadPolicy(), prefix = '', label = 'headers', hsts = null } = {}) {
+  const computed = root ? { noindex: noindexState(root), csp: buildCsp(root, policy, { https: true }), pages: pagesOf(root).filter((f) => f !== '404.html').map((f) => publicPathOf(f, 'clean')) } : null;
+  return cfCheck(text, { root, policy, prefix, label, hsts, computed });
 }
 
 const FORBIDDEN_IN_SOURCES = /vercel/i;
@@ -149,6 +96,8 @@ export async function checkHosting() {
     if (stClient === 'none' && Object.keys(robotsHeaders(client.dir, policy)).length) problems.push('an indexable client build would get an X-Robots-Tag header');
     notes.push(`noindex defence in depth: the demonstration's host files carry ${Object.entries(robotsHeaders(demo, policy)).map(([k, v]) => `${k}: ${v}`).join('; ')} (meta tag on all pages, header in "/*"); the indexable client build carries none`);
     const v = checkNoVendor(); problems.push(...v);
+    // G6-4: the hosting adapters (Cloudflare Pages, Vercel, plain static): bundles, simulation profiles, golden outputs, provider facts and adversarial negative cases
+    const ad = await checkHostingAdapters(); problems.push(...ad.problems.map((p) => `hosting adapters: ${p}`)); notes.push(...ad.notes.map((n) => `adapters: ${n}`));
     notes.push('no source, configuration, delivered file or engineering rule depends on Vercel (functionality is vendor independent)');
   } finally { rmSync(demo, { recursive: true, force: true }); rmSync(client.root, { recursive: true, force: true }); }
   return { problems, notes };

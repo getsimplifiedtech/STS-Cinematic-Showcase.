@@ -753,7 +753,12 @@
     "jade-and-ember/engineering/tools/host-files.mjs",
     "jade-and-ember/engineering/checks/hosting.mjs",
     "jade-and-ember/engineering/HOSTING.md",
-    "jade-and-ember/engineering/hosting/"
+    "jade-and-ember/engineering/hosting/",
+    "jade-and-ember/engineering/adapters/hosting/",
+    "jade-and-ember/engineering/tools/host-bundle.mjs",
+    "jade-and-ember/engineering/G6-4-REPORT.md",
+    "jade-and-ember/engineering/g6-4-evidence/",
+    "jade-and-ember/engineering/checks/hosting-adapters.mjs"
    ],
    "target": "engineering/adapters/hosting/{cloudflare-pages,vercel,static}/",
    "external": [
@@ -767,7 +772,7 @@
     "level": "split",
     "notes": "Adapters implement one interface (HOSTING-ADAPTER-INTERFACE.md): header rendering, URL style, 404 behaviour, cache rules, bundle manifest. Requirements to carry: a real 404 (D-P3-1), domain-root base URL (D-P3-2), staged-bundle verification (D-P3-3), HSTS opt-in (D-P3-4), provider documentation re-verified (D-P3-6). Live verification needs a separately authorised preview (D-P3-5)."
    },
-   "verify": "Adapter golden outputs for the fixture; the same delivered folder passes check:portability under both adapters; live checklist items recorded only when performed.",
+   "verify": "Adapter golden outputs for the fixture; the same delivered folder passes check:portability under both adapters (simulation profiles); the adapter negative cases are refused for the right reason; live checklist items recorded only when performed.",
    "masterSpecs": [
     "08",
     "14"
@@ -1184,7 +1189,7 @@
     "level": "parameterise",
     "notes": "Moves to the separate release-control repository when it is activated; its tooling/data seam (the verification view) is replaced by the G6-5 split of tooling from project data, and the local-directory adapter by the G6-4 hosting adapters."
    },
-   "verify": "check:selftest-release-control (29 cases, run through check:release-dryrun) and a mutation run in which each of 20 guards, broken in turn, is caught by the tests.",
+   "verify": "check:selftest-release-control (41 cases, run through check:release-dryrun) and a mutation run in which each of 49 guards, broken in turn, is caught by the tests except three documented survivors.",
    "masterSpecs": [
     "03",
     "08",
@@ -1496,7 +1501,7 @@
   {
    "id": "G6-3A",
    "title": "Release authentication and provenance (design, decision checkpoint and local proof of concept; multi-client operating model)",
-   "summary": "Authenticated client-production release authorisation and independently verifiable build provenance (RG-14, RB-15), designed around the STS operating model (APR-JE-042): one private repository per client, STS as sole administrator, coding agents that never approve production, no extra owner machine, second GitHub account or manual signing by default. Inserted by the owner between G6-3 and G6-4 (APR-JE-041). Design only: research verified against official GitHub documentation; an evaluation of how to enforce owner approval when an agent uses the same GitHub identity (reachability boundary, a release-control repository outside the coding integration, rather than any identity or in-repository control); the simplest secure workflow; a validation plan; plan and cost; client departure and handover; then a decision checkpoint. No credential-dependent or setting change is made before the owner approves it, and the authenticity hard stop stays until the mechanism is designed and validated. APR-JE-043 additionally authorises a local proof of concept of the release-control engine (artifact intake and verification, a hash-chained audit ledger, role-separated credentials, staging, owner approval and automatic digest matching, preauthorised routine releases, revocation, freeze and cross-client isolation) built on the existing package verifier and tested with synthetic clients and disposable credentials only; it creates no repository, credential or deployment.",
+   "summary": "Authenticated client-production release authorisation and independently verifiable build provenance (RG-14, RB-15), designed around the STS operating model (APR-JE-042): one private repository per client, STS as sole administrator, coding agents that never approve production, no extra owner machine, second GitHub account or manual signing by default. Inserted by the owner between G6-3 and G6-4 (APR-JE-041). Design only: research verified against official GitHub documentation; an evaluation of how to enforce owner approval when an agent uses the same GitHub identity (reachability boundary, a release-control repository outside the coding integration, rather than any identity or in-repository control); the simplest secure workflow; a validation plan; plan and cost; client departure and handover; then a decision checkpoint. No credential-dependent or setting change is made before the owner approves it, and the authenticity hard stop stays until the mechanism is designed and validated. APR-JE-043 additionally authorises a local proof of concept of the release-control engine (artifact intake and verification, a hash-chained audit ledger, role-separated credentials, staging, owner approval and automatic digest matching, preauthorised routine releases, revocation, freeze and cross-client isolation) built on the existing package verifier and tested with synthetic clients and disposable credentials only; it creates no repository, credential or deployment. Closed by APR-JE-044 as a successful local proof of concept (not as production activation): nothing was created, connected, deployed or credentialed, the eleven design decisions R1 to R11 are NOT implemented merely because they are documented and their necessity must be evaluated against established STS requirements before any activation, and the production authenticity hard stop stays.",
    "dependsOn": [
     "G6-3"
    ],
@@ -1590,14 +1595,17 @@
       "date": "2026-10-12",
       "text": "Authorises the minimum viable local proof of concept. Added to the allowed list: engineering/release-control/ (new code, README), the new self-test check and its registration in verify.mjs and the package scripts, and the evidence and report files for the proof of concept. Still denied: lib/authenticity.mjs and every other release gate or package library, tools/release.mjs, the release folder, the workflow and .github, every delivered file, GitHub settings, credentials and the master framework repository. No real release-control repository, credential or deployment is created."
      }
-    ]
+    ],
+    "endCommit": "c138cbf7f77f09836959be2f1edc09337d7b82ff",
+    "closedBy": "APR-JE-044",
+    "closedAs": "local proof of concept only; not production activation approval"
    },
    "status": "authorised by APR-JE-041 (design) and APR-JE-043 (local proof of concept with synthetic data); in progress"
   },
   {
    "id": "G6-4",
    "title": "Hosting adapters and hosting requirements",
-   "summary": "One adapter interface; Cloudflare Pages first, then Vercel and a plain static adapter; a real 404 (D-P3-1), domain-root base URLs (D-P3-2), staged-bundle manifest and deployed-bytes comparison (D-P3-3), HSTS opt-in (D-P3-4, D-P4-5). Provider documentation must be re-verified by a person before an adapter is built (D-P3-6). Live verification needs a separately authorised preview (D-P3-5). MONOLITH House & Design (proof of concept #2) targets Vercel, so the Vercel adapter and its re-verified provider documentation must be complete before that project starts; any Vercel preview needs its own authorisation (D-P3-5).",
+   "summary": "One adapter interface; Cloudflare Pages first, then Vercel and a plain static adapter; a real 404 (D-P3-1), domain-root base URLs (D-P3-2), staged-bundle manifest and deployed-bytes comparison (D-P3-3), HSTS opt-in (D-P3-4, D-P4-5). Provider documentation must be re-verified by a person before an adapter is built (D-P3-6). Live verification needs a separately authorised preview (D-P3-5). MONOLITH House & Design (proof of concept #2) targets Vercel, so the Vercel adapter and its re-verified provider documentation must be complete before that project starts; any Vercel preview needs its own authorisation (D-P3-5). Authorised by APR-JE-044 for portable Cloudflare Pages and Vercel adapters (plus a static wrapper), a real-404 requirement, the HSTS default correction (D-P3-4, D-P4-5), verification of SEO files, response headers, redirects, clean URLs and CSP, provider documentation read and filed with unverified live behaviour marked, and automated and adversarial negative tests; the adapters hold no credential and have no deployment authority, no preview is authorised (D-P3-5), and G6-5 is not authorised.",
    "dependsOn": [
     "G6-2",
     "G6-3",
@@ -1608,10 +1616,94 @@
    ],
    "frameworkRepoChange": false,
    "size": "large",
-   "verification": "Golden outputs per adapter; the same delivered folder passes check:portability under both; RG-12 closes; live checklist items recorded only when performed.",
+   "verification": "Golden outputs per adapter; the same delivered folder passes check:portability under both; RG-12 closes; live checklist items recorded only when performed. APR-JE-044 scope: adapter golden outputs and negative cases run inside check:hosting; provider facts filed with sources, digests and live status; every live behaviour not observed is marked unverified.",
    "blocks": [
     "RB-12"
-   ]
+   ],
+   "scope": {
+    "repository": "getsimplifiedtech/STS-Cinematic-Showcase.",
+    "branch": "feature/jade-and-ember-v0.9",
+    "baseCommit": "c138cbf7f77f09836959be2f1edc09337d7b82ff",
+    "authorisedBy": "APR-JE-044",
+    "note": "Derived from the owner's G6-4 authorisation (APR-JE-044). Allowed: the approvals ledger and the matrix, closure verifier and documents that record the closure of G6-3A and the G6-4 work; the new hosting adapters (engineering/adapters/hosting/), the bundle tool, the extended hosting check and its registration, the HSTS default in the security policy and the header renderers, the simulation server's adapter profile, the hosting documents and provider-fact file, the portability check's adapter runs, and the G6-4 report and evidence. Denied: the release gate and its libraries (authenticity, candidate, records, verification, release, package), the release tool and folder, the release-control proof of concept (frozen as accepted), the workflow and every .github file, the package lockfile, all delivered pages, styles, scripts, fonts, media and configuration, the renderer and sources, the recorded asset manifest, media-rights inventory, crawler record, external-destination registry and histories, the findings register, the baseline records, the master framework repository, the main and baseline branches, and G6-5 onward. No credential, hosting account, preview, deployment or release path is created or enabled.",
+    "allow": [
+     "docs/JADE_AND_EMBER_APPROVALS.md",
+     "jade-and-ember/QA.md",
+     "jade-and-ember/engineering/CI.md",
+     "jade-and-ember/engineering/ENG-SECURITY.md",
+     "jade-and-ember/engineering/FRAMEWORK-MIGRATION-MATRIX.md",
+     "jade-and-ember/engineering/G6-4-REPORT.md",
+     "jade-and-ember/engineering/GATE-6-IMPLEMENTATION-ORDER.md",
+     "jade-and-ember/engineering/HOSTING.md",
+     "jade-and-ember/engineering/adapters/hosting/",
+     "jade-and-ember/engineering/checks/hosting-adapters.mjs",
+     "jade-and-ember/engineering/checks/hosting.mjs",
+     "jade-and-ember/engineering/checks/portability.mjs",
+     "jade-and-ember/engineering/checks/security.mjs",
+     "jade-and-ember/engineering/checks/selftest-gate4.mjs",
+     "jade-and-ember/engineering/framework-migration-matrix.json",
+     "jade-and-ember/engineering/g6-4-evidence/",
+     "jade-and-ember/engineering/hosting/",
+     "jade-and-ember/engineering/lib/gate5-closure.mjs",
+     "jade-and-ember/engineering/lib/security.mjs",
+     "jade-and-ember/engineering/lib/server.mjs",
+     "jade-and-ember/engineering/security.json",
+     "jade-and-ember/engineering/tools/host-bundle.mjs",
+     "jade-and-ember/engineering/tools/host-files.mjs",
+     "jade-and-ember/engineering/verify.mjs",
+     "jade-and-ember/package.json"
+    ],
+    "deny": [
+     ".github/",
+     "jade-and-ember/index.html",
+     "jade-and-ember/menu.html",
+     "jade-and-ember/order-online.html",
+     "jade-and-ember/our-story.html",
+     "jade-and-ember/visit-us.html",
+     "jade-and-ember/styles.css",
+     "jade-and-ember/site.js",
+     "jade-and-ember/hero.js",
+     "jade-and-ember/menu.js",
+     "jade-and-ember/media/",
+     "jade-and-ember/fonts/",
+     "jade-and-ember/config/",
+     "jade-and-ember/src/",
+     "jade-and-ember/build.mjs",
+     "jade-and-ember/serve.py",
+     "jade-and-ember/package-lock.json",
+     "jade-and-ember/baselines/",
+     "jade-and-ember/README.md",
+     "README.md",
+     "jade-and-ember/engineering/privacy.json",
+     "jade-and-ember/engineering/assets.manifest.json",
+     "jade-and-ember/engineering/media-rights-inventory.json",
+     "jade-and-ember/engineering/search-crawler-verification.json",
+     "jade-and-ember/engineering/findings.json",
+     "jade-and-ember/engineering/baseline.json",
+     "jade-and-ember/engineering/immutability-allowlist.json",
+     "jade-and-ember/engineering/lighthouse.json",
+     "jade-and-ember/engineering/environment.json",
+     "jade-and-ember/engineering/evidence/",
+     "jade-and-ember/engineering/release/reviewers.json",
+     "jade-and-ember/engineering/external-destinations.json",
+     "jade-and-ember/engineering/external-links-verification.json",
+     "jade-and-ember/engineering/release/",
+     "jade-and-ember/engineering/lib/authenticity.mjs",
+     "jade-and-ember/engineering/lib/release.mjs",
+     "jade-and-ember/engineering/lib/release-package.mjs",
+     "jade-and-ember/engineering/lib/candidate.mjs",
+     "jade-and-ember/engineering/lib/records.mjs",
+     "jade-and-ember/engineering/lib/verification.mjs",
+     "jade-and-ember/engineering/tools/release.mjs",
+     "docs/JADE_AND_EMBER_MEDIA_RIGHTS_POLICY.md",
+     "jade-and-ember/engineering/release-control/",
+     "jade-and-ember/engineering/checks/selftest-release-control.mjs",
+     "jade-and-ember/engineering/G6-3A-DESIGN.md",
+     "jade-and-ember/engineering/G6-3A-POC-REPORT.md",
+     "jade-and-ember/engineering/g6-3a-evidence/"
+    ],
+    "amendments": []
+   }
   },
   {
    "id": "G6-5",
@@ -2580,6 +2672,62 @@
      "mustMention": "proof of concept"
     }
    ]
+  },
+  {
+   "id": "D-G64-1",
+   "text": "G6-3A accepted as a local proof of concept only",
+   "ownerWords": "The owner accepts G6-3A as a successful local proof of concept, not as production activation approval.",
+   "status": "decided (APR-JE-044); G6-3A closed as a proof of concept; no release-control repository, credential or deployment exists",
+   "workPackages": [
+    "G6-3A"
+   ],
+   "consequences": [
+    {
+     "wp": "G6-3A",
+     "mustMention": "proof of concept"
+    }
+   ]
+  },
+  {
+   "id": "D-G64-2",
+   "text": "Locked operating model preserved; authenticity hard stop stays",
+   "ownerWords": "STS owns and manages one private repository per client. STS controls releases and hosting. Routine low-risk maintenance may be automated under explicit preauthorization and mandatory verification. Material changes require STS authorization. No routine client approval process. No manual digest-entry or signing ceremony by default. Coding agents cannot authorize their own production releases. Keep the production authenticity hard stop.",
+   "status": "decided (APR-JE-044); unchanged",
+   "workPackages": [
+    "G6-3A",
+    "G6-4"
+   ],
+   "consequences": []
+  },
+  {
+   "id": "D-G64-3",
+   "text": "Necessity of the G6-3A design decisions",
+   "ownerWords": "Do not implement the eleven G6-3A design decisions merely because they are documented. Evaluate their necessity against established STS requirements before any activation.",
+   "status": "decided (APR-JE-044); standing instruction; the evaluation is an open item (OI-9) and is not part of G6-4",
+   "workPackages": [
+    "G6-3A"
+   ],
+   "consequences": [
+    {
+     "wp": "G6-3A",
+     "mustMention": "necessity"
+    }
+   ]
+  },
+  {
+   "id": "D-G64-4",
+   "text": "G6-4 authorised: Cloudflare Pages and Vercel hosting adapters",
+   "ownerWords": "Proceed with the Cloudflare Pages and Vercel hosting-adapter work package as defined in the existing approved Gate 6 plan: portable hosting adapters; preserve the static HTML/CSS/JavaScript deliverable and framework portability; correct 404 handling; the previously approved HSTS default corrections; verify SEO files, response headers, redirects, clean URLs and CSP; use provider documentation and mark any unverified live behavior explicitly; automated tests and adversarial negative cases; adapters independent of live production credentials and deployment authority. No production deployment, live hosting changes, release-control activation, master-framework changes, merges, or new media.",
+   "status": "decided (APR-JE-044); G6-4 authorised within its recorded scope",
+   "workPackages": [
+    "G6-4"
+   ],
+   "consequences": [
+    {
+     "wp": "G6-4",
+     "mustMention": "APR-JE-044"
+    }
+   ]
   }
  ],
  "operatingPrinciples": [
@@ -2663,6 +2811,11 @@
   {
    "id": "OI-8",
    "text": "Client departure and handover: the service agreement clauses (ownership of source and content, third-party licences, formats, retention) are needed to finalise the handover runbook in G6-3A-DESIGN.md section 8.",
+   "wp": "G6-3A"
+  },
+  {
+   "id": "OI-9",
+   "text": "Evaluate the necessity of each of the eleven G6-3A design decisions (R1 to R11) against established STS requirements before any activation of release control (APR-JE-044). Not part of G6-4.",
    "wp": "G6-3A"
   }
  ]

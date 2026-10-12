@@ -1,0 +1,141 @@
+{
+  "schema": "sts/hosting-bundle@1",
+  "adapter": "static",
+  "channel": "client-production",
+  "urlStyle": "extension",
+  "baseUrl": "https://fixture-bakery.example",
+  "siteRoot": "site",
+  "options": {
+    "hsts": {
+      "includeSubDomains": false
+    }
+  },
+  "files": [
+    {
+      "path": "SETTINGS.txt",
+      "role": "doc",
+      "sha256": "7f48004bdba3bc3e96fdc285501c7833051fbbc9398833681370e048ab17c1c6",
+      "bytes": 819
+    },
+    {
+      "path": "htaccess",
+      "role": "server-config",
+      "sha256": "04ed88e68af7726d17d973b9dc8ec317551d96604c2d530b1e22afa8caa7a9da",
+      "bytes": 1378
+    },
+    {
+      "path": "nginx.conf",
+      "role": "server-config",
+      "sha256": "aa7ce6ca7cc112fbbc2f673e2376d91c9157635003c21846ba1aedc784e9aa86",
+      "bytes": 4148
+    },
+    {
+      "path": "site/404.html",
+      "role": "site",
+      "sha256": "51bb8c1bb70a0f3f33345a1afeaaea23c6f65b568290098933a4c4744e627aeb",
+      "bytes": 514
+    },
+    {
+      "path": "site/about.html",
+      "role": "site",
+      "sha256": "fa6e676bf5a71eaba0ba7fa0780ae8889f3ed5685970da98a303b9ff827baee8",
+      "bytes": 491
+    },
+    {
+      "path": "site/fonts/fixture.woff2",
+      "role": "site",
+      "sha256": "1aa96856f1057a2280458a602b5fcee39623ef81ef49eb18c26cfe4eec6fd645",
+      "bytes": 512
+    },
+    {
+      "path": "site/index.html",
+      "role": "site",
+      "sha256": "e138e268aa31796cf371ffe1dd6125ee179c03727367293191097e1fa564d6a3",
+      "bytes": 524
+    },
+    {
+      "path": "site/llms.txt",
+      "role": "site",
+      "sha256": "cf7f1feb9b727e88dc1e456f887ab59442b94fe553525bb2e1bc2b240fadbd46",
+      "bytes": 68
+    },
+    {
+      "path": "site/media/clip.mp4",
+      "role": "site",
+      "sha256": "f3047ff358aa268b0eed9479ed91400ed6fa25dd60ccafefbde30cc766986a4b",
+      "bytes": 8192
+    },
+    {
+      "path": "site/media/loaf.webp",
+      "role": "site",
+      "sha256": "70e19da46a01b49618fcb1a8955ebc9642801008197fb009c0e99f63ae798c38",
+      "bytes": 2048
+    },
+    {
+      "path": "site/menu.html",
+      "role": "site",
+      "sha256": "ae4d531379a332578f7b6ff5fb7048cf1f6f8193cff03c0d995f266bb866ada1",
+      "bytes": 481
+    },
+    {
+      "path": "site/robots.txt",
+      "role": "site",
+      "sha256": "e41b8dd35ddd6c7220de0d4261107ec5035dff533e3ce32538a8f442b9c08977",
+      "bytes": 75
+    },
+    {
+      "path": "site/site.js",
+      "role": "site",
+      "sha256": "77f5eec38c5ef075e11892244ccf9e249d82937e07401398df98319568775a17",
+      "bytes": 14
+    },
+    {
+      "path": "site/sitemap.xml",
+      "role": "site",
+      "sha256": "1026d407ac2ca8a8a824e1af08cd94de407f7becbb49a0c1406c82500ba933bd",
+      "bytes": 281
+    },
+    {
+      "path": "site/styles.css",
+      "role": "site",
+      "sha256": "1db922093f8890bd7638e247ef794d763c90369d044da47231fd65ffbe87ebcf",
+      "bytes": 56
+    }
+  ],
+  "siteTreeSha256": "6b4b4a03c8a4657a3083ceebc8b6c276e36bacd0bb9d35cdeed8c53d458b6ad7",
+  "settingsToApply": [
+    {
+      "name": "nginx",
+      "value": "Include nginx.conf inside the server block that serves the site folder; add `error_page 404 /404.html;` once a 404 page exists (D-P3-1)."
+    },
+    {
+      "name": "Apache",
+      "value": "Needs mod_headers. Save htaccess as .htaccess in the site folder; add `ErrorDocument 404 /404.html` once a 404 page exists (D-P3-1)."
+    },
+    {
+      "name": "TLS",
+      "value": "Serve the site over HTTPS only; the HSTS header is sent over HTTPS."
+    }
+  ],
+  "notes": {
+    "unverifiedLive": [
+      "everything: this adapter only wraps the existing nginx and Apache renderings; no server was run"
+    ],
+    "liveBlockers": [],
+    "providerFacts": [],
+    "capabilities": {
+      "cleanUrls": "none",
+      "trailingSlash": "none",
+      "headersMechanism": "server-config",
+      "unknownPath": "not-found",
+      "previewNoindex": "none",
+      "previewProtection": "none",
+      "mount": [
+        "domain-root"
+      ],
+      "limits": {},
+      "ranges": "server default (nginx and Apache answer Range requests)"
+    }
+  },
+  "noCredential": "This bundle holds no hosting credential, account, project or team identifier and cannot deploy anything."
+}

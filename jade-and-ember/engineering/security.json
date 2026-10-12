@@ -26,7 +26,12 @@
     "Cross-Origin-Resource-Policy": "same-origin"
   },
   "httpsOnlyHeaders": {
-    "Strict-Transport-Security": "max-age=31536000; includeSubDomains"
+    "Strict-Transport-Security": "max-age=31536000"
+  },
+  "hstsOptions": {
+    "$comment": "G6-4 (APR-JE-044; owner decisions D-P3-4 and D-P4-5). The default Strict-Transport-Security value above has NO includeSubDomains: on a client's domain it would bind every subdomain (mail, a shop, a staging host) for a year. includeSubDomains is a per-client opt-in that needs a recorded authorisation (an approvals reference); the renderers refuse it without one. preload is never added by this tooling.",
+    "includeSubDomains": { "default": false, "requiresAuthorisation": true },
+    "preload": { "default": false, "supported": false }
   },
   "cache": {
     "$comment": "File names are not content-hashed in the delivered site, so nothing is marked immutable: HTML, CSS and JS revalidate; fonts and media may be reused for a week. The hashed build (npm run build:hashed) uses immutable caching for its hashed names.",
