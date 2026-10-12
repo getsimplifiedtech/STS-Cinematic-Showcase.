@@ -4,6 +4,31 @@
 
 Severity is about consequence if the risk is real and unnoticed at launch, not about likelihood: **High** (broken delivery, broken security policy or misleading search behaviour), **Medium** (degraded behaviour, rework or an owner decision needed), **Low** (cosmetic or documentation). Classes (**T**, **D**, **L**, **G6**) are defined in `README.md`. Nothing here is a defect in the approved design or media; every risk concerns delivery.
 
+## Status after G6-4 (`APR-JE-044`, 2026-10-12)
+
+The hosting adapters ([`../adapters/hosting/`](../adapters/hosting/README.md)) were built from this list. Nothing was deployed or observed on a live host, so **no L item is closed**. "Addressed" below means: implemented and tested locally, with the remaining live question named.
+
+| ID | Status | What G6-4 did | What remains |
+|---|---|---|---|
+| HR-01 | **Detected and made a release requirement at bundle level; the page itself is not created** | `real-404` live blocker in every bundle report; `checkBundle(..., { forRelease: true })` fails without a `404.html`; the Cloudflare profile models the single-page fallback (CF-10, CF-11) | The 404 page (visual proposal VP-3, not approved). The requirement is **not** in the release gate (RG-12 stays open there). Live check C-04 |
+| HR-02 | **Addressed** | Request-path cache rules for every page (the release package's own `host/_headers` too) and Vercel entries; the bundle check requires them | Live `Cache-Control` per URL class (L) |
+| HR-03 | **Vercel addressed; Cloudflare not established** | `trailingSlash: false` always written and checked, redirect modelled (VC-03) | What Pages does for `/menu/` (modelled as not found; the documentation does not say) (L) |
+| HR-04 | **Partly addressed** | Profiles apply the generated header rules and say what they do not model | Content types for `.xml`/`.txt`/`.webm`/`.mp4`/`.woff2` still come from the local table; compression, caching, TLS (L) |
+| HR-05 | **Addressed for staging** | A staged bundle with a manifest and an adapter-aware bundle check; the delivered folder is never changed | The manifest is not part of the release package or gate; nothing fetches deployed bytes (the comparison exists as `verifyServed`) |
+| HR-06 | **Open** | `vercel.json` is written at the bundle root, which is the Root Directory | Whether `vercel.json` must sit at the project root when a Root Directory is set was not established (VC-18); Vercel now also documents `vercel.ts` and `vercel.toml` (L) |
+| HR-07 | Unchanged | Bundles are deployed from a staged folder, not from the repository | Client repositories have ordinary names; the showcase repository ending in a dot is still to be confirmed with the provider (L) |
+| HR-08 | **Detection written, not wired** | `verifyServed`/`--verify-served` compares fetched bytes with the staged bytes and refuses a rewritten page; the settings text lists the zone features that rewrite HTML | A standing post-deploy check that fetches and compares (needs a credential-free scheduled job; G6-7 area) |
+| HR-09 | **Closed in the generators** | Default `max-age=31536000`, no `includeSubDomains`, never `preload`; per-client opt-in needs a recorded authorisation reference | Whether `vercel.json` replaces Vercel's platform default (63072000, VC-15) and whether a zone-level Cloudflare HSTS overrides ours (L) |
+| HR-10 | Unchanged (already addressed in Phase 4) | The demonstration keeps `X-Robots-Tag: noindex, nofollow` on every address in every adapter | A custom domain on a Vercel non-production branch gets no automatic header (VC-16); ours covers it (L) |
+| HR-11 | **Partly addressed** | The manifest lists every file of a bundle explicitly | The owner still confirms which auxiliary files (`media/PROVENANCE.md`, `fonts/LICENSES.txt`) may be public |
+| HR-12 | **Sharpened, open** | Cloudflare's documentation says Pages answers Range requests with **200, not 206** (CF-12); the Cloudflare profile models it and the portability walk passes with it | Safari video playback and seeking on Pages is a **live and device question**; Vercel's Range behaviour is not established. **Owner decision** on the host for the hero video (see the G6-4 report) |
+| HR-13 | Open | none | compression at the edge (L) |
+| HR-14 | **Partly addressed; a person is still needed** | Provider facts read and filed with sources and digests ([`provider-facts.json`](provider-facts.json)): Cloudflare verbatim from the documentation source; Vercel from its open-source routing code and **paraphrases** of pages that could not be fetched | A person re-reading the pages (D-P3-6) |
+| HR-15 | Open | none | domain, DNS, TLS, apex/www (client onboarding) |
+| HR-16 | Open | Cloudflare documents migrating to Workers static assets (CF-24, CF-25); the adapter targets Pages | Decision on the Cloudflare target |
+| HR-17 | **Addressed in the adapters** | The adapter limit stays 20,000 files (CF-17: paid plans allow 100,000) | `HOSTING.md` wording could name both |
+| HR-18 | **Addressed** | Adapters are domain-root only; an indexable base URL with a path is refused (D-P3-2); the older `--prefix` rendering remains for non-indexable builds | none |
+
 | ID | Risk | Severity | Basis | What closes it |
 |---|---|---|---|---|
 | HR-01 | **Cloudflare Pages answers unknown paths with the home page** (200) when the site has no `404.html`; on the fictional demonstration `/robots.txt`, `/sitemap.xml`, `/llms.txt` would return HTML. Soft 404s; the demo's `noindex` then rests on the meta tag alone | High (search behaviour) | D (rule); the simulation answers 404 so no test sees it (M-04, M-32) | live check C-04; owner decision D-P3-1 (accept, or authorise a designed `404.html`); `X-Robots-Tag` in Phase 4; simulation updated (G6) |

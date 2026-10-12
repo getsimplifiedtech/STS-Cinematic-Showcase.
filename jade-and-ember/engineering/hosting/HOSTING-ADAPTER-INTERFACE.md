@@ -1,5 +1,7 @@
 # Reusable hosting-adapter interface (Gate 5 Phase 3, `APR-JE-031`)
 
+> **Implemented in G6-4 (`APR-JE-044`)** in [`../adapters/hosting/`](../adapters/hosting/README.md). Differences from this design: the bundle is `site/` plus the adapter's declared files and `bundle.manifest.json` (Cloudflare's `_headers` sits inside `site/`, where Pages reads it, with the role "headers"); `checkBundle` also writes the bundle again and compares; simulation profiles live in `profiles.mjs` and are applied by `lib/server.mjs`; `liveChecklist()` is not implemented as code (the unverified-live list is in every manifest and `SETTINGS.txt`). Not implemented: `previewNoindex`/`previewProtection` as checks (recorded as capabilities only).
+
 For Gate 6 framework integration. **A design, not code.** No adapter, module or file of the framework repository is created or changed. The interface generalises what already exists for `_headers`, nginx and Apache (one policy, several renderings, a check that all renderings agree) and adds what Phase 3 found missing: a staged bundle, an adapter-aware folder check and simulation profiles that apply the generated rules.
 
 ## 1. Principles (each is already true somewhere in the code, or is a Phase 3 finding)

@@ -19,6 +19,18 @@ The owner closed Phase 3 on 2026-10-11 and decided the six open questions. This 
 - **Where the artifact is built.** A provider that builds from the repository runs its own build step; the artifact is then not the one CI checked. The pipeline must either (a) commit or publish the staged bundle to the branch the provider serves (no provider build, "framework preset: none", output directory = the bundle), or (b) re-verify the provider's output against the bundle hashes after deployment. Option (a) is the closer fit to "verify the exact staged deployment artifact".
 - **Cloudflare requirements document.** Its "Deployment method" row and acceptance list are updated to match (see `CLOUDFLARE-DEPLOYMENT-REQUIREMENTS.md`).
 
+## Status after G6-4 (`APR-JE-044`, 2026-10-12)
+
+| ID | Requirement | State |
+|---|---|---|
+| D-P3-1 | A real 404 before live release | **Detected and required at bundle level** (live blocker `real-404`, `--for-release` fails). The 404 page is not created (VP-3 not approved). Not yet a release-gate requirement |
+| D-P3-2 | Domain or subdomain root for indexable sites | **Enforced by the adapters** (a base URL with a path is refused) |
+| D-P3-3 | Verify the exact staged artifact | **Staged bundle, manifest and bundle check implemented; deployed-bytes comparison written (`verifyServed`)**. GitHub-connected deployment stays the default; nothing is deployed, the manifest is not part of the release package, nothing fetches bytes |
+| D-P3-4 / D-P4-5 | HSTS `includeSubDomains` off by default | **Done** in `security.json`, `lib/security.mjs` and every rendering, including the release package's host files; per-client opt-in needs a recorded authorisation reference |
+| D-P3-5 | No preview deployment | **Unchanged.** Nothing was deployed or previewed |
+| D-P3-6 | Provider documentation re-verified before adapters | **Read by the implementing session and filed**; Cloudflare verbatim, Vercel from open-source code and paraphrases (its pages could not be fetched). **A person has not re-read them**: the file says so |
+| Phase 4 | `X-Robots-Tag` for the demonstration in every adapter | **Done** (Cloudflare `_headers`, Vercel `vercel.json`, nginx, Apache) |
+
 ## Everything Phase 3 found, kept for Gate 6
 
 | Source | Kept as |

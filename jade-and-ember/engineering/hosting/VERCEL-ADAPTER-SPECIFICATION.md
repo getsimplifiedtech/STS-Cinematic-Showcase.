@@ -1,5 +1,7 @@
 # Vercel adapter specification (Gate 5 Phase 3, `APR-JE-031`)
 
+> **Implemented in G6-4 (`APR-JE-044`)** as `adapters/hosting/vercel.mjs`. `vercel.json` keys are limited to `framework`, `outputDirectory`, `cleanUrls`, `trailingSlash` and `headers` (the keys for "no build, no install" were not established, so Build and Install Command are dashboard settings in `SETTINGS.txt`); the HSTS value in the illustration below is the corrected default (no `includeSubDomains`). The facts in section 1 were re-read in G6-4: see `provider-facts.json` (Vercel pages could not be fetched; paraphrases and open-source routing code are labelled). Still unverified live: `source` matching after clean-URL rewriting, how entries combine, `vercel.json` location with a Root Directory, the 404 status, HSTS override.
+
 **Specification only. No adapter is implemented, no `vercel.json` exists in the repository, nothing is deployed.** This document says what a Vercel adapter must produce and prove when Gate 6 builds it, in the shape of [HOSTING-ADAPTER-INTERFACE.md](HOSTING-ADAPTER-INTERFACE.md). Jade & Ember itself stays independent of Vercel; the adapter is tooling around the site, never inside it.
 
 Vercel facts come from summaries of the official pages (2026-10-11): *Static Configuration with vercel.json*, *Deployment Protection*, *Cache-Control headers*, *Response headers*, *Encryption and TLS*, *Builds*. A person must re-read them and file a dated note before implementation. Key names marked "confirm" were not established.

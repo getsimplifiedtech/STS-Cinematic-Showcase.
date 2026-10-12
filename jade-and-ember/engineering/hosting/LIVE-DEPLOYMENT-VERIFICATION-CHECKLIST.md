@@ -4,6 +4,8 @@ What to do, and what to record, **when a non-production preview deployment is se
 
 **No preview deployment is authorised (D-P3-5, `APR-JE-032`).** This checklist is a procedure for later; nothing in it may be run against a real host until a separate approval says so.
 
+**Update after G6-4 (`APR-JE-044`): no item has been performed.** What changed for whoever runs it later: (1) the staged bundle of precondition P-2 now exists (`npm run host:bundle`, [`../adapters/hosting/README.md`](../adapters/hosting/README.md)); its `bundle.manifest.json` and `SETTINGS.txt` list the behaviours the adapter assumed and could not observe, and C-07 can be run with `node engineering/tools/host-bundle.mjs --verify-served <folder of the files fetched> --bundle <bundle>`; (2) C-09 matters more on Cloudflare Pages: its documentation says Range requests are answered with 200 (CF-12), so the hero video's seeking and Safari playback must be checked on the real host; (3) C-04 now has a known expected answer without a `404.html`: the home page with 200 on Cloudflare Pages (CF-10, CF-11); (4) V-03 and V-04 test the assumption that every matching `vercel.json` header entry applies and a repeated key is set again (VC-05, open-source code only); (5) the HSTS rows (C-08, V-07) should read max-age=31536000 without includeSubDomains.
+
 ## 0. Preconditions (all must hold; none is true today)
 
 | # | Precondition |

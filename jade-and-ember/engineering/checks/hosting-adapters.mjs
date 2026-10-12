@@ -13,7 +13,7 @@ import { isMain } from '../lib/git.mjs';
 import { ADAPTERS, MANIFEST, checkBundle, profileOf, readManifest, renderBundle, verifyServed } from '../adapters/hosting/index.mjs';
 import { composeHeaders, describeSite, sha256, walkFiles } from '../adapters/hosting/common.mjs';
 import { writeFixtureSite } from '../adapters/hosting/fixture.mjs';
-import { parseHeadersFile } from '../adapters/hosting/cloudflare-pages.mjs';
+import { checkHeadersFile as cfCheckImport, parseHeadersFile } from '../adapters/hosting/cloudflare-pages.mjs';
 import { parseApache, parseNginx } from '../adapters/hosting/static.mjs';
 import { checkVercelJson } from '../adapters/hosting/vercel.mjs';
 import { engDir } from '../lib/git.mjs';
@@ -53,7 +53,10 @@ async function behaviour(adapterId, bundleDir, { policy, expect404 }) {
       if (m.urlStyle === 'clean') {
         const x = await get(p.file === 'index.html' ? '/index.html' : `/${p.file}`);
         if (x.status !== 308 || x.h.location !== p.public) problems.push(`${at(`/${p.file}`)}: expected a 308 to ${p.public}, got ${x.status} ${x.h.location || ''}`);
-        if (p.file !== 'index.html') { const y = await get(`${p.public}/`); if (y.status === 200 && y.body.equals(readFileSync(join(siteDir, p.file)))) problems.push(`${at(`${p.public}/`)}: the page is also served at the slashed path (duplicate content; relative links break: HR-03)`); }
+        if (p.file !== 'index.html') {
+          const y = await get(`${p.public}/`);
+          if (adapterId === 'vercel' && (y.status !== 308 || y.h.location !== p.public)) problems.push(`${at(`${p.public}/`)}: trailingSlash false must redirect the slashed path with a 308 to ${p.public} (VC-03, HR-03), got ${y.status} ${y.h.location || ''}`);
+          if (y.status === 200 && y.body.equals(readFileSync(join(siteDir, p.file)))) problems.push(`${at(`${p.public}/`)}: the page is also served at the slashed path (duplicate content; relative links break: HR-03)`); }
       }
     }
     // shared files and asset folders: content type, bytes, request-path cache class
@@ -146,6 +149,11 @@ const CASES = [
   { n: 'a server-side file added with a repaired manifest', a: ['cloudflare-pages', 'vercel', 'static'], f: (b) => addSiteFile(b, 'run.php', '<?php'), re: /run\.php: not a static web file type/ },
   { n: 'a hidden file added with a repaired manifest', a: ['cloudflare-pages', 'vercel', 'static'], f: (b) => addSiteFile(b, '.htpasswd', 'a:b'), re: /\.htpasswd/ },
   { n: 'the security headers are stale after a page changed (the CSP no longer matches the pages)', a: ['cloudflare-pages', 'vercel'], f: (b, m) => { writeFileSync(join(b, m.siteRoot, 'about.html'), readFileSync(join(b, m.siteRoot, 'about.html'), 'utf8').replace('</main>', '<p style="color:red">x</p></main>')); fixHash(b, `${m.siteRoot}/about.html`); }, re: /CSP.*not the policy computed|differs from what the/ },
+  { n: 'a harmless extra rule in _headers with the manifest repaired (only writing the bundle again can tell)', a: ['cloudflare-pages'], f: (b, m) => { appendFileSync(join(b, m.siteRoot, '_headers'), '/extra\n  X-Extra: 1\n'); fixHash(b, `${m.siteRoot}/_headers`); }, re: /differs from what the cloudflare-pages adapter writes/ },
+  { n: 'a harmless extra header in vercel.json with the manifest repaired', a: ['vercel'], f: (b) => { editJson(join(b, 'vercel.json'), (j) => { j.headers.find((e) => e.source === '/menu').headers.push({ key: 'X-Extra', value: '1' }); }); fixHash(b, 'vercel.json'); }, re: /differs from what the vercel adapter writes/ },
+  { n: 'a harmless comment in nginx.conf with the manifest repaired', a: ['static'], f: (b) => { appendFileSync(join(b, 'nginx.conf'), '# extra\n'); fixHash(b, 'nginx.conf'); }, re: /differs from what the static adapter writes/ },
+  { n: 'START-HERE.txt (a release-package file) added to the site with the manifest repaired', a: ['cloudflare-pages', 'vercel', 'static'], f: (b) => addSiteFile(b, 'START-HERE.txt', 'open index.html'), re: /START-HERE\.txt: belongs to the release package/ },
+  { n: 'a hidden folder added to the site with the manifest repaired', a: ['cloudflare-pages', 'vercel', 'static'], f: (b) => addSiteFile(b, '.well-known/x.txt', 'x'), re: /hidden file/ },
   // --- HSTS (D-P3-4, D-P4-5)
   { n: 'HSTS includeSubDomains slipped into the headers without a recorded authorisation', a: ['cloudflare-pages'], f: (b, m) => editFile(join(b, m.siteRoot, '_headers'), (t) => t.replace('Strict-Transport-Security: max-age=31536000', 'Strict-Transport-Security: max-age=31536000; includeSubDomains')), re: /includeSubDomains without a recorded authorisation/ },
   { n: 'HSTS includeSubDomains slipped into vercel.json without a recorded authorisation', a: ['vercel'], f: (b) => editFile(join(b, 'vercel.json'), (t) => t.replace('"max-age=31536000"', '"max-age=31536000; includeSubDomains"')), re: /includeSubDomains without a recorded authorisation/ },
@@ -208,6 +216,38 @@ const REFUSALS = [
   { n: 'a symbolic link in the delivered site', adapter: 'vercel', opts: {}, mutateSite: (d) => symlinkSync('/etc/passwd', join(d, 'link.txt')), re: /symbolic link/ },
   { n: 'a file over the Pages size limit', adapter: 'cloudflare-pages', opts: {}, mutateSite: (d) => writeFileSync(join(d, 'media', 'huge.mp4'), Buffer.alloc(25 * 1024 * 1024 + 1)), re: /over the host limit/ },
 ];
+
+// The two independent checkers on their own, so a fault in one cannot hide behind the other layer (the bundle check also writes the files again and compares).
+function unitCases(policy) {
+  const problems = [];
+  const site = writeFixtureSite(join(tmp('unit'), 'site'), { channel: 'demonstration' });
+  const client = writeFixtureSite(join(tmp('unit'), 'site'), { channel: 'client-production' });
+  try {
+    for (const [label, root] of [['demonstration', site], ['client', client]]) {
+      const d = describeSite(root, { urlStyle: 'clean' }), h = composeHeaders(d, policy);
+      const computed = { noindex: d.channel === 'demonstration' ? 'all' : 'none', csp: buildCsp(root, policy, { https: true }), pages: d.pages.map((p) => p.public), code: h.cache.code, staticDirs: h.cache.staticDirs };
+      const cf = renderHeadersFile(root, policy, { https: true }), vc = renderBundleToText('vercel', root, policy, null);
+      const cfCheck = (t, hs = null) => checkHeadersFileDirect(t, { root, policy, computed, hsts: hs });
+      const vcCheck = (t, hs = null) => checkVercelJson(t, { site: d, policy, hsts: hs, computed });
+      if (cfCheck(cf).length || vcCheck(vc).length) { problems.push(`unit (${label}): the undamaged files fail: ${[...cfCheck(cf), ...vcCheck(vc)][0]}`); continue; }
+      const expectOnly = (what, got, re) => { if (!got.some((x) => re.test(x))) problems.push(`unit (${label}) ${what}: expected ${re}, got ${got.slice(0, 2).join(' | ') || 'nothing'}`); };
+      expectOnly('_headers with a stale CSP', cfCheck(cf.replace(/script-src 'self' [^;]*;/, "script-src 'self';")), /CSP in the file is not the policy computed/);
+      expectOnly('vercel.json with a stale CSP', vcCheck(vc.replace(/script-src 'self' [^;]*;/, "script-src 'self';")), /CSP is not the policy computed/);
+      expectOnly('_headers with a changed HSTS max-age', cfCheck(cf.replace('max-age=31536000', 'max-age=60')), /Strict-Transport-Security is "max-age=60"/);
+      expectOnly('vercel.json with a changed HSTS max-age', vcCheck(vc.replace('max-age=31536000', 'max-age=60')), /Strict-Transport-Security is "max-age=60"/);
+      expectOnly('_headers with HSTS preload', cfCheck(cf.replace('max-age=31536000', 'max-age=31536000; preload')), /carries preload/);
+      expectOnly('vercel.json with HSTS preload', vcCheck(vc.replace('"max-age=31536000"', '"max-age=31536000; preload"')), /carries preload/);
+      expectOnly('_headers with includeSubDomains and an opt-in that was never recorded', cfCheck(cf.replace('max-age=31536000', 'max-age=31536000; includeSubDomains')), /includeSubDomains without a recorded authorisation/);
+      expectOnly('the same file when the opt-in IS recorded must pass', cfCheck(cf.replace('max-age=31536000', 'max-age=31536000; includeSubDomains'), { includeSubDomains: true, authorisation: 'APR-JE-044' }).length ? ['fails'] : ['ok'], /ok/);
+    }
+    // the policy itself: a default HSTS value that carries includeSubDomains or preload is refused
+    for (const bad of ['max-age=31536000; includeSubDomains', 'max-age=31536000; preload']) {
+      try { httpsHeaders({ ...policy, httpsOnlyHeaders: { 'Strict-Transport-Security': bad } }, null); problems.push(`a default Strict-Transport-Security of "${bad}" was accepted`); } catch { /* refused */ }
+    }
+  } finally { rmrf(dirname(site)); rmrf(dirname(client)); }
+  return problems;
+}
+const checkHeadersFileDirect = (text, o) => cfCheckImport(text, { ...o, label: 'unit _headers' });
 
 export async function checkHostingAdapters({ updateGolden = false } = {}) {
   const problems = [], notes = [];
@@ -292,6 +332,8 @@ export async function checkHostingAdapters({ updateGolden = false } = {}) {
     }
     notes.push('the real Jade & Ember site (demonstration) and an indexable client build of it, delivered folder unchanged, stage and check under both Cloudflare Pages and Vercel; the only open live blocker is the missing 404.html (D-P3-1: no page is created here; VP-3 is not approved)');
 
+    unitCases(policy).forEach((p) => problems.push(p));
+    notes.push('the Cloudflare _headers checker and the vercel.json checker, run on their own against damaged text (a stale CSP, a changed HSTS max-age, preload, an unrecorded includeSubDomains), and the policy loader against a default HSTS that carries includeSubDomains or preload');
     // 5. adversarial negative cases
     const baseFor = (channel, adapterId, fx = {}) => {
       const site = writeFixtureSite(join(t('neg-site'), 'site'), { channel, ...fx });

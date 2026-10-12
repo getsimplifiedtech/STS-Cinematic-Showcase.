@@ -42,6 +42,7 @@
     "check:ci": "node engineering/checks/ci.mjs",
     "check:selftest-gate3": "node engineering/checks/selftest-gate3.mjs",
     "host:files": "node engineering/tools/host-files.mjs",
+    "host:bundle": "node engineering/tools/host-bundle.mjs",
     "build:hashed": "node engineering/tools/hashed-build.mjs",
     "assets:manifest": "node engineering/tools/asset-manifest.mjs --write",
     "check:seo": "node engineering/checks/seo.mjs",
