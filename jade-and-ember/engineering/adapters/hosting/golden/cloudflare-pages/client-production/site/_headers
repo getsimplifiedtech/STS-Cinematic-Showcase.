@@ -16,7 +16,7 @@
   Cache-Control: no-cache
 /about
   Cache-Control: no-cache
-/menu
+/products
   Cache-Control: no-cache
 /*.css
   Cache-Control: no-cache

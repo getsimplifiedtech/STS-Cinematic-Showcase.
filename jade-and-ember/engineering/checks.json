@@ -30,6 +30,13 @@
    "describe": "the delivered site is self-contained and free of development tooling"
   },
   {
+   "id": "check:project",
+   "tier": "fast",
+   "scope": "static",
+   "reason": "manifest, check registry and source-text review; no browser",
+   "describe": "project manifest valid; a manifest cannot remove or relax a check; reusable files free of project-specific values (purity ratchet)"
+  },
+  {
    "id": "check:authority",
    "tier": "fast",
    "scope": "static",

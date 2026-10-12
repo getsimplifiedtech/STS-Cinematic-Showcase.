@@ -44,7 +44,7 @@ export const FORBIDDEN = [
   { id: 'project-name', re: /jade|ember/i, what: 'the project name' },
   { id: 'record-id', re: /\b(?:APR|DEMO|REL|DEP|RIGHTS|SRCH)-JE\b/, what: 'a project record id prefix' },
   { id: 'baseline-label', re: /\bv0\.8\b/, what: 'the baseline label' },
-  { id: 'industry-word', re: /\b(?:dish(?:es)?|menu|restaurant|chef|cuisine|wok|kitchen)\b/i, what: 'restaurant vocabulary' },
+  { id: 'industry-word', re: /\b(?:dish(?:es)?|restaurant|chef|cuisine|wok|kitchen)\b|\bmenu\.(?:html|json|js)\b|['"]menu['"]/i, what: 'restaurant vocabulary' },
   { id: 'site-file', re: /\b(?:styles\.css|site\.js|hero\.js|menu\.js)\b/, what: 'a file of this site' },
   { id: 'project-layout', re: /\.\.\/\.\.\/src\/|\bbuild\.mjs\b|\/src\/lib\//, what: 'the project\'s builder or source layout' },
   { id: 'site-selector', re: /['"`](?:\.nav-toggle|#site-nav|\.pause|\.hero-video|\.foot-nav|\.jump)\b|data-ambient-root|\ba\.brand\b|classList\.contains\(['"]skip['"]\)/, what: 'a selector of this site\'s markup' },

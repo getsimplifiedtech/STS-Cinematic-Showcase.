@@ -82,7 +82,7 @@ export function checkHeadersFile(text, { root, policy = loadPolicy(), prefix = '
     }
     const cspNow = catchAll?.headers.find(([k]) => k.toLowerCase() === 'content-security-policy')?.[1];
     if (csp && cspNow !== csp) problems.push(`${label}: the CSP in the file is not the policy computed from the built pages (regenerate it after every rebuild)`);
-    // request-path cache rules: a rule written for "/*.html" never matches the clean URL /menu (HR-02), so every page needs a rule for ITS public path
+    // request-path cache rules: a rule written for "/*.html" never matches the clean URL /products (HR-02), so every page needs a rule for ITS public path
     for (const pub of pages || []) {
       const wants = pub === '/' ? (prefix ? [prefix, `${prefix}/`] : ['/']) : [`${prefix}${pub}`];
       const want = wants[0];
@@ -99,7 +99,7 @@ export const cloudflarePages = {
   siteRoot: 'site',
   facts: ['CF-01', 'CF-02', 'CF-03', 'CF-04', 'CF-04b', 'CF-05', 'CF-06', 'CF-08', 'CF-09', 'CF-09b', 'CF-10', 'CF-11', 'CF-12', 'CF-14', 'CF-14b', 'CF-15', 'CF-15b', 'CF-17', 'CF-17b'],
   capabilities: {
-    cleanUrls: 'platform', trailingSlash: 'platform (not established for a page file such as /menu/)', headersMechanism: 'headers-file', unknownPath: 'spa-fallback unless a top-level 404.html exists',
+    cleanUrls: 'platform', trailingSlash: 'platform (not established for a page file such as /products/)', headersMechanism: 'headers-file', unknownPath: 'spa-fallback unless a top-level 404.html exists',
     previewNoindex: 'automatic (platform adds X-Robots-Tag: noindex over preview URLs)', previewProtection: 'optional (public by default)', mount: ['domain-root'],
     limits: { files: PAGES_LIMITS.files, fileBytes: PAGES_LIMITS.fileBytes, rules: PAGES_LIMITS.rules, lineChars: PAGES_LIMITS.lineChars },
     ranges: 'documented to answer Range requests with 200, not 206 (CF-12)',

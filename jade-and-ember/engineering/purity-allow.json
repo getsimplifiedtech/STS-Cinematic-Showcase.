@@ -1,0 +1,102 @@
+{
+ "schema": "sts/purity-allow@1",
+ "$comment": "G6-5 (APR-JE-046), R-07: project-specific values that remain in files the migration matrix classes as reusable. A ratchet: max can be lowered, never raised; an entry that matches nothing fails check:project. lib/purity.mjs and checks/project.mjs name the forbidden values by design and are not scanned; the project's own source folders are the project's.",
+ "allow": [
+  {
+   "file": "adapters/hosting/fixture.mjs",
+   "rule": "site-file",
+   "max": 3,
+   "reason": "The hosting fixture writes a minimal static site; its shared files carry the delivery contract's conventional names. Test material for the adapters, not a rule of the adapters."
+  },
+  {
+   "file": "checks/hosting-adapters.mjs",
+   "rule": "site-file",
+   "max": 4,
+   "reason": "Negative cases tamper with the staged site by its conventional file names (a delivered file altered, a credential-shaped string added). Test material, not adapter behaviour."
+  },
+  {
+   "file": "checks/portability.mjs",
+   "rule": "industry-word",
+   "max": 1,
+   "reason": "Text of a measured-finding message that names this site's hero preload; the finding is only emitted for the project that declares that preload (markup.heroPreloadPattern). Becomes project data with the measured-finding catalogue in G6-6."
+  },
+  {
+   "file": "checks/selftest-release-control.mjs",
+   "rule": "project-name",
+   "max": 2,
+   "reason": "Self-test of the frozen release-control proof of concept (APR-JE-044): its synthetic client fixtures name the demonstration host and record ids. The proof of concept is frozen and is edited only by an approved change."
+  },
+  {
+   "file": "checks/selftest-release-control.mjs",
+   "rule": "record-id",
+   "max": 1,
+   "reason": "Self-test of the frozen release-control proof of concept (APR-JE-044): its synthetic client fixtures name the demonstration host and record ids. The proof of concept is frozen and is edited only by an approved change."
+  },
+  {
+   "file": "lib/release-cases.mjs",
+   "rule": "industry-word",
+   "max": 2,
+   "reason": "Release-gate case catalogue: each case mutates the demonstration project's records and configuration by their real names. The gate itself reads the manifest; the catalogue is per-project test material that moves with the project in G6-6."
+  },
+  {
+   "file": "lib/release-cases.mjs",
+   "rule": "project-name",
+   "max": 1,
+   "reason": "Release-gate case catalogue: each case mutates the demonstration project's records and configuration by their real names. The gate itself reads the manifest; the catalogue is per-project test material that moves with the project in G6-6."
+  },
+  {
+   "file": "lib/release-cases.mjs",
+   "rule": "record-id",
+   "max": 1,
+   "reason": "Release-gate case catalogue: each case mutates the demonstration project's records and configuration by their real names. The gate itself reads the manifest; the catalogue is per-project test material that moves with the project in G6-6."
+  },
+  {
+   "file": "lib/release-dryrun-scenarios.mjs",
+   "rule": "industry-word",
+   "max": 7,
+   "reason": "Dry-run scenario catalogue (one blocking scenario per RG finding): titles and edits name the demonstration project's files, records and hosts. Per-project test material; the runner is generic and reads project names from the manifest."
+  },
+  {
+   "file": "lib/release-dryrun-scenarios.mjs",
+   "rule": "project-name",
+   "max": 11,
+   "reason": "Dry-run scenario catalogue (one blocking scenario per RG finding): titles and edits name the demonstration project's files, records and hosts. Per-project test material; the runner is generic and reads project names from the manifest."
+  },
+  {
+   "file": "lib/release-dryrun-scenarios.mjs",
+   "rule": "record-id",
+   "max": 12,
+   "reason": "Dry-run scenario catalogue (one blocking scenario per RG finding): titles and edits name the demonstration project's files, records and hosts. Per-project test material; the runner is generic and reads project names from the manifest."
+  },
+  {
+   "file": "lib/release-dryrun-scenarios.mjs",
+   "rule": "site-file",
+   "max": 11,
+   "reason": "Dry-run scenario catalogue (one blocking scenario per RG finding): titles and edits name the demonstration project's files, records and hosts. Per-project test material; the runner is generic and reads project names from the manifest."
+  },
+  {
+   "file": "lib/release-dryrun.mjs",
+   "rule": "industry-word",
+   "max": 1,
+   "reason": "Helper that rewrites the demonstration project's ordering link inside its configuration files for the dry run. Per-project test material."
+  },
+  {
+   "file": "release-control/demo.mjs",
+   "rule": "project-name",
+   "max": 2,
+   "reason": "Frozen release-control proof of concept (APR-JE-044): the synthetic demonstration names the fixture host. Edited only by an approved change."
+  },
+  {
+   "file": "release-control/lib/state.mjs",
+   "rule": "record-id",
+   "max": 1,
+   "reason": "Frozen release-control proof of concept (APR-JE-044): a note in its synthetic marker file cites a record id. Edited only by an approved change."
+  },
+  {
+   "file": "release-control/lib/view.mjs",
+   "rule": "project-name",
+   "max": 2,
+   "reason": "Frozen release-control proof of concept (APR-JE-044): the review-page builder lays out the project folder it copies. Edited only by an approved change."
+  }
+ ]
+}

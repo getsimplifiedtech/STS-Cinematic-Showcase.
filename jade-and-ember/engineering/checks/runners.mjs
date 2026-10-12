@@ -10,6 +10,7 @@ import { checkBaseline } from './baseline.mjs';
 import { checkDeterminism } from './determinism.mjs';
 import { checkAuthority } from './authority.mjs';
 import { checkDelivery } from './delivery.mjs';
+import { checkProject } from './project.mjs';
 import { checkMedia } from './media.mjs';
 import { checkBudgets } from './budgets.mjs';
 import { checkKeyboard } from './keyboard.mjs';
@@ -47,6 +48,7 @@ export const CORE = {
   'check:baseline': (ctx) => checkBaseline(),
   'check:determinism': (ctx) => checkDeterminism(),
   'check:delivery': (ctx) => checkDelivery(),
+  'check:project': (ctx) => checkProject(),
   'check:authority': (ctx) => checkAuthority({ framework: ctx.framework }),
   'check:media': (ctx) => checkMedia({ browser: !ctx.fast, browserName: ctx.browserName }),
   'check:tokens': (ctx) => checkTokens(),

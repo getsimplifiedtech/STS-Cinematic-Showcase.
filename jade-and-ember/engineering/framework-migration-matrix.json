@@ -37,7 +37,9 @@
     "jade-and-ember/engineering/schemas/sts-engineering.schema.json",
     "jade-and-ember/engineering/lib/purity.mjs",
     "jade-and-ember/engineering/lib/generators.mjs",
-    "jade-and-ember/engineering/lib/fixtures.mjs"
+    "jade-and-ember/engineering/lib/fixtures.mjs",
+    "jade-and-ember/engineering/checks/project.mjs",
+    "jade-and-ember/engineering/purity-allow.json"
    ],
    "target": "engineering/core/lib/",
    "external": [

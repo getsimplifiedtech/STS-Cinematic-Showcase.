@@ -14,26 +14,26 @@
     {
       "path": "SETTINGS.txt",
       "role": "doc",
-      "sha256": "9257f98a1f2b62316c55f4537c3e76c2c25a17f6c4216b84b8a4b121af40f4b0",
-      "bytes": 2638
+      "sha256": "42f9b84f46914a53bc73ceb5fb27318f53ef2c98c9b629a373d6f4751d61ae64",
+      "bytes": 2658
     },
     {
       "path": "site/404.html",
       "role": "site",
-      "sha256": "51bb8c1bb70a0f3f33345a1afeaaea23c6f65b568290098933a4c4744e627aeb",
-      "bytes": 514
+      "sha256": "13bbba061f6b04f815bb987651fe6dc162d98a5e70ee870305f5fbd41cbda2b6",
+      "bytes": 522
     },
     {
       "path": "site/_headers",
       "role": "headers",
-      "sha256": "32348a31909169a0d5e9faf9663dba39ac35f5f600f9a336f37434767b78d44e",
-      "bytes": 1315
+      "sha256": "7f57c69b34e3bd682e3e834693da6fd10c70bd9164690f3641192cc47ef0b721",
+      "bytes": 1319
     },
     {
       "path": "site/about.html",
       "role": "site",
-      "sha256": "86556f3e56a5246db660812cf7c88e3cc0181e510dda71f1317e2213075fabe7",
-      "bytes": 558
+      "sha256": "f913f77b310c67e8e9ed9a3574a4f4f2971db681106112797cf1be06ae787870",
+      "bytes": 566
     },
     {
       "path": "site/assets/app.js",
@@ -50,8 +50,8 @@
     {
       "path": "site/index.html",
       "role": "site",
-      "sha256": "f0a7ff96bef7b86e46c38784e69429aa17a7c05a9687423d0b7924b94929e001",
-      "bytes": 586
+      "sha256": "45fde7f5a262d8418dcf16ff90485517603133e5e360a1af658ffd2f212c46ed",
+      "bytes": 594
     },
     {
       "path": "site/llms.txt",
@@ -72,10 +72,10 @@
       "bytes": 2048
     },
     {
-      "path": "site/menu.html",
+      "path": "site/products.html",
       "role": "site",
-      "sha256": "bdb8a0eef953300f13d6e6372047dbb20ee64bd88e1ddec6d42fcfefe78166a6",
-      "bytes": 547
+      "sha256": "2e9252fd43122b0d1ac2209fb92e4cc317946d3557c8ff166961a847095f73f7",
+      "bytes": 567
     },
     {
       "path": "site/robots.txt",
@@ -92,8 +92,8 @@
     {
       "path": "site/sitemap.xml",
       "role": "site",
-      "sha256": "1026d407ac2ca8a8a824e1af08cd94de407f7becbb49a0c1406c82500ba933bd",
-      "bytes": 281
+      "sha256": "d01442e0e5356afd185062fde8ba421c724e920e0ab36ddbec5a71ac210a1a68",
+      "bytes": 285
     },
     {
       "path": "site/styles.css",
@@ -102,7 +102,7 @@
       "bytes": 56
     }
   ],
-  "siteTreeSha256": "78347745b7566ccfe8b7675aa63959ffd35e849721443b133f3dc0c967096490",
+  "siteTreeSha256": "171a27f1c552c229cbb427e9bf3a38a7f1b3fc06079549e0974221607a73bb34",
   "settingsToApply": [
     {
       "name": "Deployment method",
@@ -127,8 +127,8 @@
   ],
   "notes": {
     "unverifiedLive": [
-      "the status of the redirect from /menu.html to /menu (308 is assumed)",
-      "what /menu/ does (HR-03)",
+      "the status of the redirect from /products.html to /products (308 is assumed)",
+      "what /products/ does (HR-03)",
       "what /index, /404 and /404.html do (modelled: not found, answered with the 404 page)",
       "that the 404.html response has status 404 (the documentation says only that the page is displayed when a file is not found)",
       "whether the _headers rules apply to the 404.html response and to the home-page fallback",
@@ -136,7 +136,7 @@
       "the content types served for .xml, .txt, .webm, .mp4 and .woff2",
       "Range support for the hero video: the documentation says 200 is returned, which Safari cannot seek (HR-12)",
       "that the deployed bytes equal the staged bytes (checklist C-07)",
-      "that request paths are matched case-sensitively, so /Menu is not answered from menu.html (modelled; the pages read do not say, and nothing was observed live)",
+      "that request paths are matched case-sensitively, so /Products is not answered from products.html (modelled; the pages read do not say, and nothing was observed live)",
       "compression and caching at the edge",
       "HSTS: that the header is sent as written and not changed by a zone setting"
     ],
@@ -164,7 +164,7 @@
     ],
     "capabilities": {
       "cleanUrls": "platform",
-      "trailingSlash": "platform (not established for a page file such as /menu/)",
+      "trailingSlash": "platform (not established for a page file such as /products/)",
       "headersMechanism": "headers-file",
       "unknownPath": "spa-fallback unless a top-level 404.html exists",
       "previewNoindex": "automatic (platform adds X-Robots-Tag: noindex over preview URLs)",

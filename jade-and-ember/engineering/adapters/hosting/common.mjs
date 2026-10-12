@@ -57,7 +57,7 @@ export function describeSite(siteDir, { urlStyle, baseUrl = null, channel = null
 }
 
 // The headers for one site from the single policy: security (with the CSP computed from THESE pages), the noindex defence for the demonstration, and the
-// cache classes keyed by the REQUEST path (a rule written for "*.html" never matches the clean URL /menu: HR-02).
+// cache classes keyed by the REQUEST path (a rule written for "*.html" never matches the clean URL /products: HR-02).
 export function composeHeaders(site, policy = loadPolicy(), { hsts = null } = {}) {
   const security = { 'Content-Security-Policy': buildCsp(site.siteDir, policy, { https: true }), ...policy.headers, ...httpsHeaders(policy, hsts) };
   const robots = robotsHeaders(site.siteDir, policy);
@@ -111,8 +111,8 @@ export function writeBundle({ outDir, adapter, site, siteRoot, extra, options, s
 }
 export const readManifest = (bundleDir) => JSON.parse(readFileSync(join(bundleDir, MANIFEST), 'utf8'));
 
-// ---- file lookup the way a host does it: case-sensitive. Cloudflare Pages and Vercel serve /Menu only if a file is named exactly Menu(.html); a stat on macOS (APFS) or Windows (NTFS)
-// folds the case and would answer /Menu from menu.html. So every path segment must appear in the folder's listing exactly as requested (no case folding, no Unicode normalisation).
+// ---- file lookup the way a host does it: case-sensitive. Cloudflare Pages and Vercel serve /Products only if a file is named exactly Products(.html); a stat on macOS (APFS) or Windows (NTFS)
+// folds the case and would answer /Products from products.html. So every path segment must appear in the folder's listing exactly as requested (no case folding, no Unicode normalisation).
 // io is injectable so the rule is tested on a Linux disk against a case-folding stand-in.
 export const diskIo = { list: (dir) => readdirSync(dir), isFile: (p) => { try { return lstatSync(p).isFile(); } catch { return false; } } };
 export function exactFile(siteDir, rel, io = diskIo) {

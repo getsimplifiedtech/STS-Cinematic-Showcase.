@@ -24,18 +24,18 @@ const CREDENTIAL = [/\bcf(?:at|ut)_[A-Za-z0-9]{20,}/, /\bvercel_blob_rw_[A-Za-z0
 // What every bundle must be able to say about live behaviour it has NOT seen. The list is written into SETTINGS.txt and the manifest.
 export const UNVERIFIED_LIVE = Object.freeze({
   'cloudflare-pages': [
-    'the status of the redirect from /menu.html to /menu (308 is assumed)', 'what /menu/ does (HR-03)', 'what /index, /404 and /404.html do (modelled: not found, answered with the 404 page)',
+    'the status of the redirect from /products.html to /products (308 is assumed)', 'what /products/ does (HR-03)', 'what /index, /404 and /404.html do (modelled: not found, answered with the 404 page)',
     'that the 404.html response has status 404 (the documentation says only that the page is displayed when a file is not found)', 'whether the _headers rules apply to the 404.html response and to the home-page fallback',
     'whether a header set in _headers replaces the platform\'s default of the same name (modelled, as the documentation says _headers "override what Cloudflare ordinarily sends") or is joined with it; Access-Control-Allow-Origin: * is a platform default the bundle does not remove',
     'the content types served for .xml, .txt, .webm, .mp4 and .woff2', 'Range support for the hero video: the documentation says 200 is returned, which Safari cannot seek (HR-12)', 'that the deployed bytes equal the staged bytes (checklist C-07)',
-    'that request paths are matched case-sensitively, so /Menu is not answered from menu.html (modelled; the pages read do not say, and nothing was observed live)', 'compression and caching at the edge', 'HSTS: that the header is sent as written and not changed by a zone setting',
+    'that request paths are matched case-sensitively, so /Products is not answered from products.html (modelled; the pages read do not say, and nothing was observed live)', 'compression and caching at the edge', 'HSTS: that the header is sent as written and not changed by a zone setting',
   ],
   vercel: [
     'that a 404.html in the output directory is served with status 404', 'what /404 and /404.html do (modelled: answered with the 404 page)', 'that vercel.json at the bundle root works with the Root Directory setting (HR-06)',
     'that the HSTS header in vercel.json replaces the platform default for a custom domain (VC-15); *.vercel.app domains get includeSubDomains; preload from the platform whatever vercel.json says',
     'how several matching header entries combine when a key repeats (the open-source routing code sets it again)', 'that the source "/(.*)" is not treated as a named segment (which would change how colons in header values are read, VC-06)',
     'that the routing library\'s /index and /x/index redirects (modelled) are what the platform does', 'the content types served for .xml, .txt, .webm, .mp4 and .woff2', 'Range support for the hero video',
-    'that request paths are matched case-sensitively, so /Menu is not answered from menu.html (modelled; the pages read do not say, and nothing was observed live)', 'that the deployed bytes equal the staged bytes (checklist C-07)', 'Deployment Protection state (whether previews are protected by default was reported inconsistently, HR-14) and the preview X-Robots-Tag (VC-16)',
+    'that request paths are matched case-sensitively, so /Products is not answered from products.html (modelled; the pages read do not say, and nothing was observed live)', 'that the deployed bytes equal the staged bytes (checklist C-07)', 'Deployment Protection state (whether previews are protected by default was reported inconsistently, HR-14) and the preview X-Robots-Tag (VC-16)',
   ],
   static: ['everything: this adapter only wraps the existing nginx and Apache renderings; no server was run'],
 });

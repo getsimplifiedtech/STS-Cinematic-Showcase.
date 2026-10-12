@@ -12,7 +12,7 @@ import { AdapterError, MANIFEST, NOT_FOUND_PAGE, diskIo, exactFile, readManifest
 const safe = (rel) => typeof rel === 'string' && !rel.startsWith('/') && !rel.includes('\\') && !rel.includes('\u0000') && !rel.split('/').some((s) => s === '..');
 const NF = (rel) => rel === NOT_FOUND_PAGE || rel === NOT_FOUND_PAGE.replace(/\.html$/, '');   // /404 and /404.html have no address of their own: they are answered as any unknown path
 
-// "/*" "/media/*" "/*.css" "/menu" "/": a single splat matches greedily (CF-03 and the headers page); anything else is literal
+// "/*" "/media/*" "/*.css" "/products" "/": a single splat matches greedily (CF-03 and the headers page); anything else is literal
 function pagesPattern(pattern) {
   if ((pattern.match(/\*/g) || []).length > 1) return null;
   const esc = pattern.split('*').map((s) => s.replace(/[.+?^${}()|[\]\\]/g, '\\$&'));
@@ -54,8 +54,8 @@ export function cloudflareProfile(siteDir, io = diskIo) {
       return out;
     },
     models: ['extension-less page URLs and the 308 from the .html form (CF-08)', 'the _headers rules applied to the REQUEST path, several matching rules combined, repeated headers joined with a comma (CF-02, CF-03)', 'unknown paths: 404.html when present, otherwise the home page with 200 (CF-10, CF-11)', 'Range requests answered with 200 (CF-12)', 'redirects carry no _headers headers (CF-06)', 'the platform default headers (CF-14, CF-15)'],
-    doesNotModel: ['compression (CF-13), ETag and 304 handling, edge caching and purge behaviour', 'HTTP to HTTPS redirects, TLS, www and the domain', 'the exact redirect status code (308 is assumed; the page says only "redirected")', 'a request for /menu/ (modelled as not found; the documentation does not say)', 'content types for .xml, .txt, .webm, .mp4 and .woff2 (the local server\'s table is used)', 'headers on the 404.html response (assumed to follow the same rules as any asset)', 'zone features that rewrite HTML (Rocket Loader, email obfuscation, analytics beacon)'],
-    assumptions: ['request paths are matched case-sensitively (/Menu is not answered from menu.html)', 'redirect status 308', '/menu/, /index, /404 and /404.html are answered as unknown paths', 'the 404.html response has status 404 (the documentation says only that the page is displayed)', 'the _headers rules apply to the 404.html response', 'a header set in _headers replaces the platform default of the same name (the documentation: "override what Cloudflare ordinarily sends")'],
+    doesNotModel: ['compression (CF-13), ETag and 304 handling, edge caching and purge behaviour', 'HTTP to HTTPS redirects, TLS, www and the domain', 'the exact redirect status code (308 is assumed; the page says only "redirected")', 'a request for /products/ (modelled as not found; the documentation does not say)', 'content types for .xml, .txt, .webm, .mp4 and .woff2 (the local server\'s table is used)', 'headers on the 404.html response (assumed to follow the same rules as any asset)', 'zone features that rewrite HTML (Rocket Loader, email obfuscation, analytics beacon)'],
+    assumptions: ['request paths are matched case-sensitively (/Products is not answered from products.html)', 'redirect status 308', '/products/, /index, /404 and /404.html are answered as unknown paths', 'the 404.html response has status 404 (the documentation says only that the page is displayed)', 'the _headers rules apply to the 404.html response', 'a header set in _headers replaces the platform default of the same name (the documentation: "override what Cloudflare ordinarily sends")'],
   };
 }
 
@@ -93,7 +93,7 @@ export function vercelProfile(bundleDir, siteDir, io = diskIo) {
     },
     models: ['cleanUrls: the 308 from /x.html, /index.html and /x/index to the clean path (VC-01, VC-02)', 'trailingSlash false: the 308 from /x/ to /x (VC-03)', 'every matching headers entry applied to the request path, a repeated key set again (VC-05)', 'unknown paths: 404.html when present, otherwise a platform 404 page'],
     doesNotModel: ['the status code of a response served from 404.html (404 is assumed; the documentation results did not state it, VC-14)', 'whether a 404.html is used on every unknown path, and what the platform 404 page looks like', 'the platform default headers, above all Strict-Transport-Security (a platform default of max-age=63072000 may or may not be overridden by vercel.json: VC-15)', 'compression, ETag, edge caching, HTTP to HTTPS redirects, TLS, the domain', 'Deployment Protection and the automatic preview X-Robots-Tag (VC-16)', 'Range support (assumed: 206 as for any static file)', 'content types for .xml, .txt, .webm, .mp4 and .woff2 (the local server\'s table is used)', 'header-source matching exactly as the platform implements it (the open-source routing code is modelled, the platform is expected but not proven to match)'],
-    assumptions: ['request paths are matched case-sensitively (/Menu is not answered from menu.html)', 'a 404.html response has status 404', 'Range requests are answered with 206', 'the open-source routing library behaves as the platform does'],
+    assumptions: ['request paths are matched case-sensitively (/Products is not answered from products.html)', 'a 404.html response has status 404', 'Range requests are answered with 206', 'the open-source routing library behaves as the platform does'],
   };
 }
 

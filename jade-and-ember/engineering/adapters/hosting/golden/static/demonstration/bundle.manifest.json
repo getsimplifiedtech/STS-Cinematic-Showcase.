@@ -32,14 +32,14 @@
     {
       "path": "site/404.html",
       "role": "site",
-      "sha256": "bd3397add1ca874e95afb214553c388a302a040d847720629a876123228eaa0f",
-      "bytes": 563
+      "sha256": "3814f126f51066f1b07886c159ce63d02037e0735a5d0ea46e876df20c5dcbb8",
+      "bytes": 571
     },
     {
       "path": "site/about.html",
       "role": "site",
-      "sha256": "83d1bb927e2bf5aac65fdfb044a32dab6f40398d7d60391d59f411b6a3109bcc",
-      "bytes": 540
+      "sha256": "95748e47a3e45892e27b44c87e55959a358f886c98e4ef360f0a90bde12db247",
+      "bytes": 548
     },
     {
       "path": "site/assets/app.js",
@@ -56,8 +56,8 @@
     {
       "path": "site/index.html",
       "role": "site",
-      "sha256": "5b19418d7495d14b5971659dcc9517ec47e4edc7d541e4a3d7b03071a0f38cde",
-      "bytes": 573
+      "sha256": "5eb281e21c0a70d020f45bf4d66e09cc011194ed9971a4f56c38fd8af8f99d2d",
+      "bytes": 581
     },
     {
       "path": "site/media/clip.mp4",
@@ -72,10 +72,10 @@
       "bytes": 2048
     },
     {
-      "path": "site/menu.html",
+      "path": "site/products.html",
       "role": "site",
-      "sha256": "4eedb339cfc0abb43a9e1cac00b19b0979f99df44e9cc9c05199f9ae252b8d4e",
-      "bytes": 530
+      "sha256": "f22276f763a48dc83f00a937832d01bb1b6caf0180a45dc2a27c4f3392cdd06b",
+      "bytes": 546
     },
     {
       "path": "site/site.js",
@@ -90,7 +90,7 @@
       "bytes": 56
     }
   ],
-  "siteTreeSha256": "43e64e90981973011caa7e523ef1c1f229858c8cd7fdfe2b330b3c5e24041eff",
+  "siteTreeSha256": "7b6e5f8a37f132efe07e48d45d0221764b080f7065721c29e0bae2008ea5b865",
   "settingsToApply": [
     {
       "name": "nginx",

@@ -45,7 +45,7 @@ export function checkVercelJson(text, { site, policy = loadPolicy(), hsts = null
   if (j.outputDirectory !== 'site') problems.push(`${label}: outputDirectory must be "site", the folder of the delivered files (VC-13)`);
   const wantClean = site.urlStyle === 'clean';
   if (j.cleanUrls !== wantClean) problems.push(`${label}: cleanUrls is ${JSON.stringify(j.cleanUrls)} but the site's urlStyle is "${site.urlStyle}" (${wantClean ? 'every canonical would be a 404' : 'the .html form would be redirected away from the canonical'})`);
-  if (j.trailingSlash !== false) problems.push(`${label}: trailingSlash must be explicitly false: left undefined, /menu/ also serves the page and every relative link on it breaks (VC-11, HR-03)`);
+  if (j.trailingSlash !== false) problems.push(`${label}: trailingSlash must be explicitly false: left undefined, /products/ also serves the page and every relative link on it breaks (VC-11, HR-03)`);
   if (!Array.isArray(j.headers)) { problems.push(`${label}: headers must be a list`); return problems; }
   if (j.headers.length > VERCEL_LIMITS.routes) problems.push(`${label}: ${j.headers.length} header entries exceed the ${VERCEL_LIMITS.routes} routes per deployment (VC-17)`);
   const security = new Set(Object.keys({ ...policy.headers, ...policy.httpsOnlyHeaders, 'Content-Security-Policy': 1 }).map((s) => s.toLowerCase()));

@@ -14,20 +14,20 @@
     {
       "path": "SETTINGS.txt",
       "role": "doc",
-      "sha256": "e5fb66e700829c6c67e7981d59f7779bff4fdd1a3a3cc7e54fc66d194ccf9c03",
-      "bytes": 2925
+      "sha256": "88a3dd18f3e4c2b46046b7a2b2b0e429ee65e7e30db0f7f7aa90d677e6f7db7e",
+      "bytes": 2933
     },
     {
       "path": "site/404.html",
       "role": "site",
-      "sha256": "51bb8c1bb70a0f3f33345a1afeaaea23c6f65b568290098933a4c4744e627aeb",
-      "bytes": 514
+      "sha256": "13bbba061f6b04f815bb987651fe6dc162d98a5e70ee870305f5fbd41cbda2b6",
+      "bytes": 522
     },
     {
       "path": "site/about.html",
       "role": "site",
-      "sha256": "86556f3e56a5246db660812cf7c88e3cc0181e510dda71f1317e2213075fabe7",
-      "bytes": 558
+      "sha256": "f913f77b310c67e8e9ed9a3574a4f4f2971db681106112797cf1be06ae787870",
+      "bytes": 566
     },
     {
       "path": "site/assets/app.js",
@@ -44,8 +44,8 @@
     {
       "path": "site/index.html",
       "role": "site",
-      "sha256": "f0a7ff96bef7b86e46c38784e69429aa17a7c05a9687423d0b7924b94929e001",
-      "bytes": 586
+      "sha256": "45fde7f5a262d8418dcf16ff90485517603133e5e360a1af658ffd2f212c46ed",
+      "bytes": 594
     },
     {
       "path": "site/llms.txt",
@@ -66,10 +66,10 @@
       "bytes": 2048
     },
     {
-      "path": "site/menu.html",
+      "path": "site/products.html",
       "role": "site",
-      "sha256": "bdb8a0eef953300f13d6e6372047dbb20ee64bd88e1ddec6d42fcfefe78166a6",
-      "bytes": 547
+      "sha256": "2e9252fd43122b0d1ac2209fb92e4cc317946d3557c8ff166961a847095f73f7",
+      "bytes": 567
     },
     {
       "path": "site/robots.txt",
@@ -86,8 +86,8 @@
     {
       "path": "site/sitemap.xml",
       "role": "site",
-      "sha256": "1026d407ac2ca8a8a824e1af08cd94de407f7becbb49a0c1406c82500ba933bd",
-      "bytes": 281
+      "sha256": "d01442e0e5356afd185062fde8ba421c724e920e0ab36ddbec5a71ac210a1a68",
+      "bytes": 285
     },
     {
       "path": "site/styles.css",
@@ -98,11 +98,11 @@
     {
       "path": "vercel.json",
       "role": "deploy-config",
-      "sha256": "80ef0db0bfb8274e71d0c6e5212986d873e7494a070d8466f91fce7453bd912b",
-      "bytes": 2225
+      "sha256": "790de925b9057c3eae60df3bd574e95cdd034366251f96af66b270e5e6e02d61",
+      "bytes": 2229
     }
   ],
-  "siteTreeSha256": "78347745b7566ccfe8b7675aa63959ffd35e849721443b133f3dc0c967096490",
+  "siteTreeSha256": "171a27f1c552c229cbb427e9bf3a38a7f1b3fc06079549e0974221607a73bb34",
   "settingsToApply": [
     {
       "name": "Framework Preset",
@@ -136,7 +136,7 @@
       "that the routing library's /index and /x/index redirects (modelled) are what the platform does",
       "the content types served for .xml, .txt, .webm, .mp4 and .woff2",
       "Range support for the hero video",
-      "that request paths are matched case-sensitively, so /Menu is not answered from menu.html (modelled; the pages read do not say, and nothing was observed live)",
+      "that request paths are matched case-sensitively, so /Products is not answered from products.html (modelled; the pages read do not say, and nothing was observed live)",
       "that the deployed bytes equal the staged bytes (checklist C-07)",
       "Deployment Protection state (whether previews are protected by default was reported inconsistently, HR-14) and the preview X-Robots-Tag (VC-16)"
     ],

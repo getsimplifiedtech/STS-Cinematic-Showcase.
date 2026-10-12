@@ -20,7 +20,9 @@ import { join } from 'node:path';
 import { assembleCandidate, pagesOf } from '../lib/site.mjs';
 import { BUSINESS, buildClient } from '../lib/fixtures.mjs';
 import { treeHash } from '../lib/hashed.mjs';
-import { hoursSpecs, publicUrl, urlStyleOf, isReservedHost } from '../../src/lib/seo.mjs';
+import { generator } from '../lib/generators.mjs';
+
+const { publicUrl, urlStyleOf, isReservedHost } = generator('seo');
 import { RIGHTS_CLAIM, crawlerRecordProblems, factsProblems, hostProblems, llmsProblems, metadataProblems, readLlms, readRobotsGroups, reservedBase, robotsProblems, urlStrategyProblems } from '../lib/search.mjs';
 import { checkSecurityStatic } from './security.mjs';
 import { checkPrivacyStatic } from './privacy.mjs';

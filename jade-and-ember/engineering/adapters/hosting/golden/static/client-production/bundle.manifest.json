@@ -32,14 +32,14 @@
     {
       "path": "site/404.html",
       "role": "site",
-      "sha256": "51bb8c1bb70a0f3f33345a1afeaaea23c6f65b568290098933a4c4744e627aeb",
-      "bytes": 514
+      "sha256": "13bbba061f6b04f815bb987651fe6dc162d98a5e70ee870305f5fbd41cbda2b6",
+      "bytes": 522
     },
     {
       "path": "site/about.html",
       "role": "site",
-      "sha256": "e39c2d93bb795e06f12b0c84e735178a28cb2ec6161f605402893036c1841416",
-      "bytes": 563
+      "sha256": "b52fffe0ebc0c24e6190b6726b1cb970c370c01af9b940f77251c5f9dec998dc",
+      "bytes": 571
     },
     {
       "path": "site/assets/app.js",
@@ -56,8 +56,8 @@
     {
       "path": "site/index.html",
       "role": "site",
-      "sha256": "f0a7ff96bef7b86e46c38784e69429aa17a7c05a9687423d0b7924b94929e001",
-      "bytes": 586
+      "sha256": "45fde7f5a262d8418dcf16ff90485517603133e5e360a1af658ffd2f212c46ed",
+      "bytes": 594
     },
     {
       "path": "site/llms.txt",
@@ -78,10 +78,10 @@
       "bytes": 2048
     },
     {
-      "path": "site/menu.html",
+      "path": "site/products.html",
       "role": "site",
-      "sha256": "016325152fb4cd413862acd327a9c96cdd9d697d00d4ad602dc1c169f50252ba",
-      "bytes": 552
+      "sha256": "35e4dae2f38772be7eef8ed3a9109d913b62bcc2c335d7e161d94d30bb9409c9",
+      "bytes": 572
     },
     {
       "path": "site/robots.txt",
@@ -98,8 +98,8 @@
     {
       "path": "site/sitemap.xml",
       "role": "site",
-      "sha256": "dd3ed7279120ffdb8918fd6ec4faebcfdd63b931e3d3963092c0cef36b688211",
-      "bytes": 291
+      "sha256": "83a8e7098d3eba4b530942a3b24e20c5960641c2a749da764db3e3022b242e65",
+      "bytes": 295
     },
     {
       "path": "site/styles.css",
@@ -108,7 +108,7 @@
       "bytes": 56
     }
   ],
-  "siteTreeSha256": "bd95beac3d63e8dd0e3d54450e25738c40122a03c795d3520d6e2f836b63d07a",
+  "siteTreeSha256": "f3f77027f17410c931ec093190acadd23bbac3a4b19cece7322080dbc032d5b8",
   "settingsToApply": [
     {
       "name": "nginx",
