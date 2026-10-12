@@ -2,6 +2,9 @@
 //   gate [--channel <name>]     evaluate the release gate for this build; exit 1 unless every requirement of its channel is met
 //   manifest [--out <file>]     print (or write) the release manifest for HEAD; never requires the gate to pass
 //   search-digest               print the fingerprint of the generated search artifacts that a search-review record must carry
+//   external-digest             print the digest of the external destinations this build delivers (what an external-links verification and review are bound to)
+//   rights-digest               print the digest of the delivered media and fonts (what a rights-verification record is bound to)
+//   sbom [--out <file>]         print (or write) the deterministic composite SBOM and its SHA-256
 //   candidate                   print the candidate artifact digest and its parts (what every record is bound to; see G6-2-DESIGN.md section 3)
 //   prepare                     if the gate passes: write release/ (package, manifest, SHA256SUMS, host files, and the records the approval relies on).
 //                               Nothing is deployed.
@@ -44,6 +47,21 @@ try {
     console.log('  the Home page JSON-LD block\nCheck: every fact (name, address, phone, hours, cuisine, ordering link) against the client; the schema.org type; the crawler classes; the production domain.');
     finish(0);
   }
+  if (cmd === 'external-digest') {
+    console.log(`external destinations delivered by this build: ${withAssets.ext.destinations.length}\ndigest: ${withAssets.ext.digest}`);
+    for (const d of withAssets.ext.destinations) console.log(`  ${d.kind.padEnd(8)} ${d.url}  [${d.files.join(', ')}]`);
+    console.log('\nVerify exactly this list on a networked runner (node engineering/tools/external-links.mjs verify --delivered --write --runner github-actions|person --note "..."), then a person opens each destination and records an external-links-review (npm run release:record -- template external-links-review).');
+    finish(0);
+  }
+  if (cmd === 'rights-digest') {
+    console.log(`digest of the delivered media and fonts: ${withAssets.mediaDigest}\nA rights-verification record carries it as subject.inventory; changing any image, video, font or licence file changes it.`);
+    finish(0);
+  }
+  if (cmd === 'sbom') {
+    if (arg('--out')) { writeFileSync(resolve(arg('--out')), withAssets.sbomText); console.log(`wrote ${arg('--out')}`); } else process.stdout.write(withAssets.sbomText);
+    console.error(`sbom sha256 ${withAssets.sbomSha256}${withAssets.sbomProblems.length ? `; INCOMPLETE: ${withAssets.sbomProblems[0]}` : ''}`);
+    finish(0);
+  }
   if (cmd === 'manifest') {
     const m = JSON.stringify(buildReleaseManifest(ctx, { siteDir: dir }), null, 2) + '\n';
     if (arg('--out')) { writeFileSync(resolve(arg('--out')), m); console.log(`wrote ${arg('--out')}`); } else process.stdout.write(m);
@@ -67,14 +85,17 @@ try {
     for (const family of ['approvals', 'evidence', 'deployments']) { const from = join(engDir, 'release', family); if (existsSync(from)) cpSync(from, join(out, 'records', family), { recursive: true, filter: (f) => !/README\.md$/.test(f) }); }
     mkdirSync(join(out, 'records'), { recursive: true });
     writeFileSync(join(out, 'records', 'verification.json'), JSON.stringify(ctx.verify, null, 2) + '\n');
+    // G6-3: the composite SBOM travels with the package; the histories and registers its requirements were judged by travel in records/ so a recipient can re-judge them
+    writeFileSync(join(out, 'sbom.cdx.json'), withAssets.sbomText);
+    for (const [from, to] of [[join(engDir, 'external-links-verification.json'), 'external-links-verification.json'], [join(engDir, 'supply-chain-verification.json'), 'supply-chain-verification.json'], [join(engDir, 'dependencies.json'), 'dependencies.json'], [join(engDir, 'media-rights-inventory.json'), 'media-rights-inventory.json']]) if (existsSync(from)) cpSync(from, join(out, 'records', to));
     cpSync(join(engDir, 'release', 'reviewers.json'), join(out, 'records', 'reviewers.json')); cpSync(join(engDir, 'release', 'demonstrations.json'), join(out, 'records', 'demonstrations.json'));
-    const sums = ['release-manifest.json', zipName].map((n) => `${sha256hex(readFileSync(join(out, n)))}  ${n}`).join('\n') + '\n';
+    const sums = ['release-manifest.json', zipName, 'sbom.cdx.json'].map((n) => `${sha256hex(readFileSync(join(out, n)))}  ${n}`).join('\n') + '\n';
     writeFileSync(join(out, 'SHA256SUMS.txt'), sums);
     const pol = loadPolicy(); mkdirSync(join(out, 'host'), { recursive: true });
     writeFileSync(join(out, 'host', '_headers'), renderHeadersFile(dir, pol, { https: true })); writeFileSync(join(out, 'host', 'nginx.conf'), renderNginx(dir, pol, { https: true })); writeFileSync(join(out, 'host', 'htaccess'), renderApache(dir, pol, { https: true }));
     console.log(`\nprepared ${out}: ${zipName} (${zip.length} bytes), release-manifest.json, SHA256SUMS.txt, host/. Nothing was deployed.`);
     finish(0);
   }
-  console.error('usage: release.mjs gate|manifest|prepare|search-digest|candidate [--channel demonstration|client-production]'); finish(2);
+  console.error('usage: release.mjs gate|manifest|prepare|search-digest|external-digest|rights-digest|sbom|candidate [--channel demonstration|client-production]'); finish(2);
 } catch (e) { console.error(e.stack || e.message); finish(2); }
 void readJson;

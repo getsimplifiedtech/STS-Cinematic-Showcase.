@@ -1,7 +1,7 @@
 // The single-defect cases of check:release and check:selftest-gate4 for release model v2 (G6-2): each is an override of the fully approved invented context
 // (lib/release-fixtures.mjs). `blocked()` must each make the gate refuse; `allowed()` are things that must NOT block (they prove the gate reads fields, not prose);
 // `demonstrationBlocked()` are demonstration defects. Functions, so every call builds fresh objects.
-import { fxEntry, fxRecord, fxReviewers, fxVerify, fxVerifyEdited, FX_CONFIG, FX_IDS, FX_HOST, greenClientContext } from './release-fixtures.mjs';
+import { fxEntry, fxExternalHistory, fxRecord, fxReviewers, fxSite, fxSiteWithIndex, fxSupplyHistory, fxVerify, fxVerifyEdited, FX_CONFIG, FX_IDS, FX_HOST, greenClientContext } from './release-fixtures.mjs';
 import { FIXTURE_CANDIDATE, FIXTURE_ENGINE } from './evidence-fixtures.mjs';
 import { sealOf } from './verification.mjs';
 
@@ -14,8 +14,32 @@ const reseal = (v) => { v.seal = sealOf(v); return v; };
 const mutateEv = (target, fn) => G().evidence.map((e) => (e.record.target === target ? (() => { const r = clone(e.record); fn(r); return { ...e, record: r }; })() : e));
 const cfg = (fn) => { const c = G().client; fn(c); return c; };
 const OTHER = '0'.repeat(64);
+import { registryDigest as destinationsDigestOf } from './external.mjs';
+const require_digest = (pairs) => destinationsDigestOf({ destinations: pairs.map(([kind, url]) => ({ kind, url })) });
 const rec = (type, over, o) => fxRecord(type, over, o);
+const hist = (fn) => { const h = fxExternalHistory(); fn(h.records[0]); return h; };
+const sup = (fn) => { const h = fxSupplyHistory(); fn(h.records[0]); return h; };
+const inv = (fn) => { const i = clone(fxSite().inventory); fn(i); return i; };
+const exc = (over = {}) => ({ name: 'left-pad', severity: 'moderate', advisory: 'GHSA-aaaa-bbbb-cccc', reason: 'INVENTED: development-only, no exposure', reviewed: '2026-10-01', expires: '2026-12-01', plan: 'upgrade', ...over });
+const advisory = (over = {}) => ({ package: 'left-pad', severity: 'moderate', advisory: 'GHSA-aaaa-bbbb-cccc', ...over });
+const withAdvisory = (a, o = {}) => sup((r) => { r.audit.advisories = [a]; r.audit.total = 1; r.audit[a.severity] = 1; Object.assign(r, o); });
+const depsWith = (...packages) => ({ ...G().deps, acceptedAdvisories: { ...G().deps.acceptedAdvisories, packages } });
+const page = (head) => `<!doctype html><html><head><title>fixture</title>${head}</head><body><p>fixture</p></body></html>`;
 
+// For the G6-3 cases: the requirement(s) that must be the reason (a case blocked only by something unrelated would prove nothing)
+const X = (ids, names) => Object.fromEntries(names.map((n) => [n, ids]));
+export const EXPECTED_REASON = {
+  ...X(['externalLinks'], ['no external-links verification record', 'an external-links verification for another destination list', 'an external-links verification from a sandbox run', 'an external-links verification older than its limit', 'a clickable link the site refused (blocked)', 'a clickable link that is gone (unavailable)', 'a clickable link that could not be reached (inconclusive)', 'a verified link through an http hop', 'a verification record with no result for a destination', 'a clickable link that is not https', 'a clickable link to a reserved host', 'a clickable link to a staging host']),
+  ...X(['externalLinksReview'], ['a missing external-links review', 'an external-links review of another destination list', 'an external-links review that relies on another verification record', 'an external-links review that did not open the destinations', 'an external-links review that was rejected', 'an external-links review revoked by an authorised reviewer', 'an external-links review for another candidate']),
+  ...X(['rightsVerification'], ['a rights verification of other media (inventory digest differs)', 'a rights verification with no inventory digest', 'a rights verification with a basis the model does not know']),
+  ...X(['mediaRightsInventory'], ['an image still unverified in the inventory', 'an inventory approval naming a record that does not exist', 'the rights verification revoked after the inventory was written (the inventory still says verified)', 'the rights verification rejected after the inventory was written', 'provider terms nobody has reviewed', 'the Noto Serif SC notice finding (F-G5-05) still open', 'the media provenance finding (F-G2-01) only accepted, not resolved', 'a font that is not described as licence-text-shipped', 'a rights verification of other media (inventory digest differs)']),
+  ...X(['socialImageRights'], ['a social image hosted on another site', 'a social image that is not a delivered file', 'a social image that is delivered but not in the rights inventory', 'a twitter card image that is not rights-verified', 'a JSON-LD image hosted elsewhere']),
+  ...X(['dependencySecurity'], ['no supply-chain verification', 'a supply-chain verification for another lockfile', 'a supply-chain verification from a sandbox run', 'an old supply-chain verification', 'a high advisory', 'a critical advisory', 'a moderate advisory with no exception', 'a moderate advisory whose exception expired', 'an exception without a plan', 'an exception that runs for more than 90 days', 'an exception written as a bare package name', 'a supply-chain record whose advisory count does not add up', 'registry signatures that failed', 'registry signatures that cover fewer packages than the lockfile']),
+  ...X(['sbomVerified'], ['an SBOM digest different from the one the build regenerates', 'an SBOM that records a library with no licence']),
+  ...X(['dependencyPolicy'], ['a dependency policy violation (a loose version range)']),
+  ...X(['supportedRuntimes'], ['a workflow on an unsupported Node']),
+  ...X(['authenticity'], ['authenticated authorisation and provenance (not implemented)']),
+};
 export const RELEASE_CASES = {
   blocked: () => ({
     // ---- approvals as structured records (RG-04 to RG-07)
@@ -123,6 +147,65 @@ export const RELEASE_CASES = {
     'an unfilled template': { evidence: mutateEv('desktop-chrome', (r) => { r.status = 'template'; }) },
     'an incomplete record (a result left empty)': { evidence: mutateEv('sr-nvda-firefox', (r) => { r.results.pages['visit-us.html']['sr-headings'].outcome = null; }) },
     'a record signed by no one': { evidence: mutateEv('sr-voiceover-macos-safari', (r) => { r.attestation.signedBy = ''; }) },
+    // ---- G6-3: external links (D-P5-1, RG-02)
+    'no external-links verification record': { externalHistory: { records: [] } },
+    'an external-links verification for another destination list': { externalHistory: hist((r) => { r.registryDigest = OTHER; }) },
+    'an external-links verification from a sandbox run': { externalHistory: hist((r) => { r.runner = { kind: 'sandbox', description: 'INVENTED: a run with no network at all' }; }) },
+    'an external-links verification older than its limit': { externalHistory: hist((r) => { r.date = '2026-08-01'; }) },
+    'a clickable link the site refused (blocked)': { externalHistory: hist((r) => { Object.assign(r.results[0], { class: 'blocked', finalStatus: 403 }); }) },
+    'a clickable link that is gone (unavailable)': { externalHistory: hist((r) => { Object.assign(r.results[0], { class: 'unavailable', finalStatus: 404 }); }) },
+    'a clickable link that could not be reached (inconclusive)': { externalHistory: hist((r) => { Object.assign(r.results[0], { class: 'inconclusive', finalStatus: null, chain: [] }); }) },
+    'a verified link through an http hop': { externalHistory: hist((r) => { r.results[0].chain = [{ url: 'http://order.jade-and-ember-fixture.com/', status: 301, method: 'HEAD' }, ...r.results[0].chain]; }) },
+    'a verification record with no result for a destination': { externalHistory: hist((r) => { r.results = [{ ...r.results[0], url: 'https://elsewhere.jade-and-ember-fixture.com/' }]; }) },
+    'a clickable link that is not https': { ext: (() => { const e = clone(fxSite().ext); e.destinations[0].url = 'http://order.jade-and-ember-fixture.com/'; return e; })() },
+    'a clickable link to a reserved host': { ext: (() => { const e = clone(fxSite().ext); e.destinations[0].url = 'https://order.jade-and-ember-fixture.test/'; return e; })() },
+    'a clickable link to a staging host': { ext: (() => { const e = clone(fxSite().ext); e.destinations[0].url = 'https://stage2.jade-and-ember-fixture.com/'; return e; })() },
+    'a missing external-links review': { approvalRecords: withoutType('external-links-review') },
+    'an external-links review of another destination list': { approvalRecords: editType('external-links-review', (r) => { r.subject.destinationsDigest = OTHER; }) },
+    'an external-links review that relies on another verification record': { approvalRecords: editType('external-links-review', (r) => { r.subject.verification = 'EXTV-9'; }) },
+    'an external-links review that did not open the destinations': { approvalRecords: editType('external-links-review', (r) => { r.subject.opened = false; }) },
+    'an external-links review that was rejected': { approvalRecords: editType('external-links-review', (r) => { r.status = 'rejected'; }) },
+    'an external-links review revoked by an authorised reviewer': { approvalRecords: plus(rec('external-links-review', { status: 'revoked', ends: 'EXTL-JE-001', decidedAt: '2026-10-11T12:00:00Z' }, { n: 2 })) },
+    'an external-links review for another candidate': { approvalRecords: editType('external-links-review', (r) => { r.candidate = OTHER; }) },
+    // ---- G6-3: media rights bound to the delivered media (D-P5-4, RG-03)
+    'a rights verification of other media (inventory digest differs)': { approvalRecords: editType('rights-verification', (r) => { r.subject.inventory = OTHER; }) },
+    'a rights verification with no inventory digest': { approvalRecords: editType('rights-verification', (r) => { delete r.subject.inventory; }) },
+    'a rights verification with a basis the model does not know': { approvalRecords: editType('rights-verification', (r) => { r.subject.basis = 'it seemed fine'; }) },
+    'an image still unverified in the inventory': { inventory: inv((i) => { i.assets[0].rights = { status: 'unverified', established: ['x'], notEstablished: ['the licence'] }; }) },
+    'an inventory approval naming a record that does not exist': { inventory: inv((i) => { i.assets[0].rights.approval = 'RIGHTS-JE-777'; }) },
+    'the rights verification revoked after the inventory was written (the inventory still says verified)': { approvalRecords: plus(rec('rights-verification', { status: 'revoked', ends: 'RIGHTS-JE-001', decidedAt: '2026-10-11T12:00:00Z' }, { n: 2 })) },
+    'the rights verification rejected after the inventory was written': { approvalRecords: plus(rec('rights-verification', { status: 'rejected', decidedAt: '2026-10-11T12:00:00Z' }, { n: 2 })) },
+    'provider terms nobody has reviewed': { inventory: inv((i) => { i.terms[0].status = 'not-reviewed'; delete i.terms[0].reviewedOn; delete i.terms[0].reviewedBy; }) },
+    'the Noto Serif SC notice finding (F-G5-05) still open': { findings: [{ id: 'F-G5-05', severity: 'Minor', visual: false, status: 'open: awaits the owner' }] },
+    'the media provenance finding (F-G2-01) only accepted, not resolved': { findings: [{ id: 'F-G2-01', severity: 'Minor', visual: false, status: 'accepted' }] },
+    'a font that is not described as licence-text-shipped': { inventory: inv((i) => { i.assets[2].rights.status = 'unverified'; }) },
+    // ---- G6-3: social-preview images (D-P4-3)
+    'a social image hosted on another site': { socialSiteDir: fxSiteWithIndex(page('<meta property="og:image" content="https://cdn.elsewhere.com/share.jpg">')) },
+    'a social image that is not a delivered file': { socialSiteDir: fxSiteWithIndex(page('<meta property="og:image" content="media/not-there.jpg">')) },
+    'a social image that is delivered but not in the rights inventory': { inventory: inv((i) => { i.assets = i.assets.filter((a) => a.path !== 'media/hero.webp'); }), socialSiteDir: fxSiteWithIndex(page('<meta property="og:image" content="media/hero.webp">')) },
+    'a twitter card image that is not rights-verified': { inventory: inv((i) => { i.assets[0].rights.status = 'unverified'; }), socialSiteDir: fxSiteWithIndex(page('<meta name="twitter:image" content="media/hero.webp">')) },
+    'a JSON-LD image hosted elsewhere': { socialSiteDir: fxSiteWithIndex(page('<script type="application/ld+json">{"@type":"Restaurant","image":"https://cdn.elsewhere.com/a.jpg"}</script>')) },
+    // ---- G6-3: dependency and supply-chain requirements (D-P6-5, D-P6-7, RG-10, RG-11)
+    'no supply-chain verification': { supplyHistory: { records: [] } },
+    'a supply-chain verification for another lockfile': { supplyHistory: sup((r) => { r.lockfileSha256 = OTHER; }) },
+    'a supply-chain verification from a sandbox run': { supplyHistory: sup((r) => { r.runner = { kind: 'sandbox', description: 'INVENTED: a run with no network at all' }; r.signatures = { total: 3, verified: 0, failed: 0, missing: 3 }; }) },
+    'an old supply-chain verification': { supplyHistory: sup((r) => { r.date = '2026-08-01'; }) },
+    'a high advisory': { supplyHistory: withAdvisory(advisory({ severity: 'high' })), deps: depsWith(exc({ severity: 'high' })) },
+    'a critical advisory': { supplyHistory: withAdvisory(advisory({ severity: 'critical' })) },
+    'a moderate advisory with no exception': { supplyHistory: withAdvisory(advisory()) },
+    'a moderate advisory whose exception expired': { supplyHistory: withAdvisory(advisory()), deps: depsWith(exc({ expires: '2026-10-01' })) },
+    'an exception without a plan': { supplyHistory: withAdvisory(advisory()), deps: depsWith(exc({ plan: 'hope' })) },
+    'an exception that runs for more than 90 days': { supplyHistory: withAdvisory(advisory()), deps: depsWith(exc({ reviewed: '2026-10-01', expires: '2027-06-01' })) },
+    'an exception written as a bare package name': { supplyHistory: withAdvisory(advisory()), deps: depsWith('left-pad') },
+    'a supply-chain record whose advisory count does not add up': { supplyHistory: sup((r) => { r.audit.total = 2; }) },
+    'registry signatures that failed': { supplyHistory: sup((r) => { r.signatures = { total: 3, verified: 2, failed: 1, missing: 0 }; }) },
+    'registry signatures that cover fewer packages than the lockfile': { supplyHistory: sup((r) => { r.signatures = { total: 2, verified: 2, failed: 0, missing: 0 }; }) },
+    'an SBOM digest different from the one the build regenerates': { supplyHistory: sup((r) => { r.sbomSha256 = OTHER; }) },
+    'an SBOM that records a library with no licence': { sbomProblems: ['left-pad@1.0.0: no licence recorded'] },
+    'a dependency policy violation (a loose version range)': { dependencyPolicyProblems: ['devDependency x is "^1.0.0": pin an exact version'] },
+    'a workflow on an unsupported Node': { runtimeProblems: ['a job still on Node 22 is refused'] },
+    // ---- G6-3: authenticity (D-G62-2, RG-14): the real verifier is a hard stop
+    'authenticated authorisation and provenance (not implemented)': { authenticityVerifier: undefined },
     // ---- search, domain and configuration
     'a staging domain (pages.dev)': { client: cfg((c) => { c.seo.baseUrl = 'https://jade.pages.dev'; }) },
     'an example domain': { client: cfg((c) => { c.seo.baseUrl = 'https://jade.example.test'; }) },
@@ -148,6 +231,17 @@ export const RELEASE_CASES = {
     'two valid approvals of the same release by two reviewers': { approvalRecords: plus(rec('release-approval', { decidedBy: { reviewer: 'R-01', name: 'Fixture Owner' }, decidedAt: '2026-10-11T12:00:00Z' }, { n: 2 })) },
     'an unauthorised POSITIVE record (not counted, harmless)': { approvalRecords: plus(rec('release-approval', { decidedBy: { reviewer: 'R-09', name: 'Nobody' } }, { n: 2 })) },
     'an unrelated deployment authorisation record': { deploymentRecords: [fxEntry(rec('deployment-authorisation', {}))] },
+    'a printed mention accepted by name in the external-links review': (() => {
+      const e = clone(fxSite().ext); e.destinations.push({ kind: 'mention', url: 'https://mentioned.jade-and-ember-fixture.com/', files: ['fonts/LICENSES.txt'], count: 1 });
+      e.digest = (() => { const d = e.destinations.map((x) => [x.kind, x.url]).sort(); return require_digest(d); })();
+      const h = fxExternalHistory(); h.records[0].registryDigest = e.digest; h.records[0].results.push({ url: 'https://mentioned.jade-and-ember-fixture.com/', kind: 'mention', class: 'inconclusive', finalUrl: null, finalStatus: null, chain: [], attempts: 2, detail: 'no DNS answer' });
+      const recs = G().approvalRecords.map((x) => (x.record.type === 'external-links-review' ? { ...x, record: { ...clone(x.record), subject: { destinationsDigest: e.digest, verification: 'EXTV-1', opened: true, accepted: [{ url: 'https://mentioned.jade-and-ember-fixture.com/', reason: 'INVENTED: the owner opened it by hand' }] } } } : x));
+      return { ext: e, externalHistory: h, approvalRecords: recs };
+    })(),
+    'a moderate advisory with a current, planned exception': { supplyHistory: withAdvisory(advisory()), deps: depsWith(exc()) },
+    'a social image that is a delivered, inventoried, rights-verified file': { socialSiteDir: fxSiteWithIndex(page('<meta property="og:image" content="media/hero.webp">')) },
+    'a rejected external-links review for an older candidate kept as history': { approvalRecords: plus(rec('external-links-review', { status: 'rejected', decidedAt: '2026-09-01T10:00:00Z' }, { n: 2, candidate: OTHER })) },
+    'a rights verification superseded by a new one that covers the same media': { approvalRecords: plus(rec('rights-verification', { status: 'superseded', ends: 'RIGHTS-JE-001', decidedAt: '2026-10-11T12:00:00Z' }, { n: 2 }), rec('rights-verification', { decidedAt: '2026-10-11T13:00:00Z' }, { n: 3 })), inventory: inv((i) => { for (const a of i.assets) if (a.rights.approval) a.rights.approval = 'RIGHTS-JE-003'; }) },
     'a CI summary with a seal different from the local record (they are different runs)': { evidence: mutateEv('ci-run', (r) => { r.verification.seal = 'e'.repeat(64); }) },
     'the HEAD commit differing from every recorded commit (records are bound to the artifact, not to HEAD)': { git: { ...G().git, commit: 'a'.repeat(40), tree: 'f'.repeat(40) } },
   }),

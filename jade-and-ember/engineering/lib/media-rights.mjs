@@ -121,3 +121,36 @@ export function mediaRightsProblems({ inventory, root, approvals = [], licenceTe
 export function mediaInventoryDigest(inventory) {
   return createHash('sha256').update(JSON.stringify((inventory.assets || []).map((a) => [a.path, a.sha256]).sort())).digest('hex');
 }
+
+// ---- the release side (G6-3, APR-JE-040; decision D-P5-4, finding RG-03)
+// A fingerprint of every file the release delivers under media/ and fonts/ (path and content), for a rights-verification record to be bound to. Changing, adding or
+// removing any image, video, font or licence file changes it, so a verification never silently covers media it did not see.
+export function deliveredMediaDigest(siteDir) {
+  const rows = [];
+  for (const dir of ['media', 'fonts']) if (existsSync(join(siteDir, dir))) for (const f of readdirSync(join(siteDir, dir)).sort()) rows.push([`${dir}/${f}`, sha256(readFileSync(join(siteDir, dir, f)))]);
+  return sha256(JSON.stringify(rows));
+}
+
+// Does the build carry any media whose use is not established? rightsIds: the ids of the rights-verification records IN FORCE for this candidate and these
+// files (rejected, revoked, superseded and mismatched records are not in the list), so revoking or rejecting a record un-verifies everything it covered.
+// Returns { ok, detail, problems }.
+export function rightsClearance({ inventory, siteDir, rightsIds, findingIds, blockingFindings }) {
+  const licencePath = join(siteDir, 'fonts', 'LICENSES.txt');
+  const licenceText = existsSync(licencePath) ? readFileSync(licencePath, 'utf8') : null;
+  const base = mediaRightsProblems({ inventory, root: siteDir, approvals: rightsIds.map((id) => ({ id, type: 'rights-verification' })), licenceText });
+  const problems = base.problems.map((p) => p.detail);
+  for (const n of base.notices) problems.push(n.detail);
+  const termById = new Map((inventory?.terms || []).map((t) => [t.id, t]));
+  for (const a of inventory?.assets || []) {
+    const st = a.rights?.status;
+    if (a.kind === 'image' || a.kind === 'video') {
+      if (st !== 'verified') problems.push(`${a.path} is ${st || 'without a status'}, not verified: no rights-verification record covers its use`);
+      else if (!rightsIds.includes(a.rights.approval)) problems.push(`${a.path} names ${a.rights.approval || 'no record'}, which is not an in-force rights verification of this build (rejected, revoked, superseded, for other media or not made)`);
+    } else if (a.kind === 'font' && !['licence-text-shipped', 'verified'].includes(st)) problems.push(`${a.path} is ${st || 'without a status'}: a font needs its licence text shipped`);
+    for (const id of a.termsToVerify || []) { const t = termById.get(id); if (!t || t.status !== 'reviewed') problems.push(`${a.path}: the terms ${id} have not been reviewed by a person (dated, authoritative evidence is the owner's task, D-P5-5)`); }
+  }
+  const open = (blockingFindings || []).filter((id) => (findingIds || []).includes(id));
+  for (const id of open) problems.push(`finding ${id} is still open: it is resolved, not merely accepted, before a client release`);
+  const uniq = [...new Set(problems)];
+  return { ok: uniq.length === 0, problems: uniq, detail: uniq.length ? `${uniq.length} problem(s): ${uniq.slice(0, 3).join('; ')}` : `${(inventory?.assets || []).length} assets: every image and video verified by an in-force rights verification, fonts with their licence text, terms reviewed, findings closed` };
+}

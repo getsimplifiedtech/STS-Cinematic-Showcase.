@@ -6,7 +6,7 @@
 // ledger, documents, and anything about git (commit, branch, date, cleanliness). Recording a decision about the artifact therefore cannot change
 // the artifact's identity, which is what made the old "name the HEAD commit" binding impossible to satisfy (RG-01).
 import { createHash } from 'node:crypto';
-import { readFileSync, readdirSync } from 'node:fs';
+import { existsSync, readFileSync, readdirSync } from 'node:fs';
 import { join } from 'node:path';
 import { engDir, projectDir, readJson } from './git.mjs';
 import { buildManifest } from './hashed.mjs';
@@ -28,6 +28,8 @@ export const digestOf = (obj) => sha(canonicalJson(obj));
 export const channelOf = (client) => (client.flags.demo === true && client.seo.noindex === true ? 'demonstration' : 'client-production');
 
 const fileSha = (p) => sha(readFileSync(p));
+// a file the release depends on that is missing is a NULL part, never a crash: the digest still computes and the requirement that relies on it fails with a reason (G6-3, RG-02)
+const fileShaOrNull = (p) => (existsSync(p) ? sha(readFileSync(p)) : null);
 
 export const DEMONSTRATION_STATEMENT = 'FICTIONAL DEMONSTRATION: a design showcase by Simplified Tech Solutions. It is not a client site, is not indexable, and is not approved for public deployment or for client production.';
 
@@ -60,8 +62,9 @@ export function computeCandidate({ siteDir, root = projectDir, eng = engDir, cha
     releasePolicy: fileSha(join(eng, 'release', 'policy.json')),
     evidenceSpec: fileSha(join(eng, 'release', 'evidence-spec.json')),
     securityPolicy: { file: fileSha(join(eng, 'security.json')), csp: sha(buildCsp(siteDir, pol)) },
-    mediaRights: fileSha(join(eng, 'media-rights-inventory.json')),
-    externalDestinations: fileSha(join(eng, 'external-destinations.json')),
+    mediaRights: fileShaOrNull(join(eng, 'media-rights-inventory.json')),
+    externalDestinations: fileShaOrNull(join(eng, 'external-destinations.json')),
+    dependencyPolicy: fileShaOrNull(join(eng, 'dependencies.json')),
     framework: { commit: authority.framework.commit, skillSha256: authority.creativeAuthority.skillSha256, licenseSha256: authority.creativeAuthority.licenseSha256 },
     // the two files the ZIP carries besides the delivered site: serve.py (run by the recipient) and the text that tells them to run it
     packageExtras: { servePy: fileSha(join(root, 'serve.py')), startHereTemplate: startHereTemplateSha(ver, ch) },

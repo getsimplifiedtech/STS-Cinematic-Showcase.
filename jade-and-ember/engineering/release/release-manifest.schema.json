@@ -24,6 +24,10 @@
     "records",
     "evidence",
     "findings",
+    "externalLinks",
+    "mediaRights",
+    "supplyChain",
+    "authenticity",
     "dependencies",
     "gate",
     "package"
@@ -699,6 +703,7 @@
             "mediaRights",
             "externalDestinations",
             "packageExtras",
+            "dependencyPolicy",
             "framework",
             "engines"
           ],
@@ -749,12 +754,26 @@
               }
             },
             "mediaRights": {
-              "type": "string",
-              "pattern": "^[0-9a-f]{64}$"
+              "oneOf": [
+                {
+                  "type": "null"
+                },
+                {
+                  "type": "string",
+                  "pattern": "^[0-9a-f]{64}$"
+                }
+              ]
             },
             "externalDestinations": {
-              "type": "string",
-              "pattern": "^[0-9a-f]{64}$"
+              "oneOf": [
+                {
+                  "type": "null"
+                },
+                {
+                  "type": "string",
+                  "pattern": "^[0-9a-f]{64}$"
+                }
+              ]
             },
             "framework": {
               "type": "object",
@@ -821,6 +840,10 @@
                   "pattern": "^[0-9a-f]{64}$"
                 }
               }
+            },
+            "dependencyPolicy": {
+              "type": "string",
+              "pattern": "^[0-9a-f]{64}$"
             }
           }
         }
@@ -865,7 +888,9 @@
         "evidence",
         "deployments",
         "reviewers",
-        "demonstrations"
+        "demonstrations",
+        "externalLinksHistory",
+        "supplyChainHistory"
       ],
       "properties": {
         "approvals": {
@@ -953,6 +978,151 @@
               "pattern": "^[0-9a-f]{64}$"
             }
           }
+        },
+        "externalLinksHistory": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "sha256"
+          ],
+          "properties": {
+            "sha256": {
+              "type": "string",
+              "pattern": "^[0-9a-f]{64}$"
+            }
+          }
+        },
+        "supplyChainHistory": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "sha256"
+          ],
+          "properties": {
+            "sha256": {
+              "type": "string",
+              "pattern": "^[0-9a-f]{64}$"
+            }
+          }
+        }
+      }
+    },
+    "externalLinks": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "destinationsDigest",
+        "destinations",
+        "verificationRecord",
+        "reviewRecords"
+      ],
+      "properties": {
+        "destinationsDigest": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{64}$"
+        },
+        "destinations": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "verificationRecord": {
+          "oneOf": [
+            {
+              "type": "null"
+            },
+            {
+              "type": "string"
+            }
+          ]
+        },
+        "reviewRecords": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "mediaRights": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "deliveredDigest",
+        "verificationRecords"
+      ],
+      "properties": {
+        "deliveredDigest": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{64}$"
+        },
+        "verificationRecords": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "supplyChain": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "lockfileSha256",
+        "sbom",
+        "verificationRecord"
+      ],
+      "properties": {
+        "lockfileSha256": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{64}$"
+        },
+        "verificationRecord": {
+          "oneOf": [
+            {
+              "type": "null"
+            },
+            {
+              "type": "string"
+            }
+          ]
+        },
+        "sbom": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "name",
+            "sha256",
+            "bytes"
+          ],
+          "properties": {
+            "name": {
+              "type": "string"
+            },
+            "sha256": {
+              "type": "string",
+              "pattern": "^[0-9a-f]{64}$"
+            },
+            "bytes": {
+              "type": "integer",
+              "minimum": 1
+            }
+          }
+        }
+      }
+    },
+    "authenticity": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "implemented",
+        "detail"
+      ],
+      "properties": {
+        "implemented": {
+          "type": "boolean"
+        },
+        "detail": {
+          "type": "string"
         }
       }
     }

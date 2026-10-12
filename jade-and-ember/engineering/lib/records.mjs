@@ -31,9 +31,12 @@ export const TYPES = {
   'release-approval': { prefix: 'REL', family: 'approvals' },
   'rights-verification': { prefix: 'RIGHTS', family: 'approvals' },
   'search-review': { prefix: 'SRCH', family: 'approvals' },
+  'external-links-review': { prefix: 'EXTL', family: 'approvals' },
   'deployment-authorisation': { prefix: 'DEP', family: 'deployments' },
 };
 export const SEARCH_REVIEWED = ['business-facts', 'structured-data', 'crawler-policy'];
+// what entitles the client to use the media (decision D-P5-4): authorised use is enough, ownership is not required
+export const RIGHTS_BASES = ['licence', 'permission', 'ownership'];
 const HEX64 = /^[0-9a-f]{64}$/;
 const isDate = (s) => typeof s === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(s) && new Date(`${s}T00:00:00Z`).toISOString().slice(0, 10) === s;
 // a UTC date-time to the second, that is a real instant (2026-02-30 and T24:00:00 are refused, not rolled over)
@@ -143,7 +146,18 @@ export function validateRecordShape(r, { today, now = null }) {
   if (r.status === 'approved') {
     if (r.type === 'release-approval' && !text(s.productionHost, 4)) bad('subject.productionHost must name the authorised production host');
     if (r.type === 'search-review') { if (!HEX64.test(s.searchDigest || '')) bad('subject.searchDigest must be the 64-hex digest of the reviewed search artifacts'); if (!Array.isArray(s.reviewed) || SEARCH_REVIEWED.some((k) => !s.reviewed.includes(k))) bad(`subject.reviewed must list ${SEARCH_REVIEWED.join(', ')}`); }
-    if (r.type === 'rights-verification') { if (!Array.isArray(s.sources) || !s.sources.length || s.sources.some((x) => !text(x, 5))) bad('subject.sources must list the sources reviewed'); if (!isDate(s.verifiedOn)) bad('subject.verifiedOn must be a real date'); else if (isStamp(r.decidedAt) && s.verifiedOn > r.decidedAt.slice(0, 10)) bad('subject.verifiedOn is after the decision'); }
+    if (r.type === 'rights-verification') {
+      if (!Array.isArray(s.sources) || !s.sources.length || s.sources.some((x) => !text(x, 5))) bad('subject.sources must list the sources reviewed');
+      if (!isDate(s.verifiedOn)) bad('subject.verifiedOn must be a real date'); else if (isStamp(r.decidedAt) && s.verifiedOn > r.decidedAt.slice(0, 10)) bad('subject.verifiedOn is after the decision');
+      if (!isStr(s.inventory) || !HEX64.test(s.inventory)) bad('subject.inventory must be the 64-hex digest of the delivered media and fonts this verification covers (npm run release:rights-digest)');
+      if (!RIGHTS_BASES.includes(s.basis)) bad(`subject.basis must say what entitles the use: one of ${RIGHTS_BASES.join(', ')} (authorised use is enough; ownership is not required)`);
+    }
+    if (r.type === 'external-links-review') {
+      if (!isStr(s.destinationsDigest) || !HEX64.test(s.destinationsDigest)) bad('subject.destinationsDigest must be the 64-hex digest of the destination list that was reviewed (npm run release:external-digest)');
+      if (!isStr(s.verification) || !/^EXTV-\d+$/.test(s.verification)) bad('subject.verification must name the verification record the review relied on (EXTV-n)');
+      if (s.opened !== true) bad('subject.opened must be true: each destination was opened and is the right one (reachability alone is never the approval)');
+      if (s.accepted !== undefined && (!Array.isArray(s.accepted) || s.accepted.some((a) => !a || !isStr(a.url) || !text(a.reason, 10)))) bad('subject.accepted must be a list of { url, reason } (a printed mention accepted by name; a clickable link cannot be accepted)');
+    }
     if (dep) { if (!/^REL-JE-\d{3,}$/.test(s.releaseApproval || '')) bad('subject.releaseApproval must name the release approval relied on'); if (!text(s.targetHost, 4)) bad('subject.targetHost must name the host'); }
   }
   return p;
@@ -222,6 +236,8 @@ export function resolve(entries, type, ctx) {
 function subjectProblems(type, s, ctx) {
   const p = [];
   if (type === 'search-review' && s.searchDigest !== ctx.searchDigest) p.push('it reviewed other search artifacts than this build generates');
+  if (type === 'rights-verification' && ctx.mediaDigest !== undefined && s.inventory !== ctx.mediaDigest) p.push('it verified other media and fonts than this build delivers (the inventory digest differs)');
+  if (type === 'external-links-review' && ctx.destinationsDigest !== undefined && s.destinationsDigest !== ctx.destinationsDigest) p.push('it reviewed another destination list than this build delivers');
   return p;
 }
 

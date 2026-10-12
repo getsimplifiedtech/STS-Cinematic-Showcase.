@@ -16,7 +16,7 @@ export const VERIFY_SCHEMA = 'jade-and-ember/verification@1';
 // test helpers, the server script, package.json and the CI workflows. NOT code: the record families, the reviewer table, the demonstration registry, the reports,
 // the evidence folders, the governance ledgers and documents (recording or reviewing a release must not invalidate a verification).
 // Exclusions are EXACT paths, not names matched at any depth (a folder that happened to be called `files` could otherwise hide code; G6-2 review, F6).
-const EXCLUDE_PATH = new Set(['.reports', 'node_modules', 'evidence', 'g6-1-evidence', 'g6-2-evidence', 'release/approvals', 'release/evidence', 'release/deployments', 'release/reviewers.json', 'release/demonstrations.json', 'framework-migration-matrix.json', 'gate5-closure.json']);
+const EXCLUDE_PATH = new Set(['.reports', 'node_modules', 'evidence', 'g6-1-evidence', 'g6-2-evidence', 'release/approvals', 'release/evidence', 'release/deployments', 'release/reviewers.json', 'release/demonstrations.json', 'framework-migration-matrix.json', 'gate5-closure.json', 'external-links-verification.json', 'supply-chain-verification.json']);
 export function engineFiles(eng = engDir) {
   const out = [];
   const walk = (base, rel, label, exclude = null) => {

@@ -22,18 +22,18 @@ import { validateSchema } from '../lib/schema.mjs';
 import { engDir, isMain, projectDir, readJson } from '../lib/git.mjs';
 import { readFileSync } from 'node:fs';
 import { greenClientContext, greenDemoContext } from '../lib/release-fixtures.mjs';
-import { RELEASE_CASES } from '../lib/release-cases.mjs';
+import { EXPECTED_REASON, RELEASE_CASES } from '../lib/release-cases.mjs';
 import { createHash } from 'node:crypto';
 
 export { greenClientContext, greenDemoContext };
 const sha = (b) => createHash('sha256').update(b).digest('hex');
 
-export const KNOWN = ['cleanTree', 'verifyPassed', 'noBlockingFindings', 'requiredApprovalsPresent', 'versionConsistent', 'demoStaysNoindex', 'demonstrationRegistered', 'demonstrationNoProductionDomain', 'assetManifestCurrent', 'stableVersion', 'recordsValid', 'releaseApproval', 'productionHostAuthorised', 'rightsVerification', 'noDemoText', 'productionSeoComplete', 'productionDomain', 'searchReadiness', 'evidence:real-device', 'evidence:screen-reader', 'evidence:browser-matrix', 'evidence:ci-run'];
+export const KNOWN = ['cleanTree', 'verifyPassed', 'noBlockingFindings', 'requiredApprovalsPresent', 'versionConsistent', 'demoStaysNoindex', 'demonstrationRegistered', 'demonstrationNoProductionDomain', 'assetManifestCurrent', 'stableVersion', 'recordsValid', 'releaseApproval', 'productionHostAuthorised', 'rightsVerification', 'noDemoText', 'productionSeoComplete', 'productionDomain', 'searchReadiness', 'evidence:real-device', 'evidence:screen-reader', 'evidence:browser-matrix', 'evidence:ci-run', 'externalLinks', 'externalLinksReview', 'mediaRightsInventory', 'socialImageRights', 'dependencyPolicy', 'dependencySecurity', 'sbomVerified', 'supportedRuntimes', 'authenticity'];
 
 export function policyProblems(policy) {
   const problems = [];
   for (const [ch, def] of Object.entries(policy.channels)) { for (const r of def.requires) if (!KNOWN.includes(r)) problems.push(`policy: channel ${ch} requires "${r}", which the gate does not implement`); if (!def.allows?.length) problems.push(`policy: channel ${ch} allows nothing`); }
-  for (const must of ['releaseApproval', 'productionHostAuthorised', 'recordsValid', 'rightsVerification', 'evidence:real-device', 'evidence:screen-reader', 'evidence:browser-matrix', 'evidence:ci-run', 'verifyPassed', 'stableVersion', 'noBlockingFindings', 'productionDomain', 'searchReadiness', 'productionSeoComplete', 'assetManifestCurrent']) if (!policy.channels['client-production'].requires.includes(must)) problems.push(`policy: client-production must require ${must}`);
+  for (const must of ['releaseApproval', 'productionHostAuthorised', 'recordsValid', 'rightsVerification', 'evidence:real-device', 'evidence:screen-reader', 'evidence:browser-matrix', 'evidence:ci-run', 'verifyPassed', 'stableVersion', 'noBlockingFindings', 'productionDomain', 'searchReadiness', 'productionSeoComplete', 'assetManifestCurrent', 'externalLinks', 'externalLinksReview', 'mediaRightsInventory', 'socialImageRights', 'dependencyPolicy', 'dependencySecurity', 'sbomVerified', 'supportedRuntimes', 'authenticity']) if (!policy.channels['client-production'].requires.includes(must)) problems.push(`policy: client-production must require ${must}`);
   for (const must of ['demoStaysNoindex', 'demonstrationRegistered', 'demonstrationNoProductionDomain', 'verifyPassed', 'assetManifestCurrent']) if (!policy.channels.demonstration.requires.includes(must)) problems.push(`policy: the demonstration must require ${must}`);
   return problems;
 }
@@ -76,7 +76,7 @@ export async function checkRelease({ root = null } = {}) {
     const green = evaluateGate(greenClientContext());
     if (!green.allowed) problems.push(`the gate blocks a fully approved client-production build: ${green.requirements.filter((r) => !r.ok).map((r) => `${r.id} (${r.detail})`).join('; ')}`);
     let blocked = 0;
-    for (const [name, over] of Object.entries(RELEASE_CASES.blocked())) { const r = evaluateGate(greenClientContext(over)); if (r.allowed) problems.push(`the gate ALLOWS a client-production build with ${name}`); else blocked++; }
+    for (const [name, over] of Object.entries(RELEASE_CASES.blocked())) { const r = evaluateGate(greenClientContext(over)); if (r.allowed) problems.push(`the gate ALLOWS a client-production build with ${name}`); else { blocked++; const want = EXPECTED_REASON[name]; const failing = r.requirements.filter((x) => !x.ok).map((x) => x.id); if (want && !want.every((w) => failing.includes(w))) problems.push(`the gate blocks ${name} but not for the right reason: expected ${want.join(', ')} to fail, got ${failing.join(', ')}`); } }
     let allowedOk = 0;
     for (const [name, over] of Object.entries(RELEASE_CASES.allowed())) { const r = evaluateGate(greenClientContext(over)); if (!r.allowed) problems.push(`the gate BLOCKS a client-production build with ${name} (it must not): ${r.requirements.filter((x) => !x.ok).map((x) => `${x.id} (${x.detail})`).join('; ')}`); else allowedOk++; }
     const demoOk = evaluateGate(greenDemoContext());

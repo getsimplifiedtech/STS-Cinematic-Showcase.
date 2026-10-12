@@ -1,0 +1,4 @@
+{
+  "$comment": "History of supply-chain verification runs (G6-3, APR-JE-040; decisions D-P6-5 and D-P6-7). Append only, one record per run of `npm run supply:record -- --write` on a networked runner (GitHub Actions or a person). A record binds a run of `npm audit` and `npm audit signatures` to the lockfile and to the digest of the deterministic composite SBOM (lib/supply.mjs). It is EVIDENCE that a run was made and what it saw; it does not authenticate who made it (a JSON record is not proof of authenticity: G6-3-SCOPE.md section 5). It is empty: no run has been recorded, and none is invented here.",
+  "records": []
+}

@@ -8,7 +8,7 @@
 //   * a tampered package is rejected by lib/release-package.mjs;
 //   * nothing in the repository's tools or workflow can deploy, publish or write to a remote system;
 //   * the real approvals, evidence, deployment and reviewer records, the ledger and the demonstration are not touched by any of it;
-//   * (v2) every finding RG-01, RG-04 to RG-09 and RG-13 has a BLOCKING scenario that fails closed: records are bound to the candidate artifact digest (the
+//   * (v2, G6-3) every finding RG-01 to RG-11, RG-13 and RG-14 (the last as a hard stop) has a BLOCKING scenario that fails closed: records are bound to the candidate artifact digest (the
 //     committed-records flow reaches green), a rejected, revoked, unauthorised or malformed record never counts and prose changes nothing, a hand-written,
 //     incomplete, edited or stale verification record is refused, the production host must be positively authorised, an unregistered demonstration is refused,
 //     and the package's ZIP must be the approved artifact.
@@ -90,7 +90,7 @@ export async function checkReleaseDryRun({ report = null, fast = false } = {}) {
     // 0. the synthetic world is what it says it is
     const synthFiles = readdirSync(sb.dir('approvals')).filter((f) => f.endsWith('.json'));
     const synthRecs = synthFiles.map((f) => JSON.parse(readFileSync(join(sb.dir('approvals'), f), 'utf8')));
-    if (synthRecs.length !== 3 || !synthRecs.every((r) => /SYNTHETIC DRY-RUN FIXTURE/.test(r.rationale))) problems.push('the synthetic approval records are not all labelled SYNTHETIC');
+    if (synthRecs.length !== 4 || !synthRecs.every((r) => /SYNTHETIC DRY-RUN FIXTURE/.test(r.rationale))) problems.push('the synthetic approval records are not all labelled SYNTHETIC');
     if (!/SYNTHETIC DRY-RUN FIXTURE/.test(readFileSync(join(sb.proj, 'engineering/release/reviewers.json'), 'utf8')) || !/SYNTHETIC DRY-RUN FIXTURE/.test(readFileSync(join(sb.proj, 'engineering/.reports/verify.json'), 'utf8'))) problems.push('the synthetic reviewer table or verification record is not labelled SYNTHETIC');
     if (sb.measure().candidate.digest !== sb.state.candidate.digest) problems.push('the sandbox does not measure to the candidate its records are bound to');
     const green = sb.gate(['--channel', 'client-production']);
@@ -135,10 +135,10 @@ export async function checkReleaseDryRun({ report = null, fast = false } = {}) {
   const total = rows.length, pass = rows.filter((r) => r.ok).length;
   notes.push(`dry run (synthetic, in a throwaway copy; real tool, parser, validator and git): ${pass}/${total} scenarios as expected — ${Object.entries(byGroup).map(([k, v]) => `${k} ${v.pass}/${v.total}`).join(', ')}`);
   // every finding this work package closes has at least one BLOCKING scenario, and all of its scenarios behave
-  const RG = ['RG-01', 'RG-04', 'RG-05', 'RG-06', 'RG-07', 'RG-08', 'RG-09', 'RG-13'];
+  const RG = ['RG-01', 'RG-02', 'RG-03', 'RG-04', 'RG-05', 'RG-06', 'RG-07', 'RG-08', 'RG-09', 'RG-10', 'RG-11', 'RG-13', 'RG-14'];
   const byRg = Object.fromEntries(RG.map((id) => [id, rows.filter((r) => r.rg === id)]));
   for (const id of RG) { const blocking = byRg[id].filter((r) => !r.allow); if (!blocking.length) problems.push(`finding ${id} has no blocking scenario in the dry run`); }
-  notes.push(`findings closed by blocking scenarios (blocking+must-stay-valid / all pass): ${RG.map((id) => `${id} ${byRg[id].filter((r) => !r.allow).length}+${byRg[id].filter((r) => r.allow).length} (${byRg[id].every((r) => r.ok) ? 'all as expected' : 'FAILING'})`).join(', ')}`);
+  notes.push(`findings with blocking scenarios (blocking+must-stay-valid / all pass; RG-14 is held shut by the authenticity hard stop, not resolved): ${RG.map((id) => `${id} ${byRg[id].filter((r) => !r.allow).length}+${byRg[id].filter((r) => r.allow).length} (${byRg[id].every((r) => r.ok) ? 'all as expected' : 'FAILING'})`).join(', ')}`);
   const open = probes.filter((p) => p.open);
   notes.push(`measured gaps (not failures): ${probes.length} probes, ${open.length} let something through that should arguably be refused: ${open.map((p) => p.id).join(', ') || 'none'} (see engineering/RELEASE-DRYRUN-GATE5.md and G6-2-REPORT.md)`);
   notes.push(`took ${Math.round((Date.now() - t0) / 1000)} s; the synthetic folders were deleted; the real ledger, records, reviewer table and tree are unchanged`);

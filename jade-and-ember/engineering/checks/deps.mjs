@@ -12,12 +12,10 @@ import { join } from 'node:path';
 import { spawnSync } from 'node:child_process';
 import { engDir, isMain, projectDir, readJson } from '../lib/git.mjs';
 import { satisfies } from '../lib/node-range.mjs';
+import { licenseOk } from '../lib/supply.mjs';
 
-// Is an SPDX expression allowed? "(MIT OR Apache-2.0)" needs one allowed alternative, "A AND B" needs both.
-export function licenseOk(expr, allowed) {
-  const e = expr.replace(/[()]/g, ' ').trim();
-  return e.split(/\s+OR\s+/i).some((alt) => alt.split(/\s+AND\s+/i).every((l) => allowed.includes(l.trim())));
-}
+// Is an SPDX expression allowed? (moved to lib/supply.mjs in G6-3 so the release gate uses the same rule)
+export { licenseOk };
 
 export function checkDepsStatic({ root = projectDir } = {}) {
   const pol = readJson(join(engDir, 'dependencies.json'));
@@ -79,9 +77,10 @@ export function checkDepsAudit({ root = projectDir } = {}) {
   const vulns = Object.entries(all.vulnerabilities || {});
   for (const [name, v] of vulns) if (['high', 'critical'].includes(v.severity) && pol.verificationPackages.includes(name)) problems.push(`${v.severity} vulnerability in ${name}, which the verification runs`);
   const acc = pol.acceptedAdvisories;
+  const accNames = acc.packages.map((e) => (typeof e === 'string' ? e : e.name));
   const high = vulns.filter(([, v]) => v.severity === 'high').map(([n]) => n);
-  for (const n of high) if (!acc.packages.includes(n)) problems.push(`high vulnerability in ${n}, which is not in the accepted list of dependencies.json (reviewed ${acc.reviewed}): review it`);
-  for (const n of acc.packages) if (!high.includes(n)) notes.push(`accepted advisory entry ${n} no longer reported: remove it from dependencies.json`);
+  for (const n of high) if (!accNames.includes(n)) problems.push(`high vulnerability in ${n}, which is not in the accepted list of dependencies.json (reviewed ${acc.reviewed}): review it`);
+  for (const n of accNames) if (!high.includes(n)) notes.push(`accepted advisory entry ${n} no longer reported: remove it from dependencies.json`);
   notes.push(`audit: production ${pv.total || 0} vulnerabilities; development tree ${av.critical || 0} critical, ${av.high || 0} high, ${av.moderate || 0} moderate, ${av.low || 0} low${high.length ? ` (all ${high.length} high ones are recorded as accepted: development-only tree of ${acc.viaRoot}, not part of verify, never delivered)` : ''}`);
   if ((av.total || 0) > 0 && !acc.packages.length) problems.push(`${av.total} vulnerabilities in the development tree and none is recorded in dependencies.json: review them`);
   return { problems, notes };

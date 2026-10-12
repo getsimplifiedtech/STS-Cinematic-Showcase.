@@ -50,7 +50,16 @@
         "productionSeoComplete",
         "productionDomain",
         "searchReadiness",
-        "assetManifestCurrent"
+        "assetManifestCurrent",
+        "externalLinks",
+        "externalLinksReview",
+        "mediaRightsInventory",
+        "socialImageRights",
+        "dependencyPolicy",
+        "dependencySecurity",
+        "sbomVerified",
+        "supportedRuntimes",
+        "authenticity"
       ],
       "allows": [
         "site-package",
@@ -77,8 +86,27 @@
       "superseded"
     ],
     "release-approval": "subject.productionHost must equal the host of seo.baseUrl and not be a reserved, example, local, IP or preview/staging address",
-    "rights-verification": "subject.sources (the sources reviewed) and subject.verifiedOn",
+    "rights-verification": "subject.sources, subject.verifiedOn, subject.inventory (the digest of the delivered media and fonts, npm run release:rights-digest) and subject.basis (licence, permission or ownership: authorised use is enough)",
     "search-review": "subject.searchDigest equal to `npm run release:search-digest` for the build, and subject.reviewed listing business-facts, structured-data and crawler-policy",
-    "deployment-authorisation": "subject.releaseApproval (the in-force release approval relied on) and subject.targetHost"
+    "deployment-authorisation": "subject.releaseApproval (the in-force release approval relied on) and subject.targetHost",
+    "external-links-review": "subject.destinationsDigest (npm run release:external-digest), subject.verification (the EXTV record relied on), subject.opened: true, and optionally subject.accepted: printed mentions accepted by name with a reason"
+  },
+  "externalLinks": {
+    "$comment": "G6-3 (APR-JE-040, decision D-P5-1). A client-production release needs a verification record from a networked run (github-actions or person) that covers exactly the destination list the build delivers, is at most maxAgeDays old and shows every clickable destination verified over https, plus a person's external-links-review record for that list. The demonstration has one destination and no client: the requirement does not apply to it.",
+    "maxAgeDays": 30
+  },
+  "supplyChain": {
+    "$comment": "G6-3 (APR-JE-040, decisions D-P6-5 and D-P6-7). A client-production release needs a supply-chain verification record for this lockfile (npm audit and npm audit signatures on a networked runner, maxAgeDays at most), no high or critical advisory, every other advisory excepted in dependencies.json with a plan and an unexpired review (at most 90 days), registry signatures verified for every locked package, and the composite SBOM (lib/supply.mjs) regenerating to the digest the record carries.",
+    "maxAgeDays": 30
+  },
+  "rights": {
+    "$comment": "G6-3 (APR-JE-040, decision D-P5-4). Authorised use is sufficient; ownership is not required. These findings must be closed (not merely accepted) before a client-production release.",
+    "blockingFindings": [
+      "F-G2-01",
+      "F-G5-05"
+    ]
+  },
+  "authenticity": {
+    "$comment": "G6-3 (APR-JE-040, decision D-G62-2). The authenticity requirement is implemented in code (lib/authenticity.mjs), not here: a value in this file cannot satisfy it. It is listed so that the policy check can refuse a client-production policy without it."
   }
 }

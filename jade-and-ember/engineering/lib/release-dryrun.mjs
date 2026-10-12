@@ -40,7 +40,7 @@ export const PERSONA = {
   rights: { reviewer: 'R-92', name: 'Dry-run Rights Persona' },
   deployer: { reviewer: 'R-93', name: 'Dry-run Deployer Persona' },
 };
-const ALL = ['release-approval', 'rights-verification', 'search-review'];
+const ALL = ['release-approval', 'rights-verification', 'search-review', 'external-links-review'];
 export const reviewerTable = () => ({
   $comment: `${SYNTH}: personas written by the dry-run harness inside a throwaway copy.`, schema: REVIEWERS_SCHEMA, establishedBy: 'APR-JE-001',
   reviewers: [
@@ -68,15 +68,15 @@ import { rmSync } from 'node:fs';
 const proj = process.cwd();
 const imp = (p) => import(pathToFileURL(join(proj, 'engineering', p)).href);
 const { assembleCandidate } = await imp('lib/site.mjs');
-const { computeCandidate } = await imp('lib/candidate.mjs');
 const { searchDigest } = await imp('lib/search-digest.mjs');
 const { buildManifest } = await imp('lib/hashed.mjs');
 const V = await imp('lib/verification.mjs');
+const { attachBuild, collectContext } = await imp('lib/release.mjs');
 const dir = assembleCandidate(proj, 'dryrun-state');
 try {
-  const c = computeCandidate({ siteDir: dir });
+  const ctx = attachBuild(collectContext(), dir);
   const ids = V.expectedCheckIds();
-  process.stdout.write(JSON.stringify({ candidate: c, engineDigest: V.engineDigest(), ids, registry: V.registryDigest(ids), searchDigest: searchDigest(dir), assetsTree: buildManifest(dir).treeSha256 }));
+  process.stdout.write(JSON.stringify({ candidate: ctx.candidate, engineDigest: V.engineDigest(), ids, registry: V.registryDigest(ids), searchDigest: searchDigest(dir), assetsTree: buildManifest(dir).treeSha256, ext: ctx.ext, mediaDigest: ctx.mediaDigest, sbomSha256: ctx.sbomSha256, lock: ctx.lock }));
 } finally { rmSync(dir, { recursive: true, force: true }); }
 `;
 
@@ -90,6 +90,7 @@ export function createSandbox({ flavour = 'client' } = {}) {
   // the real project, minus everything a release does not read
   cpSync(projectDir, proj, { recursive: true, filter: (src) => { const parts = relative(projectDir, src).split(sep).filter(Boolean); return !parts.some((x) => SKIP_ANY.has(x)) && !(parts.length === 1 && SKIP_TOP.has(parts[0])); } });
   symlinkSync(join(projectDir, 'node_modules'), p('node_modules'));
+  if (existsSync(join(repoRoot, '.github'))) cpSync(join(repoRoot, '.github'), join(root, '.github'), { recursive: true });   // the workflow the supported-runtime requirement reads
   mkdirSync(join(root, 'docs'), { recursive: true });
   cpSync(join(repoRoot, LEDGER), join(root, LEDGER));
   for (const f of ['.gitignore']) if (existsSync(join(repoRoot, f))) cpSync(join(repoRoot, f), join(root, f));
@@ -109,6 +110,8 @@ export function createSandbox({ flavour = 'client' } = {}) {
     const b = buildClient({ edit, base: 'https://www.jade-and-ember-fixture.com', label: 'dryrun-cfg' });
     if (b.status !== 0) { rmSync(root, { recursive: true, force: true }); rmSync(b.root, { recursive: true, force: true }); throw new Error(`the synthetic client configuration does not build:\n${b.text}`); }
     for (const f of readdirSync(b.cfgDir)) cpSync(join(b.cfgDir, f), p(`config/${f}`));
+    // the client fixture's own destinations are on reserved .test hosts, which a client release refuses; the throwaway copy uses ordinary invented names instead
+    for (const f of readdirSync(p('config'))) { const t = readFileSync(p(`config/${f}`), 'utf8'); writeFileSync(p(`config/${f}`), t.replace(/order\.example-restaurant\.test/g, 'order.jade-and-ember-fixture.com').replace(/maps\.example\.test/g, 'maps.jade-and-ember-fixture.com')); }
     rmSync(b.root, { recursive: true, force: true });
   }
   sb.setVersion = (version, channel) => {
@@ -116,6 +119,23 @@ export function createSandbox({ flavour = 'client' } = {}) {
     const k = JSON.parse(readFileSync(p('package.json'), 'utf8')); k.version = version; writeFileSync(p('package.json'), JSON.stringify(k, null, 2) + '\n');
   };
   if (flavour === 'client') sb.setVersion('1.0.0', 'client-production');
+  if (flavour === 'client') {
+    // authenticity: the real verifier is a hard stop (lib/authenticity.mjs); the throwaway copy swaps in a synthetic one so that every OTHER requirement can be shown
+    // to pass and fail on its own. The real file is kept so that one scenario can put it back.
+    sb.realAuthenticity = readFileSync(p('engineering/lib/authenticity.mjs'), 'utf8');
+    sb.syntheticAuthenticity = `// ${SYNTH}: stands in for a verifier that does not exist. It exists only in the dry run's throwaway copy.\nexport const AUTHENTICITY = Object.freeze({ implemented: true });\nexport function verifyAuthenticity() { return { ok: true, implemented: true, detail: '${SYNTH}: authenticity is assumed here only so that every other requirement can be exercised' }; }\n`;
+    writeFileSync(p('engineering/lib/authenticity.mjs'), sb.syntheticAuthenticity);
+    // rights: what the closed requirements would look like once a person had done their part (all of it synthetic, inside the copy)
+    const invPath = p('engineering/media-rights-inventory.json'), inv = JSON.parse(readFileSync(invPath, 'utf8'));
+    for (const a of inv.assets) if (a.kind === 'image' || a.kind === 'video') a.rights = { status: 'verified', approval: 'RIGHTS-JE-901', established: [`${SYNTH}: the use of this file is assumed here only to exercise the gate.`], notEstablished: [] };
+    for (const t of inv.terms) Object.assign(t, { status: 'reviewed', reviewedOn: TODAY(), reviewedBy: PERSONA.rights.name });
+    writeFileSync(invPath, JSON.stringify(inv, null, 2) + '\n');
+    const fp = p('engineering/findings.json'), fj = JSON.parse(readFileSync(fp, 'utf8'));
+    fj.findings = fj.findings.filter((f) => !['F-G2-01', 'F-G5-05'].includes(f.id));
+    writeFileSync(fp, JSON.stringify(fj, null, 2) + '\n');
+    const lp = p('fonts/LICENSES.txt');
+    writeFileSync(lp, readFileSync(lp, 'utf8').replace(/(===== noto-serif-sc[^\n]*=====\n)[^\n]*/, '$1(c) 2017-2024 Adobe (SYNTHETIC dry-run stand-in for the owner-authorised notice correction)'));
+  }
   // the crawler review: a person has to re-read the providers' pages; the sandbox copy says so synthetically
   const cr = JSON.parse(readFileSync(p('engineering/search-crawler-verification.json'), 'utf8'));
   cr.confirmedByPerson = true; cr.dryRunNote = `${SYNTH}: confirmedByPerson was set by the dry-run harness; no person re-read anything.`;
@@ -148,18 +168,19 @@ export function createSandbox({ flavour = 'client' } = {}) {
   const channel = () => (flavour === 'client' ? 'client-production' : 'demonstration');
   // a record bound to the sandbox's current candidate artifact; `over` is merged on top (subject and decidedBy are merged too)
   sb.record = (type, over = {}) => {
-    const prefix = { 'release-approval': 'REL', 'rights-verification': 'RIGHTS', 'search-review': 'SRCH', 'deployment-authorisation': 'DEP' }[type];
+    const prefix = { 'release-approval': 'REL', 'rights-verification': 'RIGHTS', 'search-review': 'SRCH', 'external-links-review': 'EXTL', 'deployment-authorisation': 'DEP' }[type];
     const host = new URL(JSON.parse(readFileSync(p('config/client.json'), 'utf8')).seo.baseUrl || 'https://x.invalid').hostname;
     const subject = type === 'release-approval' ? { productionHost: host }
       : type === 'search-review' ? { searchDigest: sb.state.searchDigest, reviewed: [...SEARCH_REVIEWED] }
-      : type === 'rights-verification' ? { sources: ['none: nothing exists to review (synthetic)'], verifiedOn: TODAY() }
+      : type === 'rights-verification' ? { sources: ['none: nothing exists to review (synthetic)'], verifiedOn: TODAY(), inventory: sb.state.mediaDigest, basis: 'licence' }
+      : type === 'external-links-review' ? { destinationsDigest: sb.state.ext.digest, verification: 'EXTV-901', opened: true }
       : { releaseApproval: 'REL-JE-901', targetHost: host };
     const { subject: so, decidedBy: db, ...rest } = over;
     return {
       schema: type === 'deployment-authorisation' ? DEPLOYMENT_SCHEMA : APPROVAL_SCHEMA, id: `${prefix}-JE-901`, type, status: 'approved',
       candidate: sb.state.candidate.digest, channel: channel(), version: version(), subject: { ...subject, ...(so || {}) },
       decidedBy: { ...(type === 'deployment-authorisation' ? PERSONA.deployer : PERSONA.owner), ...(db || {}) },
-      decidedAt: `${TODAY()}T09:00:00Z`, rationale: `${SYNTH}. No person decided this.`, ...rest,
+      decidedAt: `${TODAY()}T00:00:09Z`, rationale: `${SYNTH}. No person decided this.`, ...rest,
     };
   };
   sb.fileOf = (rec) => `${rec.id}.json`;
@@ -171,7 +192,7 @@ export function createSandbox({ flavour = 'client' } = {}) {
   // the verification record: the sandbox's real candidate and engine digests and its own list of checks, SYNTHETIC because no check ran
   sb.verifyRecord = () => {
     const s = sb.state;
-    const r = buildVerificationRecord({ mode: 'full', results: s.ids.map((id) => ({ id, passed: true, seconds: 0 })), candidate: s.candidate, engine: s.engineDigest, registry: s.registry, commit: sb.head || sb.configCommit, dirty: false, startedAt: `${TODAY()}T08:00:00Z`, finishedAt: `${TODAY()}T08:01:00Z`, env: {} });
+    const r = buildVerificationRecord({ mode: 'full', results: s.ids.map((id) => ({ id, passed: true, seconds: 0 })), candidate: s.candidate, engine: s.engineDigest, registry: s.registry, commit: sb.head || sb.configCommit, dirty: false, startedAt: `${TODAY()}T00:00:08Z`, finishedAt: `${TODAY()}T08:01:00Z`, env: {} });
     r.environment.platform = `${SYNTH}: no check ran; written by the dry-run harness`;   // the record is closed: the marker lives in a field the verifier writes
     r.seal = sealOf(r);
     return r;
@@ -205,13 +226,20 @@ export function createSandbox({ flavour = 'client' } = {}) {
   const commit = (msg) => { g('add', '-A'); const r = g('commit', '-q', '-m', msg); sb.head = g('rev-parse', 'HEAD').stdout.trim(); return r; };
   sb.commit = commit;
 
+  // the verification histories the external-link and supply-chain requirements read: SYNTHETIC records for the sandbox's current build
+  sb.writeHistories = ({ ext = true, supply = true } = {}) => {
+    const s = sb.state;
+    if (ext) writeFileSync(p('engineering/external-links-verification.json'), JSON.stringify({ $comment: `${SYNTH}: a throwaway history inside the dry run`, records: [{ id: 'EXTV-901', date: TODAY(), runner: { kind: 'github-actions', description: `${SYNTH}: no network request was made`, run: 'https://github.com/synthetic-dry-run/none/actions/runs/1' }, registryDigest: s.ext.digest, results: s.ext.destinations.map((d) => ({ url: d.url, kind: d.kind, class: 'verified', finalUrl: d.url, finalStatus: 200, chain: [{ url: d.url, status: 200, method: 'HEAD' }], attempts: 1, detail: 'answered directly (SYNTHETIC)' })) }] }, null, 2) + '\n');
+    if (supply) writeFileSync(p('engineering/supply-chain-verification.json'), JSON.stringify({ $comment: `${SYNTH}: a throwaway history inside the dry run`, records: [{ id: 'SCV-901', date: TODAY(), runner: { kind: 'github-actions', description: `${SYNTH}: no registry was asked` }, lockfileSha256: s.lock.sha256, sbomSha256: s.sbomSha256, audit: { total: 0, critical: 0, high: 0, moderate: 0, low: 0, advisories: [] }, signatures: { total: s.lock.packages, verified: s.lock.packages, failed: 0, missing: 0 } }] }, null, 2) + '\n');
+  };
   // (re)write every synthetic record for the sandbox's CURRENT candidate artifact, then commit them. The digest does not depend on them, so this cannot move it.
   sb.rebind = () => {
     sb.state = sb.measure();
     sb.writeReviewers();
     if (flavour === 'client') {
       // (a build without search artifacts, such as a noindex one, has no search digest and so nothing a search review could be bound to)
-      for (const t of ['release-approval', 'rights-verification', 'search-review']) { if (t === 'search-review' && !sb.state.searchDigest) { sb.drop('SRCH-JE-901.json'); continue; } sb.put(sb.record(t)); }
+      for (const t of ['release-approval', 'rights-verification', 'search-review', 'external-links-review']) { if (t === 'search-review' && !sb.state.searchDigest) { sb.drop('SRCH-JE-901.json'); continue; } sb.put(sb.record(t)); }
+      sb.writeHistories();
       sb.writeEvidence();
     }
     sb.writeVerify();

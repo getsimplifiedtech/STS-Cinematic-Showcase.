@@ -21,19 +21,25 @@ import { assessEvidence, coverage, defaultVctx, loadEvidenceEntries, loadSpec as
 import { engineDigest, expectedCheckIds, registryDigest, validateVerification } from './verification.mjs';
 import { isReservedHost } from './hosts.mjs';
 import { parseStrictJson } from './strict-json.mjs';
+import { deliveredDestinations, externalLinksGate } from './external-gate.mjs';
+import { deliveredMediaDigest, rightsClearance } from './media-rights.mjs';
+import { sbomProblems, supplyStatus } from './supply.mjs';
+import { socialImageStatus } from './social.mjs';
+import { verifyAuthenticity } from './authenticity.mjs';
 import { buildCsp, loadPolicy, renderApache, renderHeadersFile, renderNginx } from './security.mjs';
 
 const sha = (b) => createHash('sha256').update(b).digest('hex');
 const SEARCH = ['sitemap.xml', 'robots.txt', 'llms.txt'];
 
 // Returns { ok, checks: [{ id, ok, detail }] } . dir: the release/ folder.
-export function verifyPackage(dir, { eng = engDir } = {}) {
+// opts.authenticity: a replacement verifier, for the dry run's throwaway copy only; the command line never passes one (lib/authenticity.mjs is a hard stop)
+export function verifyPackage(dir, { eng = engDir, authenticity = verifyAuthenticity } = {}) {
   const checks = [];
   const add = (id, ok, detail) => checks.push({ id, ok: Boolean(ok), detail });
   const read = (n) => readFileSync(join(dir, n));
   const have = (n) => existsSync(join(dir, n));
   const zips = existsSync(dir) ? readdirSync(dir).filter((f) => f.endsWith('.zip')) : [];
-  const required = ['release-manifest.json', 'SHA256SUMS.txt', 'host/_headers', 'host/nginx.conf', 'host/htaccess', 'records/reviewers.json', 'records/demonstrations.json', 'records/verification.json'];
+  const required = ['release-manifest.json', 'SHA256SUMS.txt', 'host/_headers', 'host/nginx.conf', 'host/htaccess', 'records/reviewers.json', 'records/demonstrations.json', 'records/verification.json', 'sbom.cdx.json', 'records/external-links-verification.json', 'records/supply-chain-verification.json', 'records/dependencies.json', 'records/media-rights-inventory.json'];
   const missing = required.filter((n) => !have(n));
   add('files', zips.length === 1 && !missing.length, zips.length !== 1 ? `expected exactly one ZIP, found ${zips.length}` : missing.length ? `missing ${missing.join(', ')}` : `${zips[0]}, release-manifest.json, SHA256SUMS.txt, host/ (3 files), records/`);
   if (zips.length !== 1 || missing.length) return { ok: false, checks };
@@ -43,10 +49,10 @@ export function verifyPackage(dir, { eng = engDir } = {}) {
   const lines = read('SHA256SUMS.txt').toString('utf8').split('\n').filter(Boolean);
   const listed = {}; let formatOk = true;
   for (const l of lines) { const m = /^([0-9a-f]{64})  (\S+)$/.exec(l); if (!m) { formatOk = false; continue; } listed[m[2]] = m[1]; }
-  const wanted = ['release-manifest.json', zipName].sort();
+  const wanted = ['release-manifest.json', zipName, 'sbom.cdx.json'].sort();
   const names = Object.keys(listed).sort();
   const wrong = wanted.filter((n) => listed[n] && listed[n] !== sha(read(n)));
-  add('checksums', formatOk && names.join() === wanted.join() && !wrong.length, !formatOk ? 'a line of SHA256SUMS.txt is malformed' : names.join() !== wanted.join() ? `SHA256SUMS.txt lists ${names.join(', ') || 'nothing'}; expected ${wanted.join(', ')}` : wrong.length ? `hash mismatch: ${wrong.join(', ')}` : 'both hashes match');
+  add('checksums', formatOk && names.join() === wanted.join() && !wrong.length, !formatOk ? 'a line of SHA256SUMS.txt is malformed' : names.join() !== wanted.join() ? `SHA256SUMS.txt lists ${names.join(', ') || 'nothing'}; expected ${wanted.join(', ')}` : wrong.length ? `hash mismatch: ${wrong.join(', ')}` : 'all three hashes match');
 
   // 2. the manifest is valid and says what the ZIP is
   let m = null;
@@ -111,8 +117,15 @@ export function verifyPackage(dir, { eng = engDir } = {}) {
     const family = (f) => (f === 'evidence' ? loadEvidenceEntries(join(dir, 'records', 'evidence')) : loadFamily(f, eng, { dir: join(dir, 'records', f) }));
     const listed = (f) => (m.records[f] || []).map((x) => `${x.file}:${x.sha256}`).sort().join('|');
     const actual = (f) => family(f).map((x) => `${x.file}:${sha(readFileSync(join(dir, 'records', f, x.file)))}`).sort().join('|');
-    const sameRecords = ['approvals', 'evidence', 'deployments'].every((f) => listed(f) === actual(f)) && sha(read('records/reviewers.json')) === m.records.reviewers.sha256 && sha(read('records/demonstrations.json')) === m.records.demonstrations.sha256;
-    add('records-embedded', sameRecords, sameRecords ? `${m.records.approvals.length} approval, ${m.records.evidence.length} evidence and ${m.records.deployments.length} deployment record file(s), the reviewer table and the demonstration registry match the manifest` : 'the records in the package are not the ones the manifest lists (added, removed or edited)');
+    const sameRecords = ['approvals', 'evidence', 'deployments'].every((f) => listed(f) === actual(f)) && sha(read('records/reviewers.json')) === m.records.reviewers.sha256 && sha(read('records/demonstrations.json')) === m.records.demonstrations.sha256 && sha(read('records/external-links-verification.json')) === m.records.externalLinksHistory.sha256 && sha(read('records/supply-chain-verification.json')) === m.records.supplyChainHistory.sha256 && sha(read('records/dependencies.json')) === m.candidate.parts.dependencyPolicy && sha(read('records/media-rights-inventory.json')) === m.candidate.parts.mediaRights;
+    add('records-embedded', sameRecords, sameRecords ? `${m.records.approvals.length} approval, ${m.records.evidence.length} evidence and ${m.records.deployments.length} deployment record file(s), the reviewer table, the demonstration registry, the two verification histories, the dependency register and the rights inventory match the manifest (or the candidate)` : 'the records in the package are not the ones the manifest lists (added, removed or edited)');
+    // G6-3: the composite SBOM travels with the package; it must be the file the manifest names, describe exactly the delivered files, and the lockfile the candidate covers
+    const sbomText = read('sbom.cdx.json').toString('utf8');
+    let sbomObj = null; try { sbomObj = JSON.parse(sbomText); } catch { /* reported */ }
+    const deliveredMap = new Map(entries.filter((n) => n !== 'START-HERE.txt' && n !== 'serve.py').map((n) => [n, sha(readFileSync(join(site, n)))]));
+    const sbomProbs = sbomObj ? sbomProblems(sbomObj, { delivered: deliveredMap, lockfileSha256: m.candidate.parts.engines.lockfileSha256 }) : ['sbom.cdx.json is not valid JSON'];
+    if (sha(sbomText) !== m.supplyChain.sbom.sha256 || Buffer.byteLength(sbomText) !== m.supplyChain.sbom.bytes) sbomProbs.unshift('it is not the SBOM the manifest names (hash or size differs)');
+    add('sbom', !sbomProbs.length, sbomProbs.length ? `the composite SBOM: ${sbomProbs[0]}` : `${sbomObj.components.length} components: every delivered file with its hash, the tooling tree in development scope, the lockfile the candidate covers`);
     // the rules the package was judged by are this repository's: the policy, the evidence specification, the security policy, the reviewer table and the
     // demonstration registry. Verify a package with the checkout at the commit it names; a package judged by other rules is refused, not trusted (F4d).
     const pp = m.candidate.parts, ours = { releasePolicy: sha(readFileSync(join(eng, 'release', 'policy.json'))), evidenceSpec: sha(readFileSync(join(eng, 'release', 'evidence-spec.json'))), securityFile: sha(readFileSync(join(eng, 'security.json'))) };
@@ -135,14 +148,31 @@ export function verifyPackage(dir, { eng = engDir } = {}) {
       const baseHost = zipHosts.length === 1 && zipHosts[0] !== '?' ? zipHosts[0] : null;
       const claimed = (() => { try { return new URL(m.configuration.baseUrl).hostname.toLowerCase(); } catch { return null; } })();
       add('production-host', baseHost && baseHost === claimed, !baseHost ? `the delivered pages and sitemap name ${zipHosts.length ? `several hosts (${zipHosts.join(', ')})` : 'no canonical host'}; a client package names exactly one` : baseHost !== claimed ? `the pages are for ${baseHost}, the manifest says ${claimed}` : `${baseHost}: the host the pages, the sitemap and the manifest all name`);
-      const rctx = { candidate: m.candidate.digest, channel: m.channel, version: m.version, table: table || { reviewers: [] }, today: new Date().toISOString().slice(0, 10), now: new Date().toISOString(), baseHost, searchDigest: m.search.artifactsDigest };
-      const ap = family('approvals'), rel = resolve(ap, 'release-approval', rctx), rights = resolve(ap, 'rights-verification', rctx), rev = resolve(ap, 'search-review', rctx), dep = resolve(family('deployments'), 'deployment-authorisation', rctx);
+      const ext = deliveredDestinations(site), mediaDigest = deliveredMediaDigest(site);
+      const rctx = { candidate: m.candidate.digest, channel: m.channel, version: m.version, table: table || { reviewers: [] }, today: new Date().toISOString().slice(0, 10), now: new Date().toISOString(), baseHost, searchDigest: m.search.artifactsDigest, mediaDigest, destinationsDigest: ext.digest };
+      const ap = family('approvals'), rel = resolve(ap, 'release-approval', rctx), rights = resolve(ap, 'rights-verification', rctx), rev = resolve(ap, 'search-review', rctx), extl = resolve(ap, 'external-links-review', rctx), dep = resolve(family('deployments'), 'deployment-authorisation', rctx);
       const host = hostAuthorisation(rel, baseHost);
-      const errs = [...new Set([...rel.errors, ...rights.errors, ...rev.errors, ...dep.errors, ...validateReviewers(table)])];
+      const errs = [...new Set([...rel.errors, ...rights.errors, ...rev.errors, ...extl.errors, ...dep.errors, ...validateReviewers(table)])];
       add('approvals-recorded', rel.met && host.ok && rights.met && rev.met && !errs.length, !rel.met ? `no in-force release approval for this candidate in the package (${rel.detail})` : !host.ok ? host.detail : !rights.met ? `no in-force rights verification (${rights.detail})` : !rev.met ? `no in-force search review (${rev.detail})` : errs.length ? `record errors: ${errs.slice(0, 2).join('; ')}` : `release approval ${rel.approved.map((x) => x.id).join(', ')} (${host.detail}), rights verification ${rights.approved.map((x) => x.id).join(', ')}, search review ${rev.approved.map((x) => x.id).join(', ')}, all in force for ${m.candidate.digest.slice(0, 12)}…`);
       const ev = assessEvidence(family('evidence'), defaultVctx({ releaseCommit: m.source.commit, assetsTree: m.assets.treeSha256, candidate: m.candidate.digest, verification: { engineDigest: engineDigest(eng), registryDigest: registryDigest(expectedCheckIds(eng)), total: expectedCheckIds(eng).length }, git: { isCommit: (c) => /^[0-9a-f]{40}$/.test(c), isAncestor: () => true, commitDate: () => '1970-01-01' }, fs: { exists: (p) => existsSync(join(dir, 'records', 'evidence', 'files', p.replace(/^.*\/files\//, ''))), read: (p) => readFileSync(join(dir, 'records', 'evidence', 'files', p.replace(/^.*\/files\//, ''))) } }));
       const spec = loadEvidenceSpec(), covered = ['real-device', 'screen-reader', 'browser-matrix', 'ci-run'].map((t) => [t, coverage(spec, t, ev)]);
       add('evidence-recorded', covered.every(([, c]) => c.ok), covered.every(([, c]) => c.ok) ? `${ev.length} evidence record(s) bound to this candidate cover real devices, screen readers, browsers and CI` : `evidence not satisfied for ${covered.filter(([, c]) => !c.ok).map(([t, c]) => `${t} (${c.detail.slice(0, 90)})`).join('; ')}`);
+      // ---- G6-3 requirements, re-judged from the package itself (the histories and registers travel in records/)
+      const today = new Date().toISOString().slice(0, 10), polic = readJson(join(eng, 'release', 'policy.json'));
+      const eg = externalLinksGate({ ext, history: readJ('records/external-links-verification.json'), today, maxAgeDays: polic.externalLinks?.maxAgeDays ?? 30, review: extl });
+      const egOk = eg.ok && (ext.destinations.length === 0 || (extl.met && Boolean(eg.record) && extl.approved.some((x) => x.r.subject.verification === eg.record.id)));
+      add('external-links', egOk, eg.ok ? (egOk ? eg.detail : 'no in-force external-links review relies on the verification record') : eg.detail);
+      const rightsIds = rights.rejected.length ? [] : rights.approved.map((x) => x.id);
+      const inventory = readJ('records/media-rights-inventory.json');
+      const rc = inventory ? rightsClearance({ inventory, siteDir: site, rightsIds, findingIds: m.findings.map((f) => f.id), blockingFindings: polic.rights?.blockingFindings || [] }) : { ok: false, detail: 'the rights inventory in the package cannot be read' };
+      add('rights-inventory', rc.ok, rc.detail);
+      const sc = inventory ? socialImageStatus({ siteDir: site, inventory, rightsIds, baseUrl: m.configuration.baseUrl }) : { ok: false, detail: 'no inventory' };
+      add('social-images', sc.ok, sc.detail);
+      const toolingN = Number((sbomObj?.metadata?.properties || []).find((x) => x.name === 'sts:tooling-packages')?.value);
+      const sup = supplyStatus({ history: readJ('records/supply-chain-verification.json'), lockfileSha256: m.candidate.parts.engines.lockfileSha256, sbomSha256: sha(sbomText), lockPackages: toolingN, deps: readJ('records/dependencies.json') || { acceptedAdvisories: { packages: [] } }, today, maxAgeDays: polic.supplyChain?.maxAgeDays ?? 30 });
+      add('supply-chain', sup.dependencySecurity.ok && sup.sbom.ok, sup.dependencySecurity.ok ? sup.sbom.detail : sup.dependencySecurity.detail);
+      const au = authenticity({ packageDir: dir, manifest: m });
+      add('authenticity', au.ok, au.detail);
     } else {
       // a demonstration is the fictional showcase and nothing else: every page says noindex, none points a search engine at a real host, and no host is a production one
       const bad = pages.filter((pg) => { const t = readFileSync(join(site, pg), 'utf8'); return !/<meta[^>]+name="robots"[^>]+content="[^"]*noindex/.test(t); });
