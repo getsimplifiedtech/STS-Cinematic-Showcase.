@@ -18,31 +18,46 @@ export const CLASS_MEANING = {
   insecure: 'a hop used http, or the certificate was invalid',
 };
 const IDENTIFIERS = new Set(['http://www.w3.org/2000/svg', 'http://www.w3.org/1999/xlink', 'http://www.w3.org/1999/xhtml', 'http://www.sitemaps.org/schemas/sitemap/0.9', 'https://schema.org', 'http://schema.org', 'https://schema.org/', 'http://schema.org/']);
-const TEXT_EXT = /\.(html|css|js|txt|md|xml|json|svg)$/i;
+const TEXT_EXT = /\.(html|css|js|mjs|txt|md|xml|json|webmanifest|svg)$/i;
 const URL_RE = /\bhttps?:\/\/[^\s"'<>`\\)\]}]+/gi;
-const ATTR_RE = /\b(?:href|src|action|poster|cite|data)\s*=\s*["'](https?:\/\/[^"']+)["']/gi;
-const decode = (s) => s.replace(/&amp;/g, '&').replace(/&quot;/g, '"').replace(/&#39;|&apos;/g, "'");
+const decode = (s) => s.replace(/&#x([0-9a-f]+);?/gi, (_, h) => String.fromCodePoint(parseInt(h, 16))).replace(/&#(\d+);?/g, (_, d) => String.fromCodePoint(Number(d))).replace(/&amp;/g, '&').replace(/&quot;/g, '"').replace(/&apos;/g, "'");
+const PROTO_REL = /(?<![:\w/])\/\/[a-z0-9-]+(?:\.[a-z0-9-]+)+(?:\/[^\s"'<>`\\)\]}]*)?/gi;   // //host/path (the page's own protocol)
 const trimEnd = (u) => u.replace(/[.,;:!?]+$/, '');
 
 function walk(dir) { const out = []; for (const e of readdirSync(dir, { withFileTypes: true })) { const p = join(dir, e.name); if (e.isDirectory()) out.push(...walk(p)); else out.push(p); } return out; }
 
-// -> [{ url, file, line, kind }] kind: 'link' (an attribute value in markup), 'mention' (plain text), 'identifier' (a namespace or schema address)
+// -> [{ url, file, line, kind }] kind: 'link' (a URL inside a markup tag, in any attribute and in any form: quoted, unquoted, split over lines, srcset, formaction, a
+// meta refresh, protocol-relative, entity-encoded; or a CSS url() / @import), 'mention' (plain text, script text, JSON-LD), 'identifier' (a namespace or schema address).
+// A URL inside a tag is a link because a browser may fetch or follow it; only text is a mention (G6-3 review, F4).
 export function collectExternal(root) {
   const found = [];
   for (const path of walk(root).sort()) {
     const file = relative(root, path).split('\\').join('/');
     if (!TEXT_EXT.test(file)) continue;
     const text = readFileSync(path, 'utf8');
-    const lines = text.split('\n');
-    lines.forEach((ln, i) => {
-      const links = new Set();
-      for (const m of ln.matchAll(ATTR_RE)) { const u = trimEnd(decode(m[1])); links.add(u); found.push({ url: u, file, line: i + 1, kind: IDENTIFIERS.has(u) ? 'identifier' : 'link' }); }
-      for (const m of ln.matchAll(URL_RE)) {
-        const u = trimEnd(decode(m[0]));
-        if (links.has(u)) continue;
-        found.push({ url: u, file, line: i + 1, kind: IDENTIFIERS.has(u) ? 'identifier' : 'mention' });
+    const starts = [0]; for (let i = 0; i < text.length; i++) if (text[i] === '\n') starts.push(i + 1);
+    const lineAt = (i) => { let lo = 0, hi = starts.length - 1; while (lo < hi) { const mid = (lo + hi + 1) >> 1; if (starts[mid] <= i) lo = mid; else hi = mid - 1; } return lo + 1; };
+    const spans = [];   // [start, end) ranges already classified as links
+    if (/\.html$/i.test(file)) {
+      for (const m of text.matchAll(/<[a-zA-Z][^>]*>/g)) {
+        spans.push([m.index, m.index + m[0].length]);
+        const tag = decode(m[0]);
+        for (const u of tag.matchAll(URL_RE)) found.push({ url: u[0], file, line: lineAt(m.index), kind: IDENTIFIERS.has(u[0]) ? 'identifier' : 'link' });
+        for (const u of tag.matchAll(PROTO_REL)) found.push({ url: `https:${u[0]}`, file, line: lineAt(m.index), kind: 'link' });
       }
-    });
+    } else if (/\.css$/i.test(file)) {
+      for (const m of text.matchAll(/(?:url\(\s*|@import\s+)["']?(https?:\/\/[^"')\s]+|\/\/[a-z0-9-]+(?:\.[a-z0-9-]+)+[^"')\s]*)/gi)) {
+        spans.push([m.index, m.index + m[0].length]);
+        found.push({ url: m[1].startsWith('//') ? `https:${m[1]}` : m[1], file, line: lineAt(m.index), kind: 'link' });
+      }
+    }
+    // everything else is text: a mention
+    for (const m of text.matchAll(URL_RE)) {
+      const at = m.index;
+      if (spans.some(([a, z]) => at >= a && at < z)) continue;
+      const u = trimEnd(decode(m[0]));
+      found.push({ url: u, file, line: lineAt(at), kind: IDENTIFIERS.has(u) ? 'identifier' : 'mention' });
+    }
   }
   return found;
 }
@@ -159,11 +174,15 @@ export function recordProblems({ file, today = new Date().toISOString().slice(0,
     if (!r.runner || typeof r.runner.description !== 'string' || r.runner.description.trim().length < 10) p.push(`${w}: runner.description must say where the run happened and whether it had a network`);
     if (!/^[0-9a-f]{64}$/.test(r.registryDigest || '')) p.push(`${w}: registryDigest must be the 64-hex digest of the destination list that was checked`);
     if (!Array.isArray(r.results) || !r.results.length) { p.push(`${w}: no results`); continue; }
+    const seenUrls = new Set();
     for (const x of r.results) {
       const wx = `${w}, ${x && x.url}`;
+      if (x && typeof x.url === 'string') { if (seenUrls.has(x.url)) p.push(`${wx}: listed twice`); seenUrls.add(x.url); }
       if (!x || typeof x.url !== 'string') { p.push(`${w}: a result has no url`); continue; }
       if (!CLASSES.includes(x.class)) { p.push(`${wx}: class "${x.class}" is not one of ${CLASSES.join(', ')}`); continue; }
       const chain = Array.isArray(x.chain) ? x.chain : [];
+      if (chain.some((h) => !h || typeof h.url !== 'string' || !Number.isInteger(h.status))) { p.push(`${wx}: every hop needs a url and a status`); continue; }
+      if (chain.length && x.finalUrl !== chain[chain.length - 1].url) p.push(`${wx}: finalUrl is not the last hop`);
       if (x.class === 'verified') {
         if (!(x.finalStatus >= 200 && x.finalStatus < 300)) p.push(`${wx}: "verified" needs a 2xx final status (got ${x.finalStatus})`);
         if (chain.some((h, i) => !/^https:/.test(h.url) && !(i === 0 && x.kind === 'mention'))) p.push(`${wx}: "verified" with an http hop`);

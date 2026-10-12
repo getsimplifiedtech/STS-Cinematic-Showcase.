@@ -24,10 +24,22 @@ const days = (a, b) => Math.round((Date.parse(`${b}T00:00:00Z`) - Date.parse(`${
 export const SEVERITIES = ['critical', 'high', 'moderate', 'low'];
 export const SUPPLY_FILE = 'supply-chain-verification.json';
 
-// Is an SPDX expression allowed? "(MIT OR Apache-2.0)" needs one allowed alternative, "A AND B" needs both.
+// Is an SPDX licence expression allowed by the list? Parentheses, AND (binds tighter) and OR are evaluated, `WITH exception` is judged by its licence id, and an expression
+// that cannot be parsed is NOT allowed (G6-3 review, F8).
 export function licenseOk(expr, allowed) {
-  const e = expr.replace(/[()]/g, ' ').trim();
-  return e.split(/\s+OR\s+/i).some((alt) => alt.split(/\s+AND\s+/i).every((l) => allowed.includes(l.trim())));
+  const toks = String(expr).match(/\(|\)|[^\s()]+/g) || [];
+  let i = 0;
+  const orExpr = () => { let v = andExpr(); while (toks[i]?.toUpperCase() === 'OR') { i++; const r = andExpr(); v = v || r; } return v; };
+  const andExpr = () => { let v = atom(); while (toks[i]?.toUpperCase() === 'AND') { i++; const r = atom(); v = v && r; } return v; };
+  const atom = () => {
+    const t = toks[i++];
+    if (t === undefined || t === ')' || /^(AND|OR|WITH)$/i.test(t)) throw new Error('bad expression');
+    if (t === '(') { const v = orExpr(); if (toks[i++] !== ')') throw new Error('unclosed'); return v; }
+    let ok = allowed.includes(t.replace(/\+$/, '')) || allowed.includes(t);
+    if (toks[i]?.toUpperCase() === 'WITH') { i++; if (toks[i++] === undefined) throw new Error('bad exception'); }
+    return ok;
+  };
+  try { const v = orExpr(); return i === toks.length && v; } catch { return false; }
 }
 
 // ---- the composite SBOM
@@ -153,10 +165,17 @@ export function supplyRecordProblems({ file, today }) {
     if (!HEX64.test(r.lockfileSha256 || '')) p.push(`${w}: lockfileSha256 must be 64 hex`);
     if (!HEX64.test(r.sbomSha256 || '')) p.push(`${w}: sbomSha256 must be 64 hex`);
     const a = r.audit || {};
-    const counted = SEVERITIES.reduce((n, k) => n + (Number.isInteger(a[k]) ? a[k] : NaN), 0);
-    if (!Number.isInteger(a.total) || counted !== a.total) p.push(`${w}: audit.total must equal critical + high + moderate + low`);
+    const counted = SEVERITIES.reduce((n, k) => n + (Number.isInteger(a[k]) && a[k] >= 0 ? a[k] : NaN), 0);
+    if (!Number.isInteger(a.total) || a.total < 0 || counted !== a.total) p.push(`${w}: audit.total must equal critical + high + moderate + low, each a count of zero or more`);
     if (!Array.isArray(a.advisories) || a.advisories.length !== a.total) p.push(`${w}: audit.advisories must list each of the ${a.total} advisories`);
-    else for (const x of a.advisories) if (!x || !x.package || !SEVERITIES.includes(x.severity) || !/^GHSA-/i.test(x.advisory || '')) p.push(`${w}: an advisory entry needs package, severity and a GHSA id`);
+    else {
+      const keys = new Set();
+      for (const x of a.advisories) {
+        if (!x || !x.package || !SEVERITIES.includes(x.severity) || !/^GHSA-/i.test(x.advisory || '')) { p.push(`${w}: an advisory entry needs package, severity and a GHSA id`); continue; }
+        const k = `${x.package}|${x.advisory.toLowerCase()}`; if (keys.has(k)) p.push(`${w}: ${x.package} ${x.advisory} is listed twice`); keys.add(k);
+      }
+      for (const k of SEVERITIES) if (Number.isInteger(a[k]) && a.advisories.filter((x) => x && x.severity === k).length !== a[k]) p.push(`${w}: audit.${k} says ${a[k]} but the list has ${a.advisories.filter((x) => x && x.severity === k).length}`);
+    }
     const s = r.signatures || {};
     for (const k of ['total', 'verified', 'failed', 'missing']) if (!Number.isInteger(s[k]) || s[k] < 0) p.push(`${w}: signatures.${k} must be a count`);
     if (r.runner?.kind === 'sandbox' && (s.verified || 0) > 0) p.push(`${w}: a sandbox run cannot have verified registry signatures (no network)`);
@@ -182,7 +201,9 @@ export function supplyStatus({ history, lockfileSha256, sbomSha256, lockPackages
   const expired = exceptionProblems(deps, today);
   for (const x of r.audit.advisories) {
     if (['high', 'critical'].includes(x.severity)) { why.push(`${x.package} has a ${x.severity} advisory (${x.advisory}); none may remain at a client release`); continue; }
-    if (!exc.has(`${x.package}|${x.advisory.toLowerCase()}`)) why.push(`${x.package}: ${x.severity} advisory ${x.advisory} has no exception in dependencies.json`);
+    const ex = exc.get(`${x.package}|${x.advisory.toLowerCase()}`);
+    if (!ex) why.push(`${x.package}: ${x.severity} advisory ${x.advisory} has no exception in dependencies.json`);
+    else if (ex.severity !== x.severity) why.push(`${x.package}: the exception for ${x.advisory} says ${ex.severity}, the advisory is ${x.severity}`);
   }
   if (r.audit.advisories.length) why.push(...expired);
   if (r.signatures.failed || r.signatures.missing) why.push(`registry signatures: ${r.signatures.failed} failed, ${r.signatures.missing} missing`);

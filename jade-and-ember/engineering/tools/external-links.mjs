@@ -32,7 +32,7 @@ if (cmd === 'inventory') {
   let dests = registry.destinations, digest = registryDigest(registry);
   if (flag('--delivered')) {
     const d = assembleCandidate(projectDir, 'extdeliv');
-    try { const del = deliveredDestinations(d); dests = del.destinations; digest = del.digest; } finally { rmSync(d, { recursive: true, force: true }); }
+    try { const del = deliveredDestinations(d, { baseUrl: JSON.parse(readFileSync(join(projectDir, 'config', 'client.json'), 'utf8')).seo.baseUrl }); dests = del.destinations; digest = del.digest; } finally { rmSync(d, { recursive: true, force: true }); }
   }
   const urls = [...new Set(dests.map((d) => d.url))];
   const results = [];
@@ -42,8 +42,17 @@ if (cmd === 'inventory') {
     results.push({ url: u, kind: kinds.includes('link') ? 'link' : 'mention', class: r.class, finalUrl: r.finalUrl, finalStatus: r.finalStatus, chain: r.chain, attempts: r.attempts, detail: r.detail });
   }
   const date = new Date().toISOString().slice(0, 10);
-  const run = { date, runner: { kind: arg('--runner') || 'person', description: arg('--note') || 'run by hand; the description of the network was not given' }, registryDigest: digest, results };
-  if (arg('--run')) run.runner.run = arg('--run');
+  const answered = results.some((r) => r.class !== 'inconclusive');
+  const e = process.env, inActions = e.GITHUB_ACTIONS === 'true' && Boolean(e.GITHUB_RUN_ID && e.GITHUB_REPOSITORY);
+  // who ran this is not guessed (G6-3 review, F10): inside GitHub Actions it is recorded from the environment (still self-reported); anywhere else a person says so; with no answer at all it is a sandbox run
+  let runner;
+  if (!answered) runner = { kind: 'sandbox', description: arg('--note') || 'a run in which no destination answered (no network, or a closed one); nothing is recorded as verified' };
+  else if (inActions) runner = { kind: 'github-actions', description: arg('--note') || `GitHub Actions run ${e.GITHUB_RUN_ID} of ${e.GITHUB_REPOSITORY} with outbound network, as reported by its environment (not authenticated)`, run: `https://github.com/${e.GITHUB_REPOSITORY}/actions/runs/${e.GITHUB_RUN_ID}` };
+  else if (arg('--runner') === 'person' && (arg('--note') || '').trim().length >= 10) runner = { kind: 'person', description: arg('--note') };
+  else if (flag('--write')) { console.error('Destinations answered, but who ran this is not guessed: pass --runner person --note "where and by whom" (inside GitHub Actions it is recorded automatically).'); process.exit(2); }
+  else runner = { kind: 'person', description: 'NOT RECORDED: pass --runner person --note "where and by whom" with --write' };
+  const run = { date, runner, registryDigest: digest, results };
+  if (arg('--run') && !run.runner.run) run.runner.run = arg('--run');
   if (flag('--json')) console.log(JSON.stringify(run, null, 2));
   else {
     for (const r of results) console.log(`${r.class.padEnd(12)} ${r.url}  ${r.detail}${r.chain.length > 1 ? `  [${r.chain.map((h) => h.status).join(' > ')}]` : ''}`);

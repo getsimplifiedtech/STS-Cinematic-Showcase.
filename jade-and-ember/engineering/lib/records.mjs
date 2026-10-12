@@ -265,13 +265,14 @@ export function auditFamily(family, ctx, eng = engDir) {
 
 // ---- demonstrations ---------------------------------------------------------------------------------------------------------------------------------------
 export const loadDemonstrations = (eng = engDir) => readJson(join(eng, 'release', 'demonstrations.json'));
-export function validateDemonstrations(d) {
+export function validateDemonstrations(d, { ledgerIds = null } = {}) {
   const p = [];
   if (!d || d.schema !== DEMONSTRATIONS_SCHEMA || !Array.isArray(d.registered)) return [`demonstrations.json: schema must be "${DEMONSTRATIONS_SCHEMA}" with a "registered" list`];
   for (const e of d.registered) {
     if (!/^DEMO-JE-\d{3,}$/.test(e.id || '')) p.push(`demonstration ${e.id}: id must look like DEMO-JE-001`);
     if (!HEX64.test(e.configurationDigest || '')) p.push(`demonstration ${e.id}: configurationDigest must be 64 hex`);
     if (!/^APR-JE-\d+$/.test(e.registeredBy || '')) p.push(`demonstration ${e.id}: registeredBy must name the governance record`);
+    else if (ledgerIds && !ledgerIds.has(e.registeredBy)) p.push(`demonstration ${e.id}: ${e.registeredBy} is not in the approvals ledger`);
     if (!text(e.description, 10)) p.push(`demonstration ${e.id}: describe what is registered`);
   }
   return p;

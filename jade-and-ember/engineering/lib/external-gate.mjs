@@ -13,8 +13,12 @@ import { newestFirst } from './supply.mjs';
 
 // the files a release carries: build input (config/) and engineering files are not delivered
 const NOT_DELIVERED = /^((config|engineering)\/|START-HERE\.txt$|serve\.py$)/;   // (START-HERE.txt and serve.py are added to the ZIP when it is packed; they are not part of the built site)
-export function deliveredDestinations(siteDir) {
-  const found = collectExternal(siteDir).filter((f) => !NOT_DELIVERED.test(f.file));
+// baseUrl: the site's own address (seo.baseUrl). Its own pages, sitemap and canonical links are the site itself, not external destinations: they cannot be reached
+// before the site is live, and a parked page answering 200 would "verify" an address that is not this site (G6-3 review, F5). Only other hosts are destinations.
+export function deliveredDestinations(siteDir, { baseUrl = null } = {}) {
+  let own = null; try { own = baseUrl ? new URL(baseUrl).hostname.toLowerCase() : null; } catch { own = null; }
+  const host = (u) => { try { return new URL(u).hostname.toLowerCase(); } catch { return null; } };
+  const found = collectExternal(siteDir).filter((f) => !NOT_DELIVERED.test(f.file) && !(own && host(f.url) === own));
   const destinations = groupDestinations(found);
   return { destinations, digest: registryDigest({ destinations }) };
 }
@@ -23,7 +27,7 @@ const daysBetween = (a, b) => Math.round((Date.parse(`${b}T00:00:00Z`) - Date.pa
 
 // ext: { destinations, digest }; history: the parsed external-links-verification.json (or null); review: the resolve() result for external-links-review
 // Returns { ok, detail, record }.
-export function externalLinksStatus({ ext, history, today, maxAgeDays = 30 }) {
+function statusOf({ ext, history, today, maxAgeDays = 30 }) {
   if (!ext) return { ok: false, detail: 'the destination list of this build is unknown', record: null };
   const links = ext.destinations.filter((d) => d.kind === 'link');
   const bad = [];
@@ -57,10 +61,14 @@ export function externalLinksStatus({ ext, history, today, maxAgeDays = 30 }) {
   return { ok: true, detail: `${r.id} (${r.date}, ${r.runner.kind}) verified all ${ext.destinations.length} destination(s) of this build over https`, record: r };
 }
 
+export function externalLinksStatus(args) {
+  try { return statusOf(args); } catch (e) { return { ok: false, detail: `the external-links record cannot be read (${String(e.message).slice(0, 80)})`, record: null }; }
+}
+
 // The mentions a reviewer accepted although they were not verified: [{ url, reason }] from the in-force review's subject.
-export function acceptedMentions(review) {
+export function acceptedMentions(review, recordId) {
   const out = new Map();
-  for (const m of review?.approved || []) for (const a of m.r.subject.accepted || []) out.set(a.url, a.reason);
+  for (const m of (review?.approved || []).filter((x) => x.r.subject.verification === recordId)) for (const a of m.r.subject.accepted || []) out.set(a.url, a.reason);
   return out;
 }
 
@@ -68,7 +76,7 @@ export function acceptedMentions(review) {
 export function externalLinksGate({ ext, history, today, maxAgeDays, review }) {
   const s = externalLinksStatus({ ext, history, today, maxAgeDays });
   if (s.ok || !s.notOk) return s;
-  const acc = acceptedMentions(review);
+  const acc = acceptedMentions(review, s.record.id);
   const rest = s.notOk.filter((n) => n.kind === 'link' || !acc.has(n.url));
   return rest.length ? { ...s, detail: `${s.record.id}: ${rest.slice(0, 3).map((n) => n.text).join('; ')}` } : { ok: true, detail: `${s.record.id}: all verified or accepted by name in the review (${[...acc.keys()].join(', ')})`, record: s.record };
 }

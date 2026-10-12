@@ -148,7 +148,7 @@ export function verifyPackage(dir, { eng = engDir, authenticity = verifyAuthenti
       const baseHost = zipHosts.length === 1 && zipHosts[0] !== '?' ? zipHosts[0] : null;
       const claimed = (() => { try { return new URL(m.configuration.baseUrl).hostname.toLowerCase(); } catch { return null; } })();
       add('production-host', baseHost && baseHost === claimed, !baseHost ? `the delivered pages and sitemap name ${zipHosts.length ? `several hosts (${zipHosts.join(', ')})` : 'no canonical host'}; a client package names exactly one` : baseHost !== claimed ? `the pages are for ${baseHost}, the manifest says ${claimed}` : `${baseHost}: the host the pages, the sitemap and the manifest all name`);
-      const ext = deliveredDestinations(site), mediaDigest = deliveredMediaDigest(site);
+      const ext = deliveredDestinations(site, { baseUrl: m.configuration.baseUrl }), mediaDigest = deliveredMediaDigest(site);
       const rctx = { candidate: m.candidate.digest, channel: m.channel, version: m.version, table: table || { reviewers: [] }, today: new Date().toISOString().slice(0, 10), now: new Date().toISOString(), baseHost, searchDigest: m.search.artifactsDigest, mediaDigest, destinationsDigest: ext.digest };
       const ap = family('approvals'), rel = resolve(ap, 'release-approval', rctx), rights = resolve(ap, 'rights-verification', rctx), rev = resolve(ap, 'search-review', rctx), extl = resolve(ap, 'external-links-review', rctx), dep = resolve(family('deployments'), 'deployment-authorisation', rctx);
       const host = hostAuthorisation(rel, baseHost);
@@ -158,7 +158,8 @@ export function verifyPackage(dir, { eng = engDir, authenticity = verifyAuthenti
       const spec = loadEvidenceSpec(), covered = ['real-device', 'screen-reader', 'browser-matrix', 'ci-run'].map((t) => [t, coverage(spec, t, ev)]);
       add('evidence-recorded', covered.every(([, c]) => c.ok), covered.every(([, c]) => c.ok) ? `${ev.length} evidence record(s) bound to this candidate cover real devices, screen readers, browsers and CI` : `evidence not satisfied for ${covered.filter(([, c]) => !c.ok).map(([t, c]) => `${t} (${c.detail.slice(0, 90)})`).join('; ')}`);
       // ---- G6-3 requirements, re-judged from the package itself (the histories and registers travel in records/)
-      const today = new Date().toISOString().slice(0, 10), polic = readJson(join(eng, 'release', 'policy.json'));
+      // freshness is judged at the instant the package was released, not when it is checked: a good package must not expire in the hands of the person who received it (G6-3 review, F7)
+      const released = Number.isNaN(Date.parse(m.source.commitDate)) ? new Date() : new Date(m.source.commitDate), today = released.toISOString().slice(0, 10), polic = readJson(join(eng, 'release', 'policy.json'));
       const eg = externalLinksGate({ ext, history: readJ('records/external-links-verification.json'), today, maxAgeDays: polic.externalLinks?.maxAgeDays ?? 30, review: extl });
       const egOk = eg.ok && (ext.destinations.length === 0 || (extl.met && Boolean(eg.record) && extl.approved.some((x) => x.r.subject.verification === eg.record.id)));
       add('external-links', egOk, eg.ok ? (egOk ? eg.detail : 'no in-force external-links review relies on the verification record') : eg.detail);
@@ -180,7 +181,7 @@ export function verifyPackage(dir, { eng = engDir, authenticity = verifyAuthenti
       add('demonstration-pages', pages.length > 0 && !bad.length && !hosts.length, bad.length ? `pages without a noindex robots tag: ${bad.slice(0, 3).join(', ')}` : hosts.length ? `the pages name a production-looking host (${hosts.join(', ')})` : `${pages.length} pages, every one noindex, none naming a production host`);
     }
     // ---- channel separation (G6-2, RG-13): the marker is in the manifest and the package text, never in a page
-    const regOk = reg && !validateDemonstrations(reg).length ? (reg.registered || []).find((d) => d.configurationDigest === m.candidate.parts.configuration) : null;
+    const regOk = reg && !validateDemonstrations(reg, { ledgerIds: null }).length ? (reg.registered || []).find((d) => d.configurationDigest === m.candidate.parts.configuration) : null;
     if (m.channel === 'demonstration') add('demonstration-marker', Boolean(m.demonstration && m.demonstration.fictional === true && m.demonstration.statement === DEMONSTRATION_STATEMENT && regOk && m.demonstration.registeredAs === regOk.id && (m.search.baseUrlReserved === true || !m.configuration.baseUrl)), m.demonstration ? (regOk ? (m.search.baseUrlReserved === true || !m.configuration.baseUrl ? `${regOk.id}: the registered fictional demonstration, with the marker and no production domain` : 'a demonstration that declares a production-looking domain') : 'this configuration is not a registered demonstration (client-style content cannot be packaged as one)') : 'a demonstration package must carry the demonstration marker in its manifest');
     else add('demonstration-marker', m.demonstration === null, m.demonstration === null ? 'a client package carries no demonstration marker' : 'a client package that carries the demonstration marker');
     const start = entries.includes('START-HERE.txt') ? readFileSync(join(site, 'START-HERE.txt'), 'utf8') : '';

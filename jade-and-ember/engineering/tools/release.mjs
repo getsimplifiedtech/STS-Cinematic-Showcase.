@@ -19,6 +19,7 @@ import { buildManifest, sha256hex } from '../lib/hashed.mjs';
 import { attachBuild, collectContext, buildReleaseManifest, evaluateGate, searchDigest } from '../lib/release.mjs';
 import { zipBuffer } from '../lib/zip.mjs';
 import { startHereText } from '../lib/candidate.mjs';
+import { verifyPackage } from '../lib/release-package.mjs';
 import { engDir, listFiles, projectDir, readJson } from '../lib/git.mjs';
 import { loadPolicy, renderApache, renderHeadersFile, renderNginx } from '../lib/security.mjs';
 
@@ -93,6 +94,9 @@ try {
     writeFileSync(join(out, 'SHA256SUMS.txt'), sums);
     const pol = loadPolicy(); mkdirSync(join(out, 'host'), { recursive: true });
     writeFileSync(join(out, 'host', '_headers'), renderHeadersFile(dir, pol, { https: true })); writeFileSync(join(out, 'host', 'nginx.conf'), renderNginx(dir, pol, { https: true })); writeFileSync(join(out, 'host', 'htaccess'), renderApache(dir, pol, { https: true }));
+    // a prepared package is only kept if the package verifier accepts it (it re-judges everything from the package itself, including the authenticity hard stop)
+    const pv = verifyPackage(out);
+    if (!pv.ok) { rmSync(out, { recursive: true, force: true }); console.error(`\nNOT PREPARED: the package verifier refuses what was just written (${pv.checks.filter((c) => !c.ok).map((c) => c.id).join(', ')}); it was deleted. Nothing was deployed.`); finish(1); }
     console.log(`\nprepared ${out}: ${zipName} (${zip.length} bytes), release-manifest.json, SHA256SUMS.txt, host/. Nothing was deployed.`);
     finish(0);
   }

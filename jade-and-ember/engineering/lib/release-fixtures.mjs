@@ -64,7 +64,7 @@ export function fxSite() {
   if (SITE) return SITE;
   const dir = mkdtempSync(join(tmpdir(), 'je-fx-site-'));
   mkdirSync(join(dir, 'media')); mkdirSync(join(dir, 'fonts'));
-  const files = { 'media/hero.webp': 'INVENTED IMAGE BYTES', 'media/loop.mp4': 'INVENTED VIDEO BYTES', 'fonts/serif.woff2': 'INVENTED FONT BYTES', 'fonts/LICENSES.txt': '===== fixture-serif (SIL Open Font License 1.1) =====\nCopyright 2024 The Fixture Serif Project Authors\n\nThis Font Software is licensed under the SIL Open Font License, Version 1.1.\n\nSIL OPEN FONT LICENSE Version 1.1 - 26 February 2007\n' };
+  const files = { 'media/hero.webp': 'INVENTED IMAGE BYTES', 'media/loop.mp4': 'INVENTED VIDEO BYTES', 'fonts/serif.woff2': 'wOF2 INVENTED FONT BYTES', 'fonts/LICENSES.txt': '===== fixture-serif (SIL Open Font License 1.1) =====\nCopyright 2024 The Fixture Serif Project Authors\n\nThis Font Software is licensed under the SIL Open Font License, Version 1.1.\n\nSIL OPEN FONT LICENSE Version 1.1 - 26 February 2007\n' };
   for (const [f, t] of Object.entries(files)) writeFileSync(join(dir, f), t);
   writeFileSync(join(dir, 'index.html'), '<!doctype html><html><head><title>fixture</title></head><body><p>fixture</p></body></html>');
   const asset = (path, kind, extra) => ({ path, kind, description: `invented ${kind}`, bytes: Buffer.byteLength(files[path]), sha256: sha(files[path]), useNow: 'INVENTED: used for the fixture only.', clientUse: 'INVENTED: reuse needs the recorded rights verification.', ...extra });

@@ -84,7 +84,7 @@ export function collectContext(o = {}) {
     inventory: o.inventory || readJson(join(engDir, 'media-rights-inventory.json')),
     lock: o.lock || (() => { const t = readFileSync(join(root, 'package-lock.json')); return { sha256: sha256(t), packages: Object.keys(JSON.parse(t.toString('utf8')).packages || {}).filter(Boolean).length }; })(),
     dependencyPolicyProblems: o.dependencyPolicyProblems || checkDepsStatic({ root }).problems,
-    runtimeProblems: o.runtimeProblems || (() => { const f = join(repoRoot, '.github', 'workflows', 'jade-and-ember-verify.yml'); return existsSync(f) ? checkCiFile(readFileSync(f, 'utf8'), { docs: false }).problems : ['the workflow file is missing']; })(),
+    runtimeProblems: o.runtimeProblems || (() => { const dir = join(repoRoot, '.github', 'workflows'); const files = existsSync(dir) ? readdirSync(dir).filter((f) => /\.ya?ml$/i.test(f)).sort() : []; if (!files.includes('jade-and-ember-verify.yml')) return ['the workflow file jade-and-ember-verify.yml is missing']; return files.flatMap((f) => (f === 'jade-and-ember-verify.yml' ? checkCiFile(readFileSync(join(dir, f), 'utf8'), { docs: false }).problems : [`${f}: a workflow the CI policy does not judge`])); })(),
     policyExtras: o.policyExtras || null,
   };
 }
@@ -98,7 +98,7 @@ export function attachBuild(ctx, siteDir) {
     assetsManifestMatches: recorded ? recorded.treeSha256 === am.treeSha256 : false,
     candidate: computeCandidate({ siteDir, root: ctx.root, channel: ctx.channel, version: ctx.version.version }),
     // G6-3: what the build delivers, derived from the built files (never from a registry anyone can edit)
-    ext: deliveredDestinations(siteDir), mediaDigest: deliveredMediaDigest(siteDir),
+    ext: deliveredDestinations(siteDir, { baseUrl: ctx.client.seo.baseUrl }), mediaDigest: deliveredMediaDigest(siteDir),
     ...(() => {
       const sbom = buildCompositeSbom({ siteDir, root: ctx.root, inventory: ctx.inventory, version: ctx.version.version, channel: ctx.channel });
       const text = serialiseSbom(sbom);
@@ -140,7 +140,7 @@ export function evaluateGate(ctx, policy = loadReleasePolicy()) {
   const depRes = resolve(ctx.deploymentRecords || [], 'deployment-authorisation', rctx);
   const reviewerProblems = validateReviewers(ctx.reviewers, { ledgerIds: have });
   const recordErrors = [...new Set([...rel.errors, ...rights.errors, ...review.errors, ...extl.errors, ...depRes.errors])];
-  const demoProblems = validateDemonstrations(ctx.demonstrations);
+  const demoProblems = validateDemonstrations(ctx.demonstrations, { ledgerIds: have });
   const registered = (ctx.demonstrations?.registered || []).find((d) => d.configurationDigest === ctx.candidate?.parts?.configuration);
   const crawlersExplicit = sd.crawlers && ['search', 'aiSearch', 'training'].every((k) => sd.crawlers[k] === 'allow' || sd.crawlers[k] === 'disallow');
   const searchGaps = [!sd.host && 'seo.host is not declared (cloudflare-pages, vercel or static)', !crawlersExplicit && 'seo.crawlers does not state a decision for search, aiSearch and training', ctx.siteHasSearchFiles === false && 'sitemap.xml, robots.txt or llms.txt is missing from the built site', !ctx.searchDigest && 'there are no search artifacts to review', ctx.searchDigest && !review.met && `no in-force search review for the current search artifacts (${review.detail})`, ...crawlerReviewGaps({ record: ctx.crawlerRecord, today: ctx.today })].filter(Boolean);
@@ -186,7 +186,9 @@ export function evaluateGate(ctx, policy = loadReleasePolicy()) {
     authenticity: [authenticity.ok, authenticity.detail],
     ...Object.fromEntries(['real-device', 'screen-reader', 'browser-matrix', 'ci-run'].map((t) => { const cv = coverage(evSpec, t, assessed); return [`evidence:${t}`, [cv.ok, cv.detail]]; })),
   };
-  for (const id of need) { const [ok, detail] = checks[id] || [false, 'unknown requirement']; add(id, ok, detail); }
+  // authenticity is not a policy choice: a client-production release is judged by it whatever the policy file lists (G6-3 review, F1)
+  const judged = channel === 'client-production' && !need.includes('authenticity') ? [...need, 'authenticity'] : need;
+  for (const id of judged) { const [ok, detail] = checks[id] || [false, 'unknown requirement']; add(id, ok, detail); }
   // a client configuration labelled demonstration is always refused
   if (channel === 'client-production' && ctx.version.channel === 'demonstration') add('labelMatchesConfiguration', false, 'VERSION.json calls this a demonstration but the configuration is a client production build');
   return { channel, allowed: out.every((r) => r.ok), requirements: out, deploymentApproved: Boolean(deployOk), records: { release: rel, rights, review, externalLinks: extl, deployment: depRes }, supplyRecordId: supply.dependencySecurity.record?.id ?? null };

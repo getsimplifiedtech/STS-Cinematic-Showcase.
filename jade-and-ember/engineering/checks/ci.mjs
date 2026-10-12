@@ -1,7 +1,7 @@
 // check:ci. The GitHub Actions workflow keeps its promises (decision D-4, APR-JE-022): read-only, minimal permissions, no deployment, no merge,
 // no secrets, no AI or paid service, reproducible. The workflow is parsed as YAML and checked structurally; CI.md must document the runner.
-import { existsSync, readFileSync } from 'node:fs';
-import { join } from 'node:path';
+import { existsSync, readFileSync, readdirSync } from 'node:fs';
+import { basename, dirname, join } from 'node:path';
 import { parse } from 'yaml';
 import { engDir, isMain, projectDir, readJson, repoRoot } from '../lib/git.mjs';
 import { satisfies } from '../lib/node-range.mjs';
@@ -95,7 +95,11 @@ export function checkCiFile(text, { docs = true } = {}) {
 
 export function checkCi({ file = join(repoRoot, '.github', 'workflows', 'jade-and-ember-verify.yml') } = {}) {
   if (!existsSync(file)) return { problems: ['the workflow file .github/workflows/jade-and-ember-verify.yml is missing'], notes: [] };
-  return checkCiFile(readFileSync(file, 'utf8'));
+  const r = checkCiFile(readFileSync(file, 'utf8'));
+  // the policy judges ONE workflow; a second file in the folder would be judged by nothing (G6-3 review, F11)
+  const dir = dirname(file), others = existsSync(dir) ? readdirSync(dir).filter((f) => /\.ya?ml$/i.test(f) && join(dir, f) !== file) : [];
+  if (others.length) r.problems.push(`other workflow file(s) in .github/workflows/: ${others.join(', ')}; the CI policy judges only ${basename(file)} (add one deliberately, with its own policy, in a work package that authorises it)`);
+  return r;
 }
 
 if (isMain(import.meta.url)) {

@@ -8,6 +8,8 @@ import { readFileSync, readdirSync, existsSync } from 'node:fs';
 import { join } from 'node:path';
 import { brotliDecompressSync } from 'node:zlib';
 import { RIGHTS_CLAIM } from './search.mjs';
+// more ways to say a right exists, for the inventory only (the site-wide scan in search.mjs is unchanged)
+const MORE_CLAIMS = /\b(cleared for|free to use|free for commercial|public domain|no attribution (is )?required|commercial(ly)? (use )?(is )?(allowed|permitted|fine|ok))\b/i;
 
 export const STATUSES = ['unverified', 'licence-text-shipped', 'verified'];
 export const KINDS = ['image', 'video', 'font'];
@@ -58,6 +60,14 @@ const tokens = (s) => new Set((String(s).toLowerCase().match(/[a-z]{3,}/g) || []
 // do two copyright notices name the same party? (shared holder or project word; years and punctuation are ignored)
 export const noticesAgree = (a, b) => { const x = tokens(a), y = tokens(b); for (const w of x) if (y.has(w)) return true; return false; };
 
+// image, video or font by directory and extension; null when it is none of them
+export function kindOfPath(path) {
+  const [dir, ...rest] = path.split('/'); const f = rest.join('/'), ext = (f.split('.').pop() || '').toLowerCase();
+  if (dir === 'fonts' && ext === 'woff2') return 'font';
+  if (dir === 'media' && ['webp', 'jpg', 'jpeg', 'png', 'avif', 'gif', 'svg'].includes(ext)) return 'image';
+  if (dir === 'media' && ['mp4', 'webm', 'mov', 'm4v'].includes(ext)) return 'video';
+  return null;
+}
 // ---- the inventory against the files
 export function mediaRightsProblems({ inventory, root, approvals = [], licenceText = null }) {
   const problems = [], notices = [];
@@ -89,6 +99,10 @@ export function mediaRightsProblems({ inventory, root, approvals = [], licenceTe
     const buf = readFileSync(join(root, path));
     if (a.sha256 !== sha256(buf) || a.bytes !== buf.length) bad(`changed:${path}`, `${w} has changed since the rights inventory was written (hash or size differs): the review no longer describes this file`);
     if (!KINDS.includes(a.kind)) bad(`kind:${path}`, `${w}: kind must be one of ${KINDS.join(', ')}`);
+    // the kind follows the file, not the label (G6-3 review, F3): an image or video called a font would skip the per-asset verification and the terms review
+    const expected = kindOfPath(path);
+    if (KINDS.includes(a.kind) && expected !== a.kind) bad(`kind:${path}`, `${w}: listed as ${a.kind}, but a ${path.split('.').pop()} file in ${path.split('/')[0]}/ is ${expected ? `a ${expected}` : 'not a recognised image, video or font'}`);
+    if (a.kind === 'font' && buf.toString('latin1', 0, 4) !== 'wOF2') bad(`kind:${path}`, `${w}: a font must be a WOFF2 file (the bytes do not start with wOF2)`);
     if (!a.rights || !STATUSES.includes(a.rights.status)) { bad(`status:${path}`, `${w}: rights.status must be one of ${STATUSES.join(', ')}`); continue; }
     if (a.rights.status === 'verified') {
       if (!a.rights.approval || !rightsRows.some((r) => r.id === a.rights.approval)) bad(`verified:${path}`, `${w} is marked verified but no rights-verification approval row ${a.rights.approval || '(none named)'} exists: nothing may be marked verified without a recorded approval`);
@@ -113,7 +127,7 @@ export function mediaRightsProblems({ inventory, root, approvals = [], licenceTe
     for (const k of ['useNow', 'clientUse']) if (typeof a[k] !== 'string' || a[k].trim().length < 15) bad(`${k}:${path}`, `${w}: ${k} must say what use is permitted now / for a client`);
   }
   // the inventory must never describe the media as licensed, owned or cleared
-  if (RIGHTS_CLAIM.test(JSON.stringify(inventory))) bad('wording', 'the media rights inventory contains wording that claims a right (licensed, rights-cleared, royalty-free ...): it must only say what is established and what is not');
+  if (RIGHTS_CLAIM.test(JSON.stringify(inventory)) || MORE_CLAIMS.test(JSON.stringify(inventory))) bad('wording', 'the media rights inventory contains wording that claims a right (licensed, rights-cleared, royalty-free ...): it must only say what is established and what is not');
   return { problems, notices };
 }
 

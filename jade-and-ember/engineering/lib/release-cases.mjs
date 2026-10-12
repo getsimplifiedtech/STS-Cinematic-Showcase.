@@ -24,15 +24,28 @@ const exc = (over = {}) => ({ name: 'left-pad', severity: 'moderate', advisory: 
 const advisory = (over = {}) => ({ package: 'left-pad', severity: 'moderate', advisory: 'GHSA-aaaa-bbbb-cccc', ...over });
 const withAdvisory = (a, o = {}) => sup((r) => { r.audit.advisories = [a]; r.audit.total = 1; r.audit[a.severity] = 1; Object.assign(r, o); });
 const depsWith = (...packages) => ({ ...G().deps, acceptedAdvisories: { ...G().deps.acceptedAdvisories, packages } });
+// a destination list whose only change is one URL, with a verification and a review that match it exactly: the safety rules alone are then what blocks
+const extCase = (url, kind = 'link') => {
+  const e = clone(fxSite().ext); e.destinations[0] = { ...e.destinations[0], url, kind };
+  e.digest = require_digest(e.destinations.map((d) => [d.kind, d.url]).sort());
+  const h = fxExternalHistory(); h.records[0].registryDigest = e.digest; h.records[0].results[0] = { ...h.records[0].results[0], url, finalUrl: url, chain: [{ url, status: 200, method: 'HEAD' }] };
+  const recs = G().approvalRecords.map((x) => (x.record.type === 'external-links-review' ? { ...x, record: { ...clone(x.record), subject: { ...x.record.subject, destinationsDigest: e.digest } } } : x));
+  return { ext: e, externalHistory: h, approvalRecords: recs };
+};
 const page = (head) => `<!doctype html><html><head><title>fixture</title>${head}</head><body><p>fixture</p></body></html>`;
 
 // For the G6-3 cases: the requirement(s) that must be the reason (a case blocked only by something unrelated would prove nothing)
 const X = (ids, names) => Object.fromEntries(names.map((n) => [n, ids]));
+// and, for some, what the reason must say (so the right rule, not an incidental one, is what blocks)
+export const EXPECTED_DETAIL = {
+  'a clickable link that is not https': /not https/, 'a clickable link to a reserved host': /reserved/, 'a clickable link to a staging host': /reserved|staging/,
+  'a delivered media file that has no inventory entry': /no entry in the media rights inventory/, 'an image relabelled as a font (to skip its verification)': /listed as font/,
+};
 export const EXPECTED_REASON = {
   ...X(['externalLinks'], ['no external-links verification record', 'an external-links verification for another destination list', 'an external-links verification from a sandbox run', 'an external-links verification older than its limit', 'a clickable link the site refused (blocked)', 'a clickable link that is gone (unavailable)', 'a clickable link that could not be reached (inconclusive)', 'a verified link through an http hop', 'a verification record with no result for a destination', 'a clickable link that is not https', 'a clickable link to a reserved host', 'a clickable link to a staging host']),
-  ...X(['externalLinksReview'], ['a missing external-links review', 'an external-links review of another destination list', 'an external-links review that relies on another verification record', 'an external-links review that did not open the destinations', 'an external-links review that was rejected', 'an external-links review revoked by an authorised reviewer', 'an external-links review for another candidate']),
+  ...X(['externalLinksReview'], ['a missing external-links review', 'an external-links review of another destination list', 'an external-links review that relies on another verification record', 'an external-links review that did not open the destinations', 'an external-links review that was rejected', 'an external-links review revoked by an authorised reviewer', 'an external-links review for another candidate', 'an external-links review and a later rejection of it, both in force']),
   ...X(['rightsVerification'], ['a rights verification of other media (inventory digest differs)', 'a rights verification with no inventory digest', 'a rights verification with a basis the model does not know']),
-  ...X(['mediaRightsInventory'], ['an image still unverified in the inventory', 'an inventory approval naming a record that does not exist', 'the rights verification revoked after the inventory was written (the inventory still says verified)', 'the rights verification rejected after the inventory was written', 'provider terms nobody has reviewed', 'the Noto Serif SC notice finding (F-G5-05) still open', 'the media provenance finding (F-G2-01) only accepted, not resolved', 'a font that is not described as licence-text-shipped', 'a rights verification of other media (inventory digest differs)']),
+  ...X(['mediaRightsInventory'], ['an image still unverified in the inventory', 'an inventory approval naming a record that does not exist', 'the rights verification revoked after the inventory was written (the inventory still says verified)', 'the rights verification rejected after the inventory was written', 'provider terms nobody has reviewed', 'the Noto Serif SC notice finding (F-G5-05) still open', 'the media provenance finding (F-G2-01) only accepted, not resolved', 'a font that is not described as licence-text-shipped', 'a delivered media file that has no inventory entry', 'an image relabelled as a font (to skip its verification)', 'a rights verification of other media (inventory digest differs)']),
   ...X(['socialImageRights'], ['a social image hosted on another site', 'a social image that is not a delivered file', 'a social image that is delivered but not in the rights inventory', 'a twitter card image that is not rights-verified', 'a JSON-LD image hosted elsewhere']),
   ...X(['dependencySecurity'], ['no supply-chain verification', 'a supply-chain verification for another lockfile', 'a supply-chain verification from a sandbox run', 'an old supply-chain verification', 'a high advisory', 'a critical advisory', 'a moderate advisory with no exception', 'a moderate advisory whose exception expired', 'an exception without a plan', 'an exception that runs for more than 90 days', 'an exception written as a bare package name', 'a supply-chain record whose advisory count does not add up', 'registry signatures that failed', 'registry signatures that cover fewer packages than the lockfile']),
   ...X(['sbomVerified'], ['an SBOM digest different from the one the build regenerates', 'an SBOM that records a library with no licence']),
@@ -157,9 +170,10 @@ export const RELEASE_CASES = {
     'a clickable link that could not be reached (inconclusive)': { externalHistory: hist((r) => { Object.assign(r.results[0], { class: 'inconclusive', finalStatus: null, chain: [] }); }) },
     'a verified link through an http hop': { externalHistory: hist((r) => { r.results[0].chain = [{ url: 'http://order.jade-and-ember-fixture.com/', status: 301, method: 'HEAD' }, ...r.results[0].chain]; }) },
     'a verification record with no result for a destination': { externalHistory: hist((r) => { r.results = [{ ...r.results[0], url: 'https://elsewhere.jade-and-ember-fixture.com/' }]; }) },
-    'a clickable link that is not https': { ext: (() => { const e = clone(fxSite().ext); e.destinations[0].url = 'http://order.jade-and-ember-fixture.com/'; return e; })() },
-    'a clickable link to a reserved host': { ext: (() => { const e = clone(fxSite().ext); e.destinations[0].url = 'https://order.jade-and-ember-fixture.test/'; return e; })() },
-    'a clickable link to a staging host': { ext: (() => { const e = clone(fxSite().ext); e.destinations[0].url = 'https://stage2.jade-and-ember-fixture.com/'; return e; })() },
+    'a clickable link that is not https': extCase('http://order.jade-and-ember-fixture.com/'),
+    'a clickable link to a reserved host': extCase('https://order.jade-and-ember-fixture.test/'),
+    'a clickable link to a staging host': extCase('https://stage2.jade-and-ember-fixture.com/'),
+    'an external-links review and a later rejection of it, both in force': { approvalRecords: plus(rec('external-links-review', { status: 'rejected', decidedAt: '2026-10-11T12:00:00Z' }, { n: 2 })) },
     'a missing external-links review': { approvalRecords: withoutType('external-links-review') },
     'an external-links review of another destination list': { approvalRecords: editType('external-links-review', (r) => { r.subject.destinationsDigest = OTHER; }) },
     'an external-links review that relies on another verification record': { approvalRecords: editType('external-links-review', (r) => { r.subject.verification = 'EXTV-9'; }) },
@@ -178,6 +192,8 @@ export const RELEASE_CASES = {
     'provider terms nobody has reviewed': { inventory: inv((i) => { i.terms[0].status = 'not-reviewed'; delete i.terms[0].reviewedOn; delete i.terms[0].reviewedBy; }) },
     'the Noto Serif SC notice finding (F-G5-05) still open': { findings: [{ id: 'F-G5-05', severity: 'Minor', visual: false, status: 'open: awaits the owner' }] },
     'the media provenance finding (F-G2-01) only accepted, not resolved': { findings: [{ id: 'F-G2-01', severity: 'Minor', visual: false, status: 'accepted' }] },
+    'a delivered media file that has no inventory entry': { inventory: inv((i) => { i.assets = i.assets.filter((a) => a.path !== 'media/loop.mp4'); }) },
+    'an image relabelled as a font (to skip its verification)': { inventory: inv((i) => { i.assets[0].kind = 'font'; i.assets[0].licenceSection = 'fixture-serif'; i.assets[0].rights = { status: 'licence-text-shipped', established: ['x'], notEstablished: [] }; }) },
     'a font that is not described as licence-text-shipped': { inventory: inv((i) => { i.assets[2].rights.status = 'unverified'; }) },
     // ---- G6-3: social-preview images (D-P4-3)
     'a social image hosted on another site': { socialSiteDir: fxSiteWithIndex(page('<meta property="og:image" content="https://cdn.elsewhere.com/share.jpg">')) },
