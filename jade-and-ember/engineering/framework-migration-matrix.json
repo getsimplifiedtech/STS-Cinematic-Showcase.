@@ -1639,6 +1639,7 @@
      "jade-and-ember/engineering/checks/hosting-adapters.mjs",
      "jade-and-ember/engineering/checks/hosting.mjs",
      "jade-and-ember/engineering/checks/portability.mjs",
+     "jade-and-ember/engineering/checks/release-dryrun.mjs",
      "jade-and-ember/engineering/checks/security.mjs",
      "jade-and-ember/engineering/checks/selftest-gate4.mjs",
      "jade-and-ember/engineering/framework-migration-matrix.json",

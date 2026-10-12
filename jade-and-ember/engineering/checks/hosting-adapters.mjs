@@ -11,7 +11,6 @@ import { assembleCandidate } from '../lib/site.mjs';
 import { serveSite } from '../lib/server.mjs';
 import { isMain } from '../lib/git.mjs';
 import { ADAPTERS, MANIFEST, checkBundle, profileOf, readManifest, renderBundle, verifyServed } from '../adapters/hosting/index.mjs';
-import { request } from 'node:http';
 import { composeHeaders, describeSite, sha256, walkFiles } from '../adapters/hosting/common.mjs';
 import { writeFixtureSite } from '../adapters/hosting/fixture.mjs';
 import { checkHeadersFile as cfCheckImport, parseHeadersFile } from '../adapters/hosting/cloudflare-pages.mjs';
@@ -458,7 +457,7 @@ export async function checkHostingAdapters({ updateGolden = false } = {}) {
       const site = writeFixtureSite(join(t('esc-site'), 'site'), {}), out = t('esc');
       renderBundle('vercel', { siteDir: site, outDir: join(out, 'b'), urlStyle: 'clean', baseUrl: 'https://fixture-bakery.example', policy });
       const sv = serveSite(join(out, 'b', 'site'), { profile: profileOf(join(out, 'b')) });
-      const raw = (path) => new Promise((resolveP) => { const r = request({ host: '127.0.0.1', port: new URL(sv.origin).port, path }, (res) => { const c = []; res.on('data', (d) => c.push(d)); res.on('end', () => resolveP({ status: res.statusCode, body: Buffer.concat(c).toString('utf8') })); }); r.end(); });
+      const raw = async (path) => { const r = await fetch(sv.origin + path, { redirect: 'manual' }); return { status: r.status, body: await r.text() }; };
       for (const path of ['/..%2fvercel.json', '/..%2fbundle.manifest.json', '/%2e%2e%2fSETTINGS.txt', '/..%5cvercel.json', '/fonts/..%2f..%2fvercel.json']) { const r = await raw(path); if (r.status === 200 && /cleanUrls|noCredential|SYNTHETIC STAGING/.test(r.body)) problems.push(`the simulation server served a file outside the site folder for ${path}`); }
       sv.close();
     }
@@ -466,6 +465,10 @@ export async function checkHostingAdapters({ updateGolden = false } = {}) {
     const demo = assembleCandidate(undefined, 'hosting-hsts');
     temps.push(demo);
     for (const [n, text] of [['_headers', renderHeadersFile(demo, policy, { https: true })], ['nginx.conf', renderNginx(demo, policy, { https: true })], ['htaccess', renderApache(demo, policy, { https: true })]]) if (/includeSubDomains/.test(text)) problems.push(`${n} (the release package's host file) still carries HSTS includeSubDomains`);
+    {   // the release tool writes host/_headers from the build (page order of the registry); the package verifier writes it again from the unpacked site (file order): the bytes must agree
+      const stripped = tmp('hsts-stripped'); temps.push(stripped); cpSync(demo, join(stripped, 's'), { recursive: true }); rmrf(join(stripped, 's', 'config'));
+      if (renderHeadersFile(demo, policy, { https: true }) !== renderHeadersFile(join(stripped, 's'), policy, { https: true })) problems.push('renderHeadersFile writes different bytes for the build (with config/) and for the unpacked site (without it): the package verifier would refuse every release package');
+    }
     notes.push('the release package\'s host files (_headers, nginx.conf, htaccess) carry Strict-Transport-Security: max-age=31536000 with no includeSubDomains');
   } catch (e) { problems.push(`the adapter tests crashed: ${e.stack?.split('\n').slice(0, 3).join(' | ') || e.message}`); }
   finally { for (const d of temps) rmrf(d); }

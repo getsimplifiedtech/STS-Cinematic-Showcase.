@@ -67,7 +67,7 @@ export function deploymentSafety() {
   const DEPLOY = /\b(wrangler|vercel|netlify|gh\s+release|git\s+push|git\s+tag|rsync|scp|aws\s+s3|npm\s+publish|docker\s+push|pages\s+deploy|firebase\s+deploy|flyctl|surge)\b|curl[^\n]*-X\s*(POST|PUT|PATCH|DELETE)|upload-artifact|deploy-pages/i;
   add('no step runs a deploy, publish, push or upload command', !DEPLOY.test(runs) && !DEPLOY.test(text.replace(/#.*$/gm, '')), 'scanned every run: block and every uses: line');
   const src = ['lib', 'tools', 'checks'].flatMap((d) => listFiles(join(engDir, d)).filter((f) => f.endsWith('.mjs')).map((f) => [`${d}/${f}`, readFileSync(join(engDir, d, f), 'utf8')]));
-  const self = new Set(['lib/release-dryrun-scenarios.mjs', 'checks/release-dryrun.mjs', 'checks/selftest-gate3.mjs', 'checks/selftest-gate4.mjs', 'checks/selftest-gate5.mjs', 'checks/selftest.mjs', 'checks/ci.mjs', 'checks/hosting.mjs']);
+  const self = new Set(['lib/release-dryrun-scenarios.mjs', 'checks/release-dryrun.mjs', 'checks/selftest-gate3.mjs', 'checks/selftest-gate4.mjs', 'checks/selftest-gate5.mjs', 'checks/selftest.mjs', 'checks/ci.mjs', 'checks/hosting.mjs', 'checks/hosting-adapters.mjs']);   // (the two hosting checks talk only to servers they start on 127.0.0.1)
   const deployCalls = src.filter(([f, t]) => !self.has(f) && /(spawnSync|execFileSync|execSync|spawn|exec)\(\s*['"`](wrangler|vercel|netlify|gh|rsync|scp|aws|npm\s+publish|curl|wget|ssh|ftp)\b/.test(t)).map(([f]) => f);
   add('no engineering tool or library starts a deploy, upload or network client program', !deployCalls.length, deployCalls.join(', ') || `${src.length} files scanned`);
   const writes = src.filter(([f, t]) => !self.has(f) && /method:\s*['"](POST|PUT|PATCH|DELETE)['"]/i.test(t)).map(([f]) => f);
