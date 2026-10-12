@@ -1,5 +1,7 @@
 # Gate 6 implementation order, dependencies and release blockers (Gate 5 Phase 8, `APR-JE-036`)
 
+> **G6-3A update (2026-10-12, `APR-JE-041`).** G6-3 is closed by the owner as an engineering milestone. The owner resolved the blocking gap recorded in `G6-3-SCOPE.md` by inserting **G6-3A (release authentication and provenance)** between G6-3 and G6-4; it is authorised for research, architecture and a decision checkpoint only (`G6-3A-DESIGN.md`), and nothing credential-dependent may be implemented before the owner approves the mechanism. G6-4 now depends on G6-3A. G6-4 onward remain unauthorised.
+
 > **G6-3 update (2026-10-11, `APR-JE-040`).** G6-2 is closed by the owner as an engineering milestone (client-production release authorisation is not complete). G6-3 is authorised; its scope is reconciled with this document in `G6-3-SCOPE.md`, which also records a blocking architectural gap: **no work package in this plan implements authenticated release authorisation and build provenance (RG-14, RB-15)**. G6-4 onward remain unauthorised.
 
 > **G6-2 update (2026-10-11, `APR-JE-039`).** G6-1 is closed by the owner. G6-2 (release model v2) is authorised according to this document, with nine required controls (record `APR-JE-039`) and the instruction to stop and present alternatives for any part of the trust model that cannot be resolved safely from the approved architecture. G6-0 was not run first; G6-3 onward remain unauthorised.
@@ -28,7 +30,8 @@ G6-0 decisions + specification (documents; framework repo only with approval)
   └─ G6-1 runtime and tooling hygiene (Node 24, Actions, direct Lighthouse, licence evidence)
         └─ G6-2 release model v2   (2a design + attestation evaluation -> owner approval -> 2b implementation)
               ├─ G6-3 requirement completion (external links, rights binding, security/SBOM, crawler, images)
-              │     └─ G6-4 hosting adapters and requirements (also needs G6-2)
+              │     └─ G6-3A release authentication and provenance (APR-JE-041; design and decision checkpoint first)
+              │           └─ G6-4 hosting adapters and requirements (also needs G6-2)
               └──────────────┐
                  G6-5 de-coupling refactor in Jade & Ember (needs G6-0, G6-2, G6-3, G6-4)
                     └─ G6-6 extraction into the framework repository (branch; owner approval)
@@ -36,7 +39,7 @@ G6-0 decisions + specification (documents; framework repo only with approval)
                           └─ G6-8 consumption and independent validation (needs G6-6 and G6-7)
 ```
 
-Dependency order produced by the checker: G6-0, G6-1, G6-2, G6-3, G6-4, G6-5, G6-6, G6-7, G6-8.
+Dependency order produced by the checker: G6-0, G6-1, G6-2, G6-3, G6-3A, G6-4, G6-5, G6-6, G6-7, G6-8.
 
 **Why the refactor comes after the release model (R-08).** Release gate, evidence and dry-run code (FM-18, FM-19, FM-20) is the code that changes most, and it is also the code with the strongest safety net (112 blocking scenarios). Changing it first, in place, keeps that net intact; moving it and then changing it would mean proving parity twice. The alternative (refactor first) is safer for the *mechanical* checks and is the owner's call (D-P8-5).
 
@@ -80,6 +83,12 @@ Size is relative (S, M, L); no calendar estimate is made.
 - Crawler evaluation (D-P4-1) and approved social-preview image support (D-P4-3).
 - **Verification:** one blocking scenario per requirement; probes RG-02, RG-03, RG-10, RG-11 close; delivered folder unchanged except the two separately authorised corrections.
 - **Clears:** RB-02 (gate side), RB-10, part of RB-11.
+
+### G6-3A Release authentication and provenance (M; inserted by `APR-JE-041`)
+- **Content:** authenticated client-production release authorisation and independently verifiable build provenance (RG-14, RB-15). Step 1 research against official GitHub documentation compared with detached owner-controlled signatures; Step 2 architecture; Step 3 decision checkpoint. **Design only until the owner approves the mechanism**; any credential-dependent implementation is a later, separately authorised step.
+- **Outputs:** `G6-3A-DESIGN.md` and `g6-3a-evidence/`.
+- **Verification:** each platform statement traces to an official source or is marked unverified; each of the six required properties maps to a control and a rejection test; the hard authenticity stop stays until the mechanism is implemented and independently verified.
+- **Clears:** RB-15 (after implementation and independent verification, not by the design).
 
 ### G6-4 Hosting adapters and requirements (L)
 - The adapter interface (already specified in `hosting/HOSTING-ADAPTER-INTERFACE.md`), Cloudflare Pages first, then Vercel and a static adapter; a real 404 (D-P3-1), domain-root base URLs (D-P3-2), the staged-bundle manifest and deployed-bytes comparison (D-P3-3), HSTS opt-in (D-P3-4, D-P4-5; RG-12).

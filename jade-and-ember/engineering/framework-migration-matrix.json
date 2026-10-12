@@ -1142,7 +1142,9 @@
     "jade-and-ember/engineering/G6-3-SCOPE.md",
     "jade-and-ember/engineering/G6-3-REPORT.md",
     "jade-and-ember/engineering/g6-3-evidence/",
-    "jade-and-ember/engineering/CRAWLER-EVALUATION-G63.md"
+    "jade-and-ember/engineering/CRAWLER-EVALUATION-G63.md",
+    "jade-and-ember/engineering/G6-3A-DESIGN.md",
+    "jade-and-ember/engineering/g6-3a-evidence/"
    ],
    "target": "stays (absorbed by the framework specification at G6-0)",
    "external": [
@@ -1446,9 +1448,95 @@
      "jade-and-ember/engineering/external-destinations.json",
      "jade-and-ember/engineering/external-links-verification.json"
     ],
+    "amendments": [],
+    "endCommit": "275a97329e7d996f346e6d18561a919c11a1abce",
+    "closedBy": "APR-JE-041"
+   },
+   "status": "closed by APR-JE-041 as an engineering milestone (end commit 275a973; CI run 63 all seven jobs); client-production release authorisation is not complete"
+  },
+  {
+   "id": "G6-3A",
+   "title": "Release authentication and provenance (design and decision checkpoint)",
+   "summary": "Authenticated client-production release authorisation and independently verifiable build provenance (RG-14, RB-15). Inserted by the owner between G6-3 and G6-4 (APR-JE-041). Authorised for Steps 1 to 3 only: research verified against official GitHub documentation (plan and visibility, rulesets and branch protection, environment approval, artifact attestations, Actions permissions and trust boundaries, whether a Claude session using the carlito3k account could initiate, alter or approve a release) compared with detached owner-controlled signatures; an architecture that separates implementation from owner authorisation, binds approval to the exact candidate digest, authenticates the build and its provenance, rejects forged, revoked, stale or mismatched authorisations, stops untrusted workflows and ordinary write access from manufacturing owner approval, and keeps the hard production-release stop until the mechanism is proven, with approval keys unavailable to coding agents; then a decision checkpoint. No credential-dependent change is implemented before the owner approves it.",
+   "dependsOn": [
+    "G6-3"
+   ],
+   "priorities": [],
+   "frameworkRepoChange": false,
+   "size": "medium",
+   "verification": "Every platform statement in the design traces to an official GitHub documentation source (path and digest recorded) or is marked unverified; the six required properties are each mapped to a control and to a rejection test to be built later; the hard authenticity stop (lib/authenticity.mjs) is untouched; the reviewer table stays empty; the owner approves or amends the decision checkpoint before any implementation.",
+   "blocks": [
+    "RB-15"
+   ],
+   "scope": {
+    "repository": "getsimplifiedtech/STS-Cinematic-Showcase.",
+    "branch": "feature/jade-and-ember-v0.9",
+    "baseCommit": "275a97329e7d996f346e6d18561a919c11a1abce",
+    "authorisedBy": "APR-JE-041",
+    "note": "Derived from the owner's G6-3A authorisation (APR-JE-041): Steps 1 to 3 only (research, architecture, decision checkpoint). Allowed: the approvals ledger and the documents, matrix and closure verifier needed to record the closure of G6-3, the insertion of G6-3A and the design report with its evidence. Denied: everything that would implement, enable or weaken a release mechanism or change anything delivered: the release gate and its libraries (authenticity, candidate, records, verification, release, package), the release tool, the release folder (policy, reviewers, demonstrations, records), the workflow and every .github file, the package scripts and lockfile, all delivered pages, styles, scripts, fonts, media and configuration, the renderer and sources, the security policy and CSP code, the hosting adapters, the recorded asset manifest, media-rights inventory, crawler record, external-destination registry and histories, the findings register, the baseline records, the master framework repository, the main and baseline branches, and Gate 6 packages G6-4 onward. No credential, key, secret, account or subscription is created.",
+    "allow": [
+     "docs/JADE_AND_EMBER_APPROVALS.md",
+     "jade-and-ember/engineering/framework-migration-matrix.json",
+     "jade-and-ember/engineering/FRAMEWORK-MIGRATION-MATRIX.md",
+     "jade-and-ember/engineering/lib/gate5-closure.mjs",
+     "jade-and-ember/engineering/GATE-5-PLAN.md",
+     "jade-and-ember/engineering/GATE-6-IMPLEMENTATION-ORDER.md",
+     "jade-and-ember/engineering/CI.md",
+     "jade-and-ember/engineering/G6-3A-DESIGN.md",
+     "jade-and-ember/engineering/g6-3a-evidence/"
+    ],
+    "deny": [
+     ".github/",
+     "jade-and-ember/index.html",
+     "jade-and-ember/menu.html",
+     "jade-and-ember/order-online.html",
+     "jade-and-ember/our-story.html",
+     "jade-and-ember/visit-us.html",
+     "jade-and-ember/styles.css",
+     "jade-and-ember/site.js",
+     "jade-and-ember/hero.js",
+     "jade-and-ember/menu.js",
+     "jade-and-ember/media/",
+     "jade-and-ember/fonts/",
+     "jade-and-ember/config/",
+     "jade-and-ember/src/",
+     "jade-and-ember/build.mjs",
+     "jade-and-ember/serve.py",
+     "jade-and-ember/package-lock.json",
+     "jade-and-ember/baselines/",
+     "jade-and-ember/README.md",
+     "README.md",
+     "jade-and-ember/engineering/security.json",
+     "jade-and-ember/engineering/privacy.json",
+     "jade-and-ember/engineering/hosting/",
+     "jade-and-ember/engineering/lib/security.mjs",
+     "jade-and-ember/engineering/checks/security.mjs",
+     "jade-and-ember/engineering/assets.manifest.json",
+     "jade-and-ember/engineering/media-rights-inventory.json",
+     "jade-and-ember/engineering/search-crawler-verification.json",
+     "jade-and-ember/engineering/findings.json",
+     "jade-and-ember/engineering/baseline.json",
+     "jade-and-ember/engineering/immutability-allowlist.json",
+     "jade-and-ember/engineering/lighthouse.json",
+     "jade-and-ember/engineering/environment.json",
+     "jade-and-ember/engineering/evidence/",
+     "jade-and-ember/engineering/release/reviewers.json",
+     "jade-and-ember/engineering/external-destinations.json",
+     "jade-and-ember/engineering/external-links-verification.json",
+     "jade-and-ember/package.json",
+     "jade-and-ember/engineering/release/",
+     "jade-and-ember/engineering/lib/authenticity.mjs",
+     "jade-and-ember/engineering/lib/release.mjs",
+     "jade-and-ember/engineering/lib/release-package.mjs",
+     "jade-and-ember/engineering/lib/candidate.mjs",
+     "jade-and-ember/engineering/lib/records.mjs",
+     "jade-and-ember/engineering/lib/verification.mjs",
+     "jade-and-ember/engineering/tools/release.mjs",
+     "docs/JADE_AND_EMBER_MEDIA_RIGHTS_POLICY.md"
+    ],
     "amendments": []
    },
-   "status": "authorised by APR-JE-040; in progress"
+   "status": "authorised by APR-JE-041 for Steps 1 to 3 (design and decision checkpoint); in progress"
   },
   {
    "id": "G6-4",
@@ -1456,7 +1544,8 @@
    "summary": "One adapter interface; Cloudflare Pages first, then Vercel and a plain static adapter; a real 404 (D-P3-1), domain-root base URLs (D-P3-2), staged-bundle manifest and deployed-bytes comparison (D-P3-3), HSTS opt-in (D-P3-4, D-P4-5). Provider documentation must be re-verified by a person before an adapter is built (D-P3-6). Live verification needs a separately authorised preview (D-P3-5). MONOLITH House & Design (proof of concept #2) targets Vercel, so the Vercel adapter and its re-verified provider documentation must be complete before that project starts; any Vercel preview needs its own authorisation (D-P3-5).",
    "dependsOn": [
     "G6-2",
-    "G6-3"
+    "G6-3",
+    "G6-3A"
    ],
    "priorities": [
     5
@@ -1476,6 +1565,7 @@
     "G6-0",
     "G6-2",
     "G6-3",
+    "G6-3A",
     "G6-4"
    ],
    "priorities": [],
@@ -1717,8 +1807,8 @@
    "id": "RG-14",
    "source": "APR-JE-036",
    "summary": "A fully re-forged package verifies; nothing is signed or anchored",
-   "status": "open: authenticity (authenticated authorisation and build provenance) is not implemented and no work package is allocated; see OI-4 (APR-JE-040)",
-   "workPackage": "G6-2",
+   "status": "open: authenticity (authenticated authorisation and build provenance) is not implemented; allocated to G6-3A by APR-JE-041 (design and decision checkpoint first; implementation only after the owner approves the mechanism); the hard stop in lib/authenticity.mjs stays",
+   "workPackage": "G6-3A",
    "components": [
     "FM-20"
    ]
@@ -1790,7 +1880,7 @@
    "id": "D-P4-1",
    "source": "APR-JE-033",
    "summary": "Evaluate DuckAssistBot and Meta-ExternalFetcher against official crawler documentation",
-   "status": "approved, not implemented",
+   "status": "evaluated in G6-3, no policy assigned; classification changes pending an official-documentation review (APR-JE-041)",
    "workPackage": "G6-3",
    "components": [
     "FM-15"
@@ -1864,7 +1954,7 @@
    "id": "D-P5-3",
    "source": "APR-JE-034",
    "summary": "Canonical www credit link",
-   "status": "approved, not implemented (own authorisation; pages frozen)",
+   "status": "approved, not implemented; a later isolated correction is authorised after authoritative verification (APR-JE-041); not part of G6-3A",
    "workPackage": "G6-3",
    "components": [
     "FM-28"
@@ -1895,7 +1985,7 @@
    "id": "D-P5-6",
    "source": "APR-JE-034",
    "summary": "Noto Serif SC notice corrected after upstream comparison",
-   "status": "approved, not implemented (own authorisation; fonts text)",
+   "status": "approved, not implemented; a later isolated correction is authorised after authoritative verification (APR-JE-041); not part of G6-3A",
    "workPackage": "G6-3",
    "components": [
     "FM-28"
@@ -2086,7 +2176,7 @@
    "id": "RB-15",
    "kind": "engineering",
    "text": "Authenticated release authorisation and independently verifiable build provenance (RG-14): GitHub artifact attestations, protected environments and owner approval (preferred) or detached owner signatures; the authorised GitHub identities verified; no client-production release path is enabled until this is implemented and independently verified (APR-JE-040)",
-   "resolvedBy": "not allocated to any current work package: decision requested (OI-4)"
+   "resolvedBy": "G6-3A (design, then owner approval of the mechanism, then a separately authorised implementation); no client-production release path until implemented and independently verified"
   }
  ],
  "decisions": [
@@ -2348,6 +2438,51 @@
     "G6-3"
    ],
    "consequences": []
+  },
+  {
+   "id": "D-G63-1",
+   "text": "G6-3A inserted before G6-4",
+   "ownerWords": "Add G6-3A to the approved implementation sequence between G6-3 and G6-4. Authorised for research, architecture and a decision checkpoint; stop for owner approval before implementing credential-dependent changes.",
+   "status": "decided (APR-JE-041); G6-3A is the work package for RG-14 and RB-15",
+   "workPackages": [
+    "G6-3A"
+   ],
+   "consequences": [
+    {
+     "wp": "G6-3A",
+     "mustMention": "provenance"
+    },
+    {
+     "wp": "G6-3A",
+     "mustMention": "decision checkpoint"
+    }
+   ]
+  },
+  {
+   "id": "D-G63-2",
+   "text": "Known owner identity",
+   "ownerWords": "Retain carlito3k as the known owner identity, subject to verified trust boundaries.",
+   "status": "decided (APR-JE-041); recorded; the reviewer table stays empty until the trust boundaries are verified and the owner enters the identity",
+   "workPackages": [
+    "G6-3A"
+   ],
+   "consequences": []
+  },
+  {
+   "id": "D-G63-3",
+   "text": "Crawler classification",
+   "ownerWords": "Keep crawler classification changes pending official documentation review.",
+   "status": "decided (APR-JE-041); no crawler policy changed",
+   "workPackages": [],
+   "consequences": []
+  },
+  {
+   "id": "D-G63-4",
+   "text": "Credit URL and Noto Serif SC attribution",
+   "ownerWords": "Authorize a later isolated correction of the credit URL and Noto Serif SC attribution after authoritative verification.",
+   "status": "decided (APR-JE-041); authorised for a later isolated work package; not scheduled, not in G6-3A, delivered files unchanged",
+   "workPackages": [],
+   "consequences": []
   }
  ],
  "operatingPrinciples": [
@@ -2400,8 +2535,8 @@
   },
   {
    "id": "OI-4",
-   "text": "MONOLITH House & Design details beyond what the owner stated: page list, brand and design direction, media plan and rights, hosting configuration, and whether a Vercel preview is authorised (D-P3-5).",
-   "wp": "G6-8"
+   "text": "Which work package implements authenticated release authorisation and build provenance (RG-14, RB-15)? Decided by APR-JE-041: G6-3A, inserted between G6-3 and G6-4. Open: the owner's approval of the mechanism recommended in G6-3A-DESIGN.md (decision checkpoint) before any credential-dependent implementation.",
+   "wp": "G6-3A"
   },
   {
    "id": "OI-5",
@@ -2420,13 +2555,13 @@
   },
   {
    "id": "OI-4",
-   "text": "Which work package implements authenticated release authorisation and build provenance (RG-14, RB-15)? The current plan allocates it to none: G6-2 only evaluated it, G6-7 (centralised GitHub automation) is the nearest fit for a separate release workflow with attestation and a protected environment but comes after hosting, de-coupling and extraction, and G6-8 validates only afterwards. G6-3 adds a fail-closed requirement, so no client-production release path exists meanwhile. Decision requested (G6-3-SCOPE.md section 5).",
-   "wp": "G6-3"
+   "text": "Which work package implements authenticated release authorisation and build provenance (RG-14, RB-15)? Decided by APR-JE-041: G6-3A, inserted between G6-3 and G6-4. Open: the owner's approval of the mechanism recommended in G6-3A-DESIGN.md (decision checkpoint) before any credential-dependent implementation.",
+   "wp": "G6-3A"
   },
   {
    "id": "OI-5",
-   "text": "The owner confirms which GitHub identities are the STS owner (the observed account carlito3k is the only collaborator, with admin rights, and Claude sessions push through it, so the identity alone does not distinguish a person from a session).",
-   "wp": "G6-3"
+   "text": "The owner has retained carlito3k as the known owner identity, subject to verified trust boundaries (APR-JE-041). The trust-boundary finding of G6-3A is that this account is also the account Claude sessions push through, so an account-level GitHub control cannot by itself separate the owner from a session (G6-3A-DESIGN.md). Open until the owner decides the mechanism and names the identities to enter in the reviewer table.",
+   "wp": "G6-3A"
   }
  ]
 }

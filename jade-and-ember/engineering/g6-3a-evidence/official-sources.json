@@ -1,0 +1,505 @@
+{
+ "schema": "jade-and-ember/g6-3a-official-sources@1",
+ "retrieved": "2026-10-12",
+ "route": "docs.github.com could not be resolved from the sandbox. The source markdown of the official documentation (repository github/docs, branch main), the actions/attest README, the GitHub CLI source and the REST OpenAPI description were read from raw.githubusercontent.com. The files are Liquid-templated: {% ifversion fpt %} blocks apply to GitHub.com Free, Pro and Team; ghec blocks to GitHub Enterprise Cloud. The commit of the branch at retrieval time is not recorded by this route; the SHA-256 of each file read is.",
+ "status": "an engineering reading of the official sources, not a human review of the rendered pages; a person should re-read the cited pages before the mechanism is finally approved",
+ "sources": [
+  {
+   "key": "gated-attestations",
+   "source": "github/docs data/reusables/gated-features/attestations.md",
+   "kind": "docs",
+   "bytes": 556,
+   "sha256": "ecd0e0d048e604fcd88d36010b531a06f0c56f4e26f15b06e54de0e6b30974c4"
+  },
+  {
+   "key": "gated-environments",
+   "source": "github/docs data/reusables/gated-features/environments.md",
+   "kind": "docs",
+   "bytes": 822,
+   "sha256": "51cbf209ab4ddb2251ac8a8a48bbf13377ec170676b91639f9550712824141b3"
+  },
+  {
+   "key": "gated-repo-rules",
+   "source": "github/docs data/reusables/gated-features/repo-rules.md",
+   "kind": "docs",
+   "bytes": 841,
+   "sha256": "8a805b9de812867b9385470e318acf3b4d0ecf89bc10551993906757fd808ddf"
+  },
+  {
+   "key": "gated-protected-branches",
+   "source": "github/docs data/reusables/gated-features/protected-branches.md",
+   "kind": "docs",
+   "bytes": 532,
+   "sha256": "369862bd6b9f99564949e6d87889a6bc0257ad28941431b4c7808948e97c012e"
+  },
+  {
+   "key": "repo-rules-permissions",
+   "source": "github/docs data/reusables/repositories/repo-rules-permissions.md",
+   "kind": "docs",
+   "bytes": 470,
+   "sha256": "68981006df70ceaf40f0a23bb52f955e689f0e40bd60d194753fe2bb774491f0"
+  },
+  {
+   "key": "about-attestations",
+   "source": "github/docs data/reusables/actions/about-artifact-attestations.md",
+   "kind": "docs",
+   "bytes": 971,
+   "sha256": "75af27a34a3bf442b9a73f7c26ff9878c8d612259a6520378fd6fb73e6ca4994"
+  },
+  {
+   "key": "concept-attestations",
+   "source": "github/docs content/actions/concepts/security/artifact-attestations.md",
+   "kind": "docs",
+   "bytes": 3828,
+   "sha256": "664b528c604fb5b1cd0100b7dc5f785ccbef5091421840b460cd2a750d02f4dd"
+  },
+  {
+   "key": "use-attestations",
+   "source": "github/docs content/actions/how-tos/secure-your-work/use-artifact-attestations/use-artifact-attestations.md",
+   "kind": "docs",
+   "bytes": 10281,
+   "sha256": "0b172eaaf2a69f95a9686b762ad11fec339a6c7bae29d5958c6b958ed92c5fef"
+  },
+  {
+   "key": "attestations-slsa3",
+   "source": "github/docs content/actions/how-tos/secure-your-work/use-artifact-attestations/increase-security-rating.md",
+   "kind": "docs",
+   "bytes": 3874,
+   "sha256": "e6abaaf3432affb958db4c303515f18547404814b9592ade949134e0950d9d35"
+  },
+  {
+   "key": "attestations-offline",
+   "source": "github/docs content/actions/how-tos/secure-your-work/use-artifact-attestations/verify-attestations-offline.md",
+   "kind": "docs",
+   "bytes": 2914,
+   "sha256": "dca7126a8c397626ac0486f20b76e33708f1f77d97741aea58b81aecd06a3191"
+  },
+  {
+   "key": "env-reference",
+   "source": "github/docs content/actions/reference/workflows-and-actions/deployments-and-environments.md",
+   "kind": "docs",
+   "bytes": 9029,
+   "sha256": "8c1af21ae1520145efd508db6bd26b21e60a6d87e07b10d9fa5ac9115c6793d7"
+  },
+  {
+   "key": "manage-environments",
+   "source": "github/docs content/actions/how-tos/deploy/configure-and-manage-deployments/manage-environments.md",
+   "kind": "docs",
+   "bytes": 8962,
+   "sha256": "38b511dcfe948184416c77905503d16765b0fc54cea2d2ca5c69624c9af8bdd3"
+  },
+  {
+   "key": "review-deployments",
+   "source": "github/docs content/actions/how-tos/deploy/configure-and-manage-deployments/review-deployments.md",
+   "kind": "docs",
+   "bytes": 3032,
+   "sha256": "858811a0e9cb6d65b1df0badc0eb27cfbb289128e80593c672d148eb5f844d08"
+  },
+  {
+   "key": "secure-use",
+   "source": "github/docs content/actions/reference/security/secure-use.md",
+   "kind": "docs",
+   "bytes": 38141,
+   "sha256": "bfc40bec3a30979187ed375da6534858b3012d5813ceb6418bdd755ca0769ec6"
+  },
+  {
+   "key": "oidc-reference",
+   "source": "github/docs content/actions/reference/security/oidc.md",
+   "kind": "docs",
+   "bytes": 38473,
+   "sha256": "3b95c26a72f7f0ce4160211fdc101589d3266b96862e729efc97ac1e2213c63d"
+  },
+  {
+   "key": "about-rulesets",
+   "source": "github/docs content/repositories/configuring-branches-and-merges-in-your-repository/managing-rulesets/about-rulesets.md",
+   "kind": "docs",
+   "bytes": 6171,
+   "sha256": "ad074c0507552b396bd5d506a7e80875c5664dd7e6f0e496f5a1dbc1bd039810"
+  },
+  {
+   "key": "available-rules",
+   "source": "github/docs content/repositories/configuring-branches-and-merges-in-your-repository/managing-rulesets/available-rules-for-rulesets.md",
+   "kind": "docs",
+   "bytes": 32652,
+   "sha256": "1d1dad8bfbc0cc3ec1905193b12292d4e6e780c6ec9d3db7ee0f4b154d24f00b"
+  },
+  {
+   "key": "about-protected-branches",
+   "source": "github/docs content/repositories/configuring-branches-and-merges-in-your-repository/managing-protected-branches/about-protected-branches.md",
+   "kind": "docs",
+   "bytes": 18329,
+   "sha256": "f803163895c73c5ffbf99c45747c0626e20075913686e7b51674a73a19ee860f"
+  },
+  {
+   "key": "immutable-releases",
+   "source": "github/docs content/code-security/concepts/supply-chain-security/immutable-releases.md",
+   "kind": "docs",
+   "bytes": 3236,
+   "sha256": "67e8d2bc3b3d68ec3fc9b5b37542e9ed4ee8c0d2d10a927a5e0678a9e59ede7e"
+  },
+  {
+   "key": "prevent-release-changes",
+   "source": "github/docs content/code-security/how-tos/secure-your-supply-chain/establish-provenance-and-integrity/prevent-release-changes.md",
+   "kind": "docs",
+   "bytes": 1668,
+   "sha256": "81c0d968bcce63d578bb3fab6085e675ec9ad283ac2caec4f3ab7f475dfa0ecf"
+  },
+  {
+   "key": "billing-actions",
+   "source": "github/docs content/billing/concepts/product-billing/github-actions.md",
+   "kind": "docs",
+   "bytes": 14678,
+   "sha256": "a40dc1897d605b0c6b3780523260180780649741a27ce47ce12b8e964e14342c"
+  },
+  {
+   "key": "installed-apps",
+   "source": "github/docs content/apps/using-github-apps/reviewing-and-modifying-installed-github-apps.md",
+   "kind": "docs",
+   "bytes": 8944,
+   "sha256": "a9e7569dbedf151802a243dc2d2876f13aea227d513ed4d8ded9b949e841d305"
+  },
+  {
+   "key": "plans",
+   "source": "github/docs content/get-started/learning-about-github/githubs-plans.md",
+   "kind": "docs",
+   "bytes": 11751,
+   "sha256": "ad8769f87e1f2e4bed83faf61d605ae3c8c6b3001b4aae8d23a29ad4664e7093"
+  },
+  {
+   "key": "attest-readme",
+   "source": "actions/attest README.md (main)",
+   "kind": "action repository",
+   "bytes": 15839,
+   "sha256": "c513a2a22ce3fa07b67216d36db2c1552be51f7391fe81266f6f1a4cee8da5d6"
+  },
+  {
+   "key": "gh-verify-source",
+   "source": "cli/cli pkg/cmd/attestation/verify/verify.go (trunk)",
+   "kind": "GitHub CLI source",
+   "bytes": 16863,
+   "sha256": "8394f4b550a3b776dd846656a1f67130a6622f7023fc9cc30477d943b4dd1661"
+  },
+  {
+   "key": "rest-description",
+   "source": "github/rest-api-description descriptions/api.github.com/api.github.com.json (main)",
+   "kind": "REST OpenAPI description",
+   "bytes": 13018046,
+   "sha256": "da3d22e417611cca9a4131dceea89d4d61c3be021b0917f32d9e4422e4fe60f1"
+  }
+ ],
+ "quotes": [
+  {
+   "id": "Q01",
+   "source": "gated-attestations",
+   "text": "To use artifact attestations in private or internal repositories, you must be on a {% data variables.product.prodname_ghe_cloud %} plan.",
+   "establishes": "attestations: private/internal repositories need GitHub Enterprise Cloud"
+  },
+  {
+   "id": "Q02",
+   "source": "gated-attestations",
+   "text": "Artifact attestations are available for repositories in all current {% data variables.product.prodname_dotcom %} plans.",
+   "establishes": "attestations: available in all current plans (public repositories)"
+  },
+  {
+   "id": "Q03",
+   "source": "gated-environments",
+   "text": "other deployment protection rules, such as a wait timer or required reviewers, are only available for public repositories.",
+   "establishes": "environments: required reviewers on Free/Pro/Team only for public repositories"
+  },
+  {
+   "id": "Q04",
+   "source": "gated-repo-rules",
+   "text": "Rulesets are available in public repositories with {% data variables.product.prodname_free_user %} and {% data variables.product.prodname_free_team %} for organizations",
+   "establishes": "rulesets: public repositories on Free plans"
+  },
+  {
+   "id": "Q05",
+   "source": "concept-attestations",
+   "text": "Artifact attestations by itself provides SLSA v1.0 Build Level 2.",
+   "establishes": "attestations: SLSA Build Level 2"
+  },
+  {
+   "id": "Q06",
+   "source": "concept-attestations",
+   "text": "**Public repositories** that generate artifact attestations use the [Sigstore Public Good Instance]",
+   "establishes": "attestations: public repositories use Sigstore Public Good"
+  },
+  {
+   "id": "Q07",
+   "source": "concept-attestations",
+   "text": "is also written to an immutable transparency log that is publicly readable on the internet.",
+   "establishes": "attestations: public transparency log"
+  },
+  {
+   "id": "Q08",
+   "source": "concept-attestations",
+   "text": "but it does not have a transparency log and only federates with {% data variables.product.prodname_actions %}.",
+   "establishes": "attestations: private repositories have no transparency log"
+  },
+  {
+   "id": "Q09",
+   "source": "concept-attestations",
+   "text": "Generating attestations alone doesn't provide any security benefit, the attestations must be verified for the benefit to be realized.",
+   "establishes": "attestations are only worth what the verifier enforces"
+  },
+  {
+   "id": "Q10",
+   "source": "concept-attestations",
+   "text": "artifact attestations are _not_ a guarantee that an artifact is secure.",
+   "establishes": "attestations prove origin, not safety"
+  },
+  {
+   "id": "Q11",
+   "source": "about-attestations",
+   "text": "* The repository, organization, environment, commit SHA, and triggering event for the artifact",
+   "establishes": "attestation content: repository, environment, commit SHA, trigger"
+  },
+  {
+   "id": "Q12",
+   "source": "attest-readme",
+   "text": "    artifact-metadata: write",
+   "establishes": "attest action permissions in current README"
+  },
+  {
+   "id": "Q13",
+   "source": "attest-readme",
+   "text": "> Artifact attestations are NOT supported on GitHub Enterprise Server.",
+   "establishes": "attest: not on GHES"
+  },
+  {
+   "id": "Q14",
+   "source": "attestations-offline",
+   "text": "You will not know if key material has been revoked since you last generated the trusted root file.",
+   "establishes": "offline verification limit: key revocation not visible"
+  },
+  {
+   "id": "Q15",
+   "source": "attestations-slsa3",
+   "text": "If you would like to require an artifact attestation to be signed with a specific workflow, use the `--signer-workflow` flag to indicate the workflow file that should be used.",
+   "establishes": "verification can pin the signer workflow"
+  },
+  {
+   "id": "Q16",
+   "source": "gh-verify-source",
+   "text": "\"Enforce that the digest associated with the source repository matches the provided value\"",
+   "establishes": "gh attestation verify --source-digest"
+  },
+  {
+   "id": "Q17",
+   "source": "gh-verify-source",
+   "text": "\"Fail verification for attestations generated on self-hosted runners\"",
+   "establishes": "gh attestation verify --deny-self-hosted-runners"
+  },
+  {
+   "id": "Q18",
+   "source": "gh-verify-source",
+   "text": "\"Enforce that the digest associated with the signer workflow matches the provided value\"",
+   "establishes": "gh attestation verify --signer-digest"
+  },
+  {
+   "id": "Q19",
+   "source": "manage-environments",
+   "text": "Anyone that can edit workflows in the repository can create environments via a workflow file, but only repository admins can configure the environment.",
+   "establishes": "environments: write access creates, admins configure"
+  },
+  {
+   "id": "Q20",
+   "source": "env-reference",
+   "text": "If you enable this setting, users who initiate a deployment cannot approve the deployment job, even if they are a required reviewer.",
+   "establishes": "environments: prevent self-review"
+  },
+  {
+   "id": "Q21",
+   "source": "env-reference",
+   "text": "By default, administrators can bypass the protection rules and force deployments to specific environments.",
+   "establishes": "environments: admins can bypass by default"
+  },
+  {
+   "id": "Q22",
+   "source": "review-deployments",
+   "text": "you will not be able to approve a deployment from a workflow run you initiated",
+   "establishes": "environments: self-approval blocked when enabled"
+  },
+  {
+   "id": "Q23",
+   "source": "review-deployments",
+   "text": "You cannot bypass deployment protection rules if the environment has been configured to prevent admins from bypassing configured protection rules.",
+   "establishes": "environments: bypass can be disabled"
+  },
+  {
+   "id": "Q24",
+   "source": "rest-description",
+   "text": "Required reviewers with read access to the repository contents and deployments can use this endpoint.",
+   "establishes": "REST: any required-reviewer account can approve pending deployments through the API"
+  },
+  {
+   "id": "Q25",
+   "source": "secure-use",
+   "text": "Any user with write access to your repository has read access to all secrets configured in your repository.",
+   "establishes": "Actions: write access reads repository secrets"
+  },
+  {
+   "id": "Q26",
+   "source": "secure-use",
+   "text": "You can use required reviewers to protect environment secrets. A workflow job cannot access environment secrets until approval is granted by a reviewer.",
+   "establishes": "Actions: environment secrets gated by reviewers"
+  },
+  {
+   "id": "Q27",
+   "source": "secure-use",
+   "text": "Pinning an action to a full-length commit SHA is currently the only way to use an action as an immutable release.",
+   "establishes": "Actions: pin to full SHA"
+  },
+  {
+   "id": "Q28",
+   "source": "secure-use",
+   "text": "you can add this directory to the code owners list, so that any proposed changes to these files will first require approval from a designated reviewer.",
+   "establishes": "CODEOWNERS can gate workflow file changes"
+  },
+  {
+   "id": "Q29",
+   "source": "about-rulesets",
+   "text": "This can be users with a certain role, such as repository administrator, or it can be specific teams or {% data variables.product.prodname_github_apps %}.",
+   "establishes": "rulesets: bypass list can include repository administrators"
+  },
+  {
+   "id": "Q30",
+   "source": "repo-rules-permissions",
+   "text": "People with admin access to a repository, or a custom role with the \"edit repository rules\" permission, can create, edit, and delete rulesets for a repository",
+   "establishes": "rulesets: admins can edit and delete them"
+  },
+  {
+   "id": "Q31",
+   "source": "available-rules",
+   "text": "contributors {% ifversion fpt or ghec %}and bots{% endif %} can only push commits that have been signed and verified to the branch.",
+   "establishes": "rulesets: required signed commits"
+  },
+  {
+   "id": "Q32",
+   "source": "immutable-releases",
+   "text": "Git tags cannot be moved**: Once an immutable release is published, its associated Git tag is locked to a specific commit",
+   "establishes": "immutable releases: tag locked"
+  },
+  {
+   "id": "Q33",
+   "source": "immutable-releases",
+   "text": "creating an immutable release automatically generates a **release attestation**",
+   "establishes": "immutable releases: release attestation"
+  },
+  {
+   "id": "Q34",
+   "source": "prevent-release-changes",
+   "text": "Be aware that immutability will only apply to future releases.",
+   "establishes": "immutable releases: only future releases"
+  },
+  {
+   "id": "Q35",
+   "source": "billing-actions",
+   "text": "usage is **free** for **self-hosted runners** and for **public repositories** that use standard",
+   "establishes": "Actions minutes free for public repositories on standard runners"
+  },
+  {
+   "id": "Q36",
+   "source": "oidc-reference",
+   "text": "| `runner_environment`| The type of runner used by the job. Accepts the following values: `github-hosted` or `self-hosted`.",
+   "establishes": "OIDC claim runner_environment"
+  },
+  {
+   "id": "Q37",
+   "source": "oidc-reference",
+   "text": "| `actor`| The personal account that initiated the workflow run.",
+   "establishes": "OIDC claim actor is the account, not the person"
+  },
+  {
+   "id": "Q38",
+   "source": "installed-apps",
+   "text": "You can review the permissions that you granted and change the repositories that the {% data variables.product.prodname_github_app %} can access.",
+   "establishes": "owners can review and change an installed GitHub App's permissions and repository access"
+  },
+  {
+   "id": "Q39",
+   "source": "installed-apps",
+   "text": "This will fully deactivate any tokens issued to the app on your behalf.",
+   "establishes": "de-authorising an app deactivates its tokens issued on the account's behalf"
+  },
+  {
+   "id": "Q41",
+   "source": "concept-attestations",
+   "text": "Reusable workflows can provide isolation between the build process and the calling workflow, to meet SLSA v1.0 Build Level 3.",
+   "establishes": "attestations: SLSA Build Level 3 needs a reusable workflow"
+  },
+  {
+   "id": "Q42",
+   "source": "env-reference",
+   "text": "You can list up to six users or teams as reviewers.",
+   "establishes": "environments: up to six reviewers"
+  },
+  {
+   "id": "Q43",
+   "source": "available-rules",
+   "text": "If selected, only users with bypass permissions can create branches or tags whose name matches the pattern you specify.",
+   "establishes": "rulesets: restrict creations"
+  },
+  {
+   "id": "Q44",
+   "source": "available-rules",
+   "text": "If selected, only users with bypass permissions can push to branches or tags whose name matches the pattern you specify.",
+   "establishes": "rulesets: restrict updates"
+  },
+  {
+   "id": "Q45",
+   "source": "available-rules",
+   "text": "If selected, only users with bypass permissions can delete branches or tags whose name matches the pattern you specify.",
+   "establishes": "rulesets: restrict deletions"
+  },
+  {
+   "id": "Q46",
+   "source": "plans",
+   "text": "* Deployment protection rules with {% data variables.product.prodname_actions %} for private or internal repositories",
+   "establishes": "plans: deployment protection rules for private repositories are listed under Enterprise"
+  },
+  {
+   "id": "Q47",
+   "source": "about-attestations",
+   "text": "* A link to the workflow associated with the artifact",
+   "establishes": "attestation content: the workflow"
+  },
+  {
+   "id": "Q48",
+   "source": "attest-readme",
+   "text": "     id-token: write\n     attestations: write\n     artifact-metadata: write",
+   "establishes": "attest action permissions"
+  },
+  {
+   "id": "Q49",
+   "source": "gh-verify-source",
+   "text": "\"Repository name in the format <owner>/<repo>\"",
+   "establishes": "gh attestation verify -R"
+  },
+  {
+   "id": "Q50",
+   "source": "gh-verify-source",
+   "text": "\"Enforce that the git ref associated with the source repository matches the provided value\"",
+   "establishes": "gh attestation verify --source-ref"
+  },
+  {
+   "id": "Q51",
+   "source": "gh-verify-source",
+   "text": "\"Path to a trusted_root.jsonl file; likely for offline verification\"",
+   "establishes": "gh attestation verify --custom-trusted-root"
+  },
+  {
+   "id": "Q52",
+   "source": "gh-verify-source",
+   "text": "\"Path to bundle on disk, either a single bundle in a JSON file or a JSON lines file with multiple bundles\"",
+   "establishes": "gh attestation verify --bundle"
+  },
+  {
+   "id": "Q53",
+   "source": "attestations-offline",
+   "text": "Artifact attestations can be verified without an internet connection.",
+   "establishes": "attestations: offline verification"
+  }
+ ],
+ "quoteCheck": "every quoted text was matched verbatim against the file whose digest is listed; 52 of 52 matched (identifiers Q01 to Q53; Q40 is unused; Q13 is recorded but not cited)"
+}

@@ -1,0 +1,119 @@
+{
+ "schema": "jade-and-ember/g6-3a-platform-observations@1",
+ "observedOn": "2026-10-12",
+ "method": "read-only calls through the GitHub connector available to this session (search_repositories, list_repository_collaborators, list_branches, actions_list, get_me) and read-only git; nothing on GitHub was created, changed or approved",
+ "repository": {
+  "fullName": "getsimplifiedtech/STS-Cinematic-Showcase.",
+  "id": 1411158294,
+  "visibility": "public",
+  "private": false,
+  "defaultBranch": "main",
+  "createdAt": "2026-10-09T02:02:16Z",
+  "owner": {
+   "login": "getsimplifiedtech",
+   "id": 329268381,
+   "type": "Organization"
+  }
+ },
+ "connectorIdentity": {
+  "login": "carlito3k",
+  "id": 233489690,
+  "accountCreated": "2025-09-20T19:55:34Z",
+  "permissionsReportedForThisCredential": {
+   "admin": true,
+   "maintain": true,
+   "push": true,
+   "triage": true,
+   "pull": true
+  }
+ },
+ "collaborators": [
+  {
+   "login": "carlito3k",
+   "id": 233489690,
+   "role": "admin"
+  }
+ ],
+ "branches": [
+  {
+   "name": "main",
+   "protected": false
+  },
+  {
+   "name": "feature/jade-and-ember-v0.9",
+   "protected": false
+  },
+  {
+   "name": "feature/jade-and-ember-brief",
+   "protected": false
+  },
+  {
+   "name": "baseline/jade-and-ember-v0.8",
+   "protected": false
+  }
+ ],
+ "branchesNote": "the protected flag reflects branch protection rules; whether a ruleset targets any branch is not shown by the connector",
+ "workflows": [
+  {
+   "path": ".github/workflows/jade-and-ember-verify.yml",
+   "state": "active"
+  }
+ ],
+ "runs": {
+  "ci63": {
+   "id": 38192906727,
+   "head": "275a97329e7d996f346e6d18561a919c11a1abce",
+   "event": "push",
+   "conclusion": "success",
+   "jobs": 7,
+   "allJobsSuccess": true
+  },
+  "actors": "actor and triggering_actor of every run listed (57 to 63) is carlito3k, including the runs of commits whose message carries the Claude session trailer"
+ },
+ "commitsTouchingWorkflows": {
+  "count": 8,
+  "authorRecordedInGit": "Claude <noreply@anthropic.com>",
+  "examples": [
+   "4e37317 G6-1: Node 24.21.0, Node 24 Actions pinned to SHAs",
+   "2ae78d6 Gate 5 Phase 6",
+   "a749a9f Gate 5 Phase 5"
+  ],
+  "meaning": "a session using this environment's credential has pushed changes to the workflow file and they ran; the git author name is self-declared and is not evidence of who acted"
+ },
+ "commitSignatures": "the last five commits show %G? = N (no signature)",
+ "connectorCapabilities": {
+  "canInitiate": [
+   "actions_run_trigger"
+  ],
+  "canAlterRepository": [
+   "create_or_update_file",
+   "push_files",
+   "delete_file",
+   "create_branch",
+   "create_pull_request",
+   "merge_pull_request",
+   "update_pull_request",
+   "update_pull_request_branch",
+   "enable_pr_auto_merge",
+   "pull_request_review_write"
+  ],
+  "absent": "no connector tool exposes environments, rulesets or branch protection, repository or organisation settings, secrets or variables, or GitHub App installation settings"
+ },
+ "notDeterminable": [
+  "the organisation plan (Free, Team or Enterprise): no connector tool or reachable API returns it",
+  "whether any ruleset, environment, CODEOWNERS file or Actions policy (default token permissions, fork approval, allowed actions, SHA pinning) is configured",
+  "the permissions and repository access granted to the GitHub App through which the sessions act (an owner can review them: Q38)",
+  "whether this session's token could call the settings, environment-approval or secrets APIs (api.github.com is refused by the sandbox proxy with 403; nothing was attempted that changes state)",
+  "whether other organisation owners or members exist beyond the collaborator list",
+  "a live gh attestation verify (gh 2.89.0 is installed but unauthenticated and the API is not reachable); ssh-keygen is not installed in the sandbox so no signature interoperability test was run"
+ ],
+ "index": {
+  "O1": "repository and connectorIdentity (public repository owned by an organisation; the connector credential reports admin)",
+  "O2": "collaborators (carlito3k, admin, the only one)",
+  "O3": "branches (none protected by a branch protection rule)",
+  "O4": "runs.actors (every run attributed to carlito3k)",
+  "O5": "commitsTouchingWorkflows (workflow changes pushed from this environment ran)",
+  "O6": "connectorCapabilities (tools that initiate and alter; none for settings)",
+  "O7": "notDeterminable"
+ }
+}

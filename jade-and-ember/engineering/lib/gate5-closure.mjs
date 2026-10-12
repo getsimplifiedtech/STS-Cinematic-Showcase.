@@ -48,7 +48,7 @@ export function verifyClosure({ framework = process.env.STS_FRAMEWORK_DIR || '/h
     add(`phase ${ph.n}`, !probs.length, `${ph.name}: authorised by ${ph.authorisedBy.join(', ')}; ${closedText}${ph.code ? `; code ${ph.code.commit} run ${ph.code.run}` : ''}${ph.docs ? `, records ${ph.docs.commit} run ${ph.docs.run}` : ''}${probs.length ? ` -- PROBLEMS: ${probs.join('; ')}` : ''}`);
   }
   const plan = readFileSync(join(engDir, 'GATE-5-PLAN.md'), 'utf8');
-  add('plan status', /Phases 0 to 9 are CLOSED/.test(plan) && /Gate 5 is formally closed/.test(plan) && /G6-0 and G6-4 to G6-8 are not authorised to start/.test(plan), 'GATE-5-PLAN.md status line names Phases 0 to 9 as closed, Gate 5 as formally closed (an engineering assessment), G6-1 and G6-2 as closed and only G6-3 as authorised');
+  add('plan status', /Phases 0 to 9 are CLOSED/.test(plan) && /Gate 5 is formally closed/.test(plan) && /G6-0 and G6-4 to G6-8 are not authorised to start/.test(plan), 'GATE-5-PLAN.md status line names Phases 0 to 9 as closed, Gate 5 as formally closed (an engineering assessment), G6-1 to G6-3 as closed and only G6-3A as authorised');
 
   // 2. the migration matrix and requirement register are complete
   section('2. The migration matrix and the requirement register are complete');
@@ -118,16 +118,19 @@ export function verifyClosure({ framework = process.env.STS_FRAMEWORK_DIR || '/h
   }
   const pri = matrix.priorities.every((p) => matrix.workPackages.find((w) => w.id === p.wp)?.priorities.includes(Number(p.id.slice(2))));
   add('priorities', pri && matrix.priorities.length === 8, 'the eight required Gate 6 priorities of APR-JE-036 are each assigned to a work package that lists them');
-  // Gate 6 authorisation: G6-1 (APR-JE-039) and G6-2 (APR-JE-040) are closed with their end commits recorded; only G6-3 is authorised now (APR-JE-040); every change of each lies inside its recorded scope
+  // Gate 6 authorisation: G6-1 (APR-JE-039), G6-2 (APR-JE-040) and G6-3 (APR-JE-041) are closed with their end commits recorded; only G6-3A (release authentication and provenance, design and decision checkpoint) is authorised now (APR-JE-041); every change of each lies inside its recorded scope
   const g6 = matrix.workPackages.filter((w) => /^G6-/.test(w.id));
   const scoped = g6.filter((w) => w.scope).map((w) => w.id);
-  const wp1 = matrix.workPackages.find((w) => w.id === 'G6-1'), wp2 = matrix.workPackages.find((w) => w.id === 'G6-2'), wp3 = matrix.workPackages.find((w) => w.id === 'G6-3');
-  const auth38 = log.find((r) => r.id === 'APR-JE-038'), auth39 = log.find((r) => r.id === 'APR-JE-039'), auth40 = log.find((r) => r.id === 'APR-JE-040');
-  add('only G6-1 to G6-3 authorised', scoped.join() === 'G6-1,G6-2,G6-3' && wp1.scope.authorisedBy === 'APR-JE-038' && wp2.scope.authorisedBy === 'APR-JE-039' && wp3.scope.authorisedBy === 'APR-JE-040' && Boolean(auth38) && Boolean(auth39) && Boolean(auth40) && /G6-1/.test(auth38.decision) && /G6-2/.test(auth39.decision) && /G6-3/.test(auth40.decision) && wp1.scope.closedBy === 'APR-JE-039' && wp2.scope.closedBy === 'APR-JE-040' && !wp3.scope.closedBy, `work packages with a recorded scope: ${scoped.join(', ')}; G6-1 authorised by ${wp1.scope.authorisedBy} and closed by ${wp1.scope.closedBy}; G6-2 authorised by ${wp2.scope.authorisedBy} and closed by ${wp2.scope.closedBy}; G6-3 authorised by ${wp3.scope.authorisedBy}; the approval records are ${auth38 && auth39 && auth40 ? 'in' : 'NOT in'} the approvals log`);
-  const end1 = tryGit(['merge-base', '--is-ancestor', wp1.scope.endCommit, 'HEAD']), end2 = tryGit(['merge-base', '--is-ancestor', wp2.scope.endCommit, 'HEAD']);
-  const sc1 = verifyScope('G6-1', { matrix }), sc2 = verifyScope('G6-2', { matrix }), sc3 = verifyScope('G6-3', { matrix });
-  add('G6-1 scope', end1.ok && sc1.ok, `${sc1.changed.length} files changed from the G6-1 base ${wp1.scope.baseCommit.slice(0, 7)} to its end ${wp1.scope.endCommit.slice(0, 7)} (${end1.ok ? 'an ancestor of HEAD' : 'NOT an ancestor of HEAD'}); ${sc1.ok ? 'all inside the authorised scope' : `PROBLEMS: ${sc1.problems.slice(0, 3).join('; ')}`}`);
-  add('G6-2 scope', end2.ok && sc2.ok, `${sc2.changed.length} files changed from the G6-2 base ${wp2.scope.baseCommit.slice(0, 7)} to its end ${wp2.scope.endCommit.slice(0, 7)} (${end2.ok ? 'an ancestor of HEAD' : 'NOT an ancestor of HEAD'}); ${sc2.ok ? 'all inside the authorised scope' : `PROBLEMS: ${sc2.problems.slice(0, 3).join('; ')}`}`);
-  add('G6-3 scope', sc3.ok, `${sc3.changed.length} files changed since the G6-3 base ${wp3.scope.baseCommit.slice(0, 7)}; ${sc3.ok ? 'all inside the authorised scope' : `PROBLEMS: ${sc3.problems.slice(0, 3).join('; ')}`}`);
+  const pkg = (id) => matrix.workPackages.find((w) => w.id === id);
+  const wp1 = pkg('G6-1'), wp2 = pkg('G6-2'), wp3 = pkg('G6-3'), wp3a = pkg('G6-3A');
+  const rec = (id) => log.find((r) => r.id === id);
+  const auth38 = rec('APR-JE-038'), auth39 = rec('APR-JE-039'), auth40 = rec('APR-JE-040'), auth41 = rec('APR-JE-041');
+  const sequence = matrix.workPackages.filter((w) => /^G6-/.test(w.id)).map((w) => w.id);
+  const between = pkg('G6-4')?.dependsOn.includes('G6-3A') && wp3a?.dependsOn.join() === 'G6-3';
+  add('only G6-3A authorised', scoped.join() === 'G6-1,G6-2,G6-3,G6-3A' && wp1.scope.authorisedBy === 'APR-JE-038' && wp2.scope.authorisedBy === 'APR-JE-039' && wp3.scope.authorisedBy === 'APR-JE-040' && wp3a.scope.authorisedBy === 'APR-JE-041' && Boolean(auth38 && auth39 && auth40 && auth41) && /G6-1/.test(auth38.decision) && /G6-2/.test(auth39.decision) && /G6-3/.test(auth40.decision) && /G6-3A/.test(auth41.decision) && wp1.scope.closedBy === 'APR-JE-039' && wp2.scope.closedBy === 'APR-JE-040' && wp3.scope.closedBy === 'APR-JE-041' && !wp3a.scope.closedBy && between, `work packages with a recorded scope: ${scoped.join(', ')}; G6-1 authorised by ${wp1.scope.authorisedBy} and closed by ${wp1.scope.closedBy}; G6-2 authorised by ${wp2.scope.authorisedBy} and closed by ${wp2.scope.closedBy}; G6-3 authorised by ${wp3.scope.authorisedBy} and closed by ${wp3.scope.closedBy}; G6-3A authorised by ${wp3a.scope.authorisedBy}, placed between G6-3 and G6-4: ${between ? 'yes' : 'NO'}; the approval records are ${auth38 && auth39 && auth40 && auth41 ? 'in' : 'NOT in'} the approvals log; order ${sequence.join(' ')}`);
+  const ends = [wp1, wp2, wp3].map((w) => tryGit(['merge-base', '--is-ancestor', w.scope.endCommit, 'HEAD']));
+  const scopes = ['G6-1', 'G6-2', 'G6-3', 'G6-3A'].map((id) => verifyScope(id, { matrix }));
+  [wp1, wp2, wp3].forEach((w, i) => add(`${w.id} scope`, ends[i].ok && scopes[i].ok, `${scopes[i].changed.length} files changed from the ${w.id} base ${w.scope.baseCommit.slice(0, 7)} to its end ${w.scope.endCommit.slice(0, 7)} (${ends[i].ok ? 'an ancestor of HEAD' : 'NOT an ancestor of HEAD'}); ${scopes[i].ok ? 'all inside the authorised scope' : `PROBLEMS: ${scopes[i].problems.slice(0, 3).join('; ')}`}`));
+  add('G6-3A scope', scopes[3].ok, `${scopes[3].changed.length} files changed since the G6-3A base ${wp3a.scope.baseCommit.slice(0, 7)}; ${scopes[3].ok ? 'all inside the authorised scope (documents, matrix and closure verifier only: nothing implements, enables or weakens a release mechanism)' : `PROBLEMS: ${scopes[3].problems.slice(0, 3).join('; ')}`}`);
   return { rows, ok: rows.filter((r) => 'ok' in r).every((r) => r.ok) };
 }
