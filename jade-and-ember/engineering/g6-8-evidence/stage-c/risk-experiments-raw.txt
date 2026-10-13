@@ -1,0 +1,77 @@
+# Stage C risk experiments: raw results (throw-away clone of e17560d; every change reverted)
+
+## E1 (risk 1: not-applicable scenarios) and E3 (risk 3: scan reach)
+## E1b: 'fonts' removed from delivery.assetFolders (3 scenarios need the capability)
+exit 1
+79/255 scenarios as expected 
+FAIL  check:release-dryrun
+## E1c: fixtures.headTag removed (4 social-image scenarios need it)
+exit 0
+319/319 scenarios as expected (4 not applicable to Jade & Ember, which lacks what they exercise) 
+PASS  check:release-dryrun
+## E3a: a network call added to a PROJECT check
+exit 0
+319/319 scenarios as expected 
+PASS  check:release-dryrun
+## E3b: the same call added to ENGINE (snapshot) code
+exit 1
+318/319 scenarios as expected 
+FAIL  check:release-dryrun
+  - deployment safety: code that can open a network connection is only the external-link verifier, the local server and the search probes (lib/external.mjs, lib/search.mjs, lib/server.mjs, lib/zip.mjs)
+done
+
+## E2 (risk 2: a shrunk suite) and E6 (risk 6: the real workflow is judged by check:ci)
+## E2 a shrunk suite (risk 2)
+{"problems":[],"notes":["0 harness tests run in 0 s"]}
+-- the same suite with an empty report
+{"problems":[],"notes":[]}
+## E3 network/deploy scan reach (risk 3)
+-- a network call added to a project check
+exit 1
+Node.js v24.21.0
+-- the same call added to the engine (snapshot) code
+exit 1
+Node.js v24.21.0
+## E6 the real snapshot-caller workflow is judged by check:ci (risk 6)
+  - the client snapshot caller workflow: job "verify" carries continue-on-error, which a job here may not (only name, runs-on, timeout-minutes, steps)
+  - the client snapshot caller workflow: the blocking job "verify" must not say continue-on-error
+FAIL  check:ci
+done
+
+
+## E4 (risk 4: legacy harness limits): one guard of the frozen release-control code disabled per run
+# harness = checks/je-release-control-layout.mjs in the migrated layout
+engine.mjs:89 | exit 0 | SURVIVED |     if (toolingFingerprint(this.rc.config.toolingDir, this.rc.config.dataFiles).digest !== this.rc.config.tool | 
+engine.mjs:100 | exit 1 | CAUGHT |     if (!v.ok) throw new RcError('ledger-corrupt', `the ledger of ${client} does not verify: ${v.problems[0]}` |   - the ledger refuses a forged line, an edited line, a removed line, a truncated tail, a reordered pair, a wrong receipt, a duplicate key a
+engine.mjs:122 | exit 1 | CAUGHT |       if (who.role === 'scheduler' && st.latestStage && st.status(st.latestStage) === 'staged' && st.stages.ge |   - the scheduler cannot push aside a material stage that waits for the owner; the owner can; a release that revokes the baseline in between
+engine.mjs:140 | exit 1 | CAUGHT |         if (want && ix.subjects.domain !== want) throw new RcError('wrong-client-host', `this package is for $ |   - a package for one client cannot be staged for another, a stage name does not cross clients, and a client's deploy credential writes only
+engine.mjs:172 | exit 0 | SURVIVED |     if (type === 'rights' && !['licence', 'permission', 'ownership'].includes(basis)) throw new RcError('basis | 
+engine.mjs:199 | exit 1 | CAUGHT |       if (d.baselineStage !== (st.latestReleased?.entry.data.stageId ?? null)) throw new RcError('stale-baseli |   - the scheduler cannot push aside a material stage that waits for the owner; the owner can; a release that revokes the baseline in between
+engine.mjs:207 | exit 1 | CAUGHT |         if (!preauth) throw new RcError('no-preauth', `no preauthorisation in force covers a ${d.class} releas |   - routine releases run by themselves ONLY under a preauthorisation that covers their kind, its limit and its expiry: the staged package no
+engine.mjs:220 | exit 1 | CAUGHT |       if (cov.some((c) => !c.covered)) throw new RcError('subjects-not-recorded', `still to be recorded by the |   - first release: staged as MATERIAL; only the authenticity decision was left open; nothing is deployable before the owner has recorded the
+engine.mjs:244 | exit 0 | SURVIVED |         if (dep.digest !== filesDigest(dirMap(outDir))) { this.append(L, who, 'release-failed', { stageId, cod | 
+engine.mjs:269 | exit 0 | SURVIVED |       if (s.revoked) throw new RcError('already-revoked', 'already revoked'); | 
+engine.mjs:291 | exit 0 | SURVIVED |       if (on === Boolean(st.frozen)) throw new RcError(on ? 'already-frozen' : 'not-frozen', on ? 'already fro | 
+engine.mjs:312 | exit 0 | SURVIVED |       if (!st.preauths.has(id)) throw new RcError('unknown-preauth', 'no such preauthorisation'); | 
+intake.mjs:25 | exit 0 | SURVIVED |       if (st.isSymbolicLink()) throw new RcError('unsafe-package', `${rel} is a symbolic link`); | 
+intake.mjs:47 | exit 0 | SURVIVED |   if (count > limits.maxEntries) throw new RcError('package-too-large', `the ZIP lists ${count} entries`); | 
+intake.mjs:71 | exit 1 | CAUGHT |   if (stray.length) throw new RcError('unexpected-files', `the package holds files a prepared package does not |   - a package that the existing verifier refuses never reaches the staging area (flipped ZIP byte, edited manifest, missing SBOM, forged rec
+ledger.mjs:31 | exit 1 | CAUGHT |       else throw new RcError('busy', `another operation on ${this.client} is in progress`); |   - one operation at a time per client; a dead holder's lock is broken; a fresh lock refuses; the emergency controls break a lock held too l
+ledger.mjs:83 | exit 0 | SURVIVED |     if (genesis && (existsSync(this.file) || existsSync(this.headFile) || existsSync(this.anchorFile))) throw  | 
+state.mjs:42 | exit 0 | SURVIVED |   if (existsSync(join(dir, MARKER)) || existsSync(join(dir, 'config.json'))) throw new RcError('already-initia | 
+state.mjs:73 | exit 0 | SURVIVED |   if (config.adapter !== 'local-directory') throw new RcError('bad-adapter', 'the only adapter of the proof of | 
+done
+
+# control = the ORIGINAL self-test in the ORIGINAL layout (2bb1737), same mutants that survived the harness
+engine.mjs:89 | original self-test, original layout | exit 0 | SURVIVED
+engine.mjs:172 | original self-test, original layout | exit 0 | SURVIVED
+engine.mjs:244 | original self-test, original layout | exit 0 | SURVIVED
+engine.mjs:269 | original self-test, original layout | exit 0 | SURVIVED
+engine.mjs:291 | original self-test, original layout | exit 0 | SURVIVED
+engine.mjs:312 | original self-test, original layout | exit 0 | SURVIVED
+intake.mjs:25 | original self-test, original layout | exit 0 | SURVIVED
+intake.mjs:47 | original self-test, original layout | exit 0 | SURVIVED
+ledger.mjs:83 | original self-test, original layout | exit 0 | SURVIVED
+state.mjs:42 | original self-test, original layout | exit 0 | SURVIVED
+state.mjs:73 | original self-test, original layout | exit 0 | SURVIVED
+done

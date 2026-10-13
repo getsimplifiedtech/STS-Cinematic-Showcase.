@@ -1,0 +1,20 @@
+common files: 10 JSON, 33 PNG, 0 other
+  same  assets/regression.json  (17 fields, 0 differing)
+  same  regression.json  (29 fields, 0 differing)
+  same  security/regression.json  (24 fields, 0 differing)
+  same  selftest/a-2-px-change-to-the-brand-seal-width/regression.json  (23 fields, 0 differing)
+  same  selftest/a-demonstration-config-value-changed/regression.json  (16 fields, 0 differing)
+  same  selftest/a-font-file-replaced/regression.json  (16 fields, 0 differing)
+  same  selftest/a-one-step-change-to-the-ember-colour/regression.json  (21 fields, 0 differing)
+  same  selftest/one-added-character-of-visible-text/regression.json  (26 fields, 0 differing)
+  same  selftest/the-Pause-control-label-changed-in-hero-js/regression.json  (19 fields, 0 differing)
+  DIFF  verify.json  (93 fields, 6 differing)
+only in the baseline: none
+only in the migrated run: selftest/a-demonstration-config-value-changed/pixels/menu@desktop-1440-baseline.png, selftest/a-demonstration-config-value-changed/pixels/menu@desktop-1440-candidate.png, selftest/a-demonstration-config-v
+  - verify.json checks[check:extraction].id: "(absent)" -> "check:extraction"
+  - verify.json checks[check:extraction].passed: "(absent)" -> true
+  - verify.json checks[check:selftest-release-control].id: "(absent)" -> "check:selftest-release-control"
+  - verify.json checks[check:selftest-release-control].passed: "(absent)" -> true
+  - verify.json checks[check:selftest-je-markup].id: "(absent)" -> "check:selftest-je-markup"
+  - verify.json checks[check:selftest-je-markup].passed: "(absent)" -> true
+DIFFERENT (6 difference(s))

@@ -1,0 +1,54 @@
+== summary
+  PASS  check:baseline        0.3 s
+  PASS  check:schema          0.2 s
+  PASS  check:determinism     0.3 s
+  PASS  check:delivery        0.1 s
+  PASS  check:project         0.2 s
+  PASS  check:extraction        0 s
+  PASS  check:authority         0 s
+  PASS  check:contracts         0 s
+  PASS  check:media            19 s
+  PASS  check:tokens            0 s
+  PASS  check:secrets         1.8 s
+  PASS  check:deps            1.6 s
+  PASS  check:ci              0.1 s
+  PASS  check:html            0.7 s
+  PASS  check:links           0.3 s
+  PASS  check:seo             3.4 s
+  PASS  check:release        51.8 s
+  PASS  check:framework-matrix      0 s
+  PASS  check:evidence        0.1 s
+  PASS  check:hosting         3.8 s
+  PASS  check:privacy        23.2 s
+  PASS  check:security       69.8 s
+  PASS  check:assets         50.7 s
+  PASS  check:budgets        66.6 s
+  PASS  check:keyboard       38.3 s
+  PASS  check:reflow           15 s
+  PASS  check:forced-colors   15.4 s
+  PASS  check:a11y-tree       3.8 s
+  PASS  check:order           3.3 s
+  PASS  check:d11              16 s
+  PASS  check:supports        0.6 s
+  PASS  check:phone          14.2 s
+  PASS  check:portability    63.7 s
+  PASS  check:release-dryrun  180.6 s
+  PASS  check:selftest-release-control   37.4 s
+  PASS  check:regression    147.3 s
+  PASS  check:selftest       34.6 s
+  PASS  check:selftest-gate2    115 s
+  PASS  check:selftest-gate3  164.7 s
+  PASS  check:selftest-gate5      0 s
+  PASS  check:selftest-gate6   13.9 s
+  PASS  check:selftest-generic     13 s
+  PASS  check:selftest-evidence      1 s
+  PASS  check:selftest-gate4   21.4 s
+  PASS  check:selftest-je-markup  457.7 s
+
+  Not covered yet (planned for later gates, or manual): external link reachability (the online link check cannot run in the sandbox); Firefox and WebKit runs inside this sandbox (their jobs run on GitHub Actions: `node engineering/cross-browser.mjs --engine fi
+
+  composite SBOM digest (reproducible; compare local and CI): a1dbdd1255ca2c2d6b733658e044b5e546071c7afce17b77032994a226830e43, 151 components
+
+  verification record: full run, candidate 69f9f18fd5e119786e512125741fa2bd0c398857d7609c74784051937028f640, engine efffad74ba661341…, 45 checks, seal 7cee7d69884f0b3ac240b9d23df2e7059d96d7bd83de05849dcfc4d42c857886
+
+verify passed (45 of 45 checks)

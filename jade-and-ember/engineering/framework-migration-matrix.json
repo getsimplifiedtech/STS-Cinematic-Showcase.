@@ -780,7 +780,9 @@
     "jade-and-ember/engineering/G6-5-REPORT.md",
     "jade-and-ember/engineering/G6-6-REPORT.md",
     "jade-and-ember/engineering/G6-7-REPORT.md",
-    "jade-and-ember/engineering/G6-8-REPORT.md"
+    "jade-and-ember/engineering/G6-8-REPORT.md",
+    "jade-and-ember/engineering/G6-8-STAGE-C-REPORT.md",
+    "jade-and-ember/engineering/G6-8-V5-READINESS-CHECKLIST.md"
    ],
    "target": "engineering/adapters/hosting/{cloudflare-pages,vercel,static}/",
    "external": [
