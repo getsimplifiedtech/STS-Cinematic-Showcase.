@@ -2160,7 +2160,7 @@
     "branch": "feature/jade-and-ember-v0.9",
     "baseCommit": "2bb1737ffb56ba9f9db7021a6570c82387af4f26",
     "authorisedBy": "APR-JE-049",
-    "note": "Derived from the owner's G6-8 Stage B authorization (APR-JE-049). Jade & Ember side, allowed (Stage B): the verified framework snapshot at the repository root (engineering/, .github/actions/engineering/ and the integrity record sts-framework-snapshot.json, exactly the approved public set), the third-party notices (THIRD_PARTY_NOTICES.md, third-party-licenses/), the snapshot caller workflow that replaces the direct-style workflow, this project's engineering folder (the files that left it for the snapshot, the one-line re-exports that keep its relative imports working, the original self-test suites kept as je-*.mjs with the check that runs them, the head-tag recipe, the manifest entries of the added project checks, the matrix, the closure verifier, the CI notes, the Gate 6 order document and the G6-8 report and evidence), the script paths of package.json, sts.engineering.json and the approvals ledger. Jade & Ember side, denied: the delivered website, the renderer (build.mjs, src/), the approved visuals and assets, the dependency lockfile, the baselines, the records of earlier packages and gates, the frozen release-control proof of concept (engineering/release-control/), the release policy and reviewer table (engineering/release/), the hard authenticity stop (engineering/lib/authenticity.mjs), the project's records and overlays (every top-level JSON file of its engineering folder except authority.json and the matrix), the project-owned recipes, the renderer's own validation files (lib/config-schema.mjs, lib/schema.mjs, schemas/), the existing project checks and the frozen proof-of-concept self-test, and the evidence records. The public repository stays public. No deployment, preview, credential, signing step, account, repository, scheduled run or client-production release path is created or enabled; MONOLITH is not started; Stage C is not authorised. Framework repository side (recorded under frameworkRepository): the development-only branch feature/sts-framework-consumption.",
+    "note": "Derived from the owner's G6-8 Stage B authorization (APR-JE-049). Jade & Ember side, allowed (Stage B): the verified framework snapshot at the repository root (engineering/, .github/actions/engineering/ and the integrity record sts-framework-snapshot.json, exactly the approved public set), the third-party notices (THIRD_PARTY_NOTICES.md, third-party-licenses/), the snapshot caller workflow that replaces the direct-style workflow, this project's engineering folder (the files that left it for the snapshot, the one-line re-exports that keep its relative imports working, the original self-test suites kept as je-*.mjs with the check that runs them, the head-tag recipe, the manifest entries of the added project checks, the matrix, the closure verifier, the CI notes, the Gate 6 order document and the G6-8 report and evidence), the script paths of package.json, sts.engineering.json and the approvals ledger. Jade & Ember side, denied: the delivered website, the renderer (build.mjs, src/), the approved visuals and assets, the dependency lockfile, the baselines, the records of earlier packages and gates, the frozen release-control proof of concept (engineering/release-control/), the release policy and reviewer table (engineering/release/), the hard authenticity stop (engineering/lib/authenticity.mjs), the project's records and overlays (every top-level JSON file of its engineering folder except authority.json and the matrix), the project-owned recipes, the renderer's own validation files (lib/config-schema.mjs, lib/schema.mjs, schemas/), the existing project checks and the frozen proof-of-concept self-test, and the evidence records. The public repository stays public. No deployment, preview, credential, signing step, account, repository, scheduled run or client-production release path is created or enabled; MONOLITH is not started; Stage C (validation, V1 to V4, the risk assessment and the V5 checklist) is authorised by APR-JE-051 and adds only reports and evidence (engineering/G6-8-STAGE-C-REPORT.md, g6-8-evidence/stage-c/) on this side; the denied list above applies unchanged. Framework repository side (recorded under frameworkRepository): the development-only branch feature/sts-framework-consumption.",
     "allow": [
      "docs/JADE_AND_EMBER_APPROVALS.md",
      ".github/workflows/jade-and-ember-verify.yml",
@@ -2279,7 +2279,7 @@
      ]
     }
    },
-   "status": "Stage A closed (APR-JE-049): framework commit 17fc32345a15 (development only, not merged); Stage B authorised (APR-JE-049), replacement snapshot at framework commit 23fafcd0365e approved (APR-JE-050), Stage B completed for owner review; Stage C and MONOLITH not authorised; every production-release blocker stays active"
+   "status": "Stage A closed (APR-JE-049): framework commit 17fc32345a15 (development only, not merged); Stage B authorised (APR-JE-049), replacement snapshot at framework commit 23fafcd0365e approved (APR-JE-050), Stage B closed for engineering purposes (APR-JE-051); Stage C validation authorised (APR-JE-051), in progress; Stage C and MONOLITH not authorised; every production-release blocker stays active"
   }
  ],
  "priorities": [
@@ -3466,7 +3466,7 @@
    "id": "D-G68-3",
    "text": "Stage B migration boundaries and stop point",
    "ownerWords": "Proceed with the approved additive-then-switch migration of Jade & Ember to the verified framework snapshot. Preserve the delivered website, renderer, approved design and dependency lockfile; preserve all pre-existing mandatory checks and add the approved project-specific checks; preserve all 319 release scenarios and 41 release-control proof-of-concept cases and check:framework-matrix; make only the previously approved script-path and test-harness import adjustments; remove the temporary direct-workflow exception when the new caller is verified; preserve Cloudflare Pages and Vercel portability; keep the public showcase repository public; preserve the production-authentication hard stop and all applicable release blockers. Stop after Stage B for owner review before beginning Stage C. Do not merge the framework to main, create a Framework Release, deploy, publish a website, or start MONOLITH.",
-   "status": "decided (APR-JE-049); Stage B completed for owner review (APR-JE-050)",
+   "status": "decided (APR-JE-049); Stage B closed for engineering purposes (APR-JE-051)",
    "workPackages": [
     "G6-8"
    ],
@@ -3504,6 +3504,21 @@
     {
      "wp": "G6-8",
      "mustMention": "41 release-control proof-of-concept cases"
+    }
+   ]
+  },
+  {
+   "id": "D-G68-6",
+   "text": "Stage B closed; Stage C validation authorised within its recorded scope; stop before declaring G6-8 complete",
+   "ownerWords": "The owner approves G6-8 Stage B engineering closure. Proceed with the existing G6-8 Stage C validation scope: V1 verify the generic framework fixture and mandatory checks across the required browser engines; V2 validate Jade & Ember as a framework consumer, including its original verification coverage and parity; V3 evaluate the cinematic template in an isolated, read-only test environment without changing existing creative authority; V4 prepare an independent review evidence bundle and perform the authorized engineering review. Assess the seven remaining Stage B risks, especially silently not-applicable dry-run scenarios and the limits of the legacy release-control compatibility harness. Do not weaken checks, revise approved snapshot files, or expand scope to resolve nonblocking improvements without owner approval. Boundaries: no production deployment or website publication; no merge or tag; no Framework Release; no new infrastructure or credentials; no MONOLITH implementation yet; preserve the existing STS architecture, design authority and production-release blockers. After Stage C, prepare the V5 readiness checklist and identify actual remaining blockers versus optional improvements. Stop for owner review before declaring G6-8 complete or authorizing another work package.",
+   "status": "decided (APR-JE-051); Stage C in progress",
+   "workPackages": [
+    "G6-8"
+   ],
+   "consequences": [
+    {
+     "wp": "G6-8",
+     "mustMention": "readiness checklist"
     }
    ]
   }
