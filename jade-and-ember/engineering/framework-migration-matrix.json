@@ -778,7 +778,8 @@
     "jade-and-ember/engineering/G6-4-REPORT.md",
     "jade-and-ember/engineering/g6-4-evidence/",
     "jade-and-ember/engineering/checks/hosting-adapters.mjs",
-    "jade-and-ember/engineering/G6-5-REPORT.md"
+    "jade-and-ember/engineering/G6-5-REPORT.md",
+    "jade-and-ember/engineering/G6-6-REPORT.md"
    ],
    "target": "engineering/adapters/hosting/{cloudflare-pages,vercel,static}/",
    "external": [
@@ -1105,7 +1106,8 @@
    "paths": [
     "jade-and-ember/engineering/evidence/",
     "docs/hero-video/",
-    "jade-and-ember/engineering/g6-5-evidence/"
+    "jade-and-ember/engineering/g6-5-evidence/",
+    "jade-and-ember/engineering/g6-6-evidence/"
    ],
    "target": "stays in Jade & Ember",
    "external": [],
@@ -1934,7 +1936,7 @@
      "skillBranchForReconciliation": "feature/anthropic-frontend-design-standard (d2803c02408c27d4489ccddee0a11478621e26dd): the already-approved branch that vendors the official frontend-design skill and retires the earlier STS design skill to a redirect. It is not on main. It is recorded for later reconciliation, is not merged or modified by G6-6, and the retired skill is not reactivated."
     }
    },
-   "status": "authorised by APR-JE-047; in progress"
+   "status": "implemented and verified (G6-6-REPORT.md; framework branch feature/sts-engineering-framework at 3286f8b, development only, not merged); awaiting owner review; not closed"
   },
   {
    "id": "G6-7",

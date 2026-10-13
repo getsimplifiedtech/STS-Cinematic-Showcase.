@@ -1,0 +1,390 @@
+{
+ "schema": "sts/parity-expected-differences@1",
+ "reference": "parity-after-fast-f485758.txt",
+ "differences": [
+  {
+   "id": "project-checks-count",
+   "reason": "The project's own migration check (check:framework-matrix) assesses the monolithic repository whose files have now left the project's folder; the consumer's manifest drops it, so the manifest names two project checks, not three.",
+   "was": "  Jade & Ember: the manifest is valid and every file, folder and module it names exists (3 project check(s) added to the base engineering)",
+   "now": null
+  },
+  {
+   "id": "project-checks-count",
+   "reason": "The project's own migration check (check:framework-matrix) assesses the monolithic repository whose files have now left the project's folder; the consumer's manifest drops it, so the manifest names two project checks, not three.",
+   "was": null,
+   "now": "  Jade & Ember: the manifest is valid and every file, folder and module it names exists (2 project check(s) added to the base engineering)"
+  },
+  {
+   "id": "purity-review-layout",
+   "reason": "check:project reviews the framework's own layout (107+ reusable files and the JSON standards against the framework's purity-allow.json), not the project's old layout of 112 files.",
+   "was": "  purity review: 112 reusable files scanned; 58 remaining project-specific values, all listed in purity-allow.json with a reason (16 entries, ratchet 58)",
+   "now": null
+  },
+  {
+   "id": "purity-review-layout",
+   "reason": "check:project reviews the framework's own layout (107+ reusable files and the JSON standards against the framework's purity-allow.json), not the project's old layout of 112 files.",
+   "was": null,
+   "now": "  purity review (framework layout): 108 reusable files and 9 standards scanned; 29 remaining project-specific values, all listed in purity-allow.json with a reason (9 entries, ratchet 29)"
+  },
+  {
+   "id": "new-check-extraction",
+   "reason": "New core check:extraction (G6-6 review fix): the extraction verifier and the pinned hash of the production hard stop run inside the verification.",
+   "was": null,
+   "now": "== check:extraction: extracted files equal their source or carry a ledger entry for their current bytes; the production hard stop is byte-identical to its pinned hash"
+  },
+  {
+   "id": "new-check-extraction",
+   "reason": "New core check:extraction (G6-6 review fix).",
+   "was": null,
+   "now": "  extraction from dfb7fc4: 198 files, 108 identical to their source, 81 changed with a ledger entry, 9 removed with a ledger entry; the production hard stop is byte-identical to its pinned hash"
+  },
+  {
+   "id": "new-check-extraction",
+   "reason": "New core check:extraction (G6-6 review fix): the extraction verifier and the pinned hash of the production hard stop run inside the verification.",
+   "was": null,
+   "now": "PASS  check:extraction (T s)"
+  },
+  {
+   "id": "log-frame",
+   "reason": "Not a check result: the npm banner, a blank line or the exit-code line of the capture.",
+   "was": null,
+   "now": ""
+  },
+  {
+   "id": "authority-scan-count",
+   "reason": "check:authority scans the repository text: the consumer's tree differs in the files that hold the core (the project's re-export modules carry the core source as a comment) and in the project's own kept self-test copy, so the number of mentions differs; every mention is in an allowed historical document next to a marker.",
+   "was": "  N text files scanned; 33 mentions of the retired skill, all in allowed historical documents next to a marker",
+   "now": null
+  },
+  {
+   "id": "authority-scan-count",
+   "reason": "check:authority scans the repository text: the consumer's tree differs in the files that hold the core (the project's re-export modules carry the core source as a comment) and in the project's own kept self-test copy, so the number of mentions differs; every mention is in an allowed historical document next to a marker.",
+   "was": null,
+   "now": "  N text files scanned; 35 mentions of the retired skill, all in allowed historical documents next to a marker"
+  },
+  {
+   "id": "matrix-check-dropped",
+   "reason": "The project's migration-matrix check is dropped from the consumer's manifest (see project-checks-count).",
+   "was": "== check:framework-matrix: Phase 8: the framework extraction and migration matrix classifies every file of the repository, every reference resolves, the generated Markdown is current (an assessment; nothing is extracted)",
+   "now": null
+  },
+  {
+   "id": "matrix-check-dropped",
+   "reason": "The project's migration-matrix check is dropped from the consumer's manifest (see project-checks-count).",
+   "was": "  N files in 35 components (10 universal, 13 universal-redesign, 1 adapter-industry, 3 project, 2 devtool, 1 adapter-hosting, 4 record, 1 doc); 10 work packages in dependency order; 40 registered requirements and findings; 16 release blockers; the generated matrix is current",
+   "now": null
+  },
+  {
+   "id": "matrix-check-dropped",
+   "reason": "The project's migration-matrix check is dropped from the consumer's manifest (see project-checks-count).",
+   "was": "PASS  check:framework-matrix (T s)",
+   "now": null
+  },
+  {
+   "id": "log-frame",
+   "reason": "Not a check result: the npm banner, a blank line or the exit-code line of the capture.",
+   "was": "",
+   "now": null
+  },
+  {
+   "id": "selftest-generic-rewritten",
+   "reason": "check:selftest-generic was rewritten for the framework layout in G6-6 (52 cases: overlays, findings, records without fallback, offerings, hosting, authority, manifest review), replacing the 28 cases of G6-5.",
+   "was": "  held: identity: the fixture is another project (id, name and every record prefix differ)",
+   "now": null
+  },
+  {
+   "id": "selftest-generic-rewritten",
+   "reason": "check:selftest-generic was rewritten for the framework layout in G6-6 (52 cases: overlays, findings, records without fallback, offerings, hosting, authority, manifest review), replacing the 28 cases of G6-5.",
+   "was": "  held: isolation: the fixture tree names nothing of the default project (name, id, record prefixes, baseline label)",
+   "now": null
+  },
+  {
+   "id": "selftest-generic-rewritten",
+   "reason": "check:selftest-generic was rewritten for the framework layout in G6-6 (52 cases: overlays, findings, records without fallback, offerings, hosting, authority, manifest review), replacing the 28 cases of G6-5.",
+   "was": null,
+   "now": "  held: identity: the fixture is a project of its own (its id, name and every record prefix are its own)"
+  },
+  {
+   "id": "selftest-generic-rewritten",
+   "reason": "check:selftest-generic was rewritten for the framework layout in G6-6 (52 cases: overlays, findings, records without fallback, offerings, hosting, authority, manifest review), replacing the 28 cases of G6-5.",
+   "was": null,
+   "now": "  held: isolation: the fixture tree names nothing of the project the engineering was extracted from"
+  },
+  {
+   "id": "selftest-generic-rewritten",
+   "reason": "check:selftest-generic was rewritten for the framework layout in G6-6 (52 cases: overlays, findings, records without fallback, offerings, hosting, authority, manifest review), replacing the 28 cases of G6-5.",
+   "was": "  held: registry: the fixture has every base check and none of the default project's own three",
+   "now": null
+  },
+  {
+   "id": "selftest-generic-rewritten",
+   "reason": "check:selftest-generic was rewritten for the framework layout in G6-6 (52 cases: overlays, findings, records without fallback, offerings, hosting, authority, manifest review), replacing the 28 cases of G6-5.",
+   "was": "  held: registry: what the fixture does not declare (baseline, builder, industry) is exactly what makes checks not applicable",
+   "now": null
+  },
+  {
+   "id": "selftest-generic-rewritten",
+   "reason": "check:selftest-generic was rewritten for the framework layout in G6-6 (52 cases: overlays, findings, records without fallback, offerings, hosting, authority, manifest review), replacing the 28 cases of G6-5.",
+   "was": null,
+   "now": "  held: registry: the fixture has every base check and none of an industry adapter's own"
+  },
+  {
+   "id": "selftest-generic-rewritten",
+   "reason": "check:selftest-generic was rewritten for the framework layout in G6-6 (52 cases: overlays, findings, records without fallback, offerings, hosting, authority, manifest review), replacing the 28 cases of G6-5.",
+   "was": null,
+   "now": "  held: registry: what the fixture does not declare is exactly what makes checks not applicable (a baseline: the comparison with it and the regression harness)"
+  },
+  {
+   "id": "selftest-generic-rewritten",
+   "reason": "check:selftest-generic was rewritten for the framework layout in G6-6 (52 cases: overlays, findings, records without fallback, offerings, hosting, authority, manifest review), replacing the 28 cases of G6-5.",
+   "was": null,
+   "now": "  held: site: the not-found page is delivered and hashed with the pages but belongs to no navigation"
+  },
+  {
+   "id": "selftest-generic-rewritten",
+   "reason": "check:selftest-generic was rewritten for the framework layout in G6-6 (52 cases: overlays, findings, records without fallback, offerings, hosting, authority, manifest review), replacing the 28 cases of G6-5.",
+   "was": "  held: industry: a project with no industry adapter gets a clear refusal, never another industry's schema",
+   "now": null
+  },
+  {
+   "id": "selftest-generic-rewritten",
+   "reason": "check:selftest-generic was rewritten for the framework layout in G6-6 (52 cases: overlays, findings, records without fallback, offerings, hosting, authority, manifest review), replacing the 28 cases of G6-5.",
+   "was": "  held: builder and baseline: a project without them is told so, with no fallback to another project's",
+   "now": null
+  },
+  {
+   "id": "selftest-generic-rewritten",
+   "reason": "check:selftest-generic was rewritten for the framework layout in G6-6 (52 cases: overlays, findings, records without fallback, offerings, hosting, authority, manifest review), replacing the 28 cases of G6-5.",
+   "was": null,
+   "now": "  held: industry: a project that declares none gets the generic local-business adapter, never another industry's"
+  },
+  {
+   "id": "selftest-generic-rewritten",
+   "reason": "check:selftest-generic was rewritten for the framework layout in G6-6 (52 cases: overlays, findings, records without fallback, offerings, hosting, authority, manifest review), replacing the 28 cases of G6-5.",
+   "was": null,
+   "now": "  held: builder and baseline: a project with a builder is told its command; one with no baseline is told so, with no fallback to another project's"
+  },
+  {
+   "id": "selftest-generic-rewritten",
+   "reason": "check:selftest-generic was rewritten for the framework layout in G6-6 (52 cases: overlays, findings, records without fallback, offerings, hosting, authority, manifest review), replacing the 28 cases of G6-5.",
+   "was": "  held: engine digest: the fixture manifest is part of what the verification record covers",
+   "now": null
+  },
+  {
+   "id": "selftest-generic-rewritten",
+   "reason": "check:selftest-generic was rewritten for the framework layout in G6-6 (52 cases: overlays, findings, records without fallback, offerings, hosting, authority, manifest review), replacing the 28 cases of G6-5.",
+   "was": "  held: default: with no project set the engineering is still bound to the default project",
+   "now": null
+  },
+  {
+   "id": "selftest-generic-rewritten",
+   "reason": "check:selftest-generic was rewritten for the framework layout in G6-6 (52 cases: overlays, findings, records without fallback, offerings, hosting, authority, manifest review), replacing the 28 cases of G6-5.",
+   "was": null,
+   "now": "  held: engine digest: the fixture manifest, its overlays of the standards and its evidence specification are part of what the verification record covers; its own pages and records are not"
+  },
+  {
+   "id": "selftest-generic-rewritten",
+   "reason": "check:selftest-generic was rewritten for the framework layout in G6-6 (52 cases: overlays, findings, records without fallback, offerings, hosting, authority, manifest review), replacing the 28 cases of G6-5.",
+   "was": null,
+   "now": "  caught: check:secrets: an allowance without a reason a reviewer can accept is refused"
+  },
+  {
+   "id": "selftest-generic-rewritten",
+   "reason": "check:selftest-generic was rewritten for the framework layout in G6-6 (52 cases: overlays, findings, records without fallback, offerings, hosting, authority, manifest review), replacing the 28 cases of G6-5.",
+   "was": null,
+   "now": "  caught: manifest: a design value hidden in the manifest's text is refused (a colour, a font size, a duration)"
+  },
+  {
+   "id": "selftest-generic-rewritten",
+   "reason": "check:selftest-generic was rewritten for the framework layout in G6-6 (52 cases: overlays, findings, records without fallback, offerings, hosting, authority, manifest review), replacing the 28 cases of G6-5.",
+   "was": null,
+   "now": "  caught: manifest: a build command that runs a script the project does not have, in any language, is refused"
+  },
+  {
+   "id": "selftest-generic-rewritten",
+   "reason": "check:selftest-generic was rewritten for the framework layout in G6-6 (52 cases: overlays, findings, records without fallback, offerings, hosting, authority, manifest review), replacing the 28 cases of G6-5.",
+   "was": null,
+   "now": "  caught: manifest: a source root that is neither a folder nor a script is refused"
+  },
+  {
+   "id": "selftest-generic-rewritten",
+   "reason": "check:selftest-generic was rewritten for the framework layout in G6-6 (52 cases: overlays, findings, records without fallback, offerings, hosting, authority, manifest review), replacing the 28 cases of G6-5.",
+   "was": null,
+   "now": "  caught: manifest: an asset folder the base engineering does not judge is refused"
+  },
+  {
+   "id": "selftest-generic-rewritten",
+   "reason": "check:selftest-generic was rewritten for the framework layout in G6-6 (52 cases: overlays, findings, records without fallback, offerings, hosting, authority, manifest review), replacing the 28 cases of G6-5.",
+   "was": "  held: standards: only a rule set that names no project falls back to the engineering; a project's own records never do",
+   "now": null
+  },
+  {
+   "id": "selftest-generic-rewritten",
+   "reason": "check:selftest-generic was rewritten for the framework layout in G6-6 (52 cases: overlays, findings, records without fallback, offerings, hosting, authority, manifest review), replacing the 28 cases of G6-5.",
+   "was": "  held: record: a check that was not applicable is listed in the sealed record, and a release record cannot carry one",
+   "now": null
+  },
+  {
+   "id": "selftest-generic-rewritten",
+   "reason": "check:selftest-generic was rewritten for the framework layout in G6-6 (52 cases: overlays, findings, records without fallback, offerings, hosting, authority, manifest review), replacing the 28 cases of G6-5.",
+   "was": "  held: registry: two checks that follow the same check keep the order they were declared in, and a check that follows nothing is refused",
+   "now": null
+  },
+  {
+   "id": "selftest-generic-rewritten",
+   "reason": "check:selftest-generic was rewritten for the framework layout in G6-6 (52 cases: overlays, findings, records without fallback, offerings, hosting, authority, manifest review), replacing the 28 cases of G6-5.",
+   "was": "  28 generic-fixture tests run in T s (project: Quillfeather Letterpress, a second project that shares no value with Jade & Ember)",
+   "now": null
+  },
+  {
+   "id": "selftest-generic-rewritten",
+   "reason": "check:selftest-generic was rewritten for the framework layout in G6-6 (52 cases: overlays, findings, records without fallback, offerings, hosting, authority, manifest review), replacing the 28 cases of G6-5.",
+   "was": null,
+   "now": "  held: registry: two checks that follow the same check keep the order they were declared in, and a check that follows nothing is refused"
+  },
+  {
+   "id": "selftest-generic-rewritten",
+   "reason": "check:selftest-generic was rewritten for the framework layout in G6-6 (52 cases: overlays, findings, records without fallback, offerings, hosting, authority, manifest review), replacing the 28 cases of G6-5.",
+   "was": null,
+   "now": "  caught: registry: only the framework can make a check waivable; a project's or an adapter's entry that claims it is refused"
+  },
+  {
+   "id": "selftest-generic-rewritten",
+   "reason": "check:selftest-generic was rewritten for the framework layout in G6-6 (52 cases: overlays, findings, records without fallback, offerings, hosting, authority, manifest review), replacing the 28 cases of G6-5.",
+   "was": null,
+   "now": "  caught: records: a record the fixture does not supply fails the check that needs it, naming the record and the project, and falls back to nothing"
+  },
+  {
+   "id": "selftest-generic-rewritten",
+   "reason": "check:selftest-generic was rewritten for the framework layout in G6-6 (52 cases: overlays, findings, records without fallback, offerings, hosting, authority, manifest review), replacing the 28 cases of G6-5.",
+   "was": null,
+   "now": "  caught: records: a missing authority record fails the check that needs it with the same clear message, not a file-system error"
+  },
+  {
+   "id": "selftest-generic-rewritten",
+   "reason": "check:selftest-generic was rewritten for the framework layout in G6-6 (52 cases: overlays, findings, records without fallback, offerings, hosting, authority, manifest review), replacing the 28 cases of G6-5.",
+   "was": null,
+   "now": "  held: overlay: an overlay inside the limits of the standards is accepted (a stricter minimum target size, a longer link-host list)"
+  },
+  {
+   "id": "selftest-generic-rewritten",
+   "reason": "check:selftest-generic was rewritten for the framework layout in G6-6 (52 cases: overlays, findings, records without fallback, offerings, hosting, authority, manifest review), replacing the 28 cases of G6-5.",
+   "was": null,
+   "now": "  caught: overlay: a forbidden script API dropped from the privacy standard is refused"
+  },
+  {
+   "id": "selftest-generic-rewritten",
+   "reason": "check:selftest-generic was rewritten for the framework layout in G6-6 (52 cases: overlays, findings, records without fallback, offerings, hosting, authority, manifest review), replacing the 28 cases of G6-5.",
+   "was": null,
+   "now": "  caught: overlay: a looser minimum target size than the accessibility standard sets is refused"
+  },
+  {
+   "id": "selftest-generic-rewritten",
+   "reason": "check:selftest-generic was rewritten for the framework layout in G6-6 (52 cases: overlays, findings, records without fallback, offerings, hosting, authority, manifest review), replacing the 28 cases of G6-5.",
+   "was": null,
+   "now": "  caught: overlay: a key the accessibility standard does not know is refused"
+  },
+  {
+   "id": "selftest-generic-rewritten",
+   "reason": "check:selftest-generic was rewritten for the framework layout in G6-6 (52 cases: overlays, findings, records without fallback, offerings, hosting, authority, manifest review), replacing the 28 cases of G6-5.",
+   "was": null,
+   "now": "  caught: overlay: a Lighthouse page list that leaves a page out is refused"
+  },
+  {
+   "id": "selftest-generic-rewritten",
+   "reason": "check:selftest-generic was rewritten for the framework layout in G6-6 (52 cases: overlays, findings, records without fallback, offerings, hosting, authority, manifest review), replacing the 28 cases of G6-5.",
+   "was": null,
+   "now": "  caught: overlay: a Lighthouse score floor below the standard's is refused"
+  },
+  {
+   "id": "selftest-generic-rewritten",
+   "reason": "check:selftest-generic was rewritten for the framework layout in G6-6 (52 cases: overlays, findings, records without fallback, offerings, hosting, authority, manifest review), replacing the 28 cases of G6-5.",
+   "was": null,
+   "now": "  held: overlay: a retired package dropped from the dependency standard is refused, a project's own account of it is accepted (must find nothing for the second)"
+  },
+  {
+   "id": "selftest-generic-rewritten",
+   "reason": "check:selftest-generic was rewritten for the framework layout in G6-6 (52 cases: overlays, findings, records without fallback, offerings, hosting, authority, manifest review), replacing the 28 cases of G6-5.",
+   "was": null,
+   "now": "  caught: authority: a project that records another creative authority than the framework's sole one is refused"
+  },
+  {
+   "id": "selftest-generic-rewritten",
+   "reason": "check:selftest-generic was rewritten for the framework layout in G6-6 (52 cases: overlays, findings, records without fallback, offerings, hosting, authority, manifest review), replacing the 28 cases of G6-5.",
+   "was": null,
+   "now": "  caught: authority: a project whose record names no required approval is refused"
+  },
+  {
+   "id": "selftest-generic-rewritten",
+   "reason": "check:selftest-generic was rewritten for the framework layout in G6-6 (52 cases: overlays, findings, records without fallback, offerings, hosting, authority, manifest review), replacing the 28 cases of G6-5.",
+   "was": null,
+   "now": "  caught: findings: a finding that names a check the registry does not mark waivable is refused"
+  },
+  {
+   "id": "selftest-generic-rewritten",
+   "reason": "check:selftest-generic was rewritten for the framework layout in G6-6 (52 cases: overlays, findings, records without fallback, offerings, hosting, authority, manifest review), replacing the 28 cases of G6-5.",
+   "was": null,
+   "now": "  caught: findings: a flash or motion measurement of the media check is never a finding, even labelled Info"
+  },
+  {
+   "id": "selftest-generic-rewritten",
+   "reason": "check:selftest-generic was rewritten for the framework layout in G6-6 (52 cases: overlays, findings, records without fallback, offerings, hosting, authority, manifest review), replacing the 28 cases of G6-5.",
+   "was": null,
+   "now": "  caught: findings: a severity worse than Minor is never a finding"
+  },
+  {
+   "id": "selftest-generic-rewritten",
+   "reason": "check:selftest-generic was rewritten for the framework layout in G6-6 (52 cases: overlays, findings, records without fallback, offerings, hosting, authority, manifest review), replacing the 28 cases of G6-5.",
+   "was": null,
+   "now": "  caught: findings: an acceptance must cite an approval that is in the ledger"
+  },
+  {
+   "id": "selftest-generic-rewritten",
+   "reason": "check:selftest-generic was rewritten for the framework layout in G6-6 (52 cases: overlays, findings, records without fallback, offerings, hosting, authority, manifest review), replacing the 28 cases of G6-5.",
+   "was": null,
+   "now": "  held: findings: a status that is neither open nor an acceptance is refused; an acceptance of a known approval and an open finding are accepted (must find nothing)"
+  },
+  {
+   "id": "selftest-generic-rewritten",
+   "reason": "check:selftest-generic was rewritten for the framework layout in G6-6 (52 cases: overlays, findings, records without fallback, offerings, hosting, authority, manifest review), replacing the 28 cases of G6-5.",
+   "was": null,
+   "now": "  held: offerings: Essential, Premium and Cinematic share one base engineering (the same checks, in the same order, with the same registry digest)"
+  },
+  {
+   "id": "selftest-generic-rewritten",
+   "reason": "check:selftest-generic was rewritten for the framework layout in G6-6 (52 cases: overlays, findings, records without fallback, offerings, hosting, authority, manifest review), replacing the 28 cases of G6-5.",
+   "was": null,
+   "now": "  held: offerings: the offering changes nothing a check judges (the manifest checks for the three offerings find the same)"
+  },
+  {
+   "id": "selftest-generic-rewritten",
+   "reason": "check:selftest-generic was rewritten for the framework layout in G6-6 (52 cases: overlays, findings, records without fallback, offerings, hosting, authority, manifest review), replacing the 28 cases of G6-5.",
+   "was": null,
+   "now": "  held: record: a check that was not applicable is listed in the sealed record, and a release record cannot carry one"
+  },
+  {
+   "id": "selftest-generic-rewritten",
+   "reason": "check:selftest-generic was rewritten for the framework layout in G6-6 (52 cases: overlays, findings, records without fallback, offerings, hosting, authority, manifest review), replacing the 28 cases of G6-5.",
+   "was": null,
+   "now": "  held: hosting: the fixture's delivered folder is staged by the Cloudflare Pages and the Vercel adapter, each bundle passes its own checks and carries the folder unaltered; the static adapter serves the extension style"
+  },
+  {
+   "id": "selftest-generic-rewritten",
+   "reason": "check:selftest-generic was rewritten for the framework layout in G6-6 (52 cases: overlays, findings, records without fallback, offerings, hosting, authority, manifest review), replacing the 28 cases of G6-5.",
+   "was": null,
+   "now": "  52 generic-fixture tests run in T s (project: Quillfeather Letterpress, running as Jade & Ember)"
+  },
+  {
+   "id": "new-check-extraction",
+   "reason": "New core check:extraction (G6-6 review fix): the extraction verifier and the pinned hash of the production hard stop run inside the verification.",
+   "was": null,
+   "now": "  PASS  check:extraction T s"
+  },
+  {
+   "id": "matrix-check-dropped",
+   "reason": "The project's migration-matrix check is dropped from the consumer's manifest (see project-checks-count).",
+   "was": "  PASS  check:framework-matrix T s",
+   "now": null
+  }
+ ]
+}
