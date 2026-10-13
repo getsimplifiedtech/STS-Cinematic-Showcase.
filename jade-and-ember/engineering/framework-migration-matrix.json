@@ -779,7 +779,8 @@
     "jade-and-ember/engineering/g6-4-evidence/",
     "jade-and-ember/engineering/checks/hosting-adapters.mjs",
     "jade-and-ember/engineering/G6-5-REPORT.md",
-    "jade-and-ember/engineering/G6-6-REPORT.md"
+    "jade-and-ember/engineering/G6-6-REPORT.md",
+    "jade-and-ember/engineering/G6-7-REPORT.md"
    ],
    "target": "engineering/adapters/hosting/{cloudflare-pages,vercel,static}/",
    "external": [
@@ -1107,7 +1108,8 @@
     "jade-and-ember/engineering/evidence/",
     "docs/hero-video/",
     "jade-and-ember/engineering/g6-5-evidence/",
-    "jade-and-ember/engineering/g6-6-evidence/"
+    "jade-and-ember/engineering/g6-6-evidence/",
+    "jade-and-ember/engineering/g6-7-evidence/"
    ],
    "target": "stays in Jade & Ember",
    "external": [],
@@ -1821,7 +1823,7 @@
   {
    "id": "G6-6",
    "title": "Extraction into the framework repository",
-   "summary": "Add the de-coupled core, adapters and fixtures to the master framework repository, which owns the reusable engineering (D-P8-1), on a branch (never main), with framework CI running the generic fixture. Needs the owner's explicit approval to modify the framework repository, which has not been given. Authorised by APR-JE-047: development-only branch feature/sts-engineering-framework created at main f05f41f in the framework repository, new files only; includes the G6-0 specification deliverable (architecture/16-engineering-framework-v1.md) with independent review before code; extraction with source-file hashes and byte-for-byte initial parity; standards separated from project records; the generic fixture runs the full verification pipeline independently; identical mandatory base engineering for Essential, Premium and Cinematic; Cloudflare Pages and Vercel adapters preserved; release-authentication hard stop, provenance and production blockers preserved; Jade & Ember delivered website, renderer and production behaviour unchanged; Anthropic Frontend Design the sole creative authority; OI-1 and OI-2 deferred. The already-approved skill branch feature/anthropic-frontend-design-standard (d2803c0) is recorded for later reconciliation; it is not merged or modified here and the retired STS design skill is not reactivated.",
+   "summary": "Add the de-coupled core, adapters and fixtures to the master framework repository, which owns the reusable engineering (D-P8-1), on a branch (never main), with framework CI running the generic fixture. Needs the owner's explicit approval to modify the framework repository, which has not been given. Authorised by APR-JE-047: development-only branch feature/sts-engineering-framework created at main f05f41f in the framework repository, new files only; includes the G6-0 specification deliverable (architecture/16-engineering-framework-v1.md) with independent review before code; extraction with source-file hashes and byte-for-byte initial parity; standards separated from project records; the generic fixture runs the full verification pipeline independently; identical mandatory base engineering for Essential, Premium and Cinematic; Cloudflare Pages and Vercel adapters preserved; release-authentication hard stop, provenance and production blockers preserved; Jade & Ember delivered website, renderer and production behaviour unchanged; Anthropic Frontend Design the sole creative authority; OI-1 and OI-2 deferred. The already-approved skill branch feature/anthropic-frontend-design-standard (d2803c0) is recorded for later reconciliation; it is not merged or modified here and the retired STS design skill is not reactivated. Closed for engineering purposes only by APR-JE-048; all production-release blockers remain active.",
    "dependsOn": [
     "G6-5"
    ],
@@ -1934,14 +1936,17 @@
       "vendor/"
      ],
      "skillBranchForReconciliation": "feature/anthropic-frontend-design-standard (d2803c02408c27d4489ccddee0a11478621e26dd): the already-approved branch that vendors the official frontend-design skill and retires the earlier STS design skill to a redirect. It is not on main. It is recorded for later reconciliation, is not merged or modified by G6-6, and the retired skill is not reactivated."
-    }
+    },
+    "endCommit": "efff681d1baf5f32f2161296af45d462aab9daa5",
+    "closedBy": "APR-JE-048",
+    "closedAs": "closed for engineering purposes only (Jade & Ember final commit efff681; framework branch feature/sts-engineering-framework final commit 3286f8b; Actions runs on that head with all seven jobs; fixture verification 38 of 38 with two not applicable; reference consumer 42 of 42; 319 of 319 release dry-run scenarios); every production-release blocker stays active"
    },
-   "status": "implemented and verified (G6-6-REPORT.md; framework branch feature/sts-engineering-framework at 3286f8b, development only, not merged); awaiting owner review; not closed"
+   "status": "closed for engineering purposes only (APR-JE-048); implemented on the framework branch feature/sts-engineering-framework at 3286f8b (development only, not merged); every production-release blocker stays active"
   },
   {
    "id": "G6-7",
    "title": "Centralised GitHub automation",
-   "summary": "SHA-pinned reusable workflows in the framework repository called from a short workflow in each client repository; per-repository Dependabot configuration generated from a template with human approval and no automatic merging (D-P6-4); scheduled supply-chain, external-link and read-only live-site checks run from GitHub-hosted runners. Nothing is installed on a client's hosting; the client repository holds only a caller workflow and the manifest. The current workflow policy forbids schedule triggers and reusable-workflow calls and must be changed deliberately. GitHub Actions is the foundation for centralised maintenance and security (D-P8-8); no software is installed on any client host.",
+   "summary": "SHA-pinned reusable workflows in the framework repository called from a short workflow in each client repository; per-repository Dependabot configuration generated from a template with human approval and no automatic merging (D-P6-4); scheduled supply-chain, external-link and read-only live-site checks run from GitHub-hosted runners. Nothing is installed on a client's hosting; the client repository holds only a caller workflow and the manifest. The current workflow policy forbids schedule triggers and reusable-workflow calls and must be changed deliberately. GitHub Actions is the foundation for centralised maintenance and security (D-P8-8); no software is installed on any client host. Authorised by APR-JE-048 (2026-10-13) within the revised plan: A1, a SHA-pinned private composite action as the supported framework-consumption mechanism for private STS client repositories (the composite action); A2, fixture-based verification and caller-layout simulations in place of a scratch repository, with real private cross-repository integration verification left open until an authorised private client project exists; the reusable workflow, caller template, scheduled and Dependabot templates, and the mandatory verification policies; narrowly scoped hash-bound exceptions for the existing OpenMontage import workflow and eight documented synthetic credential-shaped test values. OpenMontage stays vendored and dormant; no PATs, deploy keys, accounts, repositories, external services or signing processes; scheduled automation is defined, not activated; no live-site monitoring.",
    "dependsOn": [
     "G6-6"
    ],
@@ -1950,15 +1955,123 @@
    ],
    "frameworkRepoChange": true,
    "size": "medium",
-   "verification": "A scratch repository with only the caller workflow and manifest runs the checks; the policy check passes on caller and reusable workflows; update PRs never merge themselves.",
+   "verification": "Fixture-based verification and caller-layout simulations (A2; actual private cross-repository integration stays open until an authorised private client project exists); the policy check passes on the caller, reusable workflow, composite action and templates; a client's configuration cannot disable a mandatory base check; the two exception families are narrow, hash-bound and fail on change; update PRs never merge themselves; independent review; all seven framework CI jobs examined individually.",
    "blocks": [
     "RB-11"
-   ]
+   ],
+   "scope": {
+    "repository": "getsimplifiedtech/STS-Cinematic-Showcase.",
+    "branch": "feature/jade-and-ember-v0.9",
+    "baseCommit": "efff681d1baf5f32f2161296af45d462aab9daa5",
+    "authorisedBy": "APR-JE-048",
+    "note": "Derived from the owner's G6-7 implementation authorization (APR-JE-048) and the revised G6-7 plan. Jade & Ember side, allowed: the approvals ledger, the matrix, the closure verifier and the Gate 6 order document that record the closure of G6-6 and the G6-7 work, and the G6-7 report and evidence. Jade & Ember side, denied: every other file (the delivered website, the renderer, the engineering code, schemas, policies and records, the hard authenticity stop, the release-control proof of concept, the reviewer table, the workflow and every .github file, the package lockfile, the history of closed work packages, the baselines); Jade & Ember does not consume the framework and its public repository stays public (G6-8). Framework repository side (recorded under frameworkRepository): one development-only branch created at the accepted G6-6 head. No deployment, preview, credential, signing step, account, repository, scheduled run or client-production release path is created or enabled.",
+    "allow": [
+     "docs/JADE_AND_EMBER_APPROVALS.md",
+     "jade-and-ember/engineering/FRAMEWORK-MIGRATION-MATRIX.md",
+     "jade-and-ember/engineering/framework-migration-matrix.json",
+     "jade-and-ember/engineering/GATE-6-IMPLEMENTATION-ORDER.md",
+     "jade-and-ember/engineering/lib/gate5-closure.mjs",
+     "jade-and-ember/engineering/G6-7-REPORT.md",
+     "jade-and-ember/engineering/g6-7-evidence/"
+    ],
+    "deny": [
+     ".github/",
+     "jade-and-ember/index.html",
+     "jade-and-ember/menu.html",
+     "jade-and-ember/order-online.html",
+     "jade-and-ember/our-story.html",
+     "jade-and-ember/visit-us.html",
+     "jade-and-ember/styles.css",
+     "jade-and-ember/site.js",
+     "jade-and-ember/hero.js",
+     "jade-and-ember/menu.js",
+     "jade-and-ember/media/",
+     "jade-and-ember/fonts/",
+     "jade-and-ember/config/",
+     "jade-and-ember/src/",
+     "jade-and-ember/build.mjs",
+     "jade-and-ember/serve.py",
+     "jade-and-ember/package-lock.json",
+     "jade-and-ember/baselines/",
+     "jade-and-ember/README.md",
+     "README.md",
+     "jade-and-ember/engineering/lib/authenticity.mjs",
+     "jade-and-ember/engineering/release-control/",
+     "jade-and-ember/engineering/release/",
+     "jade-and-ember/engineering/assets.manifest.json",
+     "jade-and-ember/engineering/media-rights-inventory.json",
+     "jade-and-ember/engineering/search-crawler-verification.json",
+     "jade-and-ember/engineering/findings.json",
+     "jade-and-ember/engineering/baseline.json",
+     "jade-and-ember/engineering/immutability-allowlist.json",
+     "jade-and-ember/engineering/external-destinations.json",
+     "jade-and-ember/engineering/external-links-verification.json",
+     "jade-and-ember/engineering/evidence/",
+     "jade-and-ember/engineering/G6-1-REPORT.md",
+     "jade-and-ember/engineering/G6-2-REPORT.md",
+     "jade-and-ember/engineering/G6-3-REPORT.md",
+     "jade-and-ember/engineering/G6-4-REPORT.md",
+     "jade-and-ember/engineering/G6-2-DESIGN.md",
+     "jade-and-ember/engineering/G6-3-SCOPE.md",
+     "jade-and-ember/engineering/G6-3A-DESIGN.md",
+     "jade-and-ember/engineering/G6-3A-POC-REPORT.md",
+     "jade-and-ember/engineering/g6-1-evidence/",
+     "jade-and-ember/engineering/g6-2-evidence/",
+     "jade-and-ember/engineering/g6-3-evidence/",
+     "jade-and-ember/engineering/g6-3a-evidence/",
+     "jade-and-ember/engineering/g6-4-evidence/",
+     "docs/JADE_AND_EMBER_MEDIA_RIGHTS_POLICY.md",
+     "jade-and-ember/engineering/G6-5-REPORT.md",
+     "jade-and-ember/engineering/g6-5-evidence/",
+     "jade-and-ember/package.json",
+     "jade-and-ember/QA.md",
+     "jade-and-ember/sts.engineering.json",
+     "jade-and-ember/engineering/checks/",
+     "jade-and-ember/engineering/tools/",
+     "jade-and-ember/engineering/adapters/",
+     "jade-and-ember/engineering/schemas/",
+     "jade-and-ember/engineering/project-owned/",
+     "jade-and-ember/engineering/fixtures/",
+     "jade-and-ember/engineering/checks.json",
+     "jade-and-ember/engineering/verify.mjs",
+     "jade-and-ember/engineering/purity-allow.json",
+     "jade-and-ember/engineering/G6-6-REPORT.md",
+     "jade-and-ember/engineering/g6-6-evidence/"
+    ],
+    "amendments": [],
+    "frameworkRepository": {
+     "repository": "getsimplifiedtech/sts-web-design-framework",
+     "branch": "feature/sts-framework-automation",
+     "baseCommit": "3286f8bcf836eb18486c9f61a41919bf53be79c6",
+     "baseNote": "The branch is created at the accepted G6-6 head 3286f8b (the identity was confirmed before creation). The framework repository's main was last observed at e15fc53, with vendor/openmontage and its one-time import workflow, neither of which is on the branch; main is not merged, tagged or modified.",
+     "operations": "create the branch; add and change files inside the allowed paths; commit; push the branch; let its own workflow run; no merge, pull request, tag, release, change to main or to any other branch; do not execute, update, remove or redistribute OpenMontage; do not modify import-openmontage.yml; no change to repository access settings",
+     "allowedPaths": [
+      "architecture/16-engineering-framework-v1.md",
+      "engineering/",
+      ".github/workflows/engineering-fixture.yml",
+      ".github/workflows/engineering-verify.yml",
+      ".github/actions/engineering/"
+     ],
+     "deniedPaths": [
+      "README.md",
+      "architecture/01-layer-model-v2.md to architecture/15-approval-determination-records-v1.md (the 15 frozen specifications)",
+      "reviews/",
+      "skills/",
+      "templates/",
+      ".claude/",
+      ".github/workflows/import-openmontage.yml",
+      "vendor/",
+      "every existing branch, including main"
+     ],
+     "skillBranchForReconciliation": "feature/anthropic-frontend-design-standard (d2803c02408c27d4489ccddee0a11478621e26dd): the already-approved branch that vendors the official frontend-design skill and retires the earlier STS design skill to a redirect. It is not on main. It is recorded for later reconciliation, is not merged or modified by G6-6, and the retired skill is not reactivated."
+    }
+   },
+   "status": "implemented and verified (G6-7-REPORT.md; framework branch feature/sts-framework-automation at eee5708, development only, not merged); awaiting owner review; not closed"
   },
   {
    "id": "G6-8",
    "title": "Consumption and independent validation",
-   "summary": "Jade & Ember consumes the framework at a pinned Git revision (M4, D-P8-2); the framework is validated independently by the ladder V1 to V4 (generic fixture, reference consumer parity, a second structure, mutation tests) with ChatGPT reviewing evidence and architecture (D-P8-10); a readiness checklist is completed. Then MONOLITH House & Design, the established proof of concept #2 (a fictional five-page luxury residential architecture/design-build website targeted for Vercel), begins; being fictional it uses the demonstration channel, not client production.",
+   "summary": "Jade & Ember consumes the framework at a pinned Git revision (M4, D-P8-2); the framework is validated independently by the ladder V1 to V4 (generic fixture, reference consumer parity, a second structure, mutation tests) with ChatGPT reviewing evidence and architecture (D-P8-10); a readiness checklist is completed. Then MONOLITH House & Design, the established proof of concept #2 (a fictional five-page luxury residential architecture/design-build website targeted for Vercel), begins; being fictional it uses the demonstration channel, not client production. Provisional owner direction recorded with APR-JE-048 (not an authorisation): the public Jade & Ember repository stays public, and the integrity-verified framework snapshot approach is provisionally accepted for G6-8, subject to its separate implementation review. G6-8 is not authorised and has not begun.",
    "dependsOn": [
     "G6-6",
     "G6-7"
@@ -3029,6 +3142,96 @@
     {
      "wp": "G6-6",
      "mustMention": "feature/anthropic-frontend-design-standard"
+    }
+   ]
+  },
+  {
+   "id": "D-G67-1",
+   "text": "G6-6 closed for engineering purposes only",
+   "ownerWords": "Record G6-6 as closed for engineering purposes only. All production-release blockers remain active.",
+   "status": "decided (APR-JE-048); G6-6 closed; every production-release blocker and live-host requirement stays open",
+   "workPackages": [
+    "G6-6"
+   ],
+   "consequences": [
+    {
+     "wp": "G6-6",
+     "mustMention": "APR-JE-048"
+    }
+   ]
+  },
+  {
+   "id": "D-G67-2",
+   "text": "A1: SHA-pinned private composite action as the supported consumption mechanism for private client repositories",
+   "ownerWords": "Approve A1: add the SHA-pinned private composite action as a supported framework-consumption mechanism for private STS client repositories.",
+   "status": "decided (APR-JE-048); implemented on the framework branch feature/sts-framework-automation",
+   "workPackages": [
+    "G6-7"
+   ],
+   "consequences": [
+    {
+     "wp": "G6-7",
+     "mustMention": "composite action"
+    }
+   ]
+  },
+  {
+   "id": "D-G67-3",
+   "text": "A2: fixture-based verification and caller-layout simulations; private cross-repository integration stays open",
+   "ownerWords": "Approve A2: replace the temporary scratch-repository requirement with fixture-based verification and caller-layout simulations. Keep actual private cross-repository integration verification open until an authorized private client project is available.",
+   "status": "decided (APR-JE-048); the integration verification is open",
+   "workPackages": [
+    "G6-7"
+   ],
+   "consequences": [
+    {
+     "wp": "G6-7",
+     "mustMention": "caller-layout"
+    }
+   ]
+  },
+  {
+   "id": "D-G67-4",
+   "text": "Narrow hash-bound exceptions: the existing OpenMontage workflow and eight synthetic credential-shaped test values",
+   "ownerWords": "Permit narrowly scoped, hash-bound exceptions for the existing OpenMontage workflow and eight documented synthetic credential-shaped test values. Each exception must include its precise scope and reason, and fail on unexpected changes.",
+   "status": "decided (APR-JE-048); implemented; not a permission for any other workflow",
+   "workPackages": [
+    "G6-7"
+   ],
+   "consequences": [
+    {
+     "wp": "G6-7",
+     "mustMention": "hash-bound"
+    }
+   ]
+  },
+  {
+   "id": "D-G67-5",
+   "text": "OpenMontage remains vendored and dormant",
+   "ownerWords": "OpenMontage remains vendored and dormant. Do not execute, update, remove, or redistribute it as part of G6-7. Do not include it in client repositories or website deliverables. Do not modify or activate the existing import workflow. Record its licensing and repository-size implications for future reconciliation.",
+   "status": "decided (APR-JE-048); recorded in the framework's engineering/docs/THIRD-PARTY.md",
+   "workPackages": [
+    "G6-7"
+   ],
+   "consequences": [
+    {
+     "wp": "G6-7",
+     "mustMention": "OpenMontage"
+    }
+   ]
+  },
+  {
+   "id": "D-G67-6",
+   "text": "G6-8 boundary: the public repository stays public; snapshot approach provisionally accepted",
+   "ownerWords": "The public Jade & Ember repository stays public. The integrity-verified framework snapshot approach is provisionally accepted for G6-8, subject to its separate implementation review. Do not modify Jade & Ember's code, migrate its framework consumption, or begin G6-8 during this package.",
+   "status": "decided (APR-JE-048); G6-8 not authorised",
+   "workPackages": [
+    "G6-8"
+   ],
+   "consequences": [
+    {
+     "wp": "G6-8",
+     "mustMention": "snapshot"
     }
    ]
   }
