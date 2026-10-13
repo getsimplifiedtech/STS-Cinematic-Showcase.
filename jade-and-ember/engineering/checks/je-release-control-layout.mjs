@@ -45,7 +45,9 @@ export async function checkSelftestReleaseControl() {
     writeFileSync(pkg, text.replace(from, '{ eng = engDir, core = eng, projectRoot = null,'));
     const left = shims(eng);
     if (left.length) problems.push(`a re-export has no engine file to replace it: ${left.map((x) => x.slice(eng.length + 1)).join(', ')}`);
-    if (existsSync(join(projectDir, 'node_modules'))) symlinkSync(join(projectDir, 'node_modules'), join(proj, 'node_modules'));
+    // the installed tools: the project's own, or the engine's when the tools are installed beside the snapshot (as the snapshot caller does in CI)
+    const modules = existsSync(join(projectDir, 'node_modules')) ? join(projectDir, 'node_modules') : join(coreDir, 'node_modules');
+    if (existsSync(modules)) symlinkSync(modules, join(proj, 'node_modules'));
     cpSync(join(repoRoot, 'docs'), join(repo, 'docs'), { recursive: true });
     const wf = join(repo, '.github', 'workflows');
     mkdirSync(wf, { recursive: true });
