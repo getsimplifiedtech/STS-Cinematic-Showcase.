@@ -2,7 +2,7 @@
 // a scratch git repository, the workflow) in a way a real mistake could, runs the check, and requires it to report the defect.
 // Nothing in the working tree or the baseline is touched. Options: --only <text>
 import { appendFileSync, cpSync, existsSync, mkdirSync, readFileSync, rmSync, symlinkSync, writeFileSync } from 'node:fs';
-import { workflowPath } from '../lib/project.mjs';
+import { engDir } from '../lib/git.mjs';
 import { join } from 'node:path';
 import { execFileSync } from 'node:child_process';
 import { checkSecurity, checkSecurityStatic } from './security.mjs';
@@ -23,7 +23,7 @@ import { isMain, projectDir, readJson, repoRoot, tempDir } from '../lib/git.mjs'
 const J = (...p) => p.join('');
 const edit = (file, fn) => writeFileSync(file, fn(readFileSync(file, 'utf8')));
 const clone = (o) => JSON.parse(JSON.stringify(o));
-const ciText = readFileSync(workflowPath(), 'utf8');
+const ciText = readFileSync(join(engDir, 'g6-8-evidence', 'legacy-direct-workflow.yml'), 'utf8');
 const sandbox = [];
 const site = () => { const d = assembleCandidate(projectDir, 'g3'); sandbox.push(d); return d; };
 const scratch = (label) => { const d = tempDir(label); sandbox.push(d); return d; };

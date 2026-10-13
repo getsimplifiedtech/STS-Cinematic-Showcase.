@@ -49,7 +49,7 @@ export async function checkSelftest({ quick = false } = {}) {
     {
       const mk = () => {
         const r = tmp('auth'); execFileSync('git', ['init', '-q'], { cwd: r });
-        for (const f of ['docs', 'baselines', 'jade-and-ember/README.md', 'jade-and-ember/QA.md', 'jade-and-ember/engineering/authority.json', 'jade-and-ember/engineering/checks/authority.mjs', 'jade-and-ember/engineering/checks/selftest.mjs']) {
+        for (const f of ['docs', 'baselines', 'jade-and-ember/README.md', 'jade-and-ember/QA.md', 'jade-and-ember/engineering/authority.json', 'jade-and-ember/engineering/checks/je-selftest.mjs']) {
           mkdirSync(join(r, f, '..'), { recursive: true }); cpSync(join(repoRoot, f), join(r, f), { recursive: true });
         }
         return r;

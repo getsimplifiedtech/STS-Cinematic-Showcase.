@@ -2,6 +2,7 @@
 // are shown to REJECT every way of getting human-testing evidence wrong: incomplete, fabricated, mismatched, wrongly classified, unbound, unverifiable.
 // Every case starts from an invented, complete, valid record (lib/evidence-fixtures.mjs: nothing here is evidence of anything) and breaks one thing.
 // (The gate's own single-defect matrix, which now includes evidence cases, is in check:release.)
+import { coreDir } from '../lib/project.mjs';
 import { cpSync, mkdirSync, readFileSync, readdirSync, rmSync, writeFileSync, mkdtempSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
@@ -162,7 +163,7 @@ add('the scaffold of every target is unfilled: no outcome, no signature, status 
 add('the specification names a class that is not E1, E2 or E3', () => { const s = JSON.parse(JSON.stringify(spec)); s.targets['iphone-safari'].classes = ['E4']; return validateRecord(fixtureRecord('iphone-safari').record, fixtureVctx(new Map(), { spec: s })).problems; }, /./);
 
 // ---- the scaffolding command (a real process, a temporary folder, no build needed: commit and tree are given)
-const tool = join(engDir, 'tools', 'evidence.mjs');
+const tool = join(coreDir, 'tools', 'evidence.mjs');
 const tmp = mkdtempSync(join(tmpdir(), 'evidence-selftest-'));
 const cli = (...a) => spawnSync(process.execPath, [tool, ...a], { cwd: projectDir, encoding: 'utf8' });
 add('evidence:new writes an unfilled template and refuses to overwrite one', () => {

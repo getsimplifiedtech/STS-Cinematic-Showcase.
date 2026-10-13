@@ -21,10 +21,10 @@ import { engDir, isMain, repoRoot } from '../lib/git.mjs';
 // what the verifier runs and what the cross-browser runner runs are both read from the check registry; the runner source must not carry a list of its own
 const entriesNow = () => loadEntries({ coreRoot: coreDir, manifest: project.manifest, label: baselineLabel });
 const verifyIds = () => entriesNow().map((e) => e.id);
-const crossSource = () => readFileSync(join(engDir, 'cross-browser.mjs'), 'utf8');
+const crossSource = () => readFileSync(join(coreDir, 'cross-browser.mjs'), 'utf8');
 const runnerIds = () => [...crossSource().matchAll(/^\s+'(check:[a-z0-9-]+)': \(\) =>/gm).map((m) => m[1]), ...(/loadEntries\(/.test(crossSource()) ? entriesNow().filter((e) => e.scope === 'engine').map((e) => e.id) : [])];
 const clone = (o) => JSON.parse(JSON.stringify(o));
-const wf = readFileSync(workflowPath(), 'utf8');
+const wf = readFileSync(join(engDir, 'g6-8-evidence', 'legacy-direct-workflow.yml'), 'utf8');
 
 // [name, async () => problems[], expected regex | null (must find nothing)]
 const cases = [
