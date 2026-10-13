@@ -8,6 +8,7 @@
 // that would change its frozen code, which is not part of the migration.
 import { cpSync, existsSync, mkdirSync, mkdtempSync, readFileSync, readdirSync, rmSync, statSync, symlinkSync, writeFileSync } from 'node:fs';
 import { spawnSync } from 'node:child_process';
+import { createHash } from 'node:crypto';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { coreDir } from '../lib/project.mjs';
@@ -43,6 +44,9 @@ export async function checkSelftestReleaseControl() {
     const pkg = join(eng, 'lib', 'release-package.mjs'), text = readFileSync(pkg, 'utf8'), from = '{ eng = engDir, core = coreDir, projectRoot = null,';
     if (text.split(from).length !== 2) return { problems: ['lib/release-package.mjs no longer has the signature this wrapper adapts: the wrapper must be reviewed'], notes };
     writeFileSync(pkg, text.replace(from, '{ eng = engDir, core = eng, projectRoot = null,'));
+    // the self-test that runs is the frozen one, byte for byte (an engine file of the same name must never replace it)
+    const frozen = (f) => createHash('sha256').update(readFileSync(f)).digest('hex');
+    if (frozen(join(eng, 'checks', 'selftest-release-control.mjs')) !== frozen(join(projectDir, 'engineering', 'checks', 'selftest-release-control.mjs'))) return { problems: ['the self-test in the reconstructed layout is not the project\'s frozen selftest-release-control.mjs'], notes };
     const left = shims(eng);
     if (left.length) problems.push(`a re-export has no engine file to replace it: ${left.map((x) => x.slice(eng.length + 1)).join(', ')}`);
     // the installed tools: the project's own, or the engine's when the tools are installed beside the snapshot (as the snapshot caller does in CI)

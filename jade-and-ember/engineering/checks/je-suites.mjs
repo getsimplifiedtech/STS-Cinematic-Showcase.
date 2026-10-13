@@ -39,6 +39,7 @@ export async function checkJeSuites() {
     const c = spawnSync(process.execPath, [fileURLToPath(import.meta.url), '--suite', id], { env: process.env, encoding: 'utf8', maxBuffer: 1 << 26 });
     let r;
     try { r = JSON.parse(c.stdout.trim().split('\n').at(-1)); } catch { r = { problems: [`crashed (exit ${c.status}): ${(c.stderr || c.stdout).trim().split('\n').slice(-3).join(' | ').slice(0, 400)}`], notes: [] }; }
+    if (!(r.notes || []).length && !(r.problems || []).length) r.problems = ['the suite reported nothing at all (no case line, no summary): an empty or emptied suite is not a pass'];
     notes.push(...(r.notes || []).map((n) => `[${id}] ${n}`));
     problems.push(...(r.problems || []).map((p) => `[${id}] ${p}`));
     notes.push(`[${id}] ${r.problems?.length ? 'FAILED' : 'passed'} in ${((Date.now() - t0) / 1000).toFixed(0)} s`);

@@ -1,0 +1,30 @@
+caught: the untouched snapshot verifies (snapshot of getsimplifiedtech/sts-web-design-framework at 23fafcd0365e…: 249 files, 2297963 bytes, snapshot tree a7ac4a6)
+caught: a byte changed in a copied file -> refused
+caught: a file added beside the copied files -> refused
+caught: a copied file removed -> refused
+caught: a copied file made executable -> refused
+caught: a link in place of a file -> refused
+caught: a dangling link added -> refused
+caught: a file added to the copied action -> refused
+caught: the copied action edited -> refused
+caught: a hidden node_modules folder below the root, in a copy without git -> refused
+caught: the record lists another checksum -> refused
+caught: the record carries a tampered tree id -> refused
+caught: the record names a branch instead of a commit -> refused
+caught: the record names another framework repository -> refused
+caught: the record without totals -> refused
+caught: a class the profile does not give (the purity scan would skip the file) -> refused
+caught: the record deleted -> refused
+caught: the production hard stop weakened, the record made to agree -> refused
+caught: a file and its record changed together: the consumer's own check passes (as it must: a copy and a record forged together look consistent); against the private framework -> refused
+caught: a record naming a commit that is not in the framework repository: the consumer's own check passes (as it must: a copy and a record forged together look consistent); against the private framework -> refused
+caught: a record naming another tree for the right commit: the consumer's own check passes (as it must: a copy and a record forged together look consistent); against the private framework -> refused
+caught: the untouched snapshot verifies against the private framework (snapshot of getsimplifiedtech/sts-web-design-framework at 23fafcd0365e…: 249 files, 2297963 bytes, snapshot tree a7ac4a6f4cb6…; every file e)
+caught: check:ci accepts the committed snapshot caller (snapshot caller workflow: every job runs the verified local copy of the framework's composite action)
+caught: the old direct-style workflow (the temporary exception is gone) -> refused
+caught: the blocking verify job allowed to fail -> refused
+caught: a different local action instead of the verified copy -> refused
+caught: the same snapshot caller in a private client repository (not on the snapshot list) -> refused
+caught: check:extraction on a tampered snapshot file -> refused
+caught: check:extraction without the record (a repository on the snapshot list must keep it) -> refused
+PASS  adversarial snapshot tests (29 caught, 0 failed)
