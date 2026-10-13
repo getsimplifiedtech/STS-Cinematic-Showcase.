@@ -1276,6 +1276,7 @@
     "jade-and-ember/engineering/checks/je-selftest-gate6.mjs",
     "jade-and-ember/engineering/checks/je-selftest.mjs",
     "jade-and-ember/engineering/checks/je-suites.mjs",
+    "jade-and-ember/engineering/checks/je-release-control-layout.mjs",
     "jade-and-ember/engineering/lib/schema.mjs",
     "jade-and-ember/engineering/project-owned/head-tag.mjs",
     "jade-and-ember/engineering/schemas/client.schema.json",

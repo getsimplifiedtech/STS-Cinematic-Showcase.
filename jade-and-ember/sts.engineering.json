@@ -141,7 +141,7 @@
       },
       {
         "id": "check:selftest-release-control",
-        "module": "engineering/checks/selftest-release-control.mjs",
+        "module": "engineering/checks/je-release-control-layout.mjs",
         "export": "checkSelftestReleaseControl",
         "tier": "full",
         "after": "check:release-dryrun",

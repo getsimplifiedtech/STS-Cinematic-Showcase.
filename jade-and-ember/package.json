@@ -64,7 +64,7 @@
     "check:selftest-gate4": "node ../engineering/checks/selftest-gate4.mjs",
     "check:selftest-gate5": "node ../engineering/checks/selftest-gate5.mjs",
     "check:selftest-gate6": "node ../engineering/checks/selftest-gate6.mjs",
-    "check:selftest-release-control": "node engineering/checks/selftest-release-control.mjs",
+    "check:selftest-release-control": "node engineering/checks/je-release-control-layout.mjs",
     "check:selftest-je-markup": "node engineering/checks/je-suites.mjs",
     "rc": "node engineering/release-control/cli.mjs",
     "rc:demo": "node engineering/release-control/demo.mjs",

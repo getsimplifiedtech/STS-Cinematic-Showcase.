@@ -10,6 +10,8 @@ import { checkSelftestGate6 } from './je-selftest-gate6.mjs';
 import { checkSelftestEvidence } from './je-selftest-evidence.mjs';
 import { existsSync, readFileSync } from 'node:fs';
 import { join } from 'node:path';
+import { spawnSync } from 'node:child_process';
+import { fileURLToPath } from 'node:url';
 import { isMain, projectDir } from '../lib/git.mjs';
 
 export const SUITES = [
@@ -28,12 +30,15 @@ export function scriptProblems(pkg = JSON.parse(readFileSync(join(projectDir, 'p
   return out;
 }
 
+// Each suite runs in a process of its own, as each ran as its own check before: the suites share fixture helpers that keep state in memory (a cached copy of a fixture site that
+// one case then changes), which only holds when a suite starts clean.
 export async function checkJeSuites() {
   const problems = [...scriptProblems()], notes = [];
-  for (const [id, run] of SUITES) {
+  for (const [id] of SUITES) {
     const t0 = Date.now();
+    const c = spawnSync(process.execPath, [fileURLToPath(import.meta.url), '--suite', id], { env: process.env, encoding: 'utf8', maxBuffer: 1 << 26 });
     let r;
-    try { r = await run(); } catch (e) { r = { problems: [`crashed: ${e.message}`], notes: [] }; }
+    try { r = JSON.parse(c.stdout.trim().split('\n').at(-1)); } catch { r = { problems: [`crashed (exit ${c.status}): ${(c.stderr || c.stdout).trim().split('\n').slice(-3).join(' | ').slice(0, 400)}`], notes: [] }; }
     notes.push(...(r.notes || []).map((n) => `[${id}] ${n}`));
     problems.push(...(r.problems || []).map((p) => `[${id}] ${p}`));
     notes.push(`[${id}] ${r.problems?.length ? 'FAILED' : 'passed'} in ${((Date.now() - t0) / 1000).toFixed(0)} s`);
@@ -41,7 +46,13 @@ export async function checkJeSuites() {
   return { problems, notes };
 }
 
-if (isMain(import.meta.url)) {
+if (isMain(import.meta.url) && process.argv[2] === '--suite') {
+  const run = SUITES.find(([id]) => id === process.argv[3])?.[1];
+  let r;
+  try { r = run ? await run() : { problems: [`no suite named ${process.argv[3]}`], notes: [] }; } catch (e) { r = { problems: [`crashed: ${e.message}`], notes: [] }; }
+  console.log(JSON.stringify({ problems: r.problems || [], notes: r.notes || [] }));
+  process.exit(0);
+} else if (isMain(import.meta.url)) {
   const { problems, notes } = await checkJeSuites();
   notes.forEach((n) => console.log('  ' + n));
   problems.forEach((p) => console.log('  - ' + p));
