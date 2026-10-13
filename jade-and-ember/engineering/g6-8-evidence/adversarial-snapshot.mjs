@@ -94,7 +94,7 @@ if (fw) {
   writeFileSync(wf, good.replace('    runs-on: ubuntu-24.04\n    timeout-minutes: 40\n', '    runs-on: ubuntu-24.04\n    timeout-minutes: 40\n    continue-on-error: true\n'));
   exp('the blocking verify job allowed to fail', run('ci.mjs'), /continue-on-error/); writeFileSync(wf, good);
   writeFileSync(wf, good.replaceAll('./.github/actions/engineering', './.github/actions/mine'));
-  exp('a different local action', run('ci.mjs'), /must use \.\/\.github\/actions\/engineering/); writeFileSync(wf, good);
+  exp('a different local action instead of the verified copy', run('ci.mjs'), /is not on the allowed list|must use the caller workflow/); writeFileSync(wf, good);
   exp('the same snapshot caller in a private client repository (not on the snapshot list)', run('ci.mjs', { GITHUB_REPOSITORY: 'getsimplifiedtech/some-client' }), /not a repository that may carry the framework as a snapshot|snapshot/);
   // the engine's own checks see a tampered copy
   const g = join(clone, 'engineering', 'lib', 'git.mjs'); const keep = readFileSync(g);
