@@ -2143,7 +2143,7 @@
   {
    "id": "G6-8",
    "title": "Consumption and independent validation",
-   "summary": "Jade & Ember consumes the framework at a pinned Git revision (an exact, immutable development commit) through a verified, integrity-checked snapshot (M4, D-P8-2): the public repository stays public and cannot use the private composite action, so it carries a copy of only the framework files needed to run and verify it, with an integrity record that the private framework repository checks against its source commit. Stage A (framework side only; authorised by the owner on 2026-10-13, closed by APR-JE-049): branch feature/sts-framework-consumption from eee5708; snapshot producer, integrity verifier, snapshot caller template, policy changes, adversarial tests and specification 16 section 10.9; accepted evidence at framework commit 17fc32345a15cfbcbdbf03468259fac218e6defa. The approved public snapshot is exactly 249 files, 2,294,640 bytes, git tree 7a4f8a09d8b4ecbd5b940049d5a1192445e9541c; any change of its content needs renewed owner approval. Stage B (authorised by APR-JE-049, in progress): the additive-then-switch migration of Jade & Ember to the verified snapshot, preserving the delivered website, the renderer, the approved design, the dependency lockfile, every pre-existing mandatory check (the 42, check:framework-matrix, the existing self-test suites), all 319 release dry-run scenarios and all 41 release-control proof-of-concept cases, with check:extraction and the approved project-specific checks added (45 identities); the temporary direct-workflow exception is removed when the new snapshot caller is verified. Stage C (the validation ladder V1 to V4 with ChatGPT reviewing evidence and architecture (D-P8-10), the V5 readiness checklist) and MONOLITH House & Design (the established proof of concept #2, a fictional five-page luxury residential architecture/design-build website targeted for Vercel, demonstration channel only) are not authorised and have not begun. Stop for owner review after Stage B.",
+   "summary": "Jade & Ember consumes the framework at a pinned Git revision (an exact, immutable development commit) through a verified, integrity-checked snapshot (M4, D-P8-2): the public repository stays public and cannot use the private composite action, so it carries a copy of only the framework files needed to run and verify it, with an integrity record that the private framework repository checks against its source commit. Stage A (framework side only; authorised by the owner on 2026-10-13, closed by APR-JE-049): branch feature/sts-framework-consumption from eee5708; snapshot producer, integrity verifier, snapshot caller template, policy changes, adversarial tests and specification 16 section 10.9; accepted evidence at framework commit 17fc32345a15cfbcbdbf03468259fac218e6defa. The approved public snapshot is exactly 249 files, 2,294,640 bytes, git tree 7a4f8a09d8b4ecbd5b940049d5a1192445e9541c; any change of its content needs renewed owner approval. The owner then approved a corrected snapshot in its place (APR-JE-050): framework commit 23fafcd0365ef01aa2460cbb6a31beef8519f802, git tree a7ac4a6f4cb6050bcd7fc6b81d62cc3565a5c482, 249 files, 2,297,963 bytes; two files differ (checks/determinism.mjs, lib/release-dryrun.mjs), and the first snapshot is superseded. Stage B (authorised by APR-JE-049, in progress): the additive-then-switch migration of Jade & Ember to the verified snapshot, preserving the delivered website, the renderer, the approved design, the dependency lockfile, every pre-existing mandatory check (the 42, check:framework-matrix, the existing self-test suites), all 319 release dry-run scenarios and all 41 release-control proof-of-concept cases, with check:extraction and the approved project-specific checks added (45 identities); the temporary direct-workflow exception is removed when the new snapshot caller is verified. Stage C (the validation ladder V1 to V4 with ChatGPT reviewing evidence and architecture (D-P8-10), the V5 readiness checklist) and MONOLITH House & Design (the established proof of concept #2, a fictional five-page luxury residential architecture/design-build website targeted for Vercel, demonstration channel only) are not authorised and have not begun. Stop for owner review after Stage B.",
    "dependsOn": [
     "G6-6",
     "G6-7"
@@ -2257,7 +2257,7 @@
      "repository": "getsimplifiedtech/sts-web-design-framework",
      "branch": "feature/sts-framework-consumption",
      "baseCommit": "eee5708022ca3cd3675177d887a5c0cb49e68276",
-     "baseNote": "Stage A: the branch was created at the accepted G6-7 head eee5708 (its identity was confirmed before creation). Accepted Stage A head: 17fc32345a15cfbcbdbf03468259fac218e6defa. The pinned snapshot source is that exact commit; main is not merged, tagged or modified.",
+     "baseNote": "Stage A: the branch was created at the accepted G6-7 head eee5708 (its identity was confirmed before creation). Accepted Stage A head: 17fc32345a15cfbcbdbf03468259fac218e6defa. The first pinned snapshot source was that exact commit; the owner replaced it (APR-JE-050) with the corrected snapshot at commit 23fafcd0365ef01aa2460cbb6a31beef8519f802, which is the pinned source now; main is not merged, tagged or modified.",
      "operations": "create the branch; add and change files inside the allowed paths; commit; push the branch; let its own workflow run; no merge, pull request, tag, release, change to main or to any other branch; do not execute, update, remove or redistribute OpenMontage; no change to repository access settings",
      "allowedPaths": [
       "architecture/16-engineering-framework-v1.md",
@@ -2279,7 +2279,7 @@
      ]
     }
    },
-   "status": "Stage A closed (APR-JE-049): framework commit 17fc32345a15 (development only, not merged); Stage B authorised (APR-JE-049), in progress; Stage C and MONOLITH not authorised; every production-release blocker stays active"
+   "status": "Stage A closed (APR-JE-049): framework commit 17fc32345a15 (development only, not merged); Stage B authorised (APR-JE-049), replacement snapshot at framework commit 23fafcd0365e approved (APR-JE-050), Stage B completed for owner review; Stage C and MONOLITH not authorised; every production-release blocker stays active"
   }
  ],
  "priorities": [
@@ -3436,7 +3436,7 @@
    "id": "D-G68-1",
    "text": "Approved public snapshot: exactly 249 files, 2,294,640 bytes, git tree 7a4f8a09d8b4ecbd5b940049d5a1192445e9541c",
    "ownerWords": "Approve exactly 249 files, 2,294,640 bytes, Git tree 7a4f8a09d8b4ecbd5b940049d5a1192445e9541c. Do not add, replace or disclose additional private framework files. Verify the exact exported tree before committing it to the public Jade & Ember repository. The private framework must independently verify the snapshot against its source commit. Any snapshot-content change requires renewed owner approval.",
-   "status": "decided (APR-JE-049); implemented in Stage B",
+   "status": "decided (APR-JE-049); implemented in Stage B; superseded by D-G68-4 (APR-JE-050)",
    "workPackages": [
     "G6-8"
    ],
@@ -3466,7 +3466,7 @@
    "id": "D-G68-3",
    "text": "Stage B migration boundaries and stop point",
    "ownerWords": "Proceed with the approved additive-then-switch migration of Jade & Ember to the verified framework snapshot. Preserve the delivered website, renderer, approved design and dependency lockfile; preserve all pre-existing mandatory checks and add the approved project-specific checks; preserve all 319 release scenarios and 41 release-control proof-of-concept cases and check:framework-matrix; make only the previously approved script-path and test-harness import adjustments; remove the temporary direct-workflow exception when the new caller is verified; preserve Cloudflare Pages and Vercel portability; keep the public showcase repository public; preserve the production-authentication hard stop and all applicable release blockers. Stop after Stage B for owner review before beginning Stage C. Do not merge the framework to main, create a Framework Release, deploy, publish a website, or start MONOLITH.",
-   "status": "decided (APR-JE-049); Stage B in progress",
+   "status": "decided (APR-JE-049); Stage B completed for owner review (APR-JE-050)",
    "workPackages": [
     "G6-8"
    ],
@@ -3474,6 +3474,36 @@
     {
      "wp": "G6-8",
      "mustMention": "Stage B"
+    }
+   ]
+  },
+  {
+   "id": "D-G68-4",
+   "text": "Replacement snapshot: framework commit 23fafcd0365ef01aa2460cbb6a31beef8519f802, git tree a7ac4a6f4cb6050bcd7fc6b81d62cc3565a5c482",
+   "ownerWords": "The owner approves replacing the previously approved snapshot with the corrected snapshot. Approved framework commit: 23fafcd0365ef01aa2460cbb6a31beef8519f802. Approved public snapshot tree: a7ac4a6f4cb6050bcd7fc6b81d62cc3565a5c482. Approved changes are limited to: engineering/checks/determinism.mjs; engineering/lib/release-dryrun.mjs; required snapshot integrity and governance-record updates. The 249-file public set is otherwise unchanged. No additional files or disclosures are authorized.",
+   "status": "decided (APR-JE-050); implemented in Stage B",
+   "workPackages": [
+    "G6-8"
+   ],
+   "consequences": [
+    {
+     "wp": "G6-8",
+     "mustMention": "a7ac4a6f4cb6050bcd7fc6b81d62cc3565a5c482"
+    }
+   ]
+  },
+  {
+   "id": "D-G68-5",
+   "text": "Release-control proof of concept: compatibility harness accepted; the frozen implementation and the original self-test are preserved",
+   "ownerWords": "Accept the compatibility harness that runs the original 41 cases in a reconstructed legacy layout. Preserve the frozen proof-of-concept implementation and original self-test. Document explicitly that this validates the original behavior under its original layout, not direct execution in the new split layout. Do not weaken or remove production-release restrictions.",
+   "status": "decided (APR-JE-050); implemented in Stage B (checks/je-release-control-layout.mjs)",
+   "workPackages": [
+    "G6-8"
+   ],
+   "consequences": [
+    {
+     "wp": "G6-8",
+     "mustMention": "41 release-control proof-of-concept cases"
     }
    ]
   }
