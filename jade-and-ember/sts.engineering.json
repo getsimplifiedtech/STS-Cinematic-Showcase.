@@ -83,7 +83,8 @@
   },
   "industry": "restaurant",
   "fixtures": {
-    "clientBuild": "engineering/project-owned/client-build.mjs"
+    "clientBuild": "engineering/project-owned/client-build.mjs",
+    "headTag": "engineering/project-owned/head-tag.mjs"
   },
   "baseline": {
     "label": "v0.8",
@@ -136,6 +137,27 @@
         "after": "check:d11",
         "scope": "engine",
         "describe": "The approved WebKit text-spacing correction (@supports hanging-punctuation) applies exactly where the engine supports it, as recorded, and the rule is in the stylesheet",
+        "browser": true
+      },
+      {
+        "id": "check:selftest-release-control",
+        "module": "engineering/checks/selftest-release-control.mjs",
+        "export": "checkSelftestReleaseControl",
+        "tier": "full",
+        "after": "check:release-dryrun",
+        "scope": "static",
+        "reason": "the frozen local proof of concept of the release-control repository (41 cases, synthetic data, throwaway folders); no browser",
+        "describe": "G6-3A: the release-control proof of concept holds (41 cases: intake, hash-chained ledger, role separation, staging, approval, revocation, freezing, per-client isolation)"
+      },
+      {
+        "id": "check:selftest-je-markup",
+        "module": "engineering/checks/je-suites.mjs",
+        "export": "checkJeSuites",
+        "tier": "full",
+        "after": "check:selftest-gate4",
+        "scope": "chromium-only",
+        "reason": "the project's own original self-test suites (they name Jade & Ember's markup, stylesheet, baseline and engine records); they damage copies and run in Chromium",
+        "describe": "the original Jade & Ember self-test suites (base, gates 2 to 6, evidence validator) still hold against the framework engine: every case that names this project's own markup and records",
         "browser": true
       }
     ]

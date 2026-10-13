@@ -1,7 +1,0 @@
-name: quillfeather-verify
-on: [workflow_dispatch]
-jobs:
-  note:
-    runs-on: ubuntu-latest
-    steps:
-      - run: echo "fixture only; the real workflow is the project's own"

@@ -1,6 +1,0 @@
-{
-  "pages": [
-    { "id": "home", "file": "index.html", "title": "Home" },
-    { "id": "services", "file": "services.html", "title": "Services" }
-  ]
-}

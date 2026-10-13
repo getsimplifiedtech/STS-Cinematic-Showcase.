@@ -2,6 +2,8 @@
 
 STS governs engineering and delivery; Anthropic Frontend Design is the creative authority (`../../docs/JADE_AND_EMBER_FRAMEWORK_REFERENCE.md`). Nothing in this folder is shipped: the website is the five HTML pages plus `styles.css`, three scripts, `fonts/` and `media/`, and it works without Node.js. Everything here is development tooling.
 
+> **Since G6-8 (`APR-JE-049`) the engine is not in this folder.** The checks, the runtime, the standards, the adapters and the tools are a verified snapshot of the framework's files at the repository root (`../../engineering/`, with the composite action in `../../.github/actions/engineering/` and the integrity record `../../sts-framework-snapshot.json`); the `npm run` scripts below call it from `../engineering/`. This folder keeps what is the project's: its records and overlays, `project-owned/`, the frozen release-control proof of concept, the checks that are about this repository (`framework-matrix`, `d11`, `supports`, `selftest-release-control`, and `selftest-je-markup`, which runs the original self-test suites kept here as `checks/je-*.mjs`), and one-line re-exports under `lib/` and `checks/` that keep their relative imports working. Do not edit the snapshot by hand: it changes only by a reviewed refresh made with the framework's snapshot tool. The check list below is the project's 42 checks plus `check:extraction` (the snapshot's integrity) and the two project checks above.
+
 ```
 npm run verify          every check below, with a summary (about 15 minutes: it drives a browser and runs the self-tests)
 npm run verify:fast     no browser (seconds): the static parts of every check

@@ -1,22 +1,21 @@
-# Jade & Ember engineering verification (v0.9). Read-only: it checks out the repository, installs the pinned development tools, runs
-# `npm run verify` and reports. It deploys nothing, merges nothing, publishes nothing, uses no secrets and calls no paid or AI service.
-# Runner requirements and what each step needs are in jade-and-ember/engineering/CI.md. Approved for the v0.9 development branch (decision D-4).
-# Gate 6 (G6-1, APR-JE-038): Node 24.21.0 (the tested baseline in engineering/environment.json) and Actions on the Node 24 runtime, each pinned to a full
-# commit SHA recorded in engineering/dependencies.json; `npm ci --engine-strict` fails the install if any package does not support the pinned Node.
-name: Jade & Ember verify
+# STS SNAPSHOT caller TEMPLATE (G6-8). For the one public consumer repository, which cannot download the framework's private action. Not a workflow: it is stored under
+# engineering/ci/templates and rendered with `node engineering/tools/ci/render.mjs snapshot-caller`. What it does when rendered: it checks out the repository and runs one mode of the
+# STS engineering per job, using the VERIFIED COPY of the framework's composite action that sits in the same repository (.github/actions/engineering) beside the verified copy of the
+# engineering (engineering/); both are listed, file by file, in sts-framework-snapshot.json and checked on every run. Same seven jobs, same rules as the client caller: no `run` step,
+# no environment, no condition, no input that could skip or soften a check; contents: read, no secret. check:ci refuses it in any repository that is not on the snapshot list.
+name: STS verify
 
 on:
   push:
-    branches: [feature/jade-and-ember-v0.9]
+    branches: ['feature/jade-and-ember-v0.9']
   pull_request:
   workflow_dispatch:
 
-# The only permission the workflow has: read the repository contents.
 permissions:
   contents: read
 
 concurrency:
-  group: jade-and-ember-verify-${{ github.ref }}
+  group: sts-verify-${{ github.ref }}
   cancel-in-progress: true
 
 jobs:
@@ -24,243 +23,116 @@ jobs:
     name: verify (Ubuntu 24.04, Node 24, Chromium)
     runs-on: ubuntu-24.04
     timeout-minutes: 40
-    defaults:
-      run:
-        shell: bash
-        working-directory: jade-and-ember
-    env:
-      STS_REQUIRE_AUDIT: '1'
     steps:
-      - name: Check out the repository (all branches, because the frozen v0.8 baseline branch is needed)
+      - name: Check out the repository (full history, because the credential scan and the baseline read it)
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           fetch-depth: 0
           persist-credentials: false
-
-      - name: Set up Node.js
-        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+      - name: Verify (all checks, self-tests)
+        uses: ./.github/actions/engineering
         with:
-          node-version: '24.21.0'
-          cache: npm
-          cache-dependency-path: jade-and-ember/package-lock.json
+          mode: verify
+          project-dir: 'jade-and-ember'
 
-      - name: Install the pinned development tools (lockfile only, no install scripts)
-        run: npm ci --ignore-scripts --engine-strict
-
-      - name: Install Chromium for Playwright, and ffmpeg for the flash check
-        run: |
-          npx playwright install --with-deps chromium
-          sudo apt-get update
-          sudo apt-get install -y --no-install-recommends ffmpeg
-
-      - name: Verify (all checks, regression against the frozen v0.8 baseline, self-tests)
-        run: npm run verify
-
-  # Informational: the fast checks (no browser) on macOS, to show portability problems of the tooling. Never blocks.
-  # Windows is not in the matrix: the repository name ends with a dot ("STS-Cinematic-Showcase."), which Windows cannot use as a folder name,
-  # so the checkout fails there before any of our code runs (seen in the first run).
   portability-smoke:
-    name: fast checks on ${{ matrix.os }} (informational)
-    runs-on: ${{ matrix.os }}
+    name: fast checks on macos-latest (informational)
+    runs-on: macos-latest
     continue-on-error: true
     timeout-minutes: 20
-    strategy:
-      fail-fast: false
-      matrix:
-        os: [macos-latest]
-    defaults:
-      run:
-        shell: bash
-        working-directory: jade-and-ember
     steps:
-      - name: Check out the repository
+      - name: Check out the repository (full history, because the credential scan and the baseline read it)
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           fetch-depth: 0
           persist-credentials: false
-      - name: Set up Node.js
-        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
-        with:
-          node-version: '24.21.0'
-          cache: npm
-          cache-dependency-path: jade-and-ember/package-lock.json
-      - name: Install the pinned development tools
-        run: npm ci --ignore-scripts --engine-strict
       - name: Fast verification (no browser)
-        run: npm run verify:fast
+        uses: ./.github/actions/engineering
+        with:
+          mode: fast
+          project-dir: 'jade-and-ember'
 
-  # Informational while compatibility is established (Gate 5, Phase 1, owner decision): the browser-driven checks of `npm run verify`, with the same
-  # assertions, in Firefox. A failure here is evidence about Firefox, recorded as a finding by a person; it does not fail the run. Nothing is skipped
-  # silently: the runner prints a matrix of every check (run, or not applicable with its reason). Baseline comparisons are made inside the engine.
   cross-browser-firefox:
     name: 'cross-browser: Firefox (informational)'
     runs-on: ubuntu-24.04
     continue-on-error: true
     timeout-minutes: 55
-    defaults:
-      run:
-        shell: bash
-        working-directory: jade-and-ember
     steps:
-      - name: Check out the repository (all branches, because the frozen v0.8 baseline branch is needed)
+      - name: Check out the repository (full history, because the credential scan and the baseline read it)
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           fetch-depth: 0
           persist-credentials: false
-      - name: Set up Node.js
-        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
-        with:
-          node-version: '24.21.0'
-          cache: npm
-          cache-dependency-path: jade-and-ember/package-lock.json
-      - name: Install the pinned development tools (lockfile only, no install scripts)
-        run: npm ci --ignore-scripts --engine-strict
-      - name: Install Firefox for Playwright, and ffmpeg for the flash check
-        run: |
-          npx playwright install --with-deps firefox
-          sudo apt-get update
-          sudo apt-get install -y --no-install-recommends ffmpeg
       - name: Cross-browser verification in Firefox
-        run: node engineering/cross-browser.mjs --engine firefox
+        uses: ./.github/actions/engineering
+        with:
+          mode: firefox
+          project-dir: 'jade-and-ember'
 
-  # Informational while compatibility is established (Gate 5, Phase 1, owner decision): the browser-driven checks of `npm run verify`, with the same
-  # assertions, in WebKit. A failure here is evidence about WebKit, recorded as a finding by a person; it does not fail the run. Nothing is skipped
-  # silently: the runner prints a matrix of every check (run, or not applicable with its reason). Baseline comparisons are made inside the engine.
   cross-browser-webkit:
     name: 'cross-browser: WebKit (informational)'
     runs-on: ubuntu-24.04
     continue-on-error: true
     timeout-minutes: 55
-    defaults:
-      run:
-        shell: bash
-        working-directory: jade-and-ember
     steps:
-      - name: Check out the repository (all branches, because the frozen v0.8 baseline branch is needed)
+      - name: Check out the repository (full history, because the credential scan and the baseline read it)
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           fetch-depth: 0
           persist-credentials: false
-      - name: Set up Node.js
-        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
-        with:
-          node-version: '24.21.0'
-          cache: npm
-          cache-dependency-path: jade-and-ember/package-lock.json
-      - name: Install the pinned development tools (lockfile only, no install scripts)
-        run: npm ci --ignore-scripts --engine-strict
-      - name: Install WebKit for Playwright, and ffmpeg for the flash check
-        run: |
-          npx playwright install --with-deps webkit
-          sudo apt-get update
-          sudo apt-get install -y --no-install-recommends ffmpeg
       - name: Cross-browser verification in WebKit
-        run: node engineering/cross-browser.mjs --engine webkit
+        uses: ./.github/actions/engineering
+        with:
+          mode: webkit
+          project-dir: 'jade-and-ember'
 
-  # Informational (Gate 5, Phase 5): ask the network about every external destination the demonstration carries (HEAD, then GET; redirects followed and
-  # recorded; TLS verified; one retry) and print the dated, classified result. Only "verified" is a pass: blocked, unavailable and inconclusive answers are
-  # reported as such. It reads the repository and the public internet, writes nothing and never fails the run; a person copies the printed record into
-  # engineering/external-links-verification.json.
   external-links:
-    name: 'external links (informational)'
+    name: external links (informational)
     runs-on: ubuntu-24.04
     continue-on-error: true
     timeout-minutes: 15
-    defaults:
-      run:
-        shell: bash
-        working-directory: jade-and-ember
     steps:
-      - name: Check out the repository
+      - name: Check out the repository (full history, because the credential scan and the baseline read it)
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           fetch-depth: 0
           persist-credentials: false
-      - name: Set up Node.js
-        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
-        with:
-          node-version: '24.21.0'
-          cache: npm
-          cache-dependency-path: jade-and-ember/package-lock.json
-      - name: Install the pinned development tools (lockfile only, no install scripts)
-        run: npm ci --ignore-scripts --engine-strict
       - name: Verify the external destinations (record printed in the log)
-        run: |
-          node engineering/tools/external-links.mjs inventory
-          node engineering/tools/external-links.mjs verify
-          node engineering/tools/external-links.mjs verify --json --runner github-actions --note "GitHub-hosted ubuntu-24.04 runner with open outbound network; TLS is verified against the runner's own certificate store" --run "$GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID"
+        uses: ./.github/actions/engineering
+        with:
+          mode: external-links
+          project-dir: 'jade-and-ember'
 
-  # Informational (Gate 6, G6-1): the direct Lighthouse runner that replaced Lighthouse CI. It serves the site folder, measures the five pages three times each
-  # in a fresh Chromium and asserts the thresholds of engineering/lighthouse.json (accessibility fails the step, the others warn). Read-only, writes only to the
-  # job's own workspace, uses no secret and never fails the run: a person reads the printed table.
   lighthouse:
-    name: 'lighthouse (informational)'
+    name: lighthouse (informational)
     runs-on: ubuntu-24.04
     continue-on-error: true
     timeout-minutes: 30
-    defaults:
-      run:
-        shell: bash
-        working-directory: jade-and-ember
     steps:
-      - name: Check out the repository
+      - name: Check out the repository (full history, because the credential scan and the baseline read it)
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           fetch-depth: 0
           persist-credentials: false
-      - name: Set up Node.js
-        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+      - name: Lighthouse (every page, three runs each; the table is printed in the log)
+        uses: ./.github/actions/engineering
         with:
-          node-version: '24.21.0'
-          cache: npm
-          cache-dependency-path: jade-and-ember/package-lock.json
-      - name: Install the pinned development tools (lockfile only, no install scripts)
-        run: npm ci --ignore-scripts --engine-strict
-      - name: Install Chromium for Playwright
-        run: npx playwright install --with-deps chromium
-      - name: Lighthouse (five pages, three runs each; the table is printed in the log)
-        run: npm run test:lighthouse
+          mode: lighthouse
+          project-dir: 'jade-and-ember'
 
-  # Informational (Gate 5, Phase 6): a read-only report on the dependency supply chain, from tools that ship with npm: registry signatures and
-  # provenance attestations (npm audit signatures), the advisory summary, a software bill of materials (CycloneDX and SPDX), and the versions that are
-  # behind. Nothing is installed beyond `npm ci --ignore-scripts`, nothing is written to the repository, no secret is used, and the job never fails the run.
   supply-chain-report:
-    name: 'supply chain report (informational)'
+    name: supply chain report (informational)
     runs-on: ubuntu-24.04
     continue-on-error: true
     timeout-minutes: 15
-    defaults:
-      run:
-        shell: bash
-        working-directory: jade-and-ember
     steps:
-      - name: Check out the repository
+      - name: Check out the repository (full history, because the credential scan and the baseline read it)
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           fetch-depth: 0
           persist-credentials: false
-      - name: Set up Node.js
-        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
-        with:
-          node-version: '24.21.0'
-          cache: npm
-          cache-dependency-path: jade-and-ember/package-lock.json
-      - name: Install the pinned development tools (lockfile only, no install scripts)
-        run: npm ci --ignore-scripts --engine-strict
       - name: Report (signatures, advisories, SBOM, outdated)
-        run: |
-          echo "node $(node --version), npm $(npm --version)"
-          echo "--- npm audit signatures (registry signatures and provenance attestations)"
-          npm audit signatures || echo "npm audit signatures exited with code $?"
-          echo "--- npm audit (summary)"
-          npm audit --json > "$RUNNER_TEMP/audit.json" || true
-          node -e "const a=require(process.env.RUNNER_TEMP+'/audit.json');console.log(JSON.stringify(a.metadata&&a.metadata.vulnerabilities));console.log(Object.entries(a.vulnerabilities||{}).map(([n,v])=>v.severity+' '+n).sort().join('\n'))"
-          echo "--- SBOM (npm sbom, built into npm)"
-          npm sbom --sbom-format cyclonedx > "$RUNNER_TEMP/sbom.cdx.json" || true
-          npm sbom --sbom-format spdx > "$RUNNER_TEMP/sbom.spdx.json" || true
-          node -e "const fs=require('fs'),t=process.env.RUNNER_TEMP;const c=JSON.parse(fs.readFileSync(t+'/sbom.cdx.json'));const s=JSON.parse(fs.readFileSync(t+'/sbom.spdx.json'));console.log('CycloneDX '+c.specVersion+': '+c.components.length+' components, '+c.components.filter(x=>x.hashes&&x.hashes.length).length+' with hashes, '+c.components.filter(x=>x.licenses&&x.licenses.length).length+' with licences');console.log(s.spdxVersion+': '+s.packages.length+' packages')"
-          sha256sum "$RUNNER_TEMP/sbom.cdx.json" "$RUNNER_TEMP/sbom.spdx.json"
-          echo "--- npm outdated (direct dependencies)"
-          npm outdated || true
-          echo "--- packages with install scripts, and deprecated packages, in the lockfile"
-          node -e "const l=require('./package-lock.json').packages;console.log('install scripts:',Object.keys(l).filter(k=>k&&l[k].hasInstallScript).join(', ')||'none');console.log('deprecated:',Object.keys(l).filter(k=>k&&l[k].deprecated).join(', ')||'none')"
+        uses: ./.github/actions/engineering
+        with:
+          mode: supply-chain-report
+          project-dir: 'jade-and-ember'

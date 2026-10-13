@@ -1,9 +1,0 @@
-:root { --paper: #f6f1e7; --ink: #1d1b19; --rule: #8a7f6d; }
-* { box-sizing: border-box; }
-body { margin: 0; background: var(--paper); color: var(--ink); font: 18px/1.6 Georgia, serif; }
-header, main, footer { max-width: 40rem; margin: 0 auto; padding: 1rem; }
-header { display: flex; justify-content: space-between; align-items: baseline; border-bottom: 1px solid var(--rule); }
-a { color: var(--ink); }
-a:focus-visible { outline: 3px solid var(--ink); outline-offset: 3px; }
-.skip { position: absolute; left: -999px; }
-.skip:focus { left: 1rem; top: 1rem; background: var(--paper); padding: .5rem; }

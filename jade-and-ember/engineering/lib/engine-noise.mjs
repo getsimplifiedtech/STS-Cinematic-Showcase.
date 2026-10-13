@@ -1,8 +1,2 @@
-// Console messages that one engine writes about correct markup (Gate 5). They are counted and reported, never silently dropped, and the
-// engine that writes them is part of the match: the same message in any other engine is NOT filtered and fails the check that saw it.
-//   F-G5-02  Firefox logs a warning for a <link rel="preload" as="image" media="..."> whose media query does not match the current viewport,
-//            which is the whole purpose of the attribute: the hero image has one preload per art direction and only one can match.
-import { markup } from './project.mjs';
-
-const PRELOAD_MEDIA = markup.heroPreloadPattern === null ? /(?!)/ : new RegExp(`Preload of \\S*${markup.heroPreloadPattern} was ignored due to unknown .as. or .type. values, or non-matching .media. attribute`);   // the project's own hero preloads (sts.engineering.json, markup.heroPreloadPattern)
-export const engineNoise = (engine, text) => (engine === 'firefox' && PRELOAD_MEDIA.test(text) ? 'F-G5-02' : null);
+// Re-export of the framework snapshot's module (the engine is the repository-root engineering/, G6-8 Stage B). This file only keeps the project's relative imports working.
+export * from '../../../engineering/lib/engine-noise.mjs';

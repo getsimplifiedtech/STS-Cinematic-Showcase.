@@ -27,19 +27,19 @@
    "summary": "Repository paths, git helpers, JSON-Schema subset validator, HTML tokenizer, media header readers, flash proxy, screenshot comparison, ZIP reader/writer, known-findings register mechanism.",
    "paths": [
     "jade-and-ember/engineering/lib/git.mjs",
-    "jade-and-ember/engineering/lib/schema.mjs",
-    "jade-and-ember/engineering/lib/html.mjs",
-    "jade-and-ember/engineering/lib/media.mjs",
+    "engineering/lib/schema.mjs",
+    "engineering/lib/html.mjs",
+    "engineering/lib/media.mjs",
     "jade-and-ember/engineering/lib/flash.mjs",
     "jade-and-ember/engineering/lib/pixels.mjs",
     "jade-and-ember/engineering/lib/zip.mjs",
     "jade-and-ember/engineering/lib/findings.mjs",
     "jade-and-ember/engineering/lib/project.mjs",
-    "jade-and-ember/engineering/schemas/sts-engineering.schema.json",
-    "jade-and-ember/engineering/lib/purity.mjs",
-    "jade-and-ember/engineering/lib/generators.mjs",
+    "engineering/schemas/sts-engineering.schema.json",
+    "engineering/lib/purity.mjs",
+    "engineering/lib/generators.mjs",
     "jade-and-ember/engineering/lib/fixtures.mjs",
-    "jade-and-ember/engineering/checks/project.mjs",
+    "engineering/checks/project.mjs",
     "jade-and-ember/engineering/purity-allow.json"
    ],
    "target": "engineering/core/lib/",
@@ -92,11 +92,10 @@
    "name": "Verify runner and report",
    "summary": "npm run verify: ordered checks, one summary, exit code, and the .reports/verify.json report (mode, commit, dirty, assetsTree) the release gate reads.",
    "paths": [
-    "jade-and-ember/engineering/verify.mjs",
-    "jade-and-ember/engineering/tools/parity.mjs",
-    "jade-and-ember/engineering/checks.json",
+    "engineering/verify.mjs",
+    "engineering/checks.json",
     "jade-and-ember/engineering/lib/registry.mjs",
-    "jade-and-ember/engineering/checks/runners.mjs"
+    "engineering/checks/runners.mjs"
    ],
    "target": "engineering/core/verify.mjs",
    "external": [
@@ -159,7 +158,7 @@
    "name": "Cross-browser harness",
    "summary": "Runs the browser checks in Chromium, Firefox or WebKit and prints a matrix in which no check can be silently left out.",
    "paths": [
-    "jade-and-ember/engineering/cross-browser.mjs",
+    "engineering/cross-browser.mjs",
     "jade-and-ember/engineering/lib/cross-catalogue.mjs"
    ],
    "target": "engineering/core/cross-browser/",
@@ -190,7 +189,7 @@
    "summary": "Compares a candidate with a frozen approved reference (git commit) at byte, text, structure, computed-style, pixel and behaviour level, with an owner-approved difference allowlist.",
    "paths": [
     "jade-and-ember/engineering/checks/baseline.mjs",
-    "jade-and-ember/engineering/checks/regression.mjs",
+    "engineering/checks/regression.mjs",
     "jade-and-ember/engineering/lib/regression.mjs",
     "jade-and-ember/engineering/lib/approved-styles.mjs"
    ],
@@ -227,8 +226,8 @@
     "jade-and-ember/engineering/checks/delivery.mjs",
     "jade-and-ember/engineering/checks/assets.mjs",
     "jade-and-ember/engineering/lib/hashed.mjs",
-    "jade-and-ember/engineering/tools/asset-manifest.mjs",
-    "jade-and-ember/engineering/tools/hashed-build.mjs",
+    "engineering/tools/asset-manifest.mjs",
+    "engineering/tools/hashed-build.mjs",
     "jade-and-ember/engineering/checks/portability.mjs"
    ],
    "target": "engineering/checks/",
@@ -260,8 +259,8 @@
    "name": "Configuration validation and component contracts",
    "summary": "Validates configuration against JSON Schemas before the build; renders every component against contracts; the configuration loader.",
    "paths": [
-    "jade-and-ember/engineering/schemas/site.schema.json",
-    "jade-and-ember/engineering/schemas/client.schema.json",
+    "engineering/schemas/site.schema.json",
+    "engineering/schemas/client.schema.json",
     "jade-and-ember/src/lib/config.mjs",
     "jade-and-ember/src/lib/util.mjs"
    ],
@@ -296,15 +295,14 @@
     "jade-and-ember/src/components/owner-note.mjs",
     "jade-and-ember/src/components/steps.mjs",
     "jade-and-ember/src/pages/menu.mjs",
-    "jade-and-ember/engineering/schemas/copy.schema.json",
-    "jade-and-ember/engineering/schemas/menu.schema.json",
+    "engineering/schemas/copy.schema.json",
+    "engineering/schemas/menu.schema.json",
     "jade-and-ember/engineering/contracts/components.json",
     "jade-and-ember/engineering/lib/config-schema.mjs",
-    "jade-and-ember/engineering/checks/schema.mjs",
+    "engineering/checks/schema.mjs",
     "jade-and-ember/engineering/checks/contracts.mjs",
-    "jade-and-ember/engineering/adapters/industry/restaurant/adapter.json",
-    "jade-and-ember/engineering/adapters/industry/restaurant/index.mjs",
-    "jade-and-ember/engineering/adapters/industry/README.md"
+    "engineering/adapters/industry/restaurant/adapter.json",
+    "engineering/adapters/industry/restaurant/index.mjs"
    ],
    "target": "engineering/adapters/industry/restaurant/",
    "external": [
@@ -460,7 +458,7 @@
     "jade-and-ember/engineering/dependencies.json",
     "jade-and-ember/engineering/lib/node-range.mjs",
     "jade-and-ember/engineering/supply-chain-verification.json",
-    "jade-and-ember/engineering/tools/supply-chain.mjs"
+    "engineering/tools/supply-chain.mjs"
    ],
    "target": "engineering/security/supply-chain/",
    "external": [
@@ -499,8 +497,8 @@
     "jade-and-ember/engineering/checks/links.mjs",
     "jade-and-ember/engineering/checks/html.mjs",
     "jade-and-ember/engineering/htmlvalidate.json",
-    "jade-and-ember/engineering/lib/industry.mjs",
-    "jade-and-ember/engineering/lib/structured-data.mjs"
+    "engineering/lib/industry.mjs",
+    "engineering/lib/structured-data.mjs"
    ],
    "target": "engineering/seo/",
    "external": [
@@ -534,7 +532,7 @@
    "summary": "Registry of external destinations, a classified verifier (verified, blocked, unavailable, inconclusive, insecure), an append-only history, an informational CI job.",
    "paths": [
     "jade-and-ember/engineering/lib/external.mjs",
-    "jade-and-ember/engineering/tools/external-links.mjs"
+    "engineering/tools/external-links.mjs"
    ],
    "target": "engineering/links/",
    "external": [
@@ -595,7 +593,7 @@
    "summary": "The release policy per channel, the gate, the release manifest and its schema, the approvals parser, the release tool (gate, manifest, prepare, search-digest).",
    "paths": [
     "jade-and-ember/engineering/lib/release.mjs",
-    "jade-and-ember/engineering/tools/release.mjs",
+    "engineering/tools/release.mjs",
     "jade-and-ember/engineering/checks/release.mjs",
     "jade-and-ember/engineering/release/policy.json",
     "jade-and-ember/engineering/release/release-manifest.schema.json",
@@ -605,11 +603,11 @@
     "jade-and-ember/engineering/lib/strict-json.mjs",
     "jade-and-ember/engineering/lib/hosts.mjs",
     "jade-and-ember/engineering/lib/verification.mjs",
-    "jade-and-ember/engineering/lib/search-digest.mjs",
+    "engineering/lib/search-digest.mjs",
     "jade-and-ember/engineering/lib/release-fixtures.mjs",
-    "jade-and-ember/engineering/lib/release-cases.mjs",
-    "jade-and-ember/engineering/tools/release-audit.mjs",
-    "jade-and-ember/engineering/tools/release-record.mjs",
+    "engineering/lib/release-cases.mjs",
+    "engineering/tools/release-audit.mjs",
+    "engineering/tools/release-record.mjs",
     "jade-and-ember/engineering/release/reviewers.json",
     "jade-and-ember/engineering/release/demonstrations.json",
     "jade-and-ember/engineering/release/approvals/README.md",
@@ -661,7 +659,7 @@
    "paths": [
     "jade-and-ember/engineering/lib/evidence.mjs",
     "jade-and-ember/engineering/lib/evidence-docs.mjs",
-    "jade-and-ember/engineering/tools/evidence.mjs",
+    "engineering/tools/evidence.mjs",
     "jade-and-ember/engineering/checks/evidence.mjs",
     "jade-and-ember/engineering/release/evidence-spec.json",
     "jade-and-ember/engineering/release/evidence/README.md",
@@ -700,10 +698,10 @@
    "summary": "Runs the real release tool against a synthetic client build in a throwaway copy; verifies a prepared package from its own bytes; 112 scenarios and 12 measured probes.",
    "paths": [
     "jade-and-ember/engineering/lib/release-dryrun.mjs",
-    "jade-and-ember/engineering/lib/release-dryrun-scenarios.mjs",
+    "engineering/lib/release-dryrun-scenarios.mjs",
     "jade-and-ember/engineering/lib/release-package.mjs",
-    "jade-and-ember/engineering/tools/release-verify-package.mjs",
-    "jade-and-ember/engineering/checks/release-dryrun.mjs"
+    "engineering/tools/release-verify-package.mjs",
+    "engineering/checks/release-dryrun.mjs"
    ],
    "target": "engineering/release/dryrun/",
    "external": [
@@ -735,16 +733,16 @@
    "name": "Self-test suites and fixtures",
    "summary": "Mutation and targeted negative tests for every check (Gate 1 to Gate 5), the client fixture and the in-memory evidence fixtures.",
    "paths": [
-    "jade-and-ember/engineering/checks/selftest.mjs",
-    "jade-and-ember/engineering/checks/selftest-gate2.mjs",
-    "jade-and-ember/engineering/checks/selftest-gate3.mjs",
-    "jade-and-ember/engineering/checks/selftest-gate4.mjs",
-    "jade-and-ember/engineering/checks/selftest-gate5.mjs",
-    "jade-and-ember/engineering/checks/selftest-gate6.mjs",
-    "jade-and-ember/engineering/checks/selftest-evidence.mjs",
+    "engineering/checks/selftest.mjs",
+    "engineering/checks/selftest-gate2.mjs",
+    "engineering/checks/selftest-gate3.mjs",
+    "engineering/checks/selftest-gate4.mjs",
+    "engineering/checks/selftest-gate5.mjs",
+    "engineering/checks/selftest-gate6.mjs",
+    "engineering/checks/selftest-evidence.mjs",
     "jade-and-ember/engineering/lib/evidence-fixtures.mjs",
-    "jade-and-ember/engineering/checks/selftest-generic.mjs",
-    "jade-and-ember/engineering/fixtures/generic/"
+    "engineering/checks/selftest-generic.mjs",
+    "engineering/fixtures/generic/"
    ],
    "target": "engineering/fixtures/ and engineering/tests/",
    "external": [
@@ -770,18 +768,19 @@
    "name": "Hosting adapters and requirements",
    "summary": "Host-file generation, the static-folder hosting check (Cloudflare Pages limits), hosting assessment documents, adapter interface, Vercel specification, live verification checklist.",
    "paths": [
-    "jade-and-ember/engineering/tools/host-files.mjs",
+    "engineering/tools/host-files.mjs",
     "jade-and-ember/engineering/checks/hosting.mjs",
     "jade-and-ember/engineering/HOSTING.md",
     "jade-and-ember/engineering/hosting/",
-    "jade-and-ember/engineering/adapters/hosting/",
-    "jade-and-ember/engineering/tools/host-bundle.mjs",
+    "engineering/adapters/hosting/",
+    "engineering/tools/host-bundle.mjs",
     "jade-and-ember/engineering/G6-4-REPORT.md",
     "jade-and-ember/engineering/g6-4-evidence/",
-    "jade-and-ember/engineering/checks/hosting-adapters.mjs",
+    "engineering/checks/hosting-adapters.mjs",
     "jade-and-ember/engineering/G6-5-REPORT.md",
     "jade-and-ember/engineering/G6-6-REPORT.md",
-    "jade-and-ember/engineering/G6-7-REPORT.md"
+    "jade-and-ember/engineering/G6-7-REPORT.md",
+    "jade-and-ember/engineering/G6-8-REPORT.md"
    ],
    "target": "engineering/adapters/hosting/{cloudflare-pages,vercel,static}/",
    "external": [
@@ -1012,7 +1011,7 @@
     "jade-and-ember/engineering/tools/gate5-diagnose.mjs",
     "jade-and-ember/engineering/lighthouse.json",
     "jade-and-ember/engineering/lib/lighthouse.mjs",
-    "jade-and-ember/engineering/tools/lighthouse.mjs"
+    "engineering/tools/lighthouse.mjs"
    ],
    "target": "engineering/tooling/ (kept as optional tools) or stays",
    "external": [
@@ -1110,7 +1109,8 @@
     "docs/hero-video/",
     "jade-and-ember/engineering/g6-5-evidence/",
     "jade-and-ember/engineering/g6-6-evidence/",
-    "jade-and-ember/engineering/g6-7-evidence/"
+    "jade-and-ember/engineering/g6-7-evidence/",
+    "jade-and-ember/engineering/g6-8-evidence/"
    ],
    "target": "stays in Jade & Ember",
    "external": [],
@@ -1262,6 +1262,33 @@
    "workPackage": "G6-8",
    "priorities": [],
    "class": "framework-snapshot"
+  },
+  {
+   "id": "FM-37",
+   "name": "Project-side glue for the framework snapshot (G6-8 Stage B)",
+   "summary": "Files that keep this project's own code working on top of the snapshot engine: one-line re-exports at the old relative import paths (so the frozen release-control proof of concept, the project checks and the original self-test suites need no import edits), the original self-test suites kept under their own names (je-*.mjs) with the check that runs them, and the project's head-tag recipe for the release dry run.",
+   "paths": [
+    "jade-and-ember/engineering/lib/",
+    "jade-and-ember/engineering/checks/",
+    "jade-and-ember/engineering/tools/",
+    "jade-and-ember/engineering/project-owned/head-tag.mjs"
+   ],
+   "target": "stays in the project (a project's glue to the engine)",
+   "external": [],
+   "dependsOn": [
+    "FM-36"
+   ],
+   "redesign": {
+    "level": "none",
+    "notes": ""
+   },
+   "verify": "check:selftest-je-markup runs the original suites; check:selftest-release-control runs the 41 proof-of-concept cases; every re-export resolves (check:project, check:framework-matrix).",
+   "masterSpecs": [
+    "09"
+   ],
+   "workPackage": "G6-8",
+   "priorities": [],
+   "class": "project"
   }
  ],
  "workPackages": [
@@ -2094,25 +2121,128 @@
       "every existing branch, including main"
      ],
      "skillBranchForReconciliation": "feature/anthropic-frontend-design-standard (d2803c02408c27d4489ccddee0a11478621e26dd): the already-approved branch that vendors the official frontend-design skill and retires the earlier STS design skill to a redirect. It is not on main. It is recorded for later reconciliation, is not merged or modified by G6-6, and the retired skill is not reactivated."
-    }
+    },
+    "endCommit": "2bb1737ffb56ba9f9db7021a6570c82387af4f26",
+    "closedBy": "APR-JE-049",
+    "closedAs": "closed for engineering purposes only (Jade & Ember final commit 2bb1737; framework branch feature/sts-framework-automation final commit eee5708; framework CI run 10 with all eight jobs passed; Jade & Ember CI run 87 with all seven jobs passed and 42 of 42 checks; the production-authentication hard stop preserved; every production-release blocker stays active)"
    },
-   "status": "implemented and verified (G6-7-REPORT.md; framework branch feature/sts-framework-automation at eee5708, development only, not merged); awaiting owner review; not closed"
+   "status": "closed for engineering purposes only (APR-JE-049); implemented on the framework branch feature/sts-framework-automation at eee5708 (development only, not merged); every production-release blocker stays active"
   },
   {
    "id": "G6-8",
    "title": "Consumption and independent validation",
-   "summary": "Jade & Ember consumes the framework at a pinned Git revision (M4, D-P8-2); the framework is validated independently by the ladder V1 to V4 (generic fixture, reference consumer parity, a second structure, mutation tests) with ChatGPT reviewing evidence and architecture (D-P8-10); a readiness checklist is completed. Then MONOLITH House & Design, the established proof of concept #2 (a fictional five-page luxury residential architecture/design-build website targeted for Vercel), begins; being fictional it uses the demonstration channel, not client production. Provisional owner direction recorded with APR-JE-048 (not an authorisation): the public Jade & Ember repository stays public, and the integrity-verified framework snapshot approach is provisionally accepted for G6-8, subject to its separate implementation review. G6-8 is not authorised and has not begun.",
+   "summary": "Jade & Ember consumes the framework at a pinned Git revision (an exact, immutable development commit) through a verified, integrity-checked snapshot (M4, D-P8-2): the public repository stays public and cannot use the private composite action, so it carries a copy of only the framework files needed to run and verify it, with an integrity record that the private framework repository checks against its source commit. Stage A (framework side only; authorised by the owner on 2026-10-13, closed by APR-JE-049): branch feature/sts-framework-consumption from eee5708; snapshot producer, integrity verifier, snapshot caller template, policy changes, adversarial tests and specification 16 section 10.9; accepted evidence at framework commit 17fc32345a15cfbcbdbf03468259fac218e6defa. The approved public snapshot is exactly 249 files, 2,294,640 bytes, git tree 7a4f8a09d8b4ecbd5b940049d5a1192445e9541c; any change of its content needs renewed owner approval. Stage B (authorised by APR-JE-049, in progress): the additive-then-switch migration of Jade & Ember to the verified snapshot, preserving the delivered website, the renderer, the approved design, the dependency lockfile, every pre-existing mandatory check (the 42, check:framework-matrix, the existing self-test suites), all 319 release dry-run scenarios and all 41 release-control proof-of-concept cases, with check:extraction and the approved project-specific checks added (45 identities); the temporary direct-workflow exception is removed when the new snapshot caller is verified. Stage C (the validation ladder V1 to V4 with ChatGPT reviewing evidence and architecture (D-P8-10), the V5 readiness checklist) and MONOLITH House & Design (the established proof of concept #2, a fictional five-page luxury residential architecture/design-build website targeted for Vercel, demonstration channel only) are not authorised and have not begun. Stop for owner review after Stage B.",
    "dependsOn": [
     "G6-6",
     "G6-7"
    ],
    "priorities": [],
-   "frameworkRepoChange": false,
+   "frameworkRepoChange": true,
    "size": "medium",
-   "verification": "All four validation levels recorded; readiness checklist signed by the owner; no engine check silently skipped.",
+   "verification": "All four validation levels recorded; readiness checklist signed by the owner; no engine check silently skipped. Stage B: full Node 24 verification compared with the approved baseline (delivered tree 9061a227, candidate digest 69f9f18f, SBOM digest a1dbdd12 unchanged; 319 of 319 release scenarios; 41 proof-of-concept cases), the snapshot validated independently against the private framework, adversarial snapshot tests, an independent engineering review and every GitHub Actions job read individually.",
    "blocks": [
     "RB-14"
-   ]
+   ],
+   "scope": {
+    "repository": "getsimplifiedtech/STS-Cinematic-Showcase.",
+    "branch": "feature/jade-and-ember-v0.9",
+    "baseCommit": "2bb1737ffb56ba9f9db7021a6570c82387af4f26",
+    "authorisedBy": "APR-JE-049",
+    "note": "Derived from the owner's G6-8 Stage B authorization (APR-JE-049). Jade & Ember side, allowed (Stage B): the verified framework snapshot at the repository root (engineering/, .github/actions/engineering/ and the integrity record sts-framework-snapshot.json, exactly the approved public set), the third-party notices (THIRD_PARTY_NOTICES.md, third-party-licenses/), the snapshot caller workflow that replaces the direct-style workflow, this project's engineering folder (the files that left it for the snapshot, the one-line re-exports that keep its relative imports working, the original self-test suites kept as je-*.mjs with the check that runs them, the head-tag recipe, the manifest entries of the added project checks, the matrix, the closure verifier, the CI notes, the Gate 6 order document and the G6-8 report and evidence), the script paths of package.json, sts.engineering.json and the approvals ledger. Jade & Ember side, denied: the delivered website, the renderer (build.mjs, src/), the approved visuals and assets, the dependency lockfile, the baselines, the records of earlier packages and gates, the frozen release-control proof of concept (engineering/release-control/), the release policy and reviewer table (engineering/release/), the hard authenticity stop (engineering/lib/authenticity.mjs), and the evidence records. The public repository stays public. No deployment, preview, credential, signing step, account, repository, scheduled run or client-production release path is created or enabled; MONOLITH is not started; Stage C is not authorised. Framework repository side (recorded under frameworkRepository): the development-only branch feature/sts-framework-consumption.",
+    "allow": [
+     "docs/JADE_AND_EMBER_APPROVALS.md",
+     ".github/workflows/jade-and-ember-verify.yml",
+     ".github/actions/engineering/",
+     "engineering/",
+     "sts-framework-snapshot.json",
+     "THIRD_PARTY_NOTICES.md",
+     "third-party-licenses/",
+     "jade-and-ember/package.json",
+     "jade-and-ember/sts.engineering.json",
+     "jade-and-ember/engineering/"
+    ],
+    "deny": [
+     "jade-and-ember/index.html",
+     "jade-and-ember/menu.html",
+     "jade-and-ember/order-online.html",
+     "jade-and-ember/our-story.html",
+     "jade-and-ember/visit-us.html",
+     "jade-and-ember/styles.css",
+     "jade-and-ember/site.js",
+     "jade-and-ember/hero.js",
+     "jade-and-ember/menu.js",
+     "jade-and-ember/media/",
+     "jade-and-ember/fonts/",
+     "jade-and-ember/config/",
+     "jade-and-ember/src/",
+     "jade-and-ember/build.mjs",
+     "jade-and-ember/serve.py",
+     "jade-and-ember/package-lock.json",
+     "jade-and-ember/baselines/",
+     "jade-and-ember/README.md",
+     "jade-and-ember/QA.md",
+     "README.md",
+     "jade-and-ember/engineering/lib/authenticity.mjs",
+     "jade-and-ember/engineering/release-control/",
+     "jade-and-ember/engineering/release/",
+     "jade-and-ember/engineering/assets.manifest.json",
+     "jade-and-ember/engineering/media-rights-inventory.json",
+     "jade-and-ember/engineering/search-crawler-verification.json",
+     "jade-and-ember/engineering/findings.json",
+     "jade-and-ember/engineering/baseline.json",
+     "jade-and-ember/engineering/immutability-allowlist.json",
+     "jade-and-ember/engineering/external-destinations.json",
+     "jade-and-ember/engineering/external-links-verification.json",
+     "jade-and-ember/engineering/evidence/",
+     "jade-and-ember/engineering/G6-1-REPORT.md",
+     "jade-and-ember/engineering/G6-2-REPORT.md",
+     "jade-and-ember/engineering/G6-3-REPORT.md",
+     "jade-and-ember/engineering/G6-4-REPORT.md",
+     "jade-and-ember/engineering/G6-5-REPORT.md",
+     "jade-and-ember/engineering/G6-6-REPORT.md",
+     "jade-and-ember/engineering/G6-7-REPORT.md",
+     "jade-and-ember/engineering/G6-2-DESIGN.md",
+     "jade-and-ember/engineering/G6-3-SCOPE.md",
+     "jade-and-ember/engineering/G6-3A-DESIGN.md",
+     "jade-and-ember/engineering/G6-3A-POC-REPORT.md",
+     "jade-and-ember/engineering/g6-1-evidence/",
+     "jade-and-ember/engineering/g6-2-evidence/",
+     "jade-and-ember/engineering/g6-3-evidence/",
+     "jade-and-ember/engineering/g6-3a-evidence/",
+     "jade-and-ember/engineering/g6-4-evidence/",
+     "jade-and-ember/engineering/g6-5-evidence/",
+     "jade-and-ember/engineering/g6-6-evidence/",
+     "jade-and-ember/engineering/g6-7-evidence/",
+     "docs/JADE_AND_EMBER_MEDIA_RIGHTS_POLICY.md"
+    ],
+    "amendments": [],
+    "frameworkRepository": {
+     "repository": "getsimplifiedtech/sts-web-design-framework",
+     "branch": "feature/sts-framework-consumption",
+     "baseCommit": "eee5708022ca3cd3675177d887a5c0cb49e68276",
+     "baseNote": "Stage A: the branch was created at the accepted G6-7 head eee5708 (its identity was confirmed before creation). Accepted Stage A head: 17fc32345a15cfbcbdbf03468259fac218e6defa. The pinned snapshot source is that exact commit; main is not merged, tagged or modified.",
+     "operations": "create the branch; add and change files inside the allowed paths; commit; push the branch; let its own workflow run; no merge, pull request, tag, release, change to main or to any other branch; do not execute, update, remove or redistribute OpenMontage; no change to repository access settings",
+     "allowedPaths": [
+      "architecture/16-engineering-framework-v1.md",
+      "engineering/",
+      ".github/workflows/engineering-fixture.yml",
+      ".github/workflows/engineering-verify.yml",
+      ".github/actions/engineering/"
+     ],
+     "deniedPaths": [
+      "README.md",
+      "architecture/01-layer-model-v2.md to architecture/15-approval-determination-records-v1.md (the 15 frozen specifications)",
+      "reviews/",
+      "skills/",
+      "templates/",
+      ".claude/",
+      ".github/workflows/import-openmontage.yml",
+      "vendor/",
+      "every existing branch, including main"
+     ]
+    }
+   },
+   "status": "Stage A closed (APR-JE-049): framework commit 17fc32345a15 (development only, not merged); Stage B authorised (APR-JE-049), in progress; Stage C and MONOLITH not authorised; every production-release blocker stays active"
   }
  ],
  "priorities": [
@@ -3254,7 +3384,7 @@
    "id": "D-G67-6",
    "text": "G6-8 boundary: the public repository stays public; snapshot approach provisionally accepted",
    "ownerWords": "The public Jade & Ember repository stays public. The integrity-verified framework snapshot approach is provisionally accepted for G6-8, subject to its separate implementation review. Do not modify Jade & Ember's code, migrate its framework consumption, or begin G6-8 during this package.",
-   "status": "decided (APR-JE-048); G6-8 not authorised",
+   "status": "decided (APR-JE-048); G6-8 Stage A and Stage B then authorised by APR-JE-049",
    "workPackages": [
     "G6-8"
    ],
@@ -3262,6 +3392,51 @@
     {
      "wp": "G6-8",
      "mustMention": "snapshot"
+    }
+   ]
+  },
+  {
+   "id": "D-G68-1",
+   "text": "Approved public snapshot: exactly 249 files, 2,294,640 bytes, git tree 7a4f8a09d8b4ecbd5b940049d5a1192445e9541c",
+   "ownerWords": "Approve exactly 249 files, 2,294,640 bytes, Git tree 7a4f8a09d8b4ecbd5b940049d5a1192445e9541c. Do not add, replace or disclose additional private framework files. Verify the exact exported tree before committing it to the public Jade & Ember repository. The private framework must independently verify the snapshot against its source commit. Any snapshot-content change requires renewed owner approval.",
+   "status": "decided (APR-JE-049); implemented in Stage B",
+   "workPackages": [
+    "G6-8"
+   ],
+   "consequences": [
+    {
+     "wp": "G6-8",
+     "mustMention": "7a4f8a09d8b4ecbd5b940049d5a1192445e9541c"
+    }
+   ]
+  },
+  {
+   "id": "D-G68-2",
+   "text": "Licensing: copyright notice of Simplified Tech Solutions; no general licence for STS-authored material; third-party notices retained and verified",
+   "ownerWords": "Use the approved copyright notice: © 2026 Simplified Tech Solutions. All rights reserved, subject to the actual copyrightability and ownership of the material. No general open-source or redistribution license is granted for STS-authored proprietary material. Retain required third-party licenses and notices. Before publication, verify Cloudflare CC BY 4.0 and Vercel Apache-2.0 attribution requirements against the quoted material. Include required notices and modification statements where applicable. Stop if any licensing obligation remains unresolved. Retain internal governance vocabulary where necessary for traceability and verification. Do not undertake a separate cleanup project. (STS is currently a sole proprietorship and may become an LLC; no entity formation, IP restructuring or additional legal documentation is part of G6-8.)",
+   "status": "decided (APR-JE-049); notices in THIRD_PARTY_NOTICES.md and third-party-licenses/",
+   "workPackages": [
+    "G6-8"
+   ],
+   "consequences": [
+    {
+     "wp": "G6-8",
+     "mustMention": "snapshot"
+    }
+   ]
+  },
+  {
+   "id": "D-G68-3",
+   "text": "Stage B migration boundaries and stop point",
+   "ownerWords": "Proceed with the approved additive-then-switch migration of Jade & Ember to the verified framework snapshot. Preserve the delivered website, renderer, approved design and dependency lockfile; preserve all pre-existing mandatory checks and add the approved project-specific checks; preserve all 319 release scenarios and 41 release-control proof-of-concept cases and check:framework-matrix; make only the previously approved script-path and test-harness import adjustments; remove the temporary direct-workflow exception when the new caller is verified; preserve Cloudflare Pages and Vercel portability; keep the public showcase repository public; preserve the production-authentication hard stop and all applicable release blockers. Stop after Stage B for owner review before beginning Stage C. Do not merge the framework to main, create a Framework Release, deploy, publish a website, or start MONOLITH.",
+   "status": "decided (APR-JE-049); Stage B in progress",
+   "workPackages": [
+    "G6-8"
+   ],
+   "consequences": [
+    {
+     "wp": "G6-8",
+     "mustMention": "Stage B"
     }
    ]
   }

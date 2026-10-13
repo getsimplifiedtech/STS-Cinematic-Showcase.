@@ -63,11 +63,7 @@
       "jade-and-ember/QA.md",
       "jade-and-ember/engineering/README.md",
       "jade-and-ember/engineering/authority.json",
-      "jade-and-ember/engineering/checks/authority.mjs",
-      "jade-and-ember/engineering/checks/selftest.mjs",
-      "engineering/checks/authority.mjs",
-      "engineering/checks/selftest.mjs",
-      "engineering/standards/authority-retired.json"
+      "jade-and-ember/engineering/checks/je-selftest.mjs"
     ]
   },
   "records": {
