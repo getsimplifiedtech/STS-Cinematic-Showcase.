@@ -1,0 +1,1003 @@
+{
+  "$comment": "The evidence specification of the generic fixture. Copied from the specification of the project the engineering was extracted from with the page list and the identifiers of the project changed: the evidence classes, outcomes, attestation and gate rules are the engineering's; a real project writes its own procedure texts (some texts below still use a restaurant's menu as the example). The fixture is never released; nothing here records any test.",
+  "schema": "quillfeather-letterpress/evidence-spec@1",
+  "recordSchema": "quillfeather-letterpress/evidence@1",
+  "ciRepository": "getsimplifiedtech/sts-web-design-framework",
+  "classes": {
+    "E1": {
+      "name": "Browser emulation",
+      "meaning": "Automated and emulated: Playwright engines, device descriptors, viewport and forced-colours emulation, a CI run",
+      "mayClaim": "behaves as expected in this engine under emulation",
+      "neverClaim": "anything about a physical device, a screen reader or a person's experience",
+      "allowedTypes": [
+        "ci-run"
+      ]
+    },
+    "E2": {
+      "name": "Human testing on a desktop browser",
+      "meaning": "A person, on a real desktop or laptop, in a real desktop browser (Safari on a Mac, Firefox, Chrome), including desktop screen readers",
+      "mayClaim": "verified by hand in this browser on this computer",
+      "neverClaim": "how a phone or tablet behaves",
+      "allowedTypes": [
+        "browser-matrix",
+        "screen-reader"
+      ]
+    },
+    "E3": {
+      "name": "Human testing on a physical device",
+      "meaning": "A person holding a real phone or tablet (model, operating-system version and browser version recorded)",
+      "mayClaim": "verified on this device",
+      "neverClaim": "anything about other devices or versions",
+      "allowedTypes": [
+        "real-device",
+        "screen-reader"
+      ]
+    }
+  },
+  "pages": [
+    "index.html",
+    "services.html",
+    "contact.html"
+  ],
+  "outcomes": [
+    "pass",
+    "fail",
+    "not-applicable"
+  ],
+  "notApplicableMinNoteLength": 15,
+  "needsNoteMinLength": 4,
+  "severities": [
+    "Blocker",
+    "Major",
+    "Minor",
+    "Info"
+  ],
+  "findingStatuses": [
+    "open",
+    "fixed",
+    "accepted"
+  ],
+  "attestation": "I performed this test myself in the environment described in this record and the outcomes are my own observations.",
+  "emulationIndicators": "emulat|simulat|dev ?tools|responsive design mode|headless|playwright|puppeteer|selenium|browserstack|lambdatest|sauce ?labs|virtual|\\bvm\\b|genymotion|xcode|android studio|bluestacks|remote device|device farm|screenshot service",
+  "nonPersonTester": "claude|anthropic|chatgpt|\\bgpt\\b|copilot|gemini|\\bbot\\b|automat|playwright|puppeteer|selenium|github actions|\\btbd\\b|\\btodo\\b|unknown|placeholder|fixture|selftest|lorem|\\bn/?a\\b",
+  "attachmentDir": "engineering/release/evidence/files",
+  "gate": {
+    "real-device": {
+      "needs": [
+        {
+          "label": "an iPhone (Safari)",
+          "targets": [
+            "iphone-safari"
+          ]
+        },
+        {
+          "label": "an Android phone (Chrome)",
+          "targets": [
+            "android-chrome"
+          ]
+        }
+      ],
+      "optional": [
+        "ipad-safari"
+      ]
+    },
+    "screen-reader": {
+      "needs": [
+        {
+          "label": "NVDA",
+          "targets": [
+            "sr-nvda-firefox",
+            "sr-nvda-chrome"
+          ]
+        },
+        {
+          "label": "VoiceOver",
+          "targets": [
+            "sr-voiceover-macos-safari",
+            "sr-voiceover-ios-safari"
+          ]
+        },
+        {
+          "label": "TalkBack",
+          "targets": [
+            "sr-talkback-android-chrome"
+          ]
+        }
+      ],
+      "optional": []
+    },
+    "browser-matrix": {
+      "needs": [
+        {
+          "label": "desktop Chrome",
+          "targets": [
+            "desktop-chrome"
+          ]
+        },
+        {
+          "label": "desktop Firefox",
+          "targets": [
+            "desktop-firefox"
+          ]
+        },
+        {
+          "label": "desktop Safari",
+          "targets": [
+            "desktop-safari"
+          ]
+        }
+      ],
+      "optional": []
+    },
+    "ci-run": {
+      "needs": [
+        {
+          "label": "a successful CI run for the release commit",
+          "targets": [
+            "ci-run"
+          ]
+        }
+      ],
+      "optional": []
+    }
+  },
+  "sections": {
+    "page-basics": {
+      "title": "Every page: it loads and reads properly",
+      "scope": "page",
+      "pages": [
+        "index.html",
+        "services.html",
+        "contact.html"
+      ],
+      "items": [
+        {
+          "id": "loads",
+          "text": "Open the page from the start of the session (address bar or a link). Wait for it to finish loading.",
+          "expect": "Text, photographs and the two typefaces appear; no error message, no blank area where an image should be."
+        },
+        {
+          "id": "layout",
+          "text": "Look at the whole page by scrolling from top to bottom, in the orientation(s) named for this target.",
+          "expect": "No sideways scrolling, nothing cut off, nothing drawn over other text or controls."
+        },
+        {
+          "id": "readable",
+          "text": "Read the headings and body text at the device's normal settings, without zooming.",
+          "expect": "Text is comfortably legible (size and contrast) and keeps its normal line breaks."
+        },
+        {
+          "id": "links",
+          "text": "Use the header links (and the brand link and footer links) to move to other pages, then use the browser's Back and Forward.",
+          "expect": "Each link opens the right page; Back and Forward return to the page you left."
+        },
+        {
+          "id": "images",
+          "text": "Look at every photograph on the page.",
+          "expect": "Each photograph is shown, sharp enough, not stretched or squashed."
+        }
+      ]
+    },
+    "navigation": {
+      "title": "Navigation and header (once per session)",
+      "scope": "session",
+      "items": [
+        {
+          "id": "menu-open-close",
+          "text": "Narrow screens: tap or press the menu button, then close the menu. Wide screens: confirm the header links are visible.",
+          "expect": "The menu opens and closes; the button's state is clear; the links are all reachable when it is open."
+        },
+        {
+          "id": "current-page",
+          "text": "On each page look at the header link for the page you are on.",
+          "expect": "The current page is marked as current."
+        },
+        {
+          "id": "skip-link",
+          "text": "Press Tab once at the top of a page (keyboard or switch access if available), then Enter on the skip link that appears.",
+          "expect": "A skip link appears first, becomes visible, and moves you past the header to the main content.",
+          "naAllowed": true
+        }
+      ]
+    },
+    "home-hero": {
+      "title": "Home page hero: poster, clip, Pause (once per session)",
+      "scope": "session",
+      "items": [
+        {
+          "id": "poster-or-clip",
+          "text": "Open the Home page and watch the hero for 20 seconds. Record in the note whether you saw the still poster, the looping clip, or a poster that slowly pushes in, and the window width in CSS pixels if you know it.",
+          "expect": "What is shown matches the design for this width: phones and narrow windows get the poster; widths of 960 px and more get the clip where the browser can play it.",
+          "needsNote": true
+        },
+        {
+          "id": "pause-control",
+          "text": "If a Pause button is shown, press it and press it again.",
+          "expect": "Pause stops the motion and Resume restarts it; the button's label changes and it is easy to hit.",
+          "naAllowed": true
+        },
+        {
+          "id": "motion-respected",
+          "text": "Turn on the system setting 'Reduce Motion' (or 'Remove animations'), reload the Home page, and watch the hero.",
+          "expect": "Nothing loops or pushes in; the still poster is shown.",
+          "naAllowed": true
+        },
+        {
+          "id": "fallback",
+          "text": "If the clip does not play in this browser, look at what the hero shows instead.",
+          "expect": "A poster is shown and nothing looks broken (no empty black box, no play icon).",
+          "naAllowed": true
+        }
+      ]
+    },
+    "page-specific": {
+      "title": "Page-specific content",
+      "scope": "page",
+      "items": [
+        {
+          "id": "menu-jump-links",
+          "text": "On the Services page use the category strip (Small plates ... Sweet & tea): scroll it sideways if it overflows, then choose a category.",
+          "expect": "The strip scrolls; each link jumps to its section and the heading is not hidden under the header.",
+          "pages": [
+            "services.html"
+          ]
+        },
+        {
+          "id": "menu-readable",
+          "text": "On the Services page read a few dish names, descriptions and prices.",
+          "expect": "Names, descriptions and prices are legible and line up; the heat markers are understandable.",
+          "pages": [
+            "services.html"
+          ]
+        },
+        {
+          "id": "story-readable",
+          "text": "On the Our story page read the opening and one later section.",
+          "expect": "Text and pictures sit in a sensible order; nothing overlaps.",
+          "pages": [
+            "services.html"
+          ]
+        },
+        {
+          "id": "visit-address-hours",
+          "text": "On the Contact page read the address and the opening-hours table.",
+          "expect": "The address and every day's hours are readable and the day labels do not touch the times, also when you enlarge the text.",
+          "pages": [
+            "contact.html"
+          ]
+        },
+        {
+          "id": "visit-phone-link",
+          "text": "On the Contact page press the telephone number.",
+          "expect": "The device offers to call the number shown (+1 555 0100 188 is a sample number: cancel the call).",
+          "pages": [
+            "contact.html"
+          ],
+          "naAllowed": true
+        },
+        {
+          "id": "order-steps",
+          "text": "On the Order online page read 'How ordering works', Pickup and Allergies.",
+          "expect": "The steps and notices are readable in order; the page says clearly that ordering is a sample.",
+          "pages": [
+            "contact.html"
+          ]
+        },
+        {
+          "id": "home-sections",
+          "text": "On the Home page scroll through 'Order these first', the kitchen story, the visit strip and the order band.",
+          "expect": "Every section is readable and every link in them works.",
+          "pages": [
+            "index.html"
+          ]
+        }
+      ]
+    },
+    "mobile-device": {
+      "title": "Phone and tablet handling (once per session)",
+      "scope": "session",
+      "items": [
+        {
+          "id": "tap-targets",
+          "text": "Tap the menu button, the header links, the telephone number and a menu category link with a finger.",
+          "expect": "Each is easy to hit on the first try; no neighbouring control is triggered by mistake."
+        },
+        {
+          "id": "orientation",
+          "text": "Rotate the device to landscape and back on the Home, Menu and Contact pages.",
+          "expect": "The layout adapts without clipping or sideways scrolling; nothing stays in the old orientation."
+        },
+        {
+          "id": "text-size",
+          "text": "Increase the system text size (Dynamic Type on iOS, Font size on Android) to a large setting and reopen the Home and Contact pages.",
+          "expect": "Text grows without overlapping or being cut off; the menu button still works.",
+          "naAllowed": true
+        },
+        {
+          "id": "low-power-data",
+          "text": "Turn on Low Power Mode / Battery Saver, and Low Data Mode / Data Saver, reload the Home page.",
+          "expect": "The page still works; the hero shows the poster if the browser blocks the clip.",
+          "naAllowed": true
+        },
+        {
+          "id": "address-bar",
+          "text": "Scroll down and up so the browser's address bar hides and shows again.",
+          "expect": "The header and the hero do not jump or leave a gap."
+        }
+      ]
+    },
+    "tablet-wide": {
+      "title": "Tablet and wide-window behaviour (once per session)",
+      "scope": "session",
+      "items": [
+        {
+          "id": "clip-path-960",
+          "text": "At a width of 960 CSS pixels or more (tablet landscape or a wide window) open the Home page.",
+          "expect": "The hero uses the clip path (the loop plays) or the poster fallback; either is shown cleanly."
+        },
+        {
+          "id": "h264-fallback",
+          "text": "If this browser cannot play the WebM clip (Safari), watch whether the MP4 version plays.",
+          "expect": "The MP4 plays, or the poster is shown; nothing looks broken. Record which in the note.",
+          "needsNote": true
+        },
+        {
+          "id": "split-view",
+          "text": "On an iPad try Split View or Slide Over (or narrow the window) and rotate.",
+          "expect": "The layout reflows at each width without sideways scrolling.",
+          "naAllowed": true
+        }
+      ]
+    },
+    "keyboard": {
+      "title": "Keyboard-only navigation",
+      "scope": "page",
+      "pages": [
+        "index.html",
+        "services.html",
+        "contact.html"
+      ],
+      "items": [
+        {
+          "id": "tab-reaches-all",
+          "text": "Using only the keyboard, press Tab repeatedly from the top of the page to the end of the page.",
+          "expect": "Every link and button is reached once, in the order you read them; nothing is skipped."
+        },
+        {
+          "id": "focus-visible",
+          "text": "While tabbing, look at where the focus is.",
+          "expect": "The focused element always has a clearly visible outline or highlight; it is never hidden under the header."
+        },
+        {
+          "id": "no-trap",
+          "text": "Tab forward through the page and Shift+Tab backward again.",
+          "expect": "Focus never gets stuck; Shift+Tab walks the same order backwards."
+        }
+      ]
+    },
+    "keyboard-session": {
+      "title": "Keyboard-only: menu, Pause, skip link (once per session)",
+      "scope": "session",
+      "items": [
+        {
+          "id": "kb-menu",
+          "text": "On a narrow window use Enter or Space on the menu button, Tab through the links, then press Escape.",
+          "expect": "The menu opens, its links can be tabbed in order, Escape closes it and focus returns to the menu button.",
+          "naAllowed": true
+        },
+        {
+          "id": "kb-pause",
+          "text": "On the Home page Tab to the Pause button and press Enter or Space.",
+          "expect": "Pause works from the keyboard and shows its state.",
+          "naAllowed": true
+        },
+        {
+          "id": "kb-skip",
+          "text": "Press Tab first on each page and activate the skip link with Enter.",
+          "expect": "Focus moves into the main content."
+        }
+      ]
+    },
+    "zoom-responsive": {
+      "title": "Responsive layouts, zoom and text spacing",
+      "scope": "session",
+      "items": [
+        {
+          "id": "zoom-200",
+          "text": "Zoom the page to 200 percent (browser zoom, or Settings > Display zoom).",
+          "expect": "The page reflows into one column where needed; nothing is cut off; no sideways scrolling."
+        },
+        {
+          "id": "zoom-400",
+          "text": "Zoom to 400 percent on a desktop browser (about 320 CSS pixels wide).",
+          "expect": "Content stays readable in one column; only tables and code may scroll sideways (this site has none); nothing is clipped.",
+          "naAllowed": true
+        },
+        {
+          "id": "text-only-zoom",
+          "text": "Enlarge only the text (Firefox: View > Zoom > Zoom Text Only; or the system text size) to the largest sensible size.",
+          "expect": "Text grows and wraps; nothing overlaps; buttons keep their labels.",
+          "naAllowed": true
+        },
+        {
+          "id": "pinch-zoom",
+          "text": "On a touch device pinch to zoom in on the Home and Services pages.",
+          "expect": "Pinch zoom works (the page does not block it) and the page stays usable.",
+          "naAllowed": true
+        },
+        {
+          "id": "narrow-320",
+          "text": "Make the window or screen as narrow as you can (about 320 CSS pixels).",
+          "expect": "The page still works in one column, with the menu button visible.",
+          "naAllowed": true
+        },
+        {
+          "id": "text-spacing",
+          "text": "If you have a text-spacing tool or bookmarklet (line height 1.5, letter spacing 0.12 em, word spacing 0.16 em), apply it on the Contact page and read the opening hours.",
+          "expect": "The day labels and the times do not touch or overlap; nothing is cut off.",
+          "naAllowed": true
+        }
+      ]
+    },
+    "reduced-motion-media": {
+      "title": "Reduced motion and media fallback",
+      "scope": "session",
+      "items": [
+        {
+          "id": "rm-poster",
+          "text": "Turn on Reduce Motion in the operating system (or the browser) and open the Home page.",
+          "expect": "The hero shows the still poster; no continuous motion anywhere on the site."
+        },
+        {
+          "id": "images-offline",
+          "text": "With the connection slow or switched to a poor network (if you can), reload a page and watch the images load.",
+          "expect": "Photographs appear without the layout jumping; text is readable while they load.",
+          "naAllowed": true
+        },
+        {
+          "id": "clip-failure",
+          "text": "If the hero clip is blocked or does not play (Low Power Mode, an old browser), look at the hero.",
+          "expect": "A poster is shown; the hero never stays empty.",
+          "naAllowed": true
+        }
+      ]
+    },
+    "screen-reader": {
+      "title": "Screen reader: every page",
+      "scope": "page",
+      "pages": [
+        "index.html",
+        "services.html",
+        "contact.html"
+      ],
+      "items": [
+        {
+          "id": "sr-landmarks",
+          "text": "Open the landmarks list (the screen reader's rotor, elements list or landmark gesture).",
+          "expect": "Banner/header, navigation, main and footer (contentinfo) are listed and correctly named."
+        },
+        {
+          "id": "sr-headings",
+          "text": "Open the headings list and step through the headings in order.",
+          "expect": "There is one main heading and the other headings follow a sensible order that matches the page."
+        },
+        {
+          "id": "sr-links-buttons",
+          "text": "Step through every link and button.",
+          "expect": "Each one is announced with a clear name and its role (link or button); the current page link says it is current; no 'link' or 'button' without a name."
+        },
+        {
+          "id": "sr-images",
+          "text": "Step through the photographs.",
+          "expect": "Meaningful photographs have a short description; purely decorative ones are skipped."
+        },
+        {
+          "id": "sr-reading-order",
+          "text": "Read the page from top to bottom with the screen reader's read-all command.",
+          "expect": "The text is read in the same order you see it; no hidden or duplicate text is read."
+        }
+      ]
+    },
+    "screen-reader-session": {
+      "title": "Screen reader: controls and key content (once per session)",
+      "scope": "session",
+      "items": [
+        {
+          "id": "sr-skip-link",
+          "text": "Move to the first item on a page.",
+          "expect": "The skip link is announced first and moves you to the main content.",
+          "naAllowed": true
+        },
+        {
+          "id": "sr-menu-state",
+          "text": "On a narrow window or phone, find the menu button and open and close it.",
+          "expect": "The button announces its state (expanded or collapsed) and the links appear in the reading order when open.",
+          "naAllowed": true
+        },
+        {
+          "id": "sr-pause",
+          "text": "On the Home page find the Pause button.",
+          "expect": "It is announced with its name and state (pressed or not) and works.",
+          "naAllowed": true
+        },
+        {
+          "id": "sr-visit-details",
+          "text": "On the Contact page read the address, the opening-hours table and the telephone link.",
+          "expect": "The address is read in order, the hours table is read row by row with day and time, the telephone link says it is a link to call (a sample number)."
+        },
+        {
+          "id": "sr-order-details",
+          "text": "On the Order online page read 'How ordering works' and the notices.",
+          "expect": "The steps are read in order; the page says clearly that ordering is a sample."
+        },
+        {
+          "id": "sr-no-surprises",
+          "text": "While using the site, notice any unexpected announcements, repeated text or silence.",
+          "expect": "None; or every surprise is written up as a finding."
+        }
+      ]
+    }
+  },
+  "targets": {
+    "iphone-safari": {
+      "title": "iPhone, Safari (physical device)",
+      "gateType": "real-device",
+      "classes": [
+        "E3"
+      ],
+      "environment": {
+        "deviceKinds": [
+          "phone"
+        ],
+        "osNames": [
+          "iOS"
+        ],
+        "browserNames": [
+          "Safari"
+        ],
+        "screenReaders": null
+      },
+      "sections": [
+        "page-basics",
+        "navigation",
+        "home-hero",
+        "page-specific",
+        "mobile-device",
+        "zoom-responsive",
+        "reduced-motion-media"
+      ],
+      "attachments": {
+        "minimum": 3,
+        "minimumLocal": 1,
+        "kinds": [
+          "photo",
+          "screenshot",
+          "screen-recording"
+        ],
+        "required": "a photo or screenshot that shows the operating-system version and the browser version (for example Settings > General > About, and the browser's About page), and at least two screenshots or a screen recording of the pages you tested"
+      },
+      "estimatedMinutes": 90,
+      "notes": "Portrait and landscape. One iPhone is the minimum; record the model (for example iPhone 15) and the iOS version."
+    },
+    "android-chrome": {
+      "title": "Android phone, Chrome (physical device)",
+      "gateType": "real-device",
+      "classes": [
+        "E3"
+      ],
+      "environment": {
+        "deviceKinds": [
+          "phone"
+        ],
+        "osNames": [
+          "Android"
+        ],
+        "browserNames": [
+          "Chrome"
+        ],
+        "screenReaders": null
+      },
+      "sections": [
+        "page-basics",
+        "navigation",
+        "home-hero",
+        "page-specific",
+        "mobile-device",
+        "zoom-responsive",
+        "reduced-motion-media"
+      ],
+      "attachments": {
+        "minimum": 3,
+        "minimumLocal": 1,
+        "kinds": [
+          "photo",
+          "screenshot",
+          "screen-recording"
+        ],
+        "required": "a photo or screenshot that shows the operating-system version and the browser version (for example Settings > General > About, and the browser's About page), and at least two screenshots or a screen recording of the pages you tested"
+      },
+      "estimatedMinutes": 90,
+      "notes": "Portrait and landscape; record the phone model, the Android version and the Chrome version."
+    },
+    "ipad-safari": {
+      "title": "iPad or tablet, Safari (physical device)",
+      "gateType": "real-device",
+      "classes": [
+        "E3"
+      ],
+      "environment": {
+        "deviceKinds": [
+          "tablet"
+        ],
+        "osNames": [
+          "iPadOS",
+          "Android"
+        ],
+        "browserNames": [
+          "Safari",
+          "Chrome"
+        ],
+        "screenReaders": null
+      },
+      "sections": [
+        "page-basics",
+        "navigation",
+        "home-hero",
+        "page-specific",
+        "mobile-device",
+        "tablet-wide",
+        "zoom-responsive",
+        "reduced-motion-media"
+      ],
+      "attachments": {
+        "minimum": 3,
+        "minimumLocal": 1,
+        "kinds": [
+          "photo",
+          "screenshot",
+          "screen-recording"
+        ],
+        "required": "a photo or screenshot that shows the operating-system version and the browser version (for example Settings > General > About, and the browser's About page), and at least two screenshots or a screen recording of the pages you tested"
+      },
+      "estimatedMinutes": 60,
+      "notes": "Tablet and wide-window behaviour: the hero clip path at 960 CSS pixels and more, rotation, and the H.264 MP4 fallback in Safari. Optional for the release gate; an iPad adds the Safari clip answer."
+    },
+    "desktop-chrome": {
+      "title": "Desktop Chrome (human, desktop browser)",
+      "gateType": "browser-matrix",
+      "classes": [
+        "E2"
+      ],
+      "environment": {
+        "deviceKinds": [
+          "desktop",
+          "laptop"
+        ],
+        "osNames": [
+          "Windows",
+          "macOS",
+          "Linux",
+          "ChromeOS"
+        ],
+        "browserNames": [
+          "Chrome"
+        ],
+        "screenReaders": null
+      },
+      "sections": [
+        "page-basics",
+        "navigation",
+        "home-hero",
+        "page-specific",
+        "keyboard",
+        "keyboard-session",
+        "zoom-responsive",
+        "reduced-motion-media"
+      ],
+      "attachments": {
+        "minimum": 2,
+        "minimumLocal": 1,
+        "kinds": [
+          "screenshot",
+          "screen-recording"
+        ],
+        "required": "a screenshot of the browser's About page showing its version and the operating system, and at least one screenshot of a tested page"
+      },
+      "estimatedMinutes": 60,
+      "notes": ""
+    },
+    "desktop-firefox": {
+      "title": "Desktop Firefox (human, desktop browser)",
+      "gateType": "browser-matrix",
+      "classes": [
+        "E2"
+      ],
+      "environment": {
+        "deviceKinds": [
+          "desktop",
+          "laptop"
+        ],
+        "osNames": [
+          "Windows",
+          "macOS",
+          "Linux"
+        ],
+        "browserNames": [
+          "Firefox"
+        ],
+        "screenReaders": null
+      },
+      "sections": [
+        "page-basics",
+        "navigation",
+        "home-hero",
+        "page-specific",
+        "keyboard",
+        "keyboard-session",
+        "zoom-responsive",
+        "reduced-motion-media"
+      ],
+      "attachments": {
+        "minimum": 2,
+        "minimumLocal": 1,
+        "kinds": [
+          "screenshot",
+          "screen-recording"
+        ],
+        "required": "a screenshot of the browser's About page showing its version and the operating system, and at least one screenshot of a tested page"
+      },
+      "estimatedMinutes": 60,
+      "notes": ""
+    },
+    "desktop-safari": {
+      "title": "Desktop Safari on a Mac (human, desktop browser)",
+      "gateType": "browser-matrix",
+      "classes": [
+        "E2"
+      ],
+      "environment": {
+        "deviceKinds": [
+          "desktop",
+          "laptop"
+        ],
+        "osNames": [
+          "macOS"
+        ],
+        "browserNames": [
+          "Safari"
+        ],
+        "screenReaders": null
+      },
+      "sections": [
+        "page-basics",
+        "navigation",
+        "home-hero",
+        "page-specific",
+        "keyboard",
+        "keyboard-session",
+        "zoom-responsive",
+        "reduced-motion-media",
+        "tablet-wide"
+      ],
+      "attachments": {
+        "minimum": 2,
+        "minimumLocal": 1,
+        "kinds": [
+          "screenshot",
+          "screen-recording"
+        ],
+        "required": "a screenshot of the browser's About page showing its version and the operating system, and at least one screenshot of a tested page"
+      },
+      "estimatedMinutes": 75,
+      "notes": "Includes the H.264 MP4 fallback question for the hero clip."
+    },
+    "sr-nvda-firefox": {
+      "title": "NVDA with Firefox (Windows)",
+      "gateType": "screen-reader",
+      "classes": [
+        "E2"
+      ],
+      "environment": {
+        "deviceKinds": [
+          "desktop",
+          "laptop"
+        ],
+        "osNames": [
+          "Windows"
+        ],
+        "browserNames": [
+          "Firefox"
+        ],
+        "screenReaders": [
+          "NVDA"
+        ]
+      },
+      "sections": [
+        "screen-reader",
+        "screen-reader-session"
+      ],
+      "attachments": {
+        "minimum": 2,
+        "minimumLocal": 1,
+        "kinds": [
+          "audio",
+          "screen-recording",
+          "transcript",
+          "screenshot"
+        ],
+        "required": "a screen recording or audio recording, or a written transcript, of the screen reader reading the Home and Contact pages, and a screenshot showing the screen reader and browser versions"
+      },
+      "estimatedMinutes": 60,
+      "notes": ""
+    },
+    "sr-nvda-chrome": {
+      "title": "NVDA with Chrome (Windows)",
+      "gateType": "screen-reader",
+      "classes": [
+        "E2"
+      ],
+      "environment": {
+        "deviceKinds": [
+          "desktop",
+          "laptop"
+        ],
+        "osNames": [
+          "Windows"
+        ],
+        "browserNames": [
+          "Chrome"
+        ],
+        "screenReaders": [
+          "NVDA"
+        ]
+      },
+      "sections": [
+        "screen-reader",
+        "screen-reader-session"
+      ],
+      "attachments": {
+        "minimum": 2,
+        "minimumLocal": 1,
+        "kinds": [
+          "audio",
+          "screen-recording",
+          "transcript",
+          "screenshot"
+        ],
+        "required": "a screen recording or audio recording, or a written transcript, of the screen reader reading the Home and Contact pages, and a screenshot showing the screen reader and browser versions"
+      },
+      "estimatedMinutes": 60,
+      "notes": ""
+    },
+    "sr-voiceover-macos-safari": {
+      "title": "VoiceOver with Safari (macOS)",
+      "gateType": "screen-reader",
+      "classes": [
+        "E2"
+      ],
+      "environment": {
+        "deviceKinds": [
+          "desktop",
+          "laptop"
+        ],
+        "osNames": [
+          "macOS"
+        ],
+        "browserNames": [
+          "Safari"
+        ],
+        "screenReaders": [
+          "VoiceOver"
+        ]
+      },
+      "sections": [
+        "screen-reader",
+        "screen-reader-session"
+      ],
+      "attachments": {
+        "minimum": 2,
+        "minimumLocal": 1,
+        "kinds": [
+          "audio",
+          "screen-recording",
+          "transcript",
+          "screenshot"
+        ],
+        "required": "a screen recording or audio recording, or a written transcript, of the screen reader reading the Home and Contact pages, and a screenshot showing the screen reader and browser versions"
+      },
+      "estimatedMinutes": 60,
+      "notes": ""
+    },
+    "sr-voiceover-ios-safari": {
+      "title": "VoiceOver with Safari (iPhone or iPad, physical device)",
+      "gateType": "screen-reader",
+      "classes": [
+        "E3"
+      ],
+      "environment": {
+        "deviceKinds": [
+          "phone",
+          "tablet"
+        ],
+        "osNames": [
+          "iOS",
+          "iPadOS"
+        ],
+        "browserNames": [
+          "Safari"
+        ],
+        "screenReaders": [
+          "VoiceOver"
+        ]
+      },
+      "sections": [
+        "screen-reader",
+        "screen-reader-session"
+      ],
+      "attachments": {
+        "minimum": 2,
+        "minimumLocal": 1,
+        "kinds": [
+          "audio",
+          "screen-recording",
+          "transcript",
+          "screenshot"
+        ],
+        "required": "a screen recording or audio recording, or a written transcript, of the screen reader reading the Home and Contact pages, and a screenshot showing the screen reader and browser versions"
+      },
+      "estimatedMinutes": 60,
+      "notes": ""
+    },
+    "sr-talkback-android-chrome": {
+      "title": "TalkBack with Chrome (Android phone, physical device)",
+      "gateType": "screen-reader",
+      "classes": [
+        "E3"
+      ],
+      "environment": {
+        "deviceKinds": [
+          "phone",
+          "tablet"
+        ],
+        "osNames": [
+          "Android"
+        ],
+        "browserNames": [
+          "Chrome"
+        ],
+        "screenReaders": [
+          "TalkBack"
+        ]
+      },
+      "sections": [
+        "screen-reader",
+        "screen-reader-session"
+      ],
+      "attachments": {
+        "minimum": 2,
+        "minimumLocal": 1,
+        "kinds": [
+          "audio",
+          "screen-recording",
+          "transcript",
+          "screenshot"
+        ],
+        "required": "a screen recording or audio recording, or a written transcript, of the screen reader reading the Home and Contact pages, and a screenshot showing the screen reader and browser versions"
+      },
+      "estimatedMinutes": 60,
+      "notes": ""
+    },
+    "ci-run": {
+      "title": "Automated verification run (GitHub Actions)",
+      "gateType": "ci-run",
+      "classes": [
+        "E1"
+      ],
+      "environment": null,
+      "sections": [],
+      "attachments": null,
+      "estimatedMinutes": 0,
+      "notes": "A recorded GitHub Actions run of the verify workflow for the release commit. Automated and emulated: it can never satisfy a human requirement."
+    }
+  }
+}

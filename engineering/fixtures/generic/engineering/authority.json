@@ -1,0 +1,62 @@
+{
+  "$comment": "Machine-readable design-authority and framework reference of the generic fixture. The human-readable record is docs/FRAMEWORK_REFERENCE.md; checks/authority.mjs keeps the two in agreement.",
+  "creativeAuthority": {
+    "name": "Anthropic Frontend Design",
+    "skill": "frontend-design",
+    "skillPath": ".claude/skills/frontend-design/SKILL.md",
+    "skillSha256": "d91970639e9f5c37682ac7ab60094d35f1c7c1f38d731bd56396563aee10c1d3",
+    "licensePath": ".claude/skills/frontend-design/LICENSE.txt",
+    "licenseSha256": "0d542e0c8804e39aa7f37eb00da5a762149dc682d7829451287e11b938e94594",
+    "license": "Apache-2.0"
+  },
+  "engineeringAuthority": {
+    "name": "STS",
+    "governs": [
+      "architecture",
+      "configuration",
+      "reusable components",
+      "accessibility",
+      "security",
+      "performance",
+      "QA",
+      "portability",
+      "release controls"
+    ]
+  },
+  "framework": {
+    "repository": "getsimplifiedtech/sts-web-design-framework",
+    "branch": "feature/anthropic-frontend-design-standard",
+    "commit": "d2803c02408c27d4489ccddee0a11478621e26dd",
+    "mainCommit": "f05f41f2e9112397d1b1755117e5b6314853a492",
+    "release": null,
+    "modifiedByThisProject": false
+  },
+  "retired": {
+    "allowedFiles": []
+  },
+  "records": {
+    "frameworkReference": "engineering/fixtures/generic/docs/FRAMEWORK_REFERENCE.md",
+    "approvals": "engineering/fixtures/generic/APPROVALS.md",
+    "requiredApprovals": [
+      "APR-QF-001",
+      "APR-QF-002"
+    ]
+  },
+  "mustState": [
+    {
+      "path": "engineering/fixtures/generic/README.md",
+      "text": "frontend-design",
+      "why": "the project README names the active creative authority"
+    },
+    {
+      "path": "engineering/fixtures/generic/docs/FRAMEWORK_REFERENCE.md",
+      "text": "Anthropic Frontend Design governs creative direction",
+      "why": "authority policy"
+    },
+    {
+      "path": "engineering/fixtures/generic/docs/FRAMEWORK_REFERENCE.md",
+      "text": "STS retains authority over architecture",
+      "why": "authority policy"
+    }
+  ]
+}

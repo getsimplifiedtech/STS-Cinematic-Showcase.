@@ -1,0 +1,116 @@
+{
+  "$schema": "../../schemas/sts-engineering.schema.json",
+  "schema": "sts/engineering-project@1",
+  "project": {
+    "id": "quillfeather-letterpress",
+    "name": "Quillfeather Letterpress",
+    "summary": "An invented letterpress studio: the generic fixture that proves the STS engineering runs the whole verification pipeline on a project that is not any client."
+  },
+  "offering": null,
+  "paths": {
+    "engineering": "engineering",
+    "repositoryRoot": "../../.."
+  },
+  "governance": {
+    "approvalsLog": "engineering/fixtures/generic/APPROVALS.md",
+    "approvalIdPrefix": "APR-QF",
+    "demonstrationIdPrefix": "DEMO-QF",
+    "recordIdSuffix": "QF",
+    "documents": {
+      "mediaRightsPolicy": "engineering/fixtures/generic/docs/MEDIA_RIGHTS_POLICY.md",
+      "deviceTestProtocol": "engineering/fixtures/generic/docs/DEVICE_TEST_PROTOCOL.md"
+    }
+  },
+  "ci": {
+    "workflow": "engineering-fixture.yml",
+    "framework": {
+      "reusable": "engineering-verify.yml",
+      "action": ".github/actions/engineering",
+      "scripts": "engineering/tools/ci",
+      "templates": {
+        "caller": "engineering/ci/templates/caller.yml",
+        "scheduled": "engineering/ci/templates/scheduled.yml",
+        "dependabot": "engineering/ci/templates/dependabot.yml"
+      }
+    }
+  },
+  "delivery": {
+    "sharedFiles": [
+      "styles.css",
+      "site.js"
+    ],
+    "assetFolders": [
+      "media"
+    ],
+    "configDir": "config",
+    "pages": {
+      "registry": "config/site.json",
+      "list": "pages",
+      "key": "file"
+    },
+    "build": {
+      "command": [
+        "node",
+        "build.mjs",
+        "--out",
+        "{out}"
+      ]
+    },
+    "stylesheet": "styles.css",
+    "sourceRoots": [
+      "build.mjs",
+      "src"
+    ]
+  },
+  "markup": {
+    "selectors": {
+      "navToggle": ".nav-toggle",
+      "siteNav": "#site-nav",
+      "pauseControl": null,
+      "ambientHero": null,
+      "brandLink": "a.brand",
+      "footerNav": ".foot-nav",
+      "sectionJump": null,
+      "skipLinkClass": "skip"
+    },
+    "heroStates": {
+      "video": null,
+      "poster": null
+    },
+    "probes": {
+      "footerLinkPage": "contact.html",
+      "sectionJumpPage": null
+    },
+    "heroPreloadPattern": null
+  },
+  "generators": {
+    "seo": null,
+    "crawlers": null,
+    "config": null
+  },
+  "industry": "local-business",
+  "fixtures": {
+    "clientBuild": "engineering/project-owned/client-build.mjs",
+    "headTag": "engineering/project-owned/head-tag.mjs"
+  },
+  "creativeAuthority": {
+    "record": "authority.json"
+  },
+  "engine": {
+    "projectFolders": [
+      "src",
+      "engineering/project-owned"
+    ],
+    "projectFiles": [
+      "sts.engineering.json",
+      "build.mjs",
+      "package.json",
+      "engineering/a11y.json",
+      "engineering/privacy.json",
+      "engineering/lighthouse.json"
+    ]
+  },
+  "checks": {
+    "project": []
+  }
+}

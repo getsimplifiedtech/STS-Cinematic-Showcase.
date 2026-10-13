@@ -1,0 +1,7 @@
+{
+  "$comment": "Every external address in the files the generic fixture delivers (the credit link and its configured source). check:links fails on an address that is not listed here and on an entry that no longer appears.",
+  "destinations": [
+    { "id": "EXT-01", "url": "https://getsimplifiedtech.com/", "kind": "link", "purpose": "Credit link in the footer of every page", "files": ["404.html", "contact.html", "index.html", "services.html"] },
+    { "id": "EXT-02", "url": "https://getsimplifiedtech.com/", "kind": "mention", "purpose": "The same address as written in the site configuration, the source of the credit link", "files": ["config/site.json"] }
+  ]
+}

@@ -1,0 +1,88 @@
+{
+  "home": {
+    "meta": {
+      "title": "Home",
+      "description": "Wedding suites, business cards and limited-edition broadsides, set by hand and printed on a vintage press."
+    },
+    "hero": {
+      "heading": "Cards, invitations and broadsides, set by hand",
+      "lead": "Quillfeather prints every job one sheet at a time, from metal and wood type on a press older than the building.",
+      "image": {
+        "src": "media/press-hero.webp",
+        "width": 1200,
+        "height": 675,
+        "alt": "A cast-iron letterpress with a locked chase of type beside a stack of cream paper"
+      }
+    },
+    "sections": [
+      {
+        "id": "process",
+        "heading": "How a job is printed",
+        "paragraphs": [
+          "We set the type, ink the plate, and pull each impression by hand. A short run takes a few days; a wedding suite takes a few weeks.",
+          "Every sheet is checked against the proof before it leaves the press."
+        ]
+      }
+    ]
+  },
+  "services": {
+    "meta": {
+      "title": "Services",
+      "description": "Three services of the studio: wedding suites, business cards and broadsides, with typical timings."
+    },
+    "heading": "Services",
+    "intro": "Three things we do well.",
+    "items": [
+      {
+        "name": "Wedding suites",
+        "text": "Invitations, reply cards and envelopes, designed with you and printed in one or two colours."
+      },
+      {
+        "name": "Business cards",
+        "text": "Thick cotton stock, deep impression, edges painted by hand on request."
+      },
+      {
+        "name": "Broadsides",
+        "text": "Limited editions of a poem or a quotation, numbered and signed.",
+        "image": {
+          "src": "media/type-drawer.webp",
+          "width": 800,
+          "height": 533,
+          "alt": "A shallow wooden drawer of metal type sorted by size"
+        }
+      }
+    ]
+  },
+  "visit": {
+    "meta": {
+      "title": "Contact",
+      "description": "How to reach the studio: address, telephone and opening hours."
+    },
+    "heading": "Contact",
+    "intro": "Visit by appointment, or call to talk about a job.",
+    "note": "Please bring a swatch of the stock you have in mind."
+  },
+  "notFound": {
+    "meta": {
+      "title": "Page not found",
+      "description": "The page you asked for does not exist."
+    },
+    "heading": "Page not found",
+    "text": "That page does not exist. Try the home page or the list of services."
+  },
+  "media": {
+    "images": [
+      {
+        "src": "media/press-hero.webp",
+        "width": 1200,
+        "height": 675
+      },
+      {
+        "src": "media/type-drawer.webp",
+        "width": 800,
+        "height": 533
+      }
+    ],
+    "video": null
+  }
+}

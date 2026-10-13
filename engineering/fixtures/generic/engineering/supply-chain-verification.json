@@ -1,0 +1,4 @@
+{
+  "$comment": "History of supply-chain verification runs of the generic fixture (one record per run of `npm run supply:record -- --write` on a networked runner). Append only. It is empty: the fixture is never released, no run has been recorded, and none is invented here.",
+  "records": []
+}

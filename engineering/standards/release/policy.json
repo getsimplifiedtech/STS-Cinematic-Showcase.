@@ -1,0 +1,127 @@
+{
+  "$comment": "The release gate policy (Gate 4, ledger ENG-071, ENG-079; release model v2, G6-2, an owner approval). A build is classified by its CONFIGURATION, never by what someone calls it: demo flag on and noindex on is the demonstration channel (and only a REGISTERED fictional demonstration may use it); anything else is client-production. Everything the gate relies on is bound to the CANDIDATE ARTIFACT DIGEST, not to a commit. No channel may deploy: a deployment authorisation is a separate record family, reported and never acted on, and no tool in this repository deploys anything.",
+  "$overlay": {
+    "delegated": {
+      "rights.blockingFindings": {
+        "type": "array",
+        "floor": "array"
+      }
+    },
+    "stricterDown": [
+      "externalLinks.maxAgeDays",
+      "supplyChain.maxAgeDays"
+    ],
+    "documentation": [
+      "channels.*.meaning",
+      "evidence.types",
+      "records",
+      "deployment"
+    ]
+  },
+  "severities": [
+    "Blocker",
+    "Major",
+    "Minor",
+    "Info"
+  ],
+  "blockingSeverities": [
+    "Blocker",
+    "Major"
+  ],
+  "channels": {
+    "demonstration": {
+      "meaning": "a demonstration of the project: flags.demo true, seo.noindex true. It may be packaged as a preview for review. It may never be indexed or sold as a client site.",
+      "requires": [
+        "cleanTree",
+        "verifyPassed",
+        "noBlockingFindings",
+        "requiredApprovalsPresent",
+        "versionConsistent",
+        "demoStaysNoindex",
+        "demonstrationRegistered",
+        "demonstrationNoProductionDomain",
+        "assetManifestCurrent"
+      ],
+      "allows": [
+        "preview-package",
+        "host-files"
+      ]
+    },
+    "client-production": {
+      "meaning": "any build with flags.demo false or seo.noindex false: a real client site, indexable, with production metadata.",
+      "requires": [
+        "cleanTree",
+        "verifyPassed",
+        "noBlockingFindings",
+        "requiredApprovalsPresent",
+        "versionConsistent",
+        "stableVersion",
+        "recordsValid",
+        "releaseApproval",
+        "productionHostAuthorised",
+        "rightsVerification",
+        "evidence:real-device",
+        "evidence:screen-reader",
+        "evidence:browser-matrix",
+        "evidence:ci-run",
+        "noDemoText",
+        "productionSeoComplete",
+        "productionDomain",
+        "searchReadiness",
+        "assetManifestCurrent",
+        "externalLinks",
+        "externalLinksReview",
+        "mediaRightsInventory",
+        "socialImageRights",
+        "dependencyPolicy",
+        "dependencySecurity",
+        "sbomVerified",
+        "supportedRuntimes",
+        "authenticity"
+      ],
+      "allows": [
+        "site-package",
+        "host-files"
+      ]
+    }
+  },
+  "deployment": "never performed by any tool here; a deployment authorisation record (release/deployments/) for the candidate, the relied-on release approval and the host is reported by the gate, but nothing acts on it",
+  "evidence": {
+    "$comment": "JSON files in engineering/release/evidence/. They are human or tool records of work the automated checks cannot do. Each is bound to the candidate artifact digest (build.candidate), not to the HEAD commit; build.commit records where the work was tested and must be the release commit or an earlier commit of it. A ci-run record also carries the summary of the verification record the CI job printed (verification.*), compared with what a full run of the current verifier must produce.",
+    "types": {
+      "real-device": "at least one iPhone and one Android phone, recorded by a person",
+      "screen-reader": "NVDA, VoiceOver and TalkBack passes on all pages, recorded by a person",
+      "browser-matrix": "automated and manual results in Chromium, Firefox and WebKit (decision D-11: Firefox and WebKit are tested before production deployment)",
+      "ci-run": "a GitHub Actions run of the verify workflow for the release commit with conclusion success, with its URL"
+    }
+  },
+  "records": {
+    "$comment": "Structured records (lib/records.mjs). The gate reads only closed fields, never prose. Folders: release/approvals/, release/evidence/, release/deployments/. Who may decide: release/reviewers.json.",
+    "statuses": [
+      "approved",
+      "rejected",
+      "revoked",
+      "superseded"
+    ],
+    "release-approval": "subject.productionHost must equal the host of seo.baseUrl and not be a reserved, example, local, IP or preview/staging address",
+    "rights-verification": "subject.sources, subject.verifiedOn, subject.inventory (the digest of the delivered media and fonts, npm run release:rights-digest) and subject.basis (licence, permission or ownership: authorised use is enough)",
+    "search-review": "subject.searchDigest equal to `npm run release:search-digest` for the build, and subject.reviewed listing business-facts, structured-data and crawler-policy",
+    "deployment-authorisation": "subject.releaseApproval (the in-force release approval relied on) and subject.targetHost",
+    "external-links-review": "subject.destinationsDigest (npm run release:external-digest), subject.verification (the EXTV record relied on), subject.opened: true, and optionally subject.accepted: printed mentions accepted by name with a reason"
+  },
+  "externalLinks": {
+    "$comment": "G6-3 (an owner approval, decision D-P5-1). A client-production release needs a verification record from a networked run (github-actions or person) that covers exactly the destination list the build delivers, is at most maxAgeDays old and shows every clickable destination verified over https, plus a person's external-links-review record for that list. The demonstration has one destination and no client: the requirement does not apply to it.",
+    "maxAgeDays": 30
+  },
+  "supplyChain": {
+    "$comment": "G6-3 (an owner approval, decisions D-P6-5 and D-P6-7). A client-production release needs a supply-chain verification record for this lockfile (npm audit and npm audit signatures on a networked runner, maxAgeDays at most), no high or critical advisory, every other advisory excepted in dependencies.json with a plan and an unexpired review (at most 90 days), registry signatures verified for every locked package, and the composite SBOM (lib/supply.mjs) regenerating to the digest the record carries.",
+    "maxAgeDays": 30
+  },
+  "rights": {
+    "$comment": "G6-3 (an owner approval, decision D-P5-4). Authorised use is sufficient; ownership is not required. These findings must be closed (not merely accepted) before a client-production release.",
+    "blockingFindings": []
+  },
+  "authenticity": {
+    "$comment": "G6-3 (an owner approval, decision D-G62-2). The authenticity requirement is implemented in code (lib/authenticity.mjs), not here: a value in this file cannot satisfy it. It is listed so that the policy check can refuse a client-production policy without it."
+  }
+}

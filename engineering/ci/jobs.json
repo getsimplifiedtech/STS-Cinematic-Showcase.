@@ -1,0 +1,20 @@
+{
+  "$comment": "The jobs of the engineering's continuous integration, in one place (G6-7). The reusable workflow (.github/workflows/engineering-verify.yml) and the client caller template (ci/templates/caller.yml) must each carry exactly these jobs; check:ci compares them with this table. A mode is one way the composite action (.github/actions/engineering) runs the engineering; a client cannot ask for anything else, and the blocking job runs the whole verification.",
+  "schema": "sts/ci-jobs@1",
+  "repository": "getsimplifiedtech/sts-web-design-framework",
+  "action": ".github/actions/engineering",
+  "modes": ["verify", "fast", "firefox", "webkit", "external-links", "lighthouse", "supply-chain-report"],
+  "jobs": [
+    { "id": "verify", "name": "verify (Ubuntu 24.04, Node 24, Chromium)", "runsOn": "ubuntu-24.04", "mode": "verify", "timeout": 40, "informational": false, "step": "Verify (all checks, self-tests)" },
+    { "id": "portability-smoke", "name": "fast checks on macos-latest (informational)", "runsOn": "macos-latest", "mode": "fast", "timeout": 20, "informational": true, "step": "Fast verification (no browser)" },
+    { "id": "cross-browser-firefox", "name": "cross-browser: Firefox (informational)", "runsOn": "ubuntu-24.04", "mode": "firefox", "timeout": 55, "informational": true, "step": "Cross-browser verification in Firefox" },
+    { "id": "cross-browser-webkit", "name": "cross-browser: WebKit (informational)", "runsOn": "ubuntu-24.04", "mode": "webkit", "timeout": 55, "informational": true, "step": "Cross-browser verification in WebKit" },
+    { "id": "external-links", "name": "external links (informational)", "runsOn": "ubuntu-24.04", "mode": "external-links", "timeout": 15, "informational": true, "step": "Verify the external destinations (record printed in the log)" },
+    { "id": "lighthouse", "name": "lighthouse (informational)", "runsOn": "ubuntu-24.04", "mode": "lighthouse", "timeout": 30, "informational": true, "step": "Lighthouse (every page, three runs each; the table is printed in the log)" },
+    { "id": "supply-chain-report", "name": "supply chain report (informational)", "runsOn": "ubuntu-24.04", "mode": "supply-chain-report", "timeout": 15, "informational": true, "step": "Report (signatures, advisories, SBOM, outdated)" }
+  ],
+  "scheduled": {
+    "$comment": "The only jobs a scheduled caller may carry. There is no live-site mode: monitoring a live site needs its own authorisation and does not exist here.",
+    "modes": ["external-links", "supply-chain-report"]
+  }
+}

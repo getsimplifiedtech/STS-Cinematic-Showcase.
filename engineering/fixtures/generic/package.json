@@ -1,0 +1,24 @@
+{
+  "name": "quillfeather-letterpress-fixture",
+  "version": "0.1.0",
+  "private": true,
+  "description": "The generic fixture project of the STS engineering. Static; no runtime dependencies. Its development tools are the engineering's own (same exact pins, same lockfile content), and the scripts delegate to the engineering that verifies it.",
+  "devDependencies": {
+    "@axe-core/playwright": "4.13.0",
+    "ajv": "8.20.0",
+    "html-validate": "11.16.2",
+    "lighthouse": "13.5.0",
+    "pixelmatch": "8.0.0",
+    "playwright": "1.64.0",
+    "pngjs": "7.0.0",
+    "yaml": "2.9.1"
+  },
+  "engines": {
+    "node": ">=24.8.0 <25"
+  },
+  "scripts": {
+    "verify": "STS_PROJECT_DIR=$PWD npm --prefix ../.. run verify",
+    "verify:fast": "STS_PROJECT_DIR=$PWD npm --prefix ../.. run verify:fast",
+    "test:lighthouse": "STS_PROJECT_DIR=$PWD npm --prefix ../.. run test:lighthouse"
+  }
+}

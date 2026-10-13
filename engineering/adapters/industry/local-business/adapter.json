@@ -1,0 +1,7 @@
+{
+ "schema": "sts/industry-adapter@1",
+ "id": "local-business",
+ "title": "Local business (the generic default)",
+ "$comment": "The adapter every project uses when its industry has none of its own (specification 16, 7.1). It adds no check: the fields common to a local business are validated by the base (lib/structured-data.mjs). An industry that has more registers its own adapter.",
+ "checks": []
+}

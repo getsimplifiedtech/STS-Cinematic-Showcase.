@@ -1,0 +1,28 @@
+# STS Dependabot configuration TEMPLATE (G6-7). Not active: it is stored under engineering/ci/templates and rendered into a client repository's .github/dependabot.yml
+# with `node engineering/tools/ci/render.mjs dependabot`. It proposes updates as pull requests that a person reviews; nothing here merges anything, and there is no
+# automatic-merge setting (Dependabot has none; an automatic merge would be a workflow, which check:ci refuses). Weekly, a small number of open pull requests, labelled
+# for the owner's review. The framework's own revision is NOT updated by Dependabot: a revision of the framework is only ever a full commit SHA that a person puts in
+# the caller after the framework change has been reviewed and tested (specification 16, section 10.8).
+version: 2
+updates:
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly
+    open-pull-requests-limit: 3
+    labels:
+      - dependencies
+      - owner-review
+    commit-message:
+      prefix: 'deps(actions)'
+
+  - package-ecosystem: npm
+    directory: '/{{PROJECT_DIR}}'
+    schedule:
+      interval: weekly
+    open-pull-requests-limit: 3
+    labels:
+      - dependencies
+      - owner-review
+    commit-message:
+      prefix: 'deps(npm)'

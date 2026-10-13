@@ -17,7 +17,8 @@
   "project": "A fact about Jade & Ember or its delivered site; stays.",
   "devtool": "Development and test tooling; kept optional, never a release dependency.",
   "record": "Project history, decisions and evidence; stays.",
-  "doc": "Documentation that is rewritten into the framework specification."
+  "doc": "Documentation that is rewritten into the framework specification.",
+  "framework-snapshot": "Framework files carried as a verified snapshot (G6-8): owned by the private framework repository, changed only by a reviewed refresh made by the snapshot tool; never edited here."
  },
  "components": [
   {
@@ -1232,6 +1233,35 @@
     7
    ],
    "class": "universal-redesign"
+  },
+  {
+   "id": "FM-36",
+   "name": "Framework snapshot (G6-8)",
+   "summary": "The verified copy of the framework files this project needs to run and verify itself: the engineering (checks, runtime, standards, adapters, tools, CI scripts and templates, the generic fixture) and the composite action, with the integrity record that lists every file, its checksum and the framework commit they were copied from, and the third-party notices the quoted provider documentation requires.",
+   "paths": [
+    "engineering/",
+    ".github/actions/engineering/",
+    "sts-framework-snapshot.json",
+    "THIRD_PARTY_NOTICES.md",
+    "third-party-licenses/"
+   ],
+   "target": "getsimplifiedtech/sts-web-design-framework, engineering/ and .github/actions/engineering/ (private; this is its public copy)",
+   "external": [
+    "node >=24.8 <25",
+    "git"
+   ],
+   "dependsOn": [],
+   "redesign": {
+    "level": "none",
+    "notes": ""
+   },
+   "verify": "check:extraction (snapshot mode: every file against the record, the production hard stop against its pin), tools/snapshot.mjs verify --against <framework checkout> (the record against the private commit), and the framework's own CI.",
+   "masterSpecs": [
+    "09"
+   ],
+   "workPackage": "G6-8",
+   "priorities": [],
+   "class": "framework-snapshot"
   }
  ],
  "workPackages": [

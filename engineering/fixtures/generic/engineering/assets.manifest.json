@@ -1,0 +1,54 @@
+{
+  "$comment": "Integrity record of the delivered site (every page, shared script and stylesheet, font and media file). Generated from a fresh build by engineering/tools/asset-manifest.mjs; check:assets fails when the built site differs from it, so every change to a delivered byte is a reviewed change to this file. SRI strings are for hosts or tools that want them; the pages carry none (SRI adds nothing for same-origin files and is unreliable over file://).",
+  "algorithm": "sha256 (hex) and sha384 (SRI)",
+  "fileCount": 9,
+  "totalBytes": 34171,
+  "treeSha256": "ba4ff16a9ae58b288975cd94d186916b1324eec6345fcafdb18b22f939016957",
+  "files": {
+    "404.html": {
+      "bytes": 2653,
+      "sha256": "73b67a6d5b6f1611d4cfbc5f24c70cd2e5006d370f9c9e62111b211ee05e09e1",
+      "integrity": "sha384-7YrZV1svPAwPhtT5GgZD5w5nZ2A98vvmnrZf+KkATeotqvgi38VGhsqpYX20UHXo"
+    },
+    "contact.html": {
+      "bytes": 3155,
+      "sha256": "ac569082786b3467783f8bdc2a5a19632b520951ddc56cb30433b78f9764608a",
+      "integrity": "sha384-ZOPt15LQEqrUwpsHCNn4R0r5gu72INN836TSR9HYylNm3Qx86Oh84vL0oLVbbPod"
+    },
+    "index.html": {
+      "bytes": 3402,
+      "sha256": "483624db88f53848c2be2d781a5cdd0119001af6e038b8e6d66c82cb21037d3a",
+      "integrity": "sha384-KsQNnEPhDRCqU6rJGbVjWG6HCw8Y22++/eFW1lhspt9fu7ymouxdqZI4JMHS7Exi"
+    },
+    "media/PROVENANCE.md": {
+      "bytes": 677,
+      "sha256": "1b79a2b1d2e9c995f634c3dacbd41a4e8ccc827603edc06fef7689ff9d9c2fc5",
+      "integrity": "sha384-xMajt/AY961UPtqP4V3Tn33cVaTfd4sOn2GH1ZrXFW8nkXBdYQmwLeyhuGTFDCs8"
+    },
+    "media/press-hero.webp": {
+      "bytes": 9396,
+      "sha256": "bee39d666ad66abba50842e2d259f652f30df20661810a630a384935c7df53b7",
+      "integrity": "sha384-5+B1NCXz8LvdxOSfjP5XMLrqjkg3GhMkXrsCNjwQ8+gvcaD4Qmfqd6NRML0CXamY"
+    },
+    "media/type-drawer.webp": {
+      "bytes": 6850,
+      "sha256": "771b0e2c19e6aa7488d7a5926eb506b08475459c8d0dbcde030263d26b6a30c5",
+      "integrity": "sha384-nHveeuKCHeEYeEnYRRapqvdy3HBxA82n24vdN/IKQ275aBTci9+c9KZ3luagrM2X"
+    },
+    "services.html": {
+      "bytes": 3304,
+      "sha256": "1775e2059a8059b67c7de35d35fb79079ed040108c71f8b1c5704e7a834a9825",
+      "integrity": "sha384-2RRyQlEfgc63k4Oo0JdCGisKfARu0qlBmUzDxpiCo2nJkZzUMI3rClPut2/skXxv"
+    },
+    "site.js": {
+      "bytes": 739,
+      "sha256": "3875cfb230ac496d7ae5227c86f52789263a487652f6d89354a896b5f5402f67",
+      "integrity": "sha384-kmarcnLQNVjDJlVrr7aPTFfwO26FuzKuIP76+3C82cYh+00f2xV+KajnbF/UpCA8"
+    },
+    "styles.css": {
+      "bytes": 3995,
+      "sha256": "bacc6410b26451698110ebea8ec3c735e4bba09fa412d4e2f116dd0d84c72dcf",
+      "integrity": "sha384-r0TxkxJS4rjUNdgmdxtCvZVBkx8nEwBy+e5/XSG536SBe3qUtncJygs/mYXu/u40"
+    }
+  }
+}

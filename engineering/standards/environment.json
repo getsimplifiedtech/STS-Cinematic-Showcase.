@@ -1,0 +1,92 @@
+{
+  "$comment": "The pinned rendering environment of the regression harness (an owner approval D-9, an owner approval). Baseline and candidate are always rendered in the SAME run, in the same browser, so a different browser build still gives a valid comparison; the pins make evidence reproducible and drift visible. Playwright is pinned exactly in package.json and package-lock.json. A browser-build mismatch is reported as a warning, or as a failure with --strict-env.",
+  "$overlay": {
+    "documentation": [
+      "nodeBaseline.note",
+      "browsers.*.note"
+    ]
+  },
+  "node": ">=24.8.0 <25",
+  "nodeBaseline": {
+    "version": "24.21.0",
+    "npm": "11.19.0",
+    "line": "Node.js 24 (Krypton), long-term support",
+    "verifiedOn": "2026-10-11",
+    "note": "The exact patch the whole verification was run on (Gate 6, G6-1, an owner approval): the SHA-256 of the Linux x64 binary was checked against SHASUMS256.txt from nodejs.org (the GPG signature of that file was not verified in the sandbox), and CI pins the same patch. 'node' above is what package.json engines declares: the lower bound 24.8.0 is the oldest Node 24 that html-validate (^22.22.0 || >=24.8.0) supports, the upper bound keeps an untested major out. Raising the patch is a deliberate change that re-runs the suite; check:ci and check:deps refuse a workflow, an engines range or a lockfile that disagrees."
+  },
+  "playwright": "1.64.0",
+  "browsers": {
+    "chromium": {
+      "version": "141.0.7390.37",
+      "note": "Reference build used for the Gate 1 evidence (Chromium via CHROMIUM_PATH, /opt/pw-browsers chromium-1194). Playwright 1.64.0's own bundled Chromium is 156.0.8078.4; a CI run (Gate 3) will pin that build instead. --strict-env fails on any other build."
+    },
+    "firefox": {
+      "version": "157.0",
+      "note": "Not installable in the development sandbox (the download host is unreachable). Runs only on GitHub Actions (node engineering/cross-browser.mjs --engine firefox, Playwright 1.64.0's own build, downloaded at run time). Version observed in Actions runs 13 and 14 (Gate 5 Phase 1); a different Playwright pin means a different build."
+    },
+    "webkit": {
+      "version": "27.2",
+      "note": "Not installable in the development sandbox (the download host is unreachable). Runs only on GitHub Actions (node engineering/cross-browser.mjs --engine webkit, Playwright 1.64.0's own build on Linux, downloaded at run time; reports itself as Safari 27.2 / AppleWebKit 605.1.15). This is Playwright's WebKit on Linux, not Safari on macOS or iOS: real-device Safari evidence is separate (human testing)."
+    }
+  },
+  "context": {
+    "locale": "en-US",
+    "timezoneId": "UTC",
+    "colorScheme": "light",
+    "reducedMotion": "reduce",
+    "deviceScaleFactor": 1
+  },
+  "launchArgs": [
+    "--force-color-profile=srgb",
+    "--font-render-hinting=none",
+    "--disable-lcd-text"
+  ],
+  "visual": {
+    "$comment": "Tolerances for screenshot comparison within one engine. pixelThreshold is pixelmatch's per-pixel colour distance (0 to 1) with anti-aliased edge pixels ignored. A page passes when the share of differing pixels is within maxDiffRatio AND no 32x32 cell contains more than maxCellPixels differing pixels (so a small local change cannot hide inside a large page). Different engines are never compared with each other.",
+    "pixelThreshold": 0.1,
+    "maxDiffRatio": 0.0005,
+    "cell": 32,
+    "maxCellPixels": 12
+  },
+  "viewports": [
+    {
+      "name": "desktop-2560",
+      "width": 2560,
+      "height": 1440
+    },
+    {
+      "name": "desktop-1440",
+      "width": 1440,
+      "height": 900
+    },
+    {
+      "name": "laptop-1024",
+      "width": 1024,
+      "height": 768
+    },
+    {
+      "name": "tablet-820",
+      "width": 820,
+      "height": 1180
+    },
+    {
+      "name": "mobile-390",
+      "width": 390,
+      "height": 844,
+      "isMobile": true,
+      "hasTouch": true
+    },
+    {
+      "name": "reflow-320",
+      "width": 320,
+      "height": 640
+    },
+    {
+      "name": "phone-landscape-844",
+      "width": 844,
+      "height": 390,
+      "isMobile": true,
+      "hasTouch": true
+    }
+  ]
+}

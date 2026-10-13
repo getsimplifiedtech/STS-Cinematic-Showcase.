@@ -1,0 +1,79 @@
+{
+  "$comment": "Lighthouse thresholds (Gate 6, G6-1, an owner approval). They reproduce lighthouserc.json of Lighthouse CI exactly (the file this replaces): the same five pages, three runs per page, performance 0.8 (warn), accessibility 0.95 (error), best practices 0.9 (warn), SEO 0.6 (warn), is-crawlable not asserted. They may be raised, never lowered: check:selftest-gate6 holds the floor in 'floor'. 'aggregation' decides how three runs become one score: Lighthouse CI's default was 'optimistic' (a page passed when ANY run reached the minimum), which the Phase 6 documents wrongly described as the median. 'median' is the same as or stricter than 'optimistic' for every set of runs, so it weakens nothing; 'pessimistic' (every run must pass) is stricter still. Only 'error' assertions fail the command; 'warn' assertions are printed.",
+  "$overlay": {
+    "delegated": {
+      "pages": {
+        "type": "array",
+        "floor": "coversPages"
+      }
+    },
+    "stricterUp": [
+      "categories.performance.minScore",
+      "categories.accessibility.minScore",
+      "categories.best-practices.minScore",
+      "categories.seo.minScore"
+    ],
+    "documentation": [
+      "audits.*.reason",
+      "chrome.noSandboxReason"
+    ]
+  },
+  "pages": [],
+  "runs": 3,
+  "aggregation": "median",
+  "categories": {
+    "performance": {
+      "level": "warn",
+      "minScore": 0.8
+    },
+    "accessibility": {
+      "level": "error",
+      "minScore": 0.95
+    },
+    "best-practices": {
+      "level": "warn",
+      "minScore": 0.9
+    },
+    "seo": {
+      "level": "warn",
+      "minScore": 0.6
+    }
+  },
+  "audits": {
+    "is-crawlable": {
+      "level": "off",
+      "reason": "Demonstrations and previews are deliberately noindex (specification 16, 9.4), so Lighthouse's own crawlability audit would fail by design and hold the SEO category below 1; the category threshold stays in force."
+    }
+  },
+  "floor": {
+    "runs": 3,
+    "categories": {
+      "performance": 0.8,
+      "accessibility": 0.95,
+      "best-practices": 0.9,
+      "seo": 0.6
+    },
+    "errorCategories": [
+      "accessibility"
+    ],
+    "aggregationOrder": [
+      "optimistic",
+      "median",
+      "pessimistic"
+    ],
+    "minimumAggregation": "optimistic"
+  },
+  "chrome": {
+    "flags": [
+      "--headless=new",
+      "--no-sandbox",
+      "--disable-gpu",
+      "--no-first-run",
+      "--no-default-browser-check",
+      "--disable-extensions",
+      "--disable-background-networking",
+      "--mute-audio"
+    ],
+    "noSandboxReason": "Lighthouse CI used --no-sandbox too, and so does Playwright by default. On the GitHub-hosted Ubuntu 24.04 runner AppArmor blocks the user namespaces Chromium's sandbox needs (seen in run 46: Chromium aborted at start with SIGABRT), and in the development container the user is root. The browser only ever opens pages of this project, served from 127.0.0.1 by the engineering static server, in a throw-away profile."
+  }
+}

@@ -1,0 +1,57 @@
+{
+  "brand": {
+    "name": "Quillfeather Letterpress",
+    "descriptor": "Letterpress printing studio"
+  },
+  "contact": {
+    "phone": {
+      "display": "555.010.0142",
+      "href": "tel:+15550100142"
+    },
+    "email": null
+  },
+  "ordering": {
+    "url": null
+  },
+  "address": {
+    "lines": [
+      "14 Printers Row",
+      "Sampletown, ST 00000"
+    ],
+    "mapUrl": null
+  },
+  "hours": {
+    "timezone": "America/New_York",
+    "rows": [
+      {
+        "days": "Monday",
+        "time": "Closed"
+      },
+      {
+        "days": "Tuesday – Friday",
+        "time": "10:00 am – 5:00 pm"
+      },
+      {
+        "days": "Saturday",
+        "time": "10:00 am – 2:00 pm"
+      },
+      {
+        "days": "Sunday",
+        "time": "Closed"
+      }
+    ]
+  },
+  "seo": {
+    "baseUrl": null,
+    "titleTemplate": "{page} | {brand}",
+    "noindex": true,
+    "structuredData": false,
+    "themeColor": "#1d1b19",
+    "urlStyle": "extension",
+    "host": "static"
+  },
+  "flags": {
+    "demo": true,
+    "heroVideo": false
+  }
+}

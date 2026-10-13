@@ -1,0 +1,93 @@
+{
+  "$comment": "Performance and page-weight budgets of the generic fixture. The limits are set generously for a small static site and are not a client's budgets; a project sets its own from its first measurements plus headroom. `measured` is rewritten by `node checks/budgets.mjs --update-measured` in a reviewed commit; a value more than regressionTolerancePercent above it fails even under its limit. The fixture has no baseline, so baselineGrowthPercent is recorded but unused. Core Web Vitals limits are the 'good' thresholds.",
+  "regressionTolerancePercent": 5,
+  "baselineGrowthPercent": 0.5,
+  "limits": {
+    "page": {
+      "htmlGzip": 4096,
+      "initialGzip": 120000,
+      "fullGzip": 160000,
+      "jsGzip": 3000,
+      "inlineJsBytes": 64,
+      "scripts": 1
+    },
+    "cssGzip": 9000,
+    "maxImageBytes": 80000,
+    "maxWebmBytes": 660000,
+    "maxMp4Bytes": 1005000,
+    "fontFiles": 4,
+    "fontBytes": 60100,
+    "deliveredBytes": 400000,
+    "requests": 11,
+    "transferBytes": 192000,
+    "webVitals": {
+      "lcpMs": 2500,
+      "cls": 0.1,
+      "blockingMs": 200,
+      "interactionMs": 200
+    }
+  },
+  "measured": {
+    "static": {
+      "pages": {
+        "index.html": {
+          "htmlGzip": 1470,
+          "initialGzip": 12605,
+          "fullGzip": 12605,
+          "jsGzip": 387
+        },
+        "services.html": {
+          "htmlGzip": 1399,
+          "initialGzip": 3138,
+          "fullGzip": 9988,
+          "jsGzip": 387
+        },
+        "contact.html": {
+          "htmlGzip": 1276,
+          "initialGzip": 3015,
+          "fullGzip": 3015,
+          "jsGzip": 387
+        }
+      },
+      "deliveredBytes": 34200
+    },
+    "runtime": {
+      "index.html": {
+        "worstEvent": "pointerdown",
+        "lcpMs": 496,
+        "cls": 0,
+        "blockingMs": 0,
+        "interactionMs": 3,
+        "inputDelayMs": 10,
+        "endToEndMs": 24,
+        "presentationMs": 22,
+        "requests": 4,
+        "transferBytes": 12605
+      },
+      "services.html": {
+        "worstEvent": "pointerover",
+        "lcpMs": 640,
+        "cls": 0,
+        "blockingMs": 0,
+        "interactionMs": 2,
+        "inputDelayMs": 9,
+        "endToEndMs": 24,
+        "presentationMs": 23,
+        "requests": 4,
+        "transferBytes": 9988
+      },
+      "contact.html": {
+        "worstEvent": "pointerover",
+        "lcpMs": 448,
+        "cls": 0,
+        "blockingMs": 0,
+        "interactionMs": 2,
+        "inputDelayMs": 7,
+        "endToEndMs": 24,
+        "presentationMs": 23,
+        "requests": 3,
+        "transferBytes": 3015
+      }
+    }
+  }
+}

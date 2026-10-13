@@ -1,0 +1,5 @@
+{
+  "$comment": "The fictional demonstrations this project may release on the demonstration channel. Empty: the fixture is never released. A configuration with demo and noindex switched on is not a demonstration unless its configuration digest is registered here (RG-13).",
+  "schema": "quillfeather-letterpress/demonstrations@1",
+  "registered": []
+}

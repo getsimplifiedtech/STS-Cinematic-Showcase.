@@ -1,0 +1,82 @@
+{
+  "$comment": "The media rights inventory of the generic fixture: every image it delivers, where each came from (media/PROVENANCE.md), what is established and what is not. It asserts no right over any file. check:media fails if a delivered file has no entry or has changed since it was written.",
+  "reviewedOn": "2026-10-13",
+  "policy": "engineering/fixtures/generic/docs/MEDIA_RIGHTS_POLICY.md",
+  "statuses": {
+    "unverified": "nothing established about rights; the generation record exists",
+    "licence-text-shipped": "a licence text and copyright notice are shipped with the file; the upstream source is not confirmed",
+    "verified": "a rights-verification approval row names who verified, the sources and the date for this file"
+  },
+  "terms": [
+    {
+      "id": "T-FIXTURE-SCRIPT",
+      "party": "STS",
+      "title": "The script that made the fixture images",
+      "url": null,
+      "establishes": "That the two images were drawn by the fixture script alone, from no third-party file, which a person confirms by reading media/PROVENANCE.md and running the script.",
+      "status": "not-reviewed"
+    }
+  ],
+  "assets": [
+    {
+      "path": "media/press-hero.webp",
+      "kind": "image",
+      "description": "1200 x 675 WebP, an abstract grid of flat rectangles",
+      "bytes": 9396,
+      "sha256": "bee39d666ad66abba50842e2d259f652f30df20661810a630a384935c7df53b7",
+      "origin": {
+        "type": "script",
+        "service": "a script written for this fixture (Pillow), run locally",
+        "generatedOn": "2026-10-13",
+        "seed": "1",
+        "postProcessing": "saved as WebP",
+        "recordedIn": "media/PROVENANCE.md",
+        "notStored": "nothing: the script is deterministic"
+      },
+      "rights": {
+        "status": "unverified",
+        "established": [
+          "How the file was made is recorded in media/PROVENANCE.md: a script, no photograph, no model output, no third-party file."
+        ],
+        "notEstablished": [
+          "That no person has to confirm the origin: the record is a statement by the engineering authors, not a verification."
+        ]
+      },
+      "termsToVerify": [
+        "T-FIXTURE-SCRIPT"
+      ],
+      "useNow": "The generic fixture only, to test the STS engineering. It depicts nothing.",
+      "clientUse": "Not for a client site. A client replaces it with media whose origin and rights are recorded in a rights-verification approval."
+    },
+    {
+      "path": "media/type-drawer.webp",
+      "kind": "image",
+      "description": "800 x 533 WebP, an abstract grid of flat rectangles",
+      "bytes": 6850,
+      "sha256": "771b0e2c19e6aa7488d7a5926eb506b08475459c8d0dbcde030263d26b6a30c5",
+      "origin": {
+        "type": "script",
+        "service": "a script written for this fixture (Pillow), run locally",
+        "generatedOn": "2026-10-13",
+        "seed": "2",
+        "postProcessing": "saved as WebP",
+        "recordedIn": "media/PROVENANCE.md",
+        "notStored": "nothing: the script is deterministic"
+      },
+      "rights": {
+        "status": "unverified",
+        "established": [
+          "How the file was made is recorded in media/PROVENANCE.md: a script, no photograph, no model output, no third-party file."
+        ],
+        "notEstablished": [
+          "That no person has to confirm the origin: the record is a statement by the engineering authors, not a verification."
+        ]
+      },
+      "termsToVerify": [
+        "T-FIXTURE-SCRIPT"
+      ],
+      "useNow": "The generic fixture only, to test the STS engineering. It depicts nothing.",
+      "clientUse": "Not for a client site. A client replaces it with media whose origin and rights are recorded in a rights-verification approval."
+    }
+  ]
+}

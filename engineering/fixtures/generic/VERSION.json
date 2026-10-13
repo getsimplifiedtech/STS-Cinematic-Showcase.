@@ -1,0 +1,8 @@
+{
+  "$comment": "The one source of the generic fixture's version. package.json must equal it (check:release). The fixture is never released; the release gate is exercised against it only in the dry run and the self-tests.",
+  "name": "quillfeather-letterpress-fixture",
+  "version": "0.1.0",
+  "baseline": null,
+  "channel": "demonstration",
+  "previewPackage": "quillfeather-letterpress-fixture-v0.1-preview.zip"
+}

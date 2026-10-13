@@ -1,0 +1,29 @@
+{
+  "$comment": "Base standard of the STS engineering (specification 16, section 5). Derived from the engineering as first extracted; rules and overlay declarations below; a project overlay of the same name is accepted only under the overlay rule (lib/policy.mjs).",
+  "$overlay": {},
+  "soleAuthority": {
+    "name": "Anthropic Frontend Design",
+    "skill": "frontend-design",
+    "license": "Apache-2.0"
+  },
+  "name": "STS Premium Web Design",
+  "status": "historical-only",
+  "patterns": [
+    "STS Premium Web Design",
+    "PREMIUM_WEB_DESIGN",
+    "sts-premium-web-design",
+    "premium-web-design-skill"
+  ],
+  "markers": [
+    "retired",
+    "historical",
+    "deprecated",
+    "superseded",
+    "archived",
+    "not applied",
+    "not reintroduced",
+    "must not be combined",
+    "no longer used",
+    "old skill"
+  ]
+}

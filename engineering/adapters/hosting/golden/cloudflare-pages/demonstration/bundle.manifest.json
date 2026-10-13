@@ -1,0 +1,167 @@
+{
+  "schema": "sts/hosting-bundle@1",
+  "adapter": "cloudflare-pages",
+  "channel": "demonstration",
+  "urlStyle": "clean",
+  "baseUrl": null,
+  "siteRoot": "site",
+  "options": {
+    "hsts": {
+      "includeSubDomains": false
+    }
+  },
+  "files": [
+    {
+      "path": "SETTINGS.txt",
+      "role": "doc",
+      "sha256": "aee7b4e64add48efee6fdb1079a8887883af9e7f2d5ad616472889b61f039461",
+      "bytes": 2680
+    },
+    {
+      "path": "site/404.html",
+      "role": "site",
+      "sha256": "3814f126f51066f1b07886c159ce63d02037e0735a5d0ea46e876df20c5dcbb8",
+      "bytes": 571
+    },
+    {
+      "path": "site/_headers",
+      "role": "headers",
+      "sha256": "1200f5a8395f8d7789c5508acb668a631d2bbc929ab781cada5605ff0051722d",
+      "bytes": 1353
+    },
+    {
+      "path": "site/about.html",
+      "role": "site",
+      "sha256": "95748e47a3e45892e27b44c87e55959a358f886c98e4ef360f0a90bde12db247",
+      "bytes": 548
+    },
+    {
+      "path": "site/assets/app.js",
+      "role": "site",
+      "sha256": "77f5eec38c5ef075e11892244ccf9e249d82937e07401398df98319568775a17",
+      "bytes": 14
+    },
+    {
+      "path": "site/fonts/fixture.woff2",
+      "role": "site",
+      "sha256": "1aa96856f1057a2280458a602b5fcee39623ef81ef49eb18c26cfe4eec6fd645",
+      "bytes": 512
+    },
+    {
+      "path": "site/index.html",
+      "role": "site",
+      "sha256": "5eb281e21c0a70d020f45bf4d66e09cc011194ed9971a4f56c38fd8af8f99d2d",
+      "bytes": 581
+    },
+    {
+      "path": "site/media/clip.mp4",
+      "role": "site",
+      "sha256": "f3047ff358aa268b0eed9479ed91400ed6fa25dd60ccafefbde30cc766986a4b",
+      "bytes": 8192
+    },
+    {
+      "path": "site/media/loaf.webp",
+      "role": "site",
+      "sha256": "70e19da46a01b49618fcb1a8955ebc9642801008197fb009c0e99f63ae798c38",
+      "bytes": 2048
+    },
+    {
+      "path": "site/products.html",
+      "role": "site",
+      "sha256": "f22276f763a48dc83f00a937832d01bb1b6caf0180a45dc2a27c4f3392cdd06b",
+      "bytes": 546
+    },
+    {
+      "path": "site/site.js",
+      "role": "site",
+      "sha256": "77f5eec38c5ef075e11892244ccf9e249d82937e07401398df98319568775a17",
+      "bytes": 14
+    },
+    {
+      "path": "site/styles.css",
+      "role": "site",
+      "sha256": "1db922093f8890bd7638e247ef794d763c90369d044da47231fd65ffbe87ebcf",
+      "bytes": 56
+    }
+  ],
+  "siteTreeSha256": "7b6e5f8a37f132efe07e48d45d0221764b080f7065721c29e0bae2008ea5b865",
+  "settingsToApply": [
+    {
+      "name": "Deployment method",
+      "value": "Git integration (the STS default, D-P3-3) with framework preset None and the output directory below, or Direct Upload of this bundle. Direct Upload cannot be switched to Git integration later (CF-20): decide per client."
+    },
+    {
+      "name": "Framework preset / build command",
+      "value": "None. Leave the build command blank (CF-22); the same page also says to use `exit 0` when no preset is used (CF-23): use whichever the dashboard accepts. No install step, no environment variables."
+    },
+    {
+      "name": "Build output directory",
+      "value": "site"
+    },
+    {
+      "name": "Custom domain",
+      "value": "None: the demonstration is never published on a client domain. Do not enable zone features that rewrite HTML (email address obfuscation, Rocket Loader, automatic minification, injected analytics): the CSP allows only the hashed inline script (HR-08)."
+    },
+    {
+      "name": "Preview deployments",
+      "value": "Public by default (CF-19). None is authorised (D-P3-5). If one is ever authorised, protect it with Cloudflare Access and keep X-Robots-Tag: noindex."
+    }
+  ],
+  "notes": {
+    "unverifiedLive": [
+      "the status of the redirect from /products.html to /products (308 is assumed)",
+      "what /products/ does (HR-03)",
+      "what /index, /404 and /404.html do (modelled: not found, answered with the 404 page)",
+      "that the 404.html response has status 404 (the documentation says only that the page is displayed when a file is not found)",
+      "whether the _headers rules apply to the 404.html response and to the home-page fallback",
+      "whether a header set in _headers replaces the platform's default of the same name (modelled, as the documentation says _headers \"override what Cloudflare ordinarily sends\") or is joined with it; Access-Control-Allow-Origin: * is a platform default the bundle does not remove",
+      "the content types served for .xml, .txt, .webm, .mp4 and .woff2",
+      "Range support for the hero video: the documentation says 200 is returned, which Safari cannot seek (HR-12)",
+      "that the deployed bytes equal the staged bytes (checklist C-07)",
+      "that request paths are matched case-sensitively, so /Products is not answered from products.html (modelled; the pages read do not say, and nothing was observed live)",
+      "compression and caching at the edge",
+      "HSTS: that the header is sent as written and not changed by a zone setting"
+    ],
+    "liveBlockers": [],
+    "providerFacts": [
+      "CF-01",
+      "CF-02",
+      "CF-03",
+      "CF-04",
+      "CF-04b",
+      "CF-05",
+      "CF-06",
+      "CF-08",
+      "CF-09",
+      "CF-09b",
+      "CF-10",
+      "CF-11",
+      "CF-12",
+      "CF-14",
+      "CF-14b",
+      "CF-15",
+      "CF-15b",
+      "CF-17",
+      "CF-17b"
+    ],
+    "capabilities": {
+      "cleanUrls": "platform",
+      "trailingSlash": "platform (not established for a page file such as /products/)",
+      "headersMechanism": "headers-file",
+      "unknownPath": "spa-fallback unless a top-level 404.html exists",
+      "previewNoindex": "automatic (platform adds X-Robots-Tag: noindex over preview URLs)",
+      "previewProtection": "optional (public by default)",
+      "mount": [
+        "domain-root"
+      ],
+      "limits": {
+        "files": 20000,
+        "fileBytes": 26214400,
+        "rules": 100,
+        "lineChars": 2000
+      },
+      "ranges": "documented to answer Range requests with 200, not 206 (CF-12)"
+    }
+  },
+  "noCredential": "This bundle holds no hosting credential, account, project or team identifier and cannot deploy anything."
+}

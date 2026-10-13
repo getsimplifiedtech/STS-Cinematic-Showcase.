@@ -1,0 +1,41 @@
+{
+  "allowedLinkHosts": [
+    "getsimplifiedtech.com"
+  ],
+  "clientLinkHostsFromConfig": true,
+  "forbiddenScriptApis": [
+    "document.cookie",
+    "localStorage",
+    "sessionStorage",
+    "indexedDB",
+    "caches.",
+    "serviceWorker",
+    "fetch(",
+    "XMLHttpRequest",
+    "sendBeacon",
+    "WebSocket",
+    "EventSource",
+    "navigator.geolocation",
+    "getUserMedia",
+    "mediaDevices",
+    "eval(",
+    "new Function",
+    "document.write",
+    "importScripts",
+    "postMessage",
+    "Notification",
+    "navigator.userAgent",
+    "navigator.plugins",
+    "navigator.languages",
+    "hardwareConcurrency",
+    "deviceMemory",
+    "getBattery",
+    "toDataURL",
+    "getImageData",
+    "RTCPeerConnection",
+    "window.name"
+  ],
+  "allowedNavigatorReads": [
+    "navigator.connection"
+  ]
+}

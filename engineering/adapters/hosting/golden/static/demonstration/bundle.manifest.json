@@ -1,0 +1,129 @@
+{
+  "schema": "sts/hosting-bundle@1",
+  "adapter": "static",
+  "channel": "demonstration",
+  "urlStyle": "extension",
+  "baseUrl": null,
+  "siteRoot": "site",
+  "options": {
+    "hsts": {
+      "includeSubDomains": false
+    }
+  },
+  "files": [
+    {
+      "path": "SETTINGS.txt",
+      "role": "doc",
+      "sha256": "5181c19350eb119ca8246763529663af1c82560f461b3f6181b9a4786b0bd943",
+      "bytes": 789
+    },
+    {
+      "path": "htaccess",
+      "role": "server-config",
+      "sha256": "9fc5365526bf41d575afdd097136422d38746b540858818c796ff2ca071c9229",
+      "bytes": 1431
+    },
+    {
+      "path": "nginx.conf",
+      "role": "server-config",
+      "sha256": "6057cb9e5d75191876d3f5cf5fff8619b28339b976118f7e1654e74ae219fd42",
+      "bytes": 4356
+    },
+    {
+      "path": "site/404.html",
+      "role": "site",
+      "sha256": "3814f126f51066f1b07886c159ce63d02037e0735a5d0ea46e876df20c5dcbb8",
+      "bytes": 571
+    },
+    {
+      "path": "site/about.html",
+      "role": "site",
+      "sha256": "95748e47a3e45892e27b44c87e55959a358f886c98e4ef360f0a90bde12db247",
+      "bytes": 548
+    },
+    {
+      "path": "site/assets/app.js",
+      "role": "site",
+      "sha256": "77f5eec38c5ef075e11892244ccf9e249d82937e07401398df98319568775a17",
+      "bytes": 14
+    },
+    {
+      "path": "site/fonts/fixture.woff2",
+      "role": "site",
+      "sha256": "1aa96856f1057a2280458a602b5fcee39623ef81ef49eb18c26cfe4eec6fd645",
+      "bytes": 512
+    },
+    {
+      "path": "site/index.html",
+      "role": "site",
+      "sha256": "5eb281e21c0a70d020f45bf4d66e09cc011194ed9971a4f56c38fd8af8f99d2d",
+      "bytes": 581
+    },
+    {
+      "path": "site/media/clip.mp4",
+      "role": "site",
+      "sha256": "f3047ff358aa268b0eed9479ed91400ed6fa25dd60ccafefbde30cc766986a4b",
+      "bytes": 8192
+    },
+    {
+      "path": "site/media/loaf.webp",
+      "role": "site",
+      "sha256": "70e19da46a01b49618fcb1a8955ebc9642801008197fb009c0e99f63ae798c38",
+      "bytes": 2048
+    },
+    {
+      "path": "site/products.html",
+      "role": "site",
+      "sha256": "f22276f763a48dc83f00a937832d01bb1b6caf0180a45dc2a27c4f3392cdd06b",
+      "bytes": 546
+    },
+    {
+      "path": "site/site.js",
+      "role": "site",
+      "sha256": "77f5eec38c5ef075e11892244ccf9e249d82937e07401398df98319568775a17",
+      "bytes": 14
+    },
+    {
+      "path": "site/styles.css",
+      "role": "site",
+      "sha256": "1db922093f8890bd7638e247ef794d763c90369d044da47231fd65ffbe87ebcf",
+      "bytes": 56
+    }
+  ],
+  "siteTreeSha256": "7b6e5f8a37f132efe07e48d45d0221764b080f7065721c29e0bae2008ea5b865",
+  "settingsToApply": [
+    {
+      "name": "nginx",
+      "value": "Include nginx.conf inside the server block that serves the site folder; add `error_page 404 /404.html;` once a 404 page exists (D-P3-1)."
+    },
+    {
+      "name": "Apache",
+      "value": "Needs mod_headers. Save htaccess as .htaccess in the site folder; add `ErrorDocument 404 /404.html` once a 404 page exists (D-P3-1)."
+    },
+    {
+      "name": "TLS",
+      "value": "The demonstration is never published."
+    }
+  ],
+  "notes": {
+    "unverifiedLive": [
+      "everything: this adapter only wraps the existing nginx and Apache renderings; no server was run"
+    ],
+    "liveBlockers": [],
+    "providerFacts": [],
+    "capabilities": {
+      "cleanUrls": "none",
+      "trailingSlash": "none",
+      "headersMechanism": "server-config",
+      "unknownPath": "not-found",
+      "previewNoindex": "none",
+      "previewProtection": "none",
+      "mount": [
+        "domain-root"
+      ],
+      "limits": {},
+      "ranges": "server default (nginx and Apache answer Range requests)"
+    }
+  },
+  "noCredential": "This bundle holds no hosting credential, account, project or team identifier and cannot deploy anything."
+}

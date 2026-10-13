@@ -1,0 +1,60 @@
+{
+ "schema": "sts/purity-allow@1",
+ "$comment": "G6-6 (specification 16, 10.6): project-specific values that remain in the framework's reusable code. All of them are test material of the framework's own checks (hosting adapters, release gate, release dry run, portability message text); none is a rule. A ratchet: max can be lowered, never raised; an entry that matches nothing fails check:project. The industry adapters, the development tools (self-tests) and the fixture projects are not scanned (see frameworkReusableFiles in checks/project.mjs); lib/purity.mjs and checks/project.mjs name the forbidden values by design.",
+ "allow": [
+  {
+   "file": "adapters/hosting/fixture.mjs",
+   "rule": "site-file",
+   "max": 3,
+   "reason": "The hosting fixture writes a minimal static site; its shared files carry the delivery contract's conventional names. Test material for the adapters, not a rule of the adapters."
+  },
+  {
+   "file": "checks/hosting-adapters.mjs",
+   "rule": "site-file",
+   "max": 4,
+   "reason": "Negative cases tamper with the staged site by its conventional file names (a delivered file altered, a credential-shaped string added, the stylesheet requested). Test material, not adapter behaviour."
+  },
+  {
+   "file": "checks/portability.mjs",
+   "rule": "industry-word",
+   "max": 1,
+   "reason": "Text of a measured-finding message that names a hero preload; the finding is emitted only for a project that declares a hero preload (markup.heroPreloadPattern). Message text, not a rule."
+  },
+  {
+   "file": "lib/release-cases.mjs",
+   "rule": "industry-word",
+   "max": 2,
+   "reason": "Test material of the release gate: case names and reserved test hosts that carry the ancestry of the first project (an approval id in a case title, a reserved fixture host, a hosted-elsewhere image). They exercise the gate and decide nothing in it."
+  },
+  {
+   "file": "lib/release-cases.mjs",
+   "rule": "record-id",
+   "max": 1,
+   "reason": "Test material of the release gate: case names and reserved test hosts that carry the ancestry of the first project (an approval id in a case title, a reserved fixture host, a hosted-elsewhere image). They exercise the gate and decide nothing in it."
+  },
+  {
+   "file": "lib/release-cases.mjs",
+   "rule": "project-name",
+   "max": 1,
+   "reason": "Test material of the release gate: case names and reserved test hosts that carry the ancestry of the first project (an approval id in a case title, a reserved fixture host, a hosted-elsewhere image). They exercise the gate and decide nothing in it."
+  },
+  {
+   "file": "lib/release-dryrun-scenarios.mjs",
+   "rule": "industry-word",
+   "max": 4,
+   "reason": "Test material of the release dry run: scenario titles and edits that name a delivered file by its conventional name (site.js, styles.css) and a demonstration package. They tamper with the sandbox copy and decide nothing in the gate."
+  },
+  {
+   "file": "lib/release-dryrun-scenarios.mjs",
+   "rule": "project-name",
+   "max": 2,
+   "reason": "Test material of the release dry run: scenario titles and edits that name a delivered file by its conventional name (site.js, styles.css) and a demonstration package. They tamper with the sandbox copy and decide nothing in the gate."
+  },
+  {
+   "file": "lib/release-dryrun-scenarios.mjs",
+   "rule": "site-file",
+   "max": 11,
+   "reason": "Test material of the release dry run: scenario titles and edits that name a delivered file by its conventional name (site.js, styles.css) and a demonstration package. They tamper with the sandbox copy and decide nothing in the gate."
+  }
+ ]
+}

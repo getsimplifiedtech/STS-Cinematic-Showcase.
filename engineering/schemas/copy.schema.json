@@ -1,0 +1,770 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "jade-and-ember/config/copy.json",
+  "title": "Page copy",
+  "description": "config/copy.json: every visible sentence, page by page, plus the image references and alt text each page uses.",
+  "$defs": {
+    "meta": {
+      "type": "object",
+      "properties": {
+        "title": {
+          "type": "string",
+          "minLength": 1
+        },
+        "description": {
+          "type": "string",
+          "minLength": 20
+        }
+      },
+      "required": [
+        "title",
+        "description"
+      ],
+      "additionalProperties": false
+    },
+    "link": {
+      "type": "object",
+      "properties": {
+        "page": {
+          "enum": [
+            "home",
+            "menu",
+            "story",
+            "visit",
+            "order"
+          ]
+        },
+        "label": {
+          "type": "string",
+          "minLength": 1
+        }
+      },
+      "required": [
+        "page",
+        "label"
+      ],
+      "additionalProperties": false
+    },
+    "orderBand": {
+      "type": "object",
+      "properties": {
+        "heading": {
+          "type": "string",
+          "minLength": 1
+        },
+        "text": {
+          "type": "string",
+          "minLength": 1
+        },
+        "secondary": {
+          "$ref": "#/$defs/link"
+        }
+      },
+      "required": [
+        "heading",
+        "text"
+      ],
+      "additionalProperties": false
+    }
+  },
+  "type": "object",
+  "properties": {
+    "home": {
+      "type": "object",
+      "properties": {
+        "meta": {
+          "$ref": "#/$defs/meta"
+        },
+        "hero": {
+          "type": "object",
+          "properties": {
+            "eyebrow": {
+              "type": "string",
+              "minLength": 1
+            },
+            "headline": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "minLength": 1
+              },
+              "minItems": 2,
+              "maxItems": 2
+            },
+            "text": {
+              "type": "string",
+              "minLength": 1
+            },
+            "primaryCta": {
+              "$ref": "#/$defs/link"
+            },
+            "caption": {
+              "type": "string",
+              "minLength": 1
+            },
+            "image": {
+              "type": "object",
+              "properties": {
+                "desktop": {
+                  "type": "string",
+                  "pattern": "^media/[A-Za-z0-9._-]+\\.(webp|webm|mp4)$"
+                },
+                "mobile": {
+                  "type": "string",
+                  "pattern": "^media/[A-Za-z0-9._-]+\\.(webp|webm|mp4)$"
+                },
+                "width": {
+                  "type": "integer",
+                  "minimum": 1
+                },
+                "height": {
+                  "type": "integer",
+                  "minimum": 1
+                },
+                "mobileWidth": {
+                  "type": "integer",
+                  "minimum": 1
+                },
+                "mobileHeight": {
+                  "type": "integer",
+                  "minimum": 1
+                },
+                "alt": {
+                  "type": "string",
+                  "minLength": 11
+                },
+                "focusDesktop": {
+                  "type": "string",
+                  "pattern": "^[0-9]{1,3}% [0-9]{1,3}%$"
+                },
+                "focusMobile": {
+                  "type": "string",
+                  "pattern": "^[0-9]{1,3}% [0-9]{1,3}%$"
+                }
+              },
+              "required": [
+                "desktop",
+                "mobile",
+                "width",
+                "height",
+                "mobileWidth",
+                "mobileHeight",
+                "alt",
+                "focusDesktop",
+                "focusMobile"
+              ],
+              "additionalProperties": false
+            },
+            "video": {
+              "type": "object",
+              "properties": {
+                "webm": {
+                  "type": "string",
+                  "pattern": "^media/[A-Za-z0-9._-]+\\.(webp|webm|mp4)$"
+                },
+                "mp4": {
+                  "type": "string",
+                  "pattern": "^media/[A-Za-z0-9._-]+\\.(webp|webm|mp4)$"
+                },
+                "width": {
+                  "type": "integer",
+                  "minimum": 1
+                },
+                "height": {
+                  "type": "integer",
+                  "minimum": 1
+                },
+                "loopSeconds": {
+                  "type": "number",
+                  "minimum": 1
+                }
+              },
+              "required": [
+                "webm",
+                "mp4",
+                "width",
+                "height",
+                "loopSeconds"
+              ],
+              "additionalProperties": false
+            }
+          },
+          "required": [
+            "eyebrow",
+            "headline",
+            "text",
+            "primaryCta",
+            "caption",
+            "image",
+            "video"
+          ],
+          "additionalProperties": false
+        },
+        "process": {
+          "type": "object",
+          "properties": {
+            "heading": {
+              "type": "string",
+              "minLength": 1
+            },
+            "body": {
+              "type": "string",
+              "minLength": 1
+            },
+            "steps": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "name": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "text": {
+                    "type": "string",
+                    "minLength": 1
+                  }
+                },
+                "required": [
+                  "name",
+                  "text"
+                ],
+                "additionalProperties": false
+              },
+              "minItems": 4,
+              "maxItems": 4
+            }
+          },
+          "required": [
+            "heading",
+            "body",
+            "steps"
+          ],
+          "additionalProperties": false
+        },
+        "signature": {
+          "type": "object",
+          "properties": {
+            "heading": {
+              "type": "string",
+              "minLength": 1
+            },
+            "moreLabel": {
+              "type": "string",
+              "minLength": 1
+            }
+          },
+          "required": [
+            "heading",
+            "moreLabel"
+          ],
+          "additionalProperties": false
+        },
+        "storyTeaser": {
+          "type": "object",
+          "properties": {
+            "text": {
+              "type": "string",
+              "minLength": 1
+            },
+            "linkLabel": {
+              "type": "string",
+              "minLength": 1
+            },
+            "sample": {
+              "type": "boolean"
+            }
+          },
+          "required": [
+            "text",
+            "linkLabel",
+            "sample"
+          ],
+          "additionalProperties": false
+        },
+        "visitStrip": {
+          "type": "object",
+          "properties": {
+            "heading": {
+              "type": "string",
+              "minLength": 1
+            },
+            "linkLabel": {
+              "type": "string",
+              "minLength": 1
+            }
+          },
+          "required": [
+            "heading",
+            "linkLabel"
+          ],
+          "additionalProperties": false
+        },
+        "orderBand": {
+          "$ref": "#/$defs/orderBand"
+        }
+      },
+      "required": [
+        "meta",
+        "hero",
+        "process",
+        "signature",
+        "storyTeaser",
+        "visitStrip",
+        "orderBand"
+      ],
+      "additionalProperties": false
+    },
+    "menu": {
+      "type": "object",
+      "properties": {
+        "meta": {
+          "$ref": "#/$defs/meta"
+        },
+        "h1": {
+          "type": "string",
+          "minLength": 1
+        },
+        "note": {
+          "type": "string",
+          "minLength": 1
+        },
+        "legend": {
+          "type": "object",
+          "properties": {
+            "heading": {
+              "type": "string",
+              "minLength": 1
+            },
+            "levels": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "minLength": 1
+              },
+              "minItems": 3,
+              "maxItems": 3
+            }
+          },
+          "required": [
+            "heading",
+            "levels"
+          ],
+          "additionalProperties": false
+        },
+        "band": {
+          "type": "object",
+          "properties": {
+            "src": {
+              "type": "string",
+              "pattern": "^media/[A-Za-z0-9._-]+\\.(webp|webm|mp4)$"
+            },
+            "width": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "height": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "alt": {
+              "type": "string"
+            },
+            "pos": {
+              "type": "string",
+              "pattern": "^[0-9]{1,3}% [0-9]{1,3}%$"
+            },
+            "decorative": {
+              "type": "boolean"
+            }
+          },
+          "required": [
+            "src",
+            "width",
+            "height",
+            "alt",
+            "pos",
+            "decorative"
+          ],
+          "additionalProperties": false
+        },
+        "orderBand": {
+          "$ref": "#/$defs/orderBand"
+        }
+      },
+      "required": [
+        "meta",
+        "h1",
+        "note",
+        "legend",
+        "band",
+        "orderBand"
+      ],
+      "additionalProperties": false
+    },
+    "story": {
+      "type": "object",
+      "properties": {
+        "meta": {
+          "$ref": "#/$defs/meta"
+        },
+        "h1": {
+          "type": "string",
+          "minLength": 1
+        },
+        "image": {
+          "type": "object",
+          "properties": {
+            "src": {
+              "type": "string",
+              "pattern": "^media/[A-Za-z0-9._-]+\\.(webp|webm|mp4)$"
+            },
+            "width": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "height": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "alt": {
+              "type": "string",
+              "minLength": 11
+            }
+          },
+          "required": [
+            "src",
+            "width",
+            "height",
+            "alt"
+          ],
+          "additionalProperties": false
+        },
+        "caption": {
+          "type": "string",
+          "minLength": 1
+        },
+        "chapters": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string",
+                "pattern": "^[a-z0-9-]+$"
+              },
+              "heading": {
+                "type": "string",
+                "minLength": 1
+              },
+              "sample": {
+                "type": "boolean"
+              },
+              "paragraphs": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "minItems": 1
+              }
+            },
+            "required": [
+              "id",
+              "heading",
+              "sample",
+              "paragraphs"
+            ],
+            "additionalProperties": false
+          },
+          "minItems": 3
+        },
+        "name": {
+          "type": "object",
+          "properties": {
+            "heading": {
+              "type": "string",
+              "minLength": 1
+            },
+            "sample": {
+              "type": "boolean"
+            },
+            "characters": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "minLength": 1
+              },
+              "minItems": 2,
+              "maxItems": 2
+            },
+            "line": {
+              "type": "string",
+              "minLength": 1
+            },
+            "note": {
+              "type": "string",
+              "minLength": 1
+            }
+          },
+          "required": [
+            "heading",
+            "sample",
+            "characters",
+            "line",
+            "note"
+          ],
+          "additionalProperties": false
+        },
+        "orderBand": {
+          "$ref": "#/$defs/orderBand"
+        }
+      },
+      "required": [
+        "meta",
+        "h1",
+        "image",
+        "caption",
+        "chapters",
+        "name",
+        "orderBand"
+      ],
+      "additionalProperties": false
+    },
+    "visit": {
+      "type": "object",
+      "properties": {
+        "meta": {
+          "$ref": "#/$defs/meta"
+        },
+        "h1": {
+          "type": "string",
+          "minLength": 1
+        },
+        "fictionalNote": {
+          "type": "string",
+          "description": "Demonstration-only text. It renders only while client.flags.demo is true, so a client build may leave it empty."
+        },
+        "directionsLabel": {
+          "type": "string",
+          "minLength": 1
+        },
+        "goodToKnow": {
+          "type": "object",
+          "properties": {
+            "heading": {
+              "type": "string",
+              "minLength": 1
+            },
+            "groups": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "title": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "sample": {
+                    "type": "boolean"
+                  },
+                  "items": {
+                    "type": "array",
+                    "items": {
+                      "type": "string",
+                      "minLength": 1
+                    },
+                    "minItems": 1
+                  },
+                  "link": {
+                    "$ref": "#/$defs/link"
+                  }
+                },
+                "required": [
+                  "title",
+                  "items"
+                ],
+                "additionalProperties": false
+              },
+              "minItems": 1
+            }
+          },
+          "required": [
+            "heading",
+            "groups"
+          ],
+          "additionalProperties": false
+        },
+        "orderBand": {
+          "$ref": "#/$defs/orderBand"
+        }
+      },
+      "required": [
+        "meta",
+        "h1",
+        "fictionalNote",
+        "directionsLabel",
+        "goodToKnow",
+        "orderBand"
+      ],
+      "additionalProperties": false
+    },
+    "order": {
+      "type": "object",
+      "properties": {
+        "meta": {
+          "$ref": "#/$defs/meta"
+        },
+        "h1": {
+          "type": "string",
+          "minLength": 1
+        },
+        "text": {
+          "type": "string",
+          "minLength": 1
+        },
+        "stepsHeading": {
+          "type": "string",
+          "minLength": 1
+        },
+        "steps": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "name": {
+                "type": "string",
+                "minLength": 1
+              },
+              "text": {
+                "type": "string",
+                "minLength": 1
+              },
+              "link": {
+                "$ref": "#/$defs/link"
+              }
+            },
+            "required": [
+              "name",
+              "text"
+            ],
+            "additionalProperties": false
+          },
+          "minItems": 2,
+          "maxItems": 4
+        },
+        "pickup": {
+          "type": "object",
+          "properties": {
+            "heading": {
+              "type": "string",
+              "minLength": 1
+            },
+            "text": {
+              "type": "string",
+              "minLength": 1
+            },
+            "link": {
+              "$ref": "#/$defs/link"
+            }
+          },
+          "required": [
+            "heading",
+            "text",
+            "link"
+          ],
+          "additionalProperties": false
+        },
+        "allergy": {
+          "type": "object",
+          "properties": {
+            "heading": {
+              "type": "string",
+              "minLength": 1
+            }
+          },
+          "required": [
+            "heading"
+          ],
+          "additionalProperties": false
+        },
+        "phone": {
+          "type": "object",
+          "properties": {
+            "heading": {
+              "type": "string",
+              "minLength": 1
+            }
+          },
+          "required": [
+            "heading"
+          ],
+          "additionalProperties": false
+        },
+        "newTab": {
+          "type": "string",
+          "minLength": 1
+        }
+      },
+      "required": [
+        "meta",
+        "h1",
+        "text",
+        "stepsHeading",
+        "steps",
+        "pickup",
+        "allergy",
+        "phone",
+        "newTab"
+      ],
+      "additionalProperties": false
+    },
+    "demo": {
+      "type": "object",
+      "properties": {
+        "ownerNoteTitle": {
+          "type": "string",
+          "description": "Demonstration-only text. It renders only while client.flags.demo is true, so a client build may leave it empty."
+        },
+        "demoNote": {
+          "type": "string",
+          "description": "Demonstration-only text. It renders only while client.flags.demo is true, so a client build may leave it empty."
+        },
+        "platformNote": {
+          "type": "string",
+          "description": "Demonstration-only text. It renders only while client.flags.demo is true, so a client build may leave it empty."
+        },
+        "exampleSuffix": {
+          "type": "string",
+          "description": "Demonstration-only text. It renders only while client.flags.demo is true, so a client build may leave it empty."
+        },
+        "menuSample": {
+          "type": "string",
+          "description": "Demonstration-only text. It renders only while client.flags.demo is true, so a client build may leave it empty."
+        },
+        "heroCaptionNote": {
+          "type": "string",
+          "description": "Demonstration-only text. It renders only while client.flags.demo is true, so a client build may leave it empty."
+        }
+      },
+      "required": [
+        "ownerNoteTitle",
+        "demoNote",
+        "platformNote",
+        "exampleSuffix",
+        "menuSample",
+        "heroCaptionNote"
+      ],
+      "additionalProperties": false
+    }
+  },
+  "required": [
+    "home",
+    "menu",
+    "story",
+    "visit",
+    "order",
+    "demo"
+  ],
+  "additionalProperties": false
+}

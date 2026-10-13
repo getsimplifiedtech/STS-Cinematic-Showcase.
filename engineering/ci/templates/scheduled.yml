@@ -1,0 +1,49 @@
+# STS scheduled automation TEMPLATE (G6-7), DEFINED BUT NOT ACTIVE. Not a workflow: it is stored under engineering/ci/templates and nothing runs it. To switch it on
+# for a client repository is a separate, deliberate act (rendered into .github/workflows on the repository's DEFAULT branch, because scheduled workflows run only
+# from the default branch, and approved by the owner). It runs only the two read-only modes that need no live site: the supply-chain report and the external-link
+# verification. There is no mode that visits a live site, and none is defined here: monitoring a live site needs its own authorisation. Same rules as the caller:
+# the framework's composite action by its FULL COMMIT SHA, no `run` step, no environment, no condition, contents: read, no secret.
+name: STS scheduled checks
+
+on:
+  schedule:
+    - cron: '17 4 * * 1'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  external-links:
+    name: external links (informational)
+    runs-on: ubuntu-24.04
+    continue-on-error: true
+    timeout-minutes: 15
+    steps:
+      - name: Check out the repository (full history, because the credential scan and the baseline read it)
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - name: Verify the external destinations (record printed in the log)
+        uses: getsimplifiedtech/sts-web-design-framework/.github/actions/engineering@{{FRAMEWORK_SHA}}
+        with:
+          mode: external-links
+          project-dir: '{{PROJECT_DIR}}'
+
+  supply-chain-report:
+    name: supply chain report (informational)
+    runs-on: ubuntu-24.04
+    continue-on-error: true
+    timeout-minutes: 15
+    steps:
+      - name: Check out the repository (full history, because the credential scan and the baseline read it)
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - name: Report (signatures, advisories, SBOM, outdated)
+        uses: getsimplifiedtech/sts-web-design-framework/.github/actions/engineering@{{FRAMEWORK_SHA}}
+        with:
+          mode: supply-chain-report
+          project-dir: '{{PROJECT_DIR}}'

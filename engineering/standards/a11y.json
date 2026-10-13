@@ -1,0 +1,103 @@
+{
+  "$comment": "Thresholds for the Gate 2 accessibility checks (ledger ENG-042 to ENG-050). Targets: WCAG 2.2 AA 2.5.8 requires 24 CSS px; the STS rule asks for 44 CSS px on primary actions. Text spacing is WCAG 1.4.12. Contexts are the viewports each check runs in.",
+  "$overlay": {
+    "delegated": {
+      "target.primarySelectors": {
+        "type": "array",
+        "floor": "nonEmpty"
+      }
+    },
+    "stricterUp": [
+      "target.minimum",
+      "target.primaryMinimum",
+      "forcedColors.minTextContrast"
+    ]
+  },
+  "target": {
+    "minimum": 24,
+    "primaryMinimum": 44,
+    "primarySelectors": []
+  },
+  "keyboard": {
+    "contexts": [
+      {
+        "name": "desktop-1440",
+        "width": 1440,
+        "height": 900
+      },
+      {
+        "name": "mobile-390",
+        "width": 390,
+        "height": 844
+      }
+    ],
+    "focusMinChangedPixels": 12,
+    "focusPadding": 8
+  },
+  "reflow": {
+    "widths": [
+      {
+        "name": "reflow-320",
+        "width": 320,
+        "height": 640
+      },
+      {
+        "name": "zoom-200-of-1280",
+        "width": 640,
+        "height": 450,
+        "deviceScaleFactor": 2
+      }
+    ],
+    "spacing": {
+      "contexts": [
+        {
+          "name": "desktop-1440",
+          "width": 1440,
+          "height": 900
+        },
+        {
+          "name": "desktop-1280",
+          "width": 1280,
+          "height": 800
+        },
+        {
+          "name": "desktop-1100",
+          "width": 1100,
+          "height": 800
+        },
+        {
+          "name": "desktop-1024",
+          "width": 1024,
+          "height": 768
+        },
+        {
+          "name": "mobile-390",
+          "width": 390,
+          "height": 844
+        }
+      ],
+      "lineHeight": 1.5,
+      "paragraphSpacingEm": 2,
+      "letterSpacingEm": 0.12,
+      "wordSpacingEm": 0.16,
+      "$comment": "Text spacing (WCAG 1.4.12) is measured at these widths in every engine. 1024, 1100 and 1280 px were added with an owner approval because WebKit showed the Visit hours table overlap there as well as at 1440 px."
+    },
+    "overlapMinPixels": 24
+  },
+  "forcedColors": {
+    "contexts": [
+      {
+        "name": "desktop-1440",
+        "width": 1440,
+        "height": 900
+      },
+      {
+        "name": "mobile-390",
+        "width": 390,
+        "height": 844
+      }
+    ],
+    "minTextContrast": 4.5,
+    "minControlPixelsPercent": 1
+  }
+}

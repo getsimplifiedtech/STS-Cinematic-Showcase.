@@ -1,0 +1,31 @@
+{
+  "lang": "en",
+  "pages": [
+    {
+      "id": "home",
+      "file": "index.html",
+      "nav": "Home"
+    },
+    {
+      "id": "services",
+      "file": "services.html",
+      "nav": "Services"
+    },
+    {
+      "id": "visit",
+      "file": "contact.html",
+      "nav": "Contact",
+      "cta": true
+    }
+  ],
+  "demo": {
+    "bar": "Fictional studio — an invented project that the STS engineering uses to prove it runs on a second website. Everything on this site is a sample.",
+    "barShort": "Fictional studio. STS engineering fixture.",
+    "footer": "Quillfeather Letterpress is a fictional studio. It does not exist. The address, the telephone number and the opening hours are invented samples.",
+    "titleSuffix": " (fictional)"
+  },
+  "credit": {
+    "label": "Website by Simplified Tech Solutions",
+    "href": "https://getsimplifiedtech.com/"
+  }
+}

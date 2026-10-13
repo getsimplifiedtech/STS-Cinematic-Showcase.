@@ -1,0 +1,49 @@
+# STS engineering (G6-7): the one way a repository runs the STS engineering. Read-only: it copies the engineering of the revision it is used at, installs the
+# engineering's own pinned development tools and runs one mode of the verification on the project the caller names. It deploys nothing, merges nothing, publishes
+# nothing, uses no secret and no token of its own, and calls no paid or AI service. A client repository uses it by the full commit SHA of the framework and by nothing
+# else (check:ci refuses a branch, a tag or a local copy there); the framework's own workflows use it locally. Specification 16, section 10.8.
+name: STS engineering
+description: Run one mode of the STS engineering verification on a project, from an exact framework revision.
+inputs:
+  mode:
+    description: 'One of verify, fast, firefox, webkit, external-links, lighthouse, supply-chain-report (ci/jobs.json). No mode skips a check.'
+    required: true
+  project-dir:
+    description: 'The project folder, relative to the workspace (the folder that holds sts.engineering.json).'
+    required: true
+runs:
+  using: composite
+  steps:
+    - name: Guard (exact framework revision, known mode, plain project path)
+      shell: bash
+      env:
+        MODE: ${{ inputs.mode }}
+        PROJECT_DIR: ${{ inputs.project-dir }}
+        ACTION_REPOSITORY: ${{ github.action_repository }}
+        ACTION_REF: ${{ github.action_ref }}
+      run: bash "$GITHUB_ACTION_PATH/../../../engineering/tools/ci/guard.sh"
+
+    - name: Materialise the engineering
+      shell: bash
+      env:
+        ACTION_REPOSITORY: ${{ github.action_repository }}
+        ACTION_REF: ${{ github.action_ref }}
+      run: bash "$GITHUB_ACTION_PATH/../../../engineering/tools/ci/materialise.sh"
+
+    - name: Set up Node.js
+      uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+      with:
+        node-version: '24.21.0'
+
+    - name: Install the pinned development tools (lockfile only, no install scripts)
+      shell: bash
+      env:
+        MODE: ${{ inputs.mode }}
+      run: bash "$GITHUB_ACTION_PATH/../../../engineering/tools/ci/install.sh"
+
+    - name: Run the engineering
+      shell: bash
+      env:
+        MODE: ${{ inputs.mode }}
+        PROJECT_DIR: ${{ inputs.project-dir }}
+      run: bash "$GITHUB_ACTION_PATH/../../../engineering/tools/ci/run.sh"

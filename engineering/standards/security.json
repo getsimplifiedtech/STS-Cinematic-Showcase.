@@ -1,0 +1,106 @@
+{
+  "$comment": "Security policy for HTTP deployments (decision D-5, ledger ENG-093). Placeholders {script-hashes} and {style-attr-hashes} are filled from the built pages: the one inline script and the inline style attributes (custom properties for image focus) are allowed by SHA-256 hash, never by 'unsafe-inline'. Everything else must come from the site's own origin. Over file:// there are no HTTP headers, so none of this applies there (see ENG-SECURITY.md). Header names and values here are the single source for the _headers, nginx and Apache outputs.",
+  "$overlay": {
+    "delegated": {
+      "hstsOptions.authorisations": {
+        "type": "array",
+        "floor": "array"
+      }
+    }
+  },
+  "csp": {
+    "default-src": [
+      "'none'"
+    ],
+    "script-src": [
+      "'self'",
+      "{script-hashes}"
+    ],
+    "style-src": [
+      "'self'"
+    ],
+    "style-src-attr": [
+      "'unsafe-hashes'",
+      "{style-attr-hashes}"
+    ],
+    "img-src": [
+      "'self'",
+      "data:"
+    ],
+    "font-src": [
+      "'self'"
+    ],
+    "media-src": [
+      "'self'"
+    ],
+    "connect-src": [
+      "'none'"
+    ],
+    "manifest-src": [
+      "'none'"
+    ],
+    "worker-src": [
+      "'none'"
+    ],
+    "object-src": [
+      "'none'"
+    ],
+    "base-uri": [
+      "'none'"
+    ],
+    "form-action": [
+      "'none'"
+    ],
+    "frame-ancestors": [
+      "'none'"
+    ]
+  },
+  "httpsOnlyCsp": [
+    "upgrade-insecure-requests"
+  ],
+  "headers": {
+    "X-Content-Type-Options": "nosniff",
+    "Referrer-Policy": "strict-origin-when-cross-origin",
+    "X-Frame-Options": "DENY",
+    "Permissions-Policy": "camera=(), microphone=(), geolocation=(), payment=(), usb=()",
+    "Cross-Origin-Opener-Policy": "same-origin",
+    "Cross-Origin-Resource-Policy": "same-origin"
+  },
+  "httpsOnlyHeaders": {
+    "Strict-Transport-Security": "max-age=31536000"
+  },
+  "hstsOptions": {
+    "$comment": "G6-4 (an owner approval; owner decisions D-P3-4 and D-P4-5). The default Strict-Transport-Security value above has NO includeSubDomains: on a client's domain it would bind every subdomain (mail, a shop, a staging host) for a year. includeSubDomains is a per-client opt-in: the reference of the owner's recorded authorisation for THIS client must be listed in \"authorisations\" below (a reviewed change to this file in the client's repository), and the renderers refuse it for any reference that is not listed. The list is empty: no client has one. preload is never added by this tooling.",
+    "includeSubDomains": {
+      "default": false,
+      "requiresAuthorisation": true
+    },
+    "authorisations": [],
+    "preload": {
+      "default": false,
+      "supported": false
+    }
+  },
+  "cache": {
+    "$comment": "File names are not content-hashed in the delivered site, so nothing is marked immutable: HTML, CSS and JS revalidate; fonts and media may be reused for a week. The hashed build (npm run build:hashed) uses immutable caching for its hashed names.",
+    "html": "no-cache",
+    "code": "no-cache",
+    "static": "public, max-age=604800"
+  },
+  "noindexHeaders": {
+    "$comment": "Gate 5 Phase 4 (an owner approval). Defence in depth for the FICTIONAL demonstration: when every built page carries the robots noindex meta tag, the generated host files (_headers, nginx, Apache) also send this response header, so the demonstration stays out of search results even if a host rewrites or strips the HTML. An indexable client build never gets it. It is not a security header and is not part of securityHeaders(), the CSP or the simulations; it is added only to the host-file renderings.",
+    "X-Robots-Tag": "noindex, nofollow"
+  },
+  "forbidden": {
+    "cspSources": [
+      "'unsafe-inline'",
+      "'unsafe-eval'",
+      "*",
+      "http:",
+      "https:",
+      "blob:",
+      "filesystem:"
+    ],
+    "$comment2": "data: is allowed for img-src only (the inline favicon)."
+  }
+}

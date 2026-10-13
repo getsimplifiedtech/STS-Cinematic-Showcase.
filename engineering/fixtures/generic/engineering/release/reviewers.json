@@ -1,0 +1,6 @@
+{
+  "$comment": "Who may decide what. EMPTY ON PURPOSE: the generic fixture names no reviewer and the engineering must not invent a person. With an empty table no approval can be authorised, so no client-production release of the fixture can pass the gate (the authenticity hard stop).",
+  "schema": "quillfeather-letterpress/reviewers@1",
+  "establishedBy": null,
+  "reviewers": []
+}

@@ -1,0 +1,92 @@
+{
+  "$comment": "Dependency policy (ledger ENG-095). The delivered website has NO dependencies of any kind: it is HTML, CSS, three small scripts, fonts, images and video. Everything in package.json is a development tool for building, testing and verifying, never delivered. The policy: no runtime dependencies; every development dependency pinned to an exact version; a committed lockfile with registry sources and sha512 integrity for every package; licences from an allow-list; no known critical vulnerability anywhere, no high vulnerability in a package the verification itself runs, and every other high vulnerability recorded below with a reason. `npm ci --ignore-scripts` installs exactly the lockfile.",
+  "$overlay": {
+    "delegated": {
+      "licenseExceptions": {
+        "type": "array",
+        "floor": "array"
+      },
+      "acceptedAdvisories": {
+        "type": "object",
+        "floor": "nonEmpty"
+      }
+    },
+    "keyed": {
+      "retiredPackages": "package"
+    },
+    "documentation": [
+      "licenseNotes",
+      "actions.*.note"
+    ]
+  },
+  "allowedLicenses": [
+    "MIT",
+    "ISC",
+    "Apache-2.0",
+    "BSD-2-Clause",
+    "BSD-3-Clause",
+    "0BSD",
+    "BlueOak-1.0.0",
+    "CC0-1.0",
+    "Unlicense",
+    "Python-2.0",
+    "MPL-2.0"
+  ],
+  "licenseNotes": {
+    "MPL-2.0": "axe-core and @axe-core/playwright: file-level copyleft that applies only if modified files are distributed. They are development tools and are never delivered.",
+    "recordedIn": "G6-1 removed @lhci/cli and with it parse-cache-control, the only package whose licence the lockfile did not record. Every package in the lockfile now records a licence, and licenseExceptions is empty. Any future exception must name the package, say why and carry a status."
+  },
+  "licenseExceptions": [],
+  "verificationPackages": [
+    "playwright",
+    "playwright-core",
+    "ajv",
+    "pixelmatch",
+    "pngjs",
+    "yaml",
+    "@axe-core/playwright",
+    "axe-core"
+  ],
+  "acceptedAdvisories": {
+    "viaRoot": null,
+    "reviewed": "",
+    "reason": "",
+    "packages": []
+  },
+  "actions": {
+    "$comment": "The GitHub Actions the workflow may use, each pinned to a full commit SHA and verified at the source on the date given (Gate 6, G6-1, an owner approval): the tag resolves to the SHA with git ls-remote, the commit is an ancestor of the default branch, and action.yml at that commit declares `runs.using: node24`. check:ci refuses any other action and any other SHA; a change here is a deliberate, reviewed change, never an automatic one.",
+    "actions/checkout": {
+      "version": "v7.0.1",
+      "sha": "3d3c42e5aac5ba805825da76410c181273ba90b1",
+      "runtime": "node24",
+      "committed": "2026-07-17",
+      "verifiedOn": "2026-10-11",
+      "replaces": {
+        "version": "v4.2.2",
+        "sha": "11bd71901bbe5b1630ceea73d27597364c9af683",
+        "runtime": "node20"
+      }
+    },
+    "actions/setup-node": {
+      "version": "v7.0.0",
+      "sha": "820762786026740c76f36085b0efc47a31fe5020",
+      "runtime": "node24",
+      "committed": "2026-07-14",
+      "verifiedOn": "2026-10-11",
+      "replaces": {
+        "version": "v4.4.0",
+        "sha": "49933ea5288caeca8642d1e84afbd3f7d6820020",
+        "runtime": "node20"
+      },
+      "note": "v7.1.0 (949feb2413d6458794dcd2491c4babbbce0c15c1) also exists; v7.0.0 was chosen because it has been public for three months and v7.1.0 for days. Moving to a newer release is a separate reviewed change."
+    }
+  },
+  "retiredPackages": [
+    {
+      "package": "@lhci/cli",
+      "retired": "2026-10-11",
+      "by": "G6-1 (an owner approval)",
+      "reason": "Lighthouse CI carried 17 advisories (11 high) in a tree of 221 packages that the verification never ran. It was replaced by the direct lighthouse package and engineering/tools/lighthouse.mjs. Bringing it back needs a reviewed change to this record."
+    }
+  ]
+}

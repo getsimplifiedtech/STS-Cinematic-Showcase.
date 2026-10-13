@@ -1,0 +1,64 @@
+{
+  "pages": [
+    "index.html",
+    "services.html",
+    "contact.html"
+  ],
+  "runs": 3,
+  "aggregation": "median",
+  "categories": {
+    "performance": {
+      "level": "warn",
+      "minScore": 0.8
+    },
+    "accessibility": {
+      "level": "error",
+      "minScore": 0.95
+    },
+    "best-practices": {
+      "level": "warn",
+      "minScore": 0.9
+    },
+    "seo": {
+      "level": "warn",
+      "minScore": 0.6
+    }
+  },
+  "audits": {
+    "is-crawlable": {
+      "level": "off",
+      "reason": "Demonstrations and previews are deliberately noindex (specification 16, 9.4), so Lighthouse's own crawlability audit would fail by design and hold the SEO category below 1; the category threshold stays in force."
+    }
+  },
+  "floor": {
+    "runs": 3,
+    "categories": {
+      "performance": 0.8,
+      "accessibility": 0.95,
+      "best-practices": 0.9,
+      "seo": 0.6
+    },
+    "errorCategories": [
+      "accessibility"
+    ],
+    "aggregationOrder": [
+      "optimistic",
+      "median",
+      "pessimistic"
+    ],
+    "minimumAggregation": "optimistic"
+  },
+  "chrome": {
+    "flags": [
+      "--headless=new",
+      "--no-sandbox",
+      "--disable-gpu",
+      "--no-first-run",
+      "--no-default-browser-check",
+      "--disable-extensions",
+      "--disable-background-networking",
+      "--mute-audio"
+    ],
+    "noSandboxReason": "Lighthouse CI used --no-sandbox too, and so does Playwright by default. On the GitHub-hosted Ubuntu 24.04 runner AppArmor blocks the user namespaces Chromium's sandbox needs (seen in run 46: Chromium aborted at start with SIGABRT), and in the development container the user is root. The browser only ever opens pages of this project, served from 127.0.0.1 by the engineering static server, in a throw-away profile."
+  }
+}

@@ -1,0 +1,198 @@
+{
+  "$comment": "Dated record of the review of the crawler identities in src/lib/crawlers.mjs against the providers' official documentation. check:seo requires one confirmed record for every agent in the policy and fails if a record is missing, stale, mis-classified, unsourced or says the name changed. It does NOT make robots.txt control any AI system: see the limits in crawlers.mjs and SEARCH-READINESS.md. [Generic fixture: this is the same review of the same provider documentation as the record of the project the engineering was extracted from, copied unchanged apart from this note and the names of that project, because the crawler list is the engineering's own (generators/crawlers.mjs), not a project's. It ages out after maxAgeDays; refresh it with the engineering, from a person re-reading the provider pages.]",
+  "verifiedOn": "2026-10-11",
+  "method": "The official provider pages could not be fetched (the sandbox cannot resolve provider hostnames). Each entry was checked on the date shown through a web-search tool that returns summaries of the official page; the quoted behaviour is that summary, not the page text. A person has not yet re-read the pages.",
+  "confirmedByPerson": false,
+  "maxAgeDays": 180,
+  "agents": [
+    {
+      "agent": "Googlebot",
+      "provider": "Google",
+      "class": "search",
+      "source": "https://developers.google.com/crawling/docs/crawlers-fetchers/google-common-crawlers",
+      "verifiedOn": "2026-10-11",
+      "status": "confirmed",
+      "finding": "Googlebot is the main common crawler for Google Search, Discover, Images, Video and News; common crawlers always obey robots.txt for automatic crawling. No separate AI-Overviews crawler or token was found in what was retrieved, so search and Google's AI search features cannot be separated."
+    },
+    {
+      "agent": "Bingbot",
+      "provider": "Microsoft Bing",
+      "class": "search",
+      "source": "https://www.bing.com/webmasters/help/which-crawlers-does-bing-use-8c184ec0",
+      "verifiedOn": "2026-10-11",
+      "status": "confirmed",
+      "finding": "Bingbot is Bing's main crawler; Copilot answers draw on the same Bing index, so blocking Bingbot also removes the site from Copilot. Bing says robots.txt controls crawling, not indexing: noindex is the way to keep a URL out. The user-agent pages are old; exact strings need a live check."
+    },
+    {
+      "agent": "DuckDuckBot",
+      "provider": "DuckDuckGo",
+      "class": "search",
+      "source": "https://duckduckgo.com/duckduckbot",
+      "verifiedOn": "2026-10-11",
+      "status": "confirmed",
+      "finding": "DuckDuckGo's own search crawler, user agent DuckDuckBot/1.1, respects robots.txt, publishes its IP addresses."
+    },
+    {
+      "agent": "Applebot",
+      "provider": "Apple",
+      "class": "search",
+      "source": "https://support.apple.com/en-us/119829",
+      "verifiedOn": "2026-10-11",
+      "status": "confirmed",
+      "finding": "Apple's general crawler; follows robots.txt, and when robots.txt names Googlebot but not Applebot it follows the Googlebot rules. It does not follow crawl-delay."
+    },
+    {
+      "agent": "OAI-SearchBot",
+      "provider": "OpenAI",
+      "class": "aiSearch",
+      "source": "https://developers.openai.com/api/docs/bots",
+      "verifiedOn": "2026-10-11",
+      "status": "confirmed",
+      "finding": "OpenAI's search crawler for ChatGPT search features; independent of GPTBot; a site that opts out will not be shown in ChatGPT search answers (links may still appear). Changes take about 24 hours."
+    },
+    {
+      "agent": "ChatGPT-User",
+      "provider": "OpenAI",
+      "class": "aiSearch",
+      "source": "https://developers.openai.com/api/docs/bots",
+      "verifiedOn": "2026-10-11",
+      "status": "confirmed",
+      "finding": "Triggered when a user asks ChatGPT or a Custom GPT a question; not automatic crawling; OpenAI says robots.txt rules may not apply to user-initiated actions and that it does not control search visibility."
+    },
+    {
+      "agent": "PerplexityBot",
+      "provider": "Perplexity",
+      "class": "aiSearch",
+      "source": "https://docs.perplexity.ai/docs/resources/perplexity-crawlers",
+      "verifiedOn": "2026-10-11",
+      "status": "confirmed",
+      "finding": "Search crawler that surfaces and links sites in Perplexity results; not used to crawl for foundation-model training; Perplexity recommends allowing it."
+    },
+    {
+      "agent": "Perplexity-User",
+      "provider": "Perplexity",
+      "class": "aiSearch",
+      "source": "https://docs.perplexity.ai/docs/resources/perplexity-crawlers",
+      "verifiedOn": "2026-10-11",
+      "status": "confirmed",
+      "finding": "User-initiated fetches; generally ignores robots.txt because a user requested the fetch; not used for training."
+    },
+    {
+      "agent": "Claude-SearchBot",
+      "provider": "Anthropic",
+      "class": "aiSearch",
+      "source": "https://support.claude.com/en/articles/8896518-does-anthropic-crawl-data-from-the-web-and-how-can-site-owners-block-the-crawler",
+      "verifiedOn": "2026-10-11",
+      "status": "confirmed",
+      "finding": "Indexes content to improve the relevance of search results; blocking it may reduce visibility and accuracy in user search results."
+    },
+    {
+      "agent": "Claude-User",
+      "provider": "Anthropic",
+      "class": "aiSearch",
+      "source": "https://support.claude.com/en/articles/8896518-does-anthropic-crawl-data-from-the-web-and-how-can-site-owners-block-the-crawler",
+      "verifiedOn": "2026-10-11",
+      "status": "confirmed",
+      "finding": "Fetches pages when a person asks Claude a question; blocking it may reduce visibility in user-directed search."
+    },
+    {
+      "agent": "GPTBot",
+      "provider": "OpenAI",
+      "class": "training",
+      "source": "https://developers.openai.com/api/docs/bots",
+      "verifiedOn": "2026-10-11",
+      "status": "confirmed",
+      "finding": "Crawls content that may be used to train OpenAI generative foundation models; disallowing it signals the content should not be used for training."
+    },
+    {
+      "agent": "ClaudeBot",
+      "provider": "Anthropic",
+      "class": "training",
+      "source": "https://support.claude.com/en/articles/8896518-does-anthropic-crawl-data-from-the-web-and-how-can-site-owners-block-the-crawler",
+      "verifiedOn": "2026-10-11",
+      "status": "confirmed",
+      "finding": "Collects web content that may contribute to model training; a restriction signals future material should be excluded from training; honours robots.txt and Crawl-delay; each subdomain needs its own robots.txt."
+    },
+    {
+      "agent": "Google-Extended",
+      "provider": "Google",
+      "class": "training",
+      "source": "https://developers.google.com/crawling/docs/crawlers-fetchers/google-common-crawlers",
+      "verifiedOn": "2026-10-11",
+      "status": "confirmed",
+      "finding": "A robots.txt-only control token (no separate user agent): crawling uses existing Google user agents. It governs use for Gemini training and grounding, and does not affect inclusion in Google Search or ranking."
+    },
+    {
+      "agent": "Applebot-Extended",
+      "provider": "Apple",
+      "class": "training",
+      "source": "https://support.apple.com/en-us/119829",
+      "verifiedOn": "2026-10-11",
+      "status": "confirmed",
+      "finding": "A robots.txt token, not a crawler: it does not crawl pages; disallowing it opts content out of training Apple's foundation models and does not affect search; Applebot may still crawl."
+    },
+    {
+      "agent": "CCBot",
+      "provider": "Common Crawl",
+      "class": "training",
+      "source": "https://commoncrawl.org/ccbot",
+      "verifiedOn": "2026-10-11",
+      "status": "confirmed",
+      "finding": "Common Crawl's crawler; checks robots.txt, token CCBot; Common Crawl warns that blocking it also removes the site from other uses of its data, not only AI training. Kept in the training class as the general-purpose crawl whose data is widely used for training."
+    },
+    {
+      "agent": "Meta-ExternalAgent",
+      "provider": "Meta",
+      "class": "training",
+      "source": "https://developers.facebook.com/documentation/sharing/webmasters/web-crawlers",
+      "verifiedOn": "2026-10-11",
+      "status": "confirmed",
+      "finding": "Crawls the web for purposes such as training AI models and indexing content to improve products; blockable with a robots.txt disallow; changes take up to 24 hours. Its purpose is wider than training alone."
+    }
+  ],
+  "identitiesNotInPolicy": [
+    {
+      "agent": "DuckAssistBot",
+      "provider": "DuckDuckGo",
+      "suggestedClass": "aiSearch",
+      "source": "https://duckduckgo.com/duckduckgo-help-pages/results/duckassistbot",
+      "verifiedOn": "2026-10-11",
+      "finding": "A separate crawler that fetches pages in real time for DuckDuckGo's AI-assisted answers, which cite sources; publishers opt out by disallowing it in robots.txt (about 72 hours); opting out does not affect organic search ranking.",
+      "recommendation": "Owner decision D-P4-1 (recorded by the project the engineering was extracted from): evaluate for Gate 6 and verify the provider's official crawler documentation before assigning a policy class. Not added to the policy now."
+    },
+    {
+      "agent": "Meta-ExternalFetcher",
+      "provider": "Meta",
+      "suggestedClass": "aiSearch",
+      "source": "https://developers.facebook.com/documentation/sharing/webmasters/web-crawlers",
+      "verifiedOn": "2026-10-11",
+      "finding": "Retrieves individual links when a user asks for them; Meta says it may bypass robots.txt because the fetches are user-initiated.",
+      "recommendation": "Owner decision D-P4-1 (recorded by the project the engineering was extracted from): evaluate for Gate 6 and verify the provider's official crawler documentation before assigning a policy class. Not added to the policy now."
+    },
+    {
+      "agent": "OAI-AdsBot",
+      "provider": "OpenAI",
+      "suggestedClass": null,
+      "source": "https://developers.openai.com/api/docs/bots",
+      "verifiedOn": "2026-10-11",
+      "finding": "Checks landing pages submitted as ads; its data is not used to train foundation models.",
+      "recommendation": "Not relevant to a site without ads. Not added."
+    }
+  ],
+  "notReviewed": [
+    "Amazonbot",
+    "Bytespider",
+    "cohere-ai",
+    "Diffbot",
+    "YouBot",
+    "MistralAI-User",
+    "Google-CloudVertexBot",
+    "exact user-agent strings and published IP ranges for every provider (only the robots.txt tokens were checked; a robots.txt rule matches the token)"
+  ],
+  "limits": [
+    "robots.txt is a request, not access control, and does not control every AI system.",
+    "Providers state that user-initiated fetchers (ChatGPT-User, Perplexity-User, Claude-User, Meta-ExternalFetcher) may not follow robots.txt.",
+    "Google and Bing do not separate search from their AI features; blocking Bingbot or Googlebot removes the site from search as well.",
+    "The record proves the names were found in the providers' documentation on that date, nothing about ranking, citation or inclusion."
+  ]
+}
