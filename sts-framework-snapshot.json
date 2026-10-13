@@ -2,8 +2,8 @@
  "schema": "sts/framework-snapshot@1",
  "framework": {
   "repository": "getsimplifiedtech/sts-web-design-framework",
-  "commit": "17fc32345a15cfbcbdbf03468259fac218e6defa",
-  "tree": "eba552fa8011e8daae884d6f66f141efcf34063e"
+  "commit": "23fafcd0365ef01aa2460cbb6a31beef8519f802",
+  "tree": "c7fc653907236d11840548f9213685f16a2a7a5e"
  },
  "profile": {
   "path": "engineering/ci/snapshot-profile.json",
@@ -17,10 +17,10 @@
  "protected": {
   "engineering/lib/authenticity.mjs": "0b57bc9888707192ecd544c45929836895776075c6817758c3fdce09b93a7eef"
  },
- "snapshotTree": "7a4f8a09d8b4ecbd5b940049d5a1192445e9541c",
+ "snapshotTree": "a7ac4a6f4cb6050bcd7fc6b81d62cc3565a5c482",
  "totals": {
   "files": 249,
-  "bytes": 2294640,
+  "bytes": 2297963,
   "excluded": 39
  },
  "files": [
@@ -345,9 +345,9 @@
   {
    "path": "engineering/checks/determinism.mjs",
    "mode": "100644",
-   "blob": "58cd9255ff9ee1a82c0d8b2509eeda0118d6f8fa",
-   "sha256": "4b576391e6a2f673c8a2fdf6d4eba0ccdce50ce690cfeca5e9b14fff234455ed",
-   "bytes": 7517
+   "blob": "f76e1b594774b187259a99d99b80829990490f2c",
+   "sha256": "18d88ca97805658f4d6980440ab9272cd976c9207e2ffd5f9e26df3a928ddab8",
+   "bytes": 7710
   },
   {
    "path": "engineering/checks/evidence.mjs",
@@ -1399,9 +1399,9 @@
   {
    "path": "engineering/lib/release-dryrun.mjs",
    "mode": "100644",
-   "blob": "6a516fa4447de281708279cff67cd51e89bcec69",
-   "sha256": "484649f84da7eaea8420fc02228b8cf83e2a0f7f6acab187277b5e09142b4fe6",
-   "bytes": 29007
+   "blob": "2b910e51c6682d6bbb074ddfa5da7d174afe9200",
+   "sha256": "687acf8afa0c2ddc36dd8916f8aed36511af47f556e6047e67c19860932b8d92",
+   "bytes": 32137
   },
   {
    "path": "engineering/lib/release-fixtures.mjs",

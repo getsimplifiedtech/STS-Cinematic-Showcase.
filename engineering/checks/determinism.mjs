@@ -49,7 +49,7 @@ export function checkDeterminism({ root = projectDir } = {}) {
     const inCore = root.startsWith(coreDir + sep);
     // a project beside the engineering (the engineering inside the repository, the project in a folder of its own) is copied with the engineering at the same offset, because the project's
     // own code may import the engineering by relative path; a project that carries the engineering in its own folder is copied alone
-    const coreBeside = !inCore && !coreDir.startsWith(root + sep) && !relative(project.repoRoot, coreDir).startsWith('..');
+    const coreBeside = !inCore && !coreDir.startsWith(root + sep) && !relative(project.repoRoot, coreDir).startsWith('..') && !relative(project.repoRoot, root).startsWith('..');   // a root outside the repository (a temporary copy, as the self-tests make) has no offset to keep: it is copied alone, never onto itself
     const copyBase = join(tmp, 'copy with space');
     const copy = inCore ? join(copyBase, 'engineering', relative(coreDir, root)) : coreBeside ? join(copyBase, relative(project.repoRoot, root)) : join(copyBase, 'je');
     const filter = (s) => !/node_modules|[\\/]shots|[\\/]\.lighthouseci|[\\/]\.git$/.test(s);

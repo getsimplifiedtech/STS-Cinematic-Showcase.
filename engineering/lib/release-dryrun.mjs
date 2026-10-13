@@ -17,13 +17,15 @@ import { cpSync, existsSync, mkdirSync, readFileSync, readdirSync, rmSync, symli
 import { dirname, join, relative, sep } from 'node:path';
 import { spawnSync } from 'node:child_process';
 import { createHash } from 'node:crypto';
-import { projectDir, repoRoot, tempDir } from './git.mjs';
+import { projectDir, readJson, repoRoot, tempDir } from './git.mjs';
 import { addHeadTag, buildClient, hasHeadTag } from './fixtures.mjs';
 import { fixtureRecord } from './evidence-fixtures.mjs';
 import { loadSpec } from './evidence.mjs';
 import { APPROVAL_SCHEMA, DEPLOYMENT_SCHEMA, REVIEWERS_SCHEMA, SEARCH_REVIEWED } from './records.mjs';
 import { buildVerificationRecord, sealOf } from './verification.mjs';
 import { coreDir, fixtureNames, ids, project, projectFolder } from './project.mjs';
+import { ciContext } from './ci-policy.mjs';
+import { policy } from './policy.mjs';
 
 export const SYNTH = 'SYNTHETIC DRY-RUN FIXTURE (not an approval, not evidence)';
 export const TODAY = () => new Date().toISOString().slice(0, 10);
@@ -83,6 +85,24 @@ try {
 `;
 
 // ---- the sandbox
+const SNAPSHOT_RECORD_NAME = 'sts-framework-snapshot.json';
+// The direct workflow of a synthetic client: one blocking job, the pinned Actions and the tested Node of the framework's own standards, nothing else.
+function syntheticWorkflow() {
+  const ctx = ciContext({ dependencies: policy('dependencies'), environment: policy('environment'), jobs: readJson(join(coreDir, 'ci', 'jobs.json')) });
+  const pin = (n) => `${n}@${ctx.pins[n].sha}`;
+  return [
+    `# ${SYNTH}: the workflow of a throw-away client; it exists only in the dry run's sandbox.`,
+    'name: Synthetic client verify', 'on:', '  push:', '    branches: [synthetic-client-development]', '  pull_request:', '  workflow_dispatch:',
+    'permissions:', '  contents: read', 'concurrency:', "  group: synthetic-verify-${{ github.ref }}", '  cancel-in-progress: true',
+    'jobs:', '  verify:', `    name: verify (Ubuntu 24.04, Node ${ctx.nodeVersion.split('.')[0]})`, '    runs-on: ubuntu-24.04', '    timeout-minutes: 40',
+    '    defaults:', '      run:', '        shell: bash', `        working-directory: ${projectFolder}`,
+    '    steps:',
+    '      - name: Check out the repository', `        uses: ${pin('actions/checkout')}`, '        with:', '          fetch-depth: 0', '          persist-credentials: false',
+    '      - name: Set up Node.js', `        uses: ${pin('actions/setup-node')}`, '        with:', `          node-version: '${ctx.nodeVersion}'`, '          cache: npm', `          cache-dependency-path: ${projectFolder}/package-lock.json`,
+    '      - name: Install the pinned development tools', '        run: npm ci --ignore-scripts --engine-strict',
+    '      - name: Verify', '        run: npm run verify', '',
+  ].join('\n');
+}
 export function createSandbox({ flavour = 'client' } = {}) {
   const root = tempDir('dryrun'), proj = join(root, projectFolder), aux = tempDir('dryaux');
   const g = (...a) => spawnSync('git', [...GIT, ...a], { cwd: root, encoding: 'utf8' });
@@ -96,7 +116,7 @@ export function createSandbox({ flavour = 'client' } = {}) {
   // sits inside the framework's folder (the generic fixture) or beside it brings the framework along, without the framework's other projects.
   const core = join(root, relative(repoRoot, coreDir));
   sb.core = core;
-  if (!coreDir.startsWith(projectDir + sep)) cpSync(coreDir, core, { recursive: true, filter: (src) => { const parts = relative(coreDir, src).split(sep).filter(Boolean); return !parts.some((x) => SKIP_ANY.has(x)) && parts[0] !== 'fixtures'; } });
+  if (!coreDir.startsWith(projectDir + sep)) cpSync(coreDir, core, { recursive: true, filter: (src) => { const parts = relative(coreDir, src).split(sep).filter(Boolean); return !parts.some((x) => SKIP_ANY.has(x)) && !(parts[0] === 'fixtures' && projectDir.startsWith(coreDir + sep)); } });   // the fixtures are left out only where the project is one of them (copying the engineering would copy the project into itself); a snapshot consumer's copy is complete, as its integrity record lists it
   // the real project, minus everything a release does not read
   cpSync(projectDir, proj, { recursive: true, filter: (src) => { const parts = relative(projectDir, src).split(sep).filter(Boolean); return !parts.some((x) => SKIP_ANY.has(x)) && !(parts.length === 1 && SKIP_TOP.has(parts[0])); } });
   // the installed development tools: the project's own node_modules, or the engineering's when the project has none
@@ -104,9 +124,20 @@ export function createSandbox({ flavour = 'client' } = {}) {
   symlinkSync(modules, p('node_modules'));
   if (!coreDir.startsWith(projectDir + sep) && !existsSync(join(core, 'node_modules'))) symlinkSync(modules, join(core, 'node_modules'));   // the code resolves its tools from its own place
   if (existsSync(join(repoRoot, '.github'))) cpSync(join(repoRoot, '.github'), join(root, '.github'), { recursive: true });   // the workflow the supported-runtime requirement reads
+  // The sandbox models a CLIENT (a client configuration, its own hosts). A client carries no copy of the framework: a repository that consumes the framework as a verified snapshot
+  // (G6-8) would otherwise make the gate judge the integrity of the sandbox's copy, which the synthetic authenticity verifier below changes on purpose. The sandbox therefore gets no
+  // integrity record and no local action, and the workflow the gate reads is a synthetic direct one built from the framework's own pins. The real workflow of the repository is
+  // judged by check:ci and the caller simulation, not here.
+  if (existsSync(join(repoRoot, SNAPSHOT_RECORD_NAME))) {
+    rmSync(join(root, '.github', 'actions'), { recursive: true, force: true });
+    const wfDir = join(root, '.github', 'workflows');
+    rmSync(wfDir, { recursive: true, force: true }); mkdirSync(wfDir, { recursive: true });
+    writeFileSync(join(wfDir, project.ci.workflow), syntheticWorkflow());
+    delete sbEnv.GITHUB_REPOSITORY;   // a throw-away copy has no identity, as a scratch copy has none
+  }
   mkdirSync(join(root, 'docs'), { recursive: true });
   cpSync(join(repoRoot, LEDGER), join(root, LEDGER));
-  for (const f of ['.gitignore']) if (existsSync(join(repoRoot, f))) cpSync(join(repoRoot, f), join(root, f));
+  if (existsSync(join(repoRoot, '.gitignore'))) cpSync(join(repoRoot, '.gitignore'), join(root, '.gitignore'));
   // the real records never travel into the sandbox: it starts with no approval, no evidence, no deployment authorisation and no reviewer
   for (const fam of ['approvals', 'evidence', 'deployments']) { const d = p(`engineering/release/${fam}`); for (const f of existsSync(d) ? readdirSync(d) : []) if (f.endsWith('.json')) rmSync(join(d, f)); rmSync(join(d, 'files'), { recursive: true, force: true }); }
   g('init', '-q');
