@@ -1,4 +1,11 @@
 # Stage C risk experiments: raw results (throw-away clone of e17560d; every change reverted)
+# READING GUIDE (added after the independent review):
+#  - E1b below is NOT the fonts not-applicable path: removing 'fonts' from delivery.assetFolders ended the run at 79/255
+#    with exit 1, i.e. it was aborted by a different failure. Only E1c (head tag, 4 scenarios) demonstrates a quiet not-applicable.
+#  - The first block headed 'E2 ... E3 ... E6' contains the FIRST ROUND of E2/E3, which crashed on a script error (a Node stack,
+#    exit 1, in both E3 lines). Those two E3 lines are INVALID; the valid scan-reach result is E3a/E3b above them.
+#    E2 and E6 in that block are valid. The E2 refusal of an empty report is in the parent runner je-suites.mjs, not in the suite.
+#  - E4: one operator (disable one throw guard), 19 of the frozen code's throw sites, not all of them.
 
 ## E1 (risk 1: not-applicable scenarios) and E3 (risk 3: scan reach)
 ## E1b: 'fonts' removed from delivery.assetFolders (3 scenarios need the capability)
@@ -75,3 +82,8 @@ ledger.mjs:83 | original self-test, original layout | exit 0 | SURVIVED
 state.mjs:42 | original self-test, original layout | exit 0 | SURVIVED
 state.mjs:73 | original self-test, original layout | exit 0 | SURVIVED
 done
+
+## E3c/E3d (run by me after the review): a fetch(...) line appended to a hosting adapter and to a generator, then reverted
+-- fetch appended to engineering/adapters/hosting/vercel.mjs | exit 0 |   dry run (synthetic, in a throwaway copy; real tool, parser, validator and git): 319/319 scenarios as expected — success path 1/1, appr
+-- fetch appended to engineering/generators/seo.mjs | exit 0 |   dry run (synthetic, in a throwaway copy; real tool, parser, validator and git): 319/319 scenarios as expected — success path 1/1, approvals 42/
+(tree clean after: 0 changes)

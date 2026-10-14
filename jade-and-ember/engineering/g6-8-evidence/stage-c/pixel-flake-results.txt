@@ -1,0 +1,20 @@
+# Stage C, Stage B risk 6 (pixel regression across load): raw results
+# Method: `node ../engineering/checks/regression.mjs` (thresholds untouched, committed baselines) in a fresh clone of e17560d,
+# Chromium 141, 4 cores. alone1-4: nothing else running. loaded1-3: 8 busy-loop processes (2 per core) running at the same time.
+# Each line: label | exit code | pixel comparison summary | number of problem lines. Problem lines follow.
+alone1 | exit 0 | pixels: 39 comparison(s), 0 problem(s) | 0 problem line(s)
+alone2 | exit 0 | pixels: 39 comparison(s), 0 problem(s) | 0 problem line(s)
+alone3 | exit 0 | pixels: 39 comparison(s), 0 problem(s) | 0 problem line(s)
+alone4 | exit 0 | pixels: 39 comparison(s), 0 problem(s) | 0 problem line(s)
+loaded1 | exit 1 | pixels: 39 comparison(s), 1 problem(s) | 1 problem line(s)
+loaded2 | exit 1 | pixels: 39 comparison(s), 1 problem(s) | 1 problem line(s)
+loaded3 | exit 1 | pixels: 39 comparison(s), 1 problem(s) | 1 problem line(s)
+done
+
+## problem lines of the loaded runs (absolute paths removed)
+-- loaded1
+  - [pixels] index@desktop-1440: 810568 pixels differ (7.6951%), densest 32px cell has 1024 (images in .reports/pixels)
+-- loaded2
+  - [pixels] menu@reflow-320: 44 pixels differ (0.0027%), densest 32px cell has 23 (images in .reports/pixels)
+-- loaded3
+  - [pixels] our-story@reflow-320: 44 pixels differ (0.0037%), densest 32px cell has 23 (images in .reports/pixels)
