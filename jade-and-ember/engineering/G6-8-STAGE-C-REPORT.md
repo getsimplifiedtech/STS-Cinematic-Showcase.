@@ -85,6 +85,41 @@ The bundle (how to reproduce every Stage B and Stage C claim and what to challen
 
 **Optional improvements** (none needed to close G6-8; each needs the owner's approval because it touches an approved snapshot file, adds a check or changes a workflow): assert the dry run's not-applicable count (risk 1); pin suite case counts (2); scan the project's engineering folder, adapters and generators for network and deploy calls (3); a private-side verification job on the public repository (5); snapshot-caller dry-run scenarios (note under section 4); run `gate6:scope` and `gate5:closure` in CI (section 6); an adoption guide; the core fixes above.
 
-## 8. What this report does not do
+## 8. Readiness decision after the owner's review request
+
+**Decision: no engineering work is needed before MONOLITH development, and MONOLITH is not cleared to start.** What stops it is owner-side and people-side, listed exactly below. No approved snapshot file, restriction or approval was changed; no implementation stage was begun.
+
+**CI, every job read.** Jade & Ember run 96 (`6a1ed11`): the blocking Chromium job `verify passed (45 of 45 checks)`, candidate `69f9f18f…`, SBOM `a1dbdd12…` (both unchanged from the baseline); Firefox and WebKit 15 passed, 0 failed, 0 not applicable of 15 each (pixel regression passed in both); macOS fast tier, Lighthouse, external links and supply chain succeeded. Framework run 23 (`0e80433`): the Chromium job `38 of 38` (2 not applicable); Firefox and WebKit 12 passed, 0 failed, 1 not applicable of 13 each; caller-layout simulation (public consumer with the verified snapshot, dry run 319 of 319) and the four informational jobs succeeded.
+
+**Evidence.** V1, V2 and V3 reproduce from the commands in the V4 bundle: V1 and V2 are CI jobs and a fresh clone, V3 is one script that also proves the template's 36 files unchanged. Gaps found and closed here: the risk experiments' scripts were not in the repository (now `g6-8-evidence/stage-c/scripts/`, with a header for pointing them at a working folder); the review by the Claude agent is not stored, so its extra claims (the harness positive control, the four semantic mutants) stand on its word and are marked as such. Pixel-regression and mutation figures come from one machine and are small samples.
+
+**The ten core findings** (C1 to C11 without the withdrawn C3):
+
+| Class | Findings | Why |
+|---|---|---|
+| **Actual blockers for building MONOLITH** | none | each has a workaround inside the project, none needs an approved snapshot file to change |
+| **Production release blockers** | none new | the register is unchanged (RB-01 to RB-08, RB-14, RB-15, RB-16). C1 stops the release of a site with nested asset folders and C9 would ship a stale poster reference in a hashed build, but only if MONOLITH does not follow the rules below |
+| **Template onboarding requirements** (MONOLITH's builder supplies or follows them) | C1 flat `media/` and `fonts/` folders; C2 `media/PROVENANCE.md`; C6 `serve.py`; C11 `config/client.json`; C7 name the visually hidden class `.vh`; C8 keep `:root{` with a newline before its closing brace in the delivered CSS; C9 no `data-poster`; C10 no radio buttons (the check reports every unchecked radio, so a checked default does not help; use a select or checkboxes); C4 there will be no negative tests of the checks against MONOLITH's own markup (those suites are per project), so the engine is covered by `selftest-generic` only | all in V3 section 4 and V5 item 6 |
+| **Nonblocking improvements** (each needs owner approval: it touches an approved snapshot file) | the framework fixes behind C1, C2, C7 to C11; C5 (alternate renderings; MONOLITH is five pages and does not need it) | |
+
+If MONOLITH's design needs something the workarounds forbid (nested media folders, radio groups, `data-poster`), that finding becomes a build blocker and a snapshot change for the owner to approve.
+
+**Dry-run network-scan gap (risk 3).** The scan reads `lib/`, `tools/` and `checks/` of the engineering folder only. Project code, hosting adapters and generators are not scanned (proved: a `fetch` appended to the Vercel adapter or the SEO generator still gives 319 of 319). Assessment: **not a blocker for development or for the dry run's purpose.** Adapters and generators are snapshot files, so in a consumer repository any change to them stops the run through the integrity record (CI step "a changed file of the copied engineering stops the run"). The open gap is project code, which for MONOLITH will be new code: a hand-run grep of its engineering folder at each review is the compensating control, as done here for Jade & Ember (one local-diagnostic hit). The dry run is a rehearsal, not an authorisation, and release stays blocked by RB-15 whatever it says.
+
+**Load-sensitive pixel regression (risk 6).** Fails in the safe direction only (4 of 4 passes alone and 3 of 3 failures under CPU load on one machine; run 96 passed in all three engines). **Not a blocker.** Rule until the owner decides otherwise: a pixel failure is read and its images inspected, never re-run until green, and MONOLITH's baseline is captured and judged only on an idle runner. MONOLITH has no baseline yet, so the check is not applicable to it until one is declared.
+
+**Smallest corrective work before MONOLITH development: none in code.** Documentation only, already done: the onboarding rules above and the experiment scripts. Nothing else is proposed.
+
+**Exact blockers to the start of MONOLITH** (all unchanged by this review, none is engineering):
+1. The owner signs the V5 checklist (not signed).
+2. A person re-verifies Vercel's provider documentation (D-P3-6; the Vercel adapter exists and passes its checks, but its provider facts are second-hand) before MONOLITH starts (matrix, G6-4 row). No Vercel preview is authorised (D-P3-5).
+3. The owner decides the industry (`industry: null` or a new work package for an adapter) and the tier.
+4. The owner decides pinning (RB-14): a Framework Release (a merge and a tag, not authorised) or a recorded permission to pin an exact development commit.
+5. The owner supplies the media-rights plan and the people-evidence plan.
+6. The Stage C review by ChatGPT (D-P8-10) and the owner's acceptance of Stage C, if the owner wants them first; the review by the Claude agent does not stand in for either.
+
+All deployment, authenticity (`lib/authenticity.mjs`, RB-15) and owner-approval restrictions are unchanged.
+
+## 9. What this report does not do
 
 It does not declare G6-8 complete, sign the V5 checklist, authorise another work package, or resolve any optional improvement. It stops here for the owner.
