@@ -31,8 +31,8 @@ const TL = {
 // [p, zoom, x, y] with x, y the point of the frame the camera looks at (0..1, y down). Fire: low and close on the burner, the wok base and the flame that
 // wraps it. Steam: pulled up and back to the wok mouth, where the vapour leaves the food. Texture: pushed in on the food. Then it settles for the handover.
 const CAM = {
-  desk: [[0, 1, .5, .5], [.085, 1, .5, .5], [.15, 1.4, .5, .64], [.27, 1.4, .5, .64], [.345, 1.1, .5, .5], [.45, 1.1, .5, .48], [.515, 1.5, .5, .62], [.62, 1.58, .5, .64], [.70, 1.04, .5, .5], [1, 1, .5, .5]],
-  phone: [[0, 1, .5, .5], [.085, 1, .5, .5], [.15, 1.38, .52, .68], [.27, 1.38, .52, .68], [.345, 1.1, .52, .54], [.45, 1.1, .52, .52], [.515, 1.45, .52, .66], [.62, 1.5, .52, .67], [.70, 1.04, .5, .5], [1, 1, .5, .5]],
+  desk: [[0, 1, .5, .5], [.085, 1, .5, .5], [.15, 1.4, .64, .72], [.27, 1.4, .64, .72], [.345, 1.1, .6, .5], [.45, 1.1, .62, .48], [.515, 1.5, .66, .56], [.62, 1.62, .66, .56], [.70, 1.04, .5, .5], [1, 1, .5, .5]],
+  phone: [[0, 1, .5, .5], [.085, 1, .5, .5], [.15, 1.5, .52, .76], [.27, 1.5, .52, .76], [.345, 1, .5, .46], [.45, 1.04, .5, .44], [.515, 1.55, .52, .56], [.62, 1.6, .52, .58], [.70, 1.04, .5, .5], [1, 1, .5, .5]],
 };
 const ease = (t) => t * t * (3 - 2 * t);
 function camAt(p, ph) {
@@ -75,24 +75,24 @@ function measure() {
 const progress = () => clamp((scrollY - top) / travel);
 
 // ---------------------------------------------------------------- placement of the steam source and the dish in stage uv (y up)
-const SRC = { desk: [0.50, 0.58], phone: [0.55, 0.62] };   // measured on the posters: where the vapour leaves the wok (image uv, y down)
+const SRC = { desk: [0.665, 0.55], phone: [0.556, 0.55] };   // measured on the posters: where the vapour leaves the wok (image uv, y down)
 // How the steam looks on each composition. A phone frame is narrow: vents are slimmer and closer together, the detail is finer, the source stays
 // small, the lower frame gives off less vapour, and vapour thins out as it climbs, so plumes rise as separate billows instead of one sheet of fog.
 const LOOK = {
-  desk: { vent: [.85, .011], noise: 3.4, wisp: .85, band: .95, radMax: .12, alt: .35, lobe: 1.4 },
-  phone: { vent: [.8, .0065], noise: 4.2, wisp: 1, band: .75, radMax: .1, alt: .9, lobe: 1 },
+  desk: { vent: [.85, .011], noise: 3.4, wisp: .85, band: .95, radMax: .12, alt: .35, lobe: 1.4, amb: .6 },
+  phone: { vent: [.8, .0065], noise: 4.2, wisp: 1, band: .75, radMax: .1, alt: .9, lobe: 1, amb: .4 },
 };
 function layout() {
   if (!steam) return;
   const sw = stage.clientWidth, sh = stage.clientHeight, ph = phone.matches;
-  const [iw, ih] = ph ? [810, 1440] : [1920, 1080];
+  const [iw, ih] = ph ? [810, 1440] : [1928, 1072];
   const [fx, fy] = (getComputedStyle(poster).objectPosition || '50% 50%').split(' ').map((v) => parseFloat(v) / 100);
   const s = Math.max(sw / iw, sh / ih), rw = iw * s, rh = ih * s, ox = (rw - sw) * (fx ?? .5), oy = (rh - sh) * (fy ?? .5);
   const [u, v] = ph ? SRC.phone : SRC.desk;
   Object.assign(steam.L, LOOK[ph ? 'phone' : 'desk']);
   steam.L.src = [(u * rw - ox) / sw, 1 - (v * rh - oy) / sh];
   // the dish: the plate (72% of the photograph's width) is the centre of the frame, where the wok was; type sits above and below it, not beside it
-  const plateW = ph ? .96 * sw : Math.min(.62 * sw, 1.3 * sh), imgW = plateW / .72, imgH = imgW * 800 / 1200;
+  const plateW = ph ? .96 * sw : Math.min(.62 * sw, 1.3 * sh), imgW = plateW / .72, imgH = imgW * 1610 / 2400;
   const c = ph ? [.5, .40] : [.5, .53], ex = imgW / sw, ey = imgH / sh;
   steam.L.dc = c; steam.L.shade = ph ? [0, 1] : [.55, .45];
   stage.style.setProperty('--ox', (steam.L.src[0] * 100).toFixed(2) + '%'); stage.style.setProperty('--oy', ((1 - steam.L.src[1]) * 100).toFixed(2) + '%');
@@ -130,10 +130,10 @@ function applyDom(pp, force) {
 }
 
 // ---------------------------------------------------------------- flame light for the steam to pick up
-// Brightness of each frame of the flame clip (24 fps, 121 frames), measured offline with ffmpeg on media/hero-loop.mp4 (see tools/flame-table.py) and scaled 0..99.
+// Brightness of each frame of the flame clip (24 fps, 121 frames), measured offline with ffmpeg on media/hero-wok-v2.mp4 (see tools/flame-table.py) and scaled 0..99.
 // Reading it by frame number replaces copying the video into a canvas and reading the pixels back every few frames, which makes the CPU wait for the GPU.
 // If the clip is replaced, regenerate the table.
-const FLAME = [99, 99, 99, 87, 20, 15, 35, 43, 54, 77, 99, 80, 28, 0, 2, 12, 48, 62, 98, 77, 17, 5, 13, 34, 72, 92, 76, 0, 1, 19, 18, 35, 78, 99, 90, 31, 7, 11, 56, 74, 83, 99, 74, 32, 39, 39, 35, 8, 37, 58, 71, 40, 0, 6, 9, 16, 27, 58, 85, 25, 51, 73, 87, 29, 0, 7, 14, 62, 73, 79, 66, 0, 2, 10, 18, 55, 61, 66, 72, 19, 23, 55, 58, 20, 20, 38, 78, 92, 99, 32, 20, 42, 60, 87, 64, 0, 0, 4, 29, 60, 85, 46, 20, 6, 35, 76, 99, 80, 4, 13, 35, 25, 34, 52, 76, 82, 36, 25, 38, 44, 64];
+const FLAME = [36, 0, 33, 55, 90, 26, 22, 0, 23, 48, 99, 13, 42, 56, 32, 48, 93, 81, 83, 0, 43, 72, 89, 80, 40, 96, 99, 61, 39, 82, 0, 6, 56, 1, 92, 72, 29, 47, 62, 18, 85, 56, 54, 40, 0, 50, 51, 43, 92, 64, 94, 99, 67, 61, 49, 64, 62, 57, 88, 61, 25, 83, 40, 42, 90, 50, 59, 78, 54, 56, 28, 38, 99, 43, 60, 86, 79, 0, 59, 70, 31, 71, 81, 37, 34, 43, 77, 99, 65, 79, 33, 89, 28, 67, 56, 54, 91, 79, 69, 56, 13, 40, 61, 40, 32, 77, 99, 57, 0, 38, 67, 0, 73, 48, 99, 74, 43, 84, 80, 48, 19];
 let flick = .5;
 function readFlicker(now) {
   const playing = stage.classList.contains('is-video') && !video.paused;
@@ -229,7 +229,7 @@ async function ensureSteam() {
   if (steam || steamPending || glFailed) return steamPending;
   steamPending = (async () => {
     try {
-      const img = await loadImage('media/dish-charsiu.webp');
+      const img = await loadImage('media/dish-beef.webp');
       const tier = q.get('quality') || (phone.matches ? 'low' : ((navigator.hardwareConcurrency || 4) >= 8 && (navigator.deviceMemory || 8) >= 8 ? 'high' : 'mid'));
       steam = await createSteam({ canvas, tier });
       const lost = () => { steam = dish = null; glFailed = true; applyMode(); };

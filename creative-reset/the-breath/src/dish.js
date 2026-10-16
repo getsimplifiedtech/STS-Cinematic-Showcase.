@@ -3,7 +3,7 @@
 // soft on a 2x or 3x screen. Here the canvas is sized to the dish and the screen's pixel ratio (capped at 3x and 4 megapixels), the photograph is
 // resampled with Catmull-Rom, sharpened with a limited unsharp mask (it cannot overshoot its neighbourhood, so no halos) and given a fine static grain so
 // upscaled areas keep a photographic texture. It redraws only while the clearing is moving or the layout changes, so it costs nothing at rest.
-// No new imagery: the source is still the 1200x800 photograph; this only decides how its pixels reach the screen.
+// No new imagery: the source is the 2400x1610 photograph of the plated beef and broccoli; this only decides how its pixels reach the screen.
 import { createGL, program, quad, texture, bind, ready } from './gl.js';
 
 const FS = `#version 300 es
@@ -39,7 +39,7 @@ void main(){
   float side = clamp(1. - uv.x, 0., 1.);
   c *= mix(vec3(.62, .68, .8), vec3(1.28, 1.02, .78), side);
   c = pow(max(c, 0.), vec3(1.22))*1.12;
-  float plate = 1. - smoothstep(.96, 1.3, length((uv - vec2(.49, .53))/vec2(.36, .30)));
+  float plate = 1. - smoothstep(.96, 1.3, length((uv - vec2(.506, .495))/vec2(.37, .33)));
   vec2 e = min(uv, 1. - uv); float win = smoothstep(0., .14, e.x)*smoothstep(0., .2, e.y);   // the photograph dissolves into soot before the edge of its canvas
   c = c*mix(.03, 1., plate)*win + vec3(.055, .05, .047)*(1. - plate*win);
   // one band of warm light crosses the plate as it lands: it only catches what is already bright (glaze, oil, the sheen on the greens)

@@ -66,9 +66,9 @@ export async function createSteam({ canvas, tier = 'mid' }) {
   const P = { emit: 0.4, spread: 0, clear: 0, haze: 1, glow: 0.6, detail: 0.4, flick: 0.5, media: 1 };   // set by the caller each frame
   // placement and look (stage uv, y up); the caller sets these per layout. vent: [span, width^2], noise: detail frequency, wisp: how ragged the vapour is,
   // band: how much the lower frame gives off vapour, radMax: widest the source gets, alt: dissipation with height
-  const L = { src: [0.5, 0.45], dc: [0.62, 0.5], shade: [1, 0], aspect: 1.6, reach: 1.1, vent: [.9, .02], noise: 2.3, wisp: .5, band: 1, radMax: .14, alt: .25, lobe: 1 };
+  const L = { src: [0.5, 0.45], dc: [0.62, 0.5], shade: [1, 0], aspect: 1.6, reach: 1.1, vent: [.9, .02], noise: 2.3, wisp: .5, band: 1, radMax: .14, alt: .25, lobe: 1, amb: 0 };
   //#lab
-  { const l = new URLSearchParams(location.search).get('lobe'); if (l !== null) L.lobe = +l; }   // lab: A/B the billow lighting (0 = round-1 shading)
+  { const l = new URLSearchParams(location.search).get('lobe'); if (l !== null) L.lobe = +l; const am = new URLSearchParams(location.search).get('amb'); if (am !== null) L.amb = +am; }   // lab: A/B the billow lighting (lobe 0 = round-1 shading) and the room-light lift (amb)
   //#endlab
   let vel, prs, dye, div, crl, SIM = { w: 2, h: 2 }, DYE = { w: 2, h: 2 }, gpuBytes = 0, acc = 0, time = 0, lastClear = 0, push = 0, stirs = [];
   let jacobi = T.jacobi;
@@ -165,7 +165,7 @@ void main(){
   // turbulence (curls and ragged edges), thin vapour is eroded away (so it breaks into wisps), and only thick vapour holds a body.
   const COMP = prog( `${HEAD}
 uniform sampler2D tDye, tVel; uniform vec2 dyePx, src, dc, shade;
-uniform float aspect, time, clearR, haze, glow, detail, flick, reach, media, noise, wisp, lobe;
+uniform float aspect, time, clearR, haze, glow, detail, flick, reach, media, noise, wisp, lobe, amb;
 //#lab
 uniform float dbg;
 //#endlab
@@ -199,6 +199,7 @@ void main(){
   float rim = pow(1. - n.z, 2.)*(.3 + .5*detail);
   float lightK = clamp(.24 + .8*mid*(.4 + .9*diff)*mix(1., lit, lobe), 0., 1.5)*(.78 + .5*flick)*mix(.8, 1., media);   // how much flame light reaches this bit of cloud
   vec3 sc = mix(cool*.42, warm, clamp(lightK*.8, 0., 1.))*lightK*(.6 + .85*nz) + cool*rim*.2;
+  sc += amb*vec3(.34, .33, .32)*(.45 + .55*nz)*mix(.6, 1., lit);                         // the room's own light on the vapour, so a plume reads against a dark wok wall too
   sc *= 1. - .35*smoothstep(.7, 1.8, d)*(1. - near);                                      // the heart of a thick cloud is in its own shadow
   sc *= 1. - shade.x*.6*(1. - smoothstep(0., .62, uv.x)) - shade.y*.55*smoothstep(.5, .92, uv.y);   // keep the type side dark
   vec3 rgb = sc*a;
@@ -251,7 +252,7 @@ void main(){
     COMP.use(); bindTex(COMP, 'tDye', dye.read.tex, 4); bindTex(COMP, 'tVel', vel.read.tex, 5);
     COMP.set('dyePx', 1 / DYE.w, 1 / DYE.h); COMP.set('src', ...L.src); COMP.set('dc', ...L.dc); COMP.set('shade', ...L.shade);
     COMP.set('aspect', L.aspect); COMP.set('time', time); COMP.set('clearR', P.clear); COMP.set('reach', L.reach); COMP.set('haze', P.haze); COMP.set('glow', P.glow); COMP.set('detail', P.detail); COMP.set('flick', P.flick);
-    COMP.set('media', P.media); COMP.set('noise', L.noise); COMP.set('wisp', L.wisp); COMP.set('lobe', L.lobe);
+    COMP.set('media', P.media); COMP.set('noise', L.noise); COMP.set('wisp', L.wisp); COMP.set('lobe', L.lobe); COMP.set('amb', L.amb);
     COMP.set('dbg', P.dbg || 0);   //#lab
     Q.draw();
   }

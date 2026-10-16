@@ -32,10 +32,10 @@
      "scale": 1,
      "jacobi": 14
     },
-    "gpuMB": 10.26,
+    "gpuMB": 25.02,
     "dishPx": [
      1240,
-     827
+     832
     ],
     "video": "idle",
     "inView": true,
@@ -189,10 +189,10 @@
      "scale": 1,
      "jacobi": 10
     },
-    "gpuMB": 6.21,
+    "gpuMB": 20.95,
     "dishPx": [
      520,
-     347
+     349
     ],
     "video": "idle",
     "inView": true,
@@ -697,7 +697,7 @@
     ],
     "dish": [
      882,
-     588
+     592
     ],
     "grids": {
      "sim": [
@@ -726,7 +726,7 @@
     ],
     "dish": [
      520,
-     347
+     349
     ],
     "grids": {
      "sim": [
@@ -755,7 +755,7 @@
     ],
     "dish": [
      704,
-     469
+     472
     ],
     "grids": {
      "sim": [
@@ -784,7 +784,7 @@
     ],
     "dish": [
      1240,
-     827
+     832
     ],
     "grids": {
      "sim": [
@@ -810,19 +810,19 @@
  },
  "gating": {
   "visible": {
-   "drawCallsIn2s": 493
+   "drawCallsIn2s": 370
   },
   "hiddenTab": {
    "drawCallsIn2s": 0
   },
   "resumed": {
-   "drawCallsIn2s": 285
+   "drawCallsIn2s": 304
   },
   "offScreen": {
    "drawCallsIn2s": 0
   },
   "backOnScreen": {
-   "drawCallsIn2s": 300
+   "drawCallsIn2s": 180
   },
   "pausedByVisitor": {
    "drawCallsIn2s": 0,
@@ -841,42 +841,26 @@
   "1440x900-mid-dpr1": {
    "steam-at-fullest": {
     "p": 0.55,
-    "framesPerSecond": 1.5,
+    "framesPerSecond": 1.12,
     "frameIntervalMs": {
-     "p50": 774,
-     "p95": 852
+     "p50": 949,
+     "p95": 1000
     },
     "cpuSecondsPerSecond": {
      "browser": 0,
      "renderer": 0,
-     "GPU": 3.71,
+     "GPU": 3.72,
      "network.mojom.NetworkService": 0
     },
-    "steamDrawCallsPerFrame": 155,
+    "steamDrawCallsPerFrame": 216.1,
     "dishDrawCalls": 0
    },
    "dish-reveal": {
     "p": 0.76,
-    "framesPerSecond": 1.12,
+    "framesPerSecond": 1,
     "frameIntervalMs": {
-     "p50": 978,
-     "p95": 1107
-    },
-    "cpuSecondsPerSecond": {
-     "browser": 0,
-     "renderer": 0,
-     "GPU": 3.7,
-     "network.mojom.NetworkService": 0
-    },
-    "steamDrawCallsPerFrame": 118.3,
-    "dishDrawCalls": 8
-   },
-   "dish-at-rest": {
-    "p": 0.97,
-    "framesPerSecond": 1.12,
-    "frameIntervalMs": {
-     "p50": 961,
-     "p95": 1082
+     "p50": 999,
+     "p95": 1129
     },
     "cpuSecondsPerSecond": {
      "browser": 0,
@@ -884,8 +868,24 @@
      "GPU": 3.68,
      "network.mojom.NetworkService": 0
     },
-    "steamDrawCallsPerFrame": 142.8,
-    "dishDrawCalls": 9
+    "steamDrawCallsPerFrame": 210,
+    "dishDrawCalls": 8
+   },
+   "dish-at-rest": {
+    "p": 0.97,
+    "framesPerSecond": 1,
+    "frameIntervalMs": {
+     "p50": 1055,
+     "p95": 1150
+    },
+    "cpuSecondsPerSecond": {
+     "browser": 0,
+     "renderer": 0,
+     "GPU": 3.71,
+     "network.mojom.NetworkService": 0
+    },
+    "steamDrawCallsPerFrame": 237.5,
+    "dishDrawCalls": 8
    },
    "heapMB": 1.5,
    "longTasksOver50ms": 1,
@@ -894,82 +894,82 @@
   "390x844-low-dpr2": {
    "steam-at-fullest": {
     "p": 0.55,
-    "framesPerSecond": 12.85,
+    "framesPerSecond": 6.99,
     "frameIntervalMs": {
-     "p50": 71,
-     "p95": 122
+     "p50": 117,
+     "p95": 237
     },
     "cpuSecondsPerSecond": {
      "browser": 0,
-     "renderer": 0.02,
-     "GPU": 3.73,
+     "renderer": 0.01,
+     "GPU": 3.71,
+     "network.mojom.NetworkService": 0
+    },
+    "steamDrawCallsPerFrame": 19,
+    "dishDrawCalls": 9
+   },
+   "dish-reveal": {
+    "p": 0.76,
+    "framesPerSecond": 7.49,
+    "frameIntervalMs": {
+     "p50": 122,
+     "p95": 217
+    },
+    "cpuSecondsPerSecond": {
+     "browser": 0,
+     "renderer": 0.01,
+     "GPU": 3.68,
+     "network.mojom.NetworkService": 0
+    },
+    "steamDrawCallsPerFrame": 19,
+    "dishDrawCalls": 4
+   },
+   "dish-at-rest": {
+    "p": 0.97,
+    "framesPerSecond": 8.37,
+    "frameIntervalMs": {
+     "p50": 116,
+     "p95": 197
+    },
+    "cpuSecondsPerSecond": {
+     "browser": 0,
+     "renderer": 0.01,
+     "GPU": 3.53,
      "network.mojom.NetworkService": 0
     },
     "steamDrawCallsPerFrame": 19,
     "dishDrawCalls": 0
    },
-   "dish-reveal": {
-    "p": 0.76,
-    "framesPerSecond": 11.73,
-    "frameIntervalMs": {
-     "p50": 75,
-     "p95": 157
-    },
-    "cpuSecondsPerSecond": {
-     "browser": 0,
-     "renderer": 0.02,
-     "GPU": 3.64,
-     "network.mojom.NetworkService": 0
-    },
-    "steamDrawCallsPerFrame": 19,
-    "dishDrawCalls": 1
-   },
-   "dish-at-rest": {
-    "p": 0.97,
-    "framesPerSecond": 9.87,
-    "frameIntervalMs": {
-     "p50": 93,
-     "p95": 193
-    },
-    "cpuSecondsPerSecond": {
-     "browser": 0,
-     "renderer": 0.02,
-     "GPU": 3.64,
-     "network.mojom.NetworkService": 0
-    },
-    "steamDrawCallsPerFrame": 19,
-    "dishDrawCalls": 3
-   },
-   "heapMB": 1.8,
-   "longTasksOver50ms": 0,
+   "heapMB": 1.9,
+   "longTasksOver50ms": 1,
    "errors": []
   }
  },
  "assets": {
   "index.html": {
-   "bytes": 6383,
-   "gzip": 2365,
-   "brotli": 1875
+   "bytes": 6403,
+   "gzip": 2369,
+   "brotli": 1860
   },
   "breath.css": {
-   "bytes": 15253,
-   "gzip": 4966,
-   "brotli": 4258
+   "bytes": 15522,
+   "gzip": 5070,
+   "brotli": 4335
   },
   "js/breath.min.js": {
-   "bytes": 34659,
-   "gzip": 12918,
-   "brotli": 11648
+   "bytes": 34770,
+   "gzip": 12967,
+   "brotli": 11665
   },
   "src/breath.js": {
-   "bytes": 24272,
-   "gzip": 9074,
-   "brotli": 7943
+   "bytes": 24301,
+   "gzip": 9092,
+   "brotli": 7938
   },
   "src/dish.js": {
-   "bytes": 6530,
-   "gzip": 2907,
-   "brotli": 2585
+   "bytes": 6559,
+   "gzip": 2921,
+   "brotli": 2607
   },
   "src/gl.js": {
    "bytes": 4925,
@@ -977,15 +977,18 @@
    "brotli": 1882
   },
   "src/steam.js": {
-   "bytes": 22611,
-   "gzip": 8302,
-   "brotli": 7310
+   "bytes": 22946,
+   "gzip": 8425,
+   "brotli": 7413
   },
   "media/cloud-plate-m.webp": {
-   "bytes": 5216
+   "bytes": 5928
   },
   "media/cloud-plate.webp": {
-   "bytes": 6844
+   "bytes": 8394
+  },
+  "media/dish-beef.webp": {
+   "bytes": 155586
   },
   "media/dish-charsiu.webp": {
    "bytes": 61404
@@ -999,14 +1002,26 @@
   "media/hero-wok-m.webp": {
    "bytes": 54436
   },
+  "media/hero-wok-v2-m.webp": {
+   "bytes": 83786
+  },
+  "media/hero-wok-v2.mp4": {
+   "bytes": 1199611
+  },
+  "media/hero-wok-v2.webm": {
+   "bytes": 513324
+  },
+  "media/hero-wok-v2.webp": {
+   "bytes": 109080
+  },
   "media/hero-wok.webp": {
    "bytes": 61464
   },
   "media/steam-plate-m.webp": {
-   "bytes": 26312
+   "bytes": 34604
   },
   "media/steam-plate.webp": {
-   "bytes": 38014
+   "bytes": 47426
   },
   "fonts/karla-latin-400-normal.woff2": {
    "bytes": 13140
@@ -1023,82 +1038,86 @@
  },
  "load": {
   "desktop-unthrottled": {
-   "loadEventMs": 38,
-   "fcpMs": 52,
-   "lcpMs": 52,
+   "loadEventMs": 47,
+   "fcpMs": 56,
+   "lcpMs": 56,
    "cls": 0,
-   "totalBlockingTimeMs": 10,
+   "totalBlockingTimeMs": 73,
    "longTasks": [
     [
-     45,
-     60
+     58,
+     108
+    ],
+    [
+     188,
+     65
     ]
    ],
-   "requests": 11,
-   "transferredKB": 837.9,
+   "requests": 14,
+   "transferredKB": 1137,
    "byType": {
     "Document": {
      "requests": 1,
-     "bytes": 6467
+     "bytes": 6616
+    },
+    "Stylesheet": {
+     "requests": 1,
+     "bytes": 15737
+    },
+    "Image": {
+     "requests": 6,
+     "bytes": 537997
     },
     "Font": {
      "requests": 4,
      "bytes": 55439
     },
-    "Stylesheet": {
-     "requests": 1,
-     "bytes": 13043
-    },
-    "Image": {
-     "requests": 3,
-     "bytes": 151687
-    },
     "Script": {
      "requests": 1,
-     "bytes": 33096
+     "bytes": 34890
     },
     "Media": {
      "requests": 1,
-     "bytes": 598316
+     "bytes": 513567
     }
    },
    "scriptDurationMs": 0,
-   "taskDurationMs": 3,
+   "taskDurationMs": 0,
    "modeAfterLoad": "live",
    "jsFiles": [
     "js/breath.min.js"
    ]
   },
   "desktop-slow4g-cpu4x": {
-   "loadEventMs": 1245,
-   "fcpMs": 876,
-   "lcpMs": 876,
-   "cls": 0.0314,
-   "totalBlockingTimeMs": 182,
+   "loadEventMs": 1512,
+   "fcpMs": 888,
+   "lcpMs": 888,
+   "cls": 0,
+   "totalBlockingTimeMs": 354,
    "longTasks": [
     [
-     763,
-     98
+     796,
+     76
     ],
     [
-     1855,
-     184
+     3278,
+     378
     ]
    ],
-   "requests": 12,
-   "transferredKB": 837.9,
+   "requests": 14,
+   "transferredKB": 1030.2,
    "byType": {
     "Document": {
      "requests": 1,
-     "bytes": 6467
+     "bytes": 6616
     },
     "Stylesheet": {
      "requests": 1,
-     "bytes": 13043
+     "bytes": 15737
     },
     "Image": {
-     "requests": 4,
-     "bytes": 151687
+     "requests": 6,
+     "bytes": 428701
     },
     "Font": {
      "requests": 4,
@@ -1106,11 +1125,11 @@
     },
     "Script": {
      "requests": 1,
-     "bytes": 33096
+     "bytes": 34890
     },
     "Media": {
      "requests": 1,
-     "bytes": 598316
+     "bytes": 513567
     }
    },
    "scriptDurationMs": 0,
@@ -1121,39 +1140,39 @@
    ]
   },
   "mobile-unthrottled": {
-   "loadEventMs": 54,
-   "fcpMs": 56,
-   "lcpMs": 56,
+   "loadEventMs": 48,
+   "fcpMs": 60,
+   "lcpMs": 60,
    "cls": 0,
-   "totalBlockingTimeMs": 33,
+   "totalBlockingTimeMs": 66,
    "longTasks": [
     [
-     57,
-     83
+     64,
+     116
     ]
    ],
-   "requests": 10,
-   "transferredKB": 233.5,
+   "requests": 12,
+   "transferredKB": 465.8,
    "byType": {
     "Document": {
      "requests": 1,
-     "bytes": 6467
+     "bytes": 6616
+    },
+    "Stylesheet": {
+     "requests": 1,
+     "bytes": 15737
     },
     "Image": {
-     "requests": 3,
-     "bytes": 131059
+     "requests": 5,
+     "bytes": 364339
     },
     "Font": {
      "requests": 4,
      "bytes": 55439
     },
-    "Stylesheet": {
-     "requests": 1,
-     "bytes": 13043
-    },
     "Script": {
      "requests": 1,
-     "bytes": 33096
+     "bytes": 34890
     }
    },
    "scriptDurationMs": 0,
@@ -1164,35 +1183,35 @@
    ]
   },
   "mobile-slow4g-cpu4x": {
-   "loadEventMs": 1159,
-   "fcpMs": 864,
-   "lcpMs": 864,
+   "loadEventMs": 1327,
+   "fcpMs": 944,
+   "lcpMs": 944,
    "cls": 0,
-   "totalBlockingTimeMs": 144,
+   "totalBlockingTimeMs": 412,
    "longTasks": [
     [
-     776,
-     72
+     828,
+     95
     ],
     [
-     1710,
-     172
+     2905,
+     417
     ]
    ],
-   "requests": 10,
-   "transferredKB": 233.5,
+   "requests": 12,
+   "transferredKB": 465.8,
    "byType": {
     "Document": {
      "requests": 1,
-     "bytes": 6467
+     "bytes": 6616
     },
     "Stylesheet": {
      "requests": 1,
-     "bytes": 13043
+     "bytes": 15737
     },
     "Image": {
-     "requests": 3,
-     "bytes": 131059
+     "requests": 5,
+     "bytes": 364339
     },
     "Font": {
      "requests": 4,
@@ -1200,7 +1219,7 @@
     },
     "Script": {
      "requests": 1,
-     "bytes": 33096
+     "bytes": 34890
     }
    },
    "scriptDurationMs": 0,
@@ -1228,8 +1247,8 @@
      "p": 0.824,
      "media": 0,
      "dishCanvas": "visible",
-     "clear": 0.856,
-     "spread": 0.319,
+     "clear": 0.857,
+     "spread": 0.314,
      "mediaOff": true
     },
     {
@@ -1237,8 +1256,8 @@
      "p": 1,
      "media": 0,
      "dishCanvas": "visible",
-     "clear": 1.15,
-     "spread": 0.007,
+     "clear": 1.149,
+     "spread": 0.008,
      "mediaOff": true
     },
     {
@@ -1337,7 +1356,7 @@
      "media": 0,
      "dishCanvas": "visible",
      "clear": 0.861,
-     "spread": 0.234,
+     "spread": 0.238,
      "mediaOff": true
     },
     {
@@ -1346,7 +1365,7 @@
      "media": 1,
      "dishCanvas": "hidden",
      "clear": 0,
-     "spread": 0.276,
+     "spread": 0.269,
      "mediaOff": false
     },
     {
@@ -1481,7 +1500,7 @@
      "media": 1,
      "dishCanvas": "hidden",
      "clear": 0,
-     "spread": 0.145,
+     "spread": 0.143,
      "mediaOff": false
     },
     {
@@ -1490,7 +1509,7 @@
      "media": 0,
      "dishCanvas": "visible",
      "clear": 0.488,
-     "spread": 0.555,
+     "spread": 0.56,
      "mediaOff": true
     },
     {
@@ -1499,7 +1518,7 @@
      "media": 0,
      "dishCanvas": "visible",
      "clear": 1.088,
-     "spread": 0.044,
+     "spread": 0.04,
      "mediaOff": true
     },
     {
@@ -1607,7 +1626,7 @@
      "media": 1,
      "dishCanvas": "hidden",
      "clear": 0,
-     "spread": 0.178,
+     "spread": 0.177,
      "mediaOff": false
     },
     {

@@ -20,7 +20,7 @@
   --seal:"JE Seal","Noto Serif SC","Songti SC",serif;
   --gutter:clamp(20px,5vw,72px);
   --ease:cubic-bezier(.2,.7,.2,1);
-  --focus:56% 50%;
+  --focus:34% 50%;   /* the wok sits right of centre in the footage; this keeps as much of the dark left side in frame as the crop allows */
 }
 *,*::before,*::after{box-sizing:border-box}
 html{background:var(--soot);-webkit-text-size-adjust:100%}
@@ -71,6 +71,7 @@ a{color:inherit}
 .eyebrow{margin:0 0 20px;font-weight:600;font-size:1rem;color:var(--jade)}
 h1,.word{margin:0;font:400 clamp(3.5rem,9.4vw,9.5rem)/.92 var(--serif);letter-spacing:-.018em;color:var(--rice);text-wrap:balance}
 h1 .ln{display:block}
+@media (min-width:960px){h1{font-size:clamp(3.5rem,7.2vw,8rem)}}   /* the headline stays on the dark left of the frame and off the food */
 .word{font-size:clamp(3.25rem,6.6vw,7rem);letter-spacing:-.025em}
 .lede{margin:28px 0 0;max-width:30rem;font-size:1.25rem;line-height:1.55;color:var(--rice)}
 .copy{margin:22px 0 0;max-width:23rem;font-size:1.1875rem;line-height:1.5;color:var(--rice);text-shadow:0 1px 18px rgba(14,13,12,.7)}
@@ -123,7 +124,7 @@ h1 .ln{display:block}
 .is-calm .beat .ln>span{opacity:calc(var(--in)*(1 - var(--out)))}
 .is-calm .beat-4{align-items:center}
 .is-calm .poster{opacity:var(--media,1)}
-.plate-fire{opacity:calc(var(--fire,0)*var(--media,1));background:url(media/hero-wok.webp) var(--focus)/cover no-repeat;transform:scale(1.4);transform-origin:50% 68%}   /* the same stills, cropped to each chapter's subject: opacity-only changes, nothing animates */
+.plate-fire{opacity:calc(var(--fire,0)*var(--media,1));background:url(media/hero-wok-v2.webp) var(--focus)/cover no-repeat;transform:scale(1.4);transform-origin:50% 68%}   /* the same stills, cropped to each chapter's subject: opacity-only changes, nothing animates */
 .plate-tex{opacity:calc(var(--tex,0)*var(--media,1));background:url(media/steam-plate.webp) var(--focus)/cover no-repeat;transform:scale(1.5);transform-origin:50% 64%}
 .plate-steam{opacity:calc(var(--steam,0)*var(--media,1));background:url(media/steam-plate.webp) var(--focus)/cover no-repeat,
   radial-gradient(90% 70% at 50% 30%,rgba(112,104,96,.78) 0,rgba(66,62,58,.62) 46%,rgba(30,28,26,.4) 100%)}
@@ -142,7 +143,7 @@ h1 .ln{display:block}
 
 /* ---------------------------------------------------------------- phones: a different composition, not a scaled desktop */
 @media (max-aspect-ratio:1/1) and (max-width:959px){
-  :root{--focus:55% 62%}
+  :root{--focus:71.5% 62%}
   .top{padding-top:14px}
   .lab-tag{display:none}
   .brand-name{font-size:1.3125rem}
@@ -160,7 +161,7 @@ h1 .ln{display:block}
   .copy{font-size:1.0625rem;max-width:19rem;margin-top:16px}
   .beat-4 .beat-in,.is-live .beat-4,.is-calm .beat-4{margin-block:0;align-items:flex-start}
   .plate-cloud{background-image:url(media/cloud-plate-m.webp)}
-  .plate-fire{background-image:url(media/hero-wok-m.webp);transform-origin:50% 72%}
+  .plate-fire{background-image:url(media/hero-wok-v2-m.webp);transform-origin:50% 72%}
   .plate-tex{background-image:url(media/steam-plate-m.webp);transform-origin:50% 66%}
   .plate-steam{background-image:url(media/steam-plate-m.webp),radial-gradient(90% 70% at 50% 30%,rgba(112,104,96,.78) 0,rgba(66,62,58,.62) 46%,rgba(30,28,26,.4) 100%)}
   .pause{top:14px;right:var(--gutter);bottom:auto;width:44px;padding:0;justify-content:center}

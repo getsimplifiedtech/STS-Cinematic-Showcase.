@@ -17,13 +17,13 @@ One progress value `p` (0 to 1) runs along a pinned 660svh track (560svh on phon
 
 | p | Beat | What the viewer sees |
 | --- | --- | --- |
-| 0 to .09 | Hero | The Kling flame establishes the scene. Wok steam rises, driven by a live fluid solver. |
+| 0 to .09 | Hero | The footage (gas flames under the wok) establishes the scene. Wok steam rises, driven by a live fluid solver. |
 | .105 to .275 | Fire | Flame at full height. The camera pushes in slowly. Ember light warms the steam. |
 | .295 to .46 | Steam | Five vents pulse out of phase. Plumes bulge, collide and merge. |
 | .48 to .645 | Texture | The steam is at its densest and most turbulent. It fills the frame and the flame glows through it. |
 | .56 to .68 | Handover (1) | The footage sinks into its own steam and fades to soot. The clip stops decoding once hidden. |
 | .70 to .92 | Handover (2) | Only now the clearing opens. The dish appears out of cleared soot and settles from 1.035x to 1x. |
-| .665 to 1 | The plate | The char siu plate, lit from the flame side, on soot. |
+| .665 to 1 | The plate | The plated beef and broccoli, lit from the flame side, on soot. |
 
 Footage and dish are never visible together (`lab.overlap()` = 0). Scroll sets the "weather" (emission, spread, clearing radius). The fluid supplies the motion, so scrolling backwards is not a recording played in reverse: the cloud drifts back in. The Kling clip plays normally underneath. It is never scrubbed.
 
@@ -42,7 +42,7 @@ src/dish.js         the dish on its own canvas at the screen's real pixel densit
 src/breath.js       scroll controller, handover timeline, modes, Pause, gating, adaptive quality, lab hooks
 js/breath.min.js    built, shipped bundle (index.html loads this one)
 js/breath.lab.js    built, same code plus window.lab test hooks (tests only)
-media/              Kling clip, posters, dish, calm-mode steam stills (rendered by tools/plates.mjs)
+media/              footage (hero-wok-v2.*), posters, plated dish, calm-mode steam stills (tools/plates.mjs); PROVENANCE.md has prompts, jobs and spend; the earlier media is kept unreferenced
 fonts/              Young Serif, Karla, seal glyphs (same files as production)
 tools/build.mjs     src/ -> js/ (no dependencies; strips //#lab blocks, minifies JS and GLSL)
 tools/serve.py      local server with Range support
@@ -63,4 +63,4 @@ shots/              captured screenshots, evidence sheets, results.json, contras
 
 ## Build
 
-`node tools/build.mjs` after any change under `src/`. If the Kling clip is replaced, rerun `tools/flame-table.py` and paste its table into `src/breath.js`.
+`node tools/build.mjs` after any change under `src/`. If the clip is replaced, rerun `tools/flame-table.py` and paste its table into `src/breath.js`.
