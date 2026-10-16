@@ -1,0 +1,102 @@
+<!doctype html>
+<html lang="en" class="no-js">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>The Breath: Jade & Ember lab prototype</title>
+<meta name="robots" content="noindex, nofollow">
+<meta name="description" content="Lab prototype of The Breath, the signature scroll sequence for Jade & Ember. Not the production site.">
+<link rel="preload" as="font" type="font/woff2" href="fonts/young-serif-latin-400-normal.woff2" crossorigin>
+<link rel="preload" as="font" type="font/woff2" href="fonts/karla-latin-400-normal.woff2" crossorigin>
+<link rel="stylesheet" href="breath.css">
+<script>document.documentElement.className='js'</script>
+</head>
+<body>
+
+<header class="top">
+  <a class="brand" href="./" aria-label="Jade &amp; Ember, lab prototype home"><span class="seal" lang="zh-Hans" aria-hidden="true"><span>玉</span><span>火</span></span><span class="brand-name">Jade &amp; Ember</span></a>
+  <p class="lab-tag">Lab prototype · The Breath · not the production site</p>
+</header>
+
+<main id="main">
+<section class="breath" data-breath aria-label="The Breath: how the wok makes its heat">
+
+  <!-- The pinned stage. Without JavaScript it is still pinned (CSS sticky): the poster stays put and the text panels below scroll over it. -->
+  <div class="stage" data-stage>
+    <div class="media">
+      <picture>
+        <source media="(max-aspect-ratio: 1/1) and (max-width: 959px)" srcset="media/hero-wok-m.webp" width="810" height="1440">
+        <img class="poster" src="media/hero-wok.webp" alt="A carbon steel wok on a roaring burner under a tall flare of orange flame, steam rising into a dark kitchen." width="1920" height="1080" fetchpriority="high" decoding="async">
+      </picture>
+      <video class="flame" muted loop playsinline preload="none" disablepictureinpicture disableremoteplayback aria-hidden="true" tabindex="-1" width="1280" height="720" data-webm="media/hero-loop.webm" data-mp4="media/hero-loop.mp4"></video>
+    </div>
+    <div class="dark" aria-hidden="true"></div>
+    <canvas class="steam" aria-hidden="true"></canvas>
+    <!-- Calm mode plates (reduced motion, Save-Data, no WebGL2, or a failed performance check): opacity-only crossfades, no movement. -->
+    <div class="plates" aria-hidden="true">
+      <div class="plate plate-steam"></div>
+      <div class="plate plate-dish"><img src="media/dish-charsiu.webp" alt="" width="1200" height="800" loading="lazy" decoding="async"></div>
+    </div>
+    <button class="pause" type="button" aria-pressed="false" hidden><span class="pause-ico" aria-hidden="true"></span><span class="pause-txt">Pause motion</span></button>
+  </div>
+
+  <!-- All narrative text is real, ordered DOM. In the live sequence these panels are pinned over the stage; otherwise they scroll over it. -->
+  <div class="beats" data-beats>
+    <div class="beat beat-0" data-from="0" data-to="0.085">
+      <div class="beat-in">
+        <p class="eyebrow">Modern Chinese kitchen</p>
+        <h1 id="hero-title"><span class="ln"><span>The breath</span></span> <span class="ln"><span>of the wok.</span></span></h1>
+        <p class="lede">Carbon steel, a flame at full height, and a kitchen that cooks to the second. Tuesday to Sunday, from five.</p>
+        <p class="actions"><a class="btn" href="#menu-stub">See the menu</a> <a class="btn-link" href="#menu-stub">Order online</a></p>
+      </div>
+    </div>
+
+    <ol class="steps">
+      <li class="beat beat-1" data-from="0.105" data-to="0.275">
+        <div class="beat-in">
+          <h2 class="word"><span class="ln"><span>Fire</span></span></h2>
+          <p class="copy">A burner kept at full height, so the pan never has time to cool.</p>
+        </div>
+      </li>
+      <li class="beat beat-2" data-from="0.295" data-to="0.46">
+        <div class="beat-in">
+          <h2 class="word"><span class="ln"><span>Steam</span></span></h2>
+          <p class="copy">Wine and stock flash at the wall of the wok and lift the aroma into the dish.</p>
+        </div>
+      </li>
+      <li class="beat beat-3" data-from="0.48" data-to="0.645">
+        <div class="beat-in">
+          <h2 class="word"><span class="ln"><span>Texture</span></span></h2>
+          <p class="copy">Small cuts, dry ingredients, and a toss that never stops. Crisp stays crisp.</p>
+        </div>
+      </li>
+      <li class="beat beat-4" data-from="0.665" data-to="1.02">
+        <div class="beat-in">
+          <h2 class="word"><span class="ln"><span>The plate</span></span></h2>
+          <p class="copy">Out of the wok and onto jade or slate within seconds, while it is still singing.</p>
+          <p class="dish-name">Char siu, maltose and five-spice <span class="price">$24</span></p>
+          <!-- No-JS and calm fallback: the finished dish as an ordinary figure. Hidden in the live sequence, where the dish is drawn on the canvas. -->
+          <figure class="dish-static"><img src="media/dish-charsiu.webp" alt="Sliced char siu pork with lacquered, charred edges on a matte black plate beside two stalks of blanched gai lan." width="1200" height="800" loading="lazy" decoding="async"></figure>
+        </div>
+      </li>
+    </ol>
+  </div>
+</section>
+
+<!-- The rest of the page: where The Breath hands over. Placeholder content in the soot colour the sequence ends on. -->
+<section class="after" id="menu-stub" aria-labelledby="after-title">
+  <div class="after-in">
+    <h2 id="after-title">Order these first.</h2>
+    <p class="after-text">Three plates from the wok and the roasting rack, cooked to the second. The full menu and the other pages are unchanged in the production build; this lab only prototypes the opening.</p>
+    <p class="actions"><a class="btn" href="#main">Back to the top</a></p>
+  </div>
+</section>
+</main>
+
+<footer class="foot">
+  <p>Jade &amp; Ember is a fictional restaurant concept by Simplified Tech Solutions. Imagery and the flame clip are AI-generated concept media. This page is a lab prototype for owner review.</p>
+</footer>
+
+<script type="module" src="js/breath.js"></script>
+</body>
+</html>
