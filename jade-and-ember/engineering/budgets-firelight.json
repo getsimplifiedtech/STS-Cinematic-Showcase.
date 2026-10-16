@@ -1,0 +1,35 @@
+{
+  "$comment": "Firelight budgets (APR-JE-052, Option A). Everything not named here keeps the v0.9 limit in budgets.json: Menu, Our Story, Visit Us and Order Online are held to exactly the v0.9 page limits (3,000 B gzip of script, 2 scripts, 255,000 B initial, 325,000 B full page, 4,096 B HTML, 192,000 B and 11 requests at 390 px on the throttled connection, 68,000 B per image, the Core Web Vitals limits). Only Home, and only the items listed under `home`, has its own limit, set from what The Breath measurably needs (a WebGL2 steam simulation in one script, the live dish at full resolution, two stylesheets, the footage). Each Home limit is the measured value plus about 10 percent headroom, rounded; `measured` records the measurement the limit came from, and a Home value more than regressionTolerancePercent above it fails even when it is under its limit. Run: node engineering/project-owned/budgets-firelight.mjs (add --static to skip the browser). The shared check:budgets is left exactly as it is; it measures against the frozen v0.8 baseline and cannot run on this branch (see docs/JADE_AND_EMBER_FIRELIGHT_GATE_STATUS.md).",
+  "approval": "APR-JE-052",
+  "regressionTolerancePercent": 5,
+  "home": {
+    "file": "index.html",
+    "limits": {
+      "jsGzip": 15600,
+      "scripts": 2,
+      "htmlGzip": 4400,
+      "initialGzip": 280000,
+      "fullGzip": 415000
+    },
+    "imageExceptions": {
+      "media/dish-beef.webp": 135000
+    },
+    "why": {
+      "jsGzip": "breath.js (the steam solver, the dish renderer and the sequence, one script) plus site.js. The v0.9 limit was 3,000 B for a page with a nav toggle and a 100-line hero script; a stable-fluids solver in WebGL2 cannot be written in that. Nothing was removed to fit.",
+      "fullGzip": "the finished-dish photograph is drawn at 2400 px so the steam can be composited over it at full resolution; the other two signature plates and the story teaser follow.",
+      "images": "media/dish-beef.webp is 2400 px wide on purpose (it is the live dish canvas). Menu serves a 1200 px copy of it, so no other page carries it."
+    },
+    "runtimeLimits": {
+      "live": {
+        "requests": 14,
+        "transferBytes": 330000,
+        "blockingMsRegressionGuard": 4000
+      },
+      "calm": {
+        "requests": 14,
+        "transferBytes": 330000
+      }
+    }
+  },
+  "measured": {}
+}

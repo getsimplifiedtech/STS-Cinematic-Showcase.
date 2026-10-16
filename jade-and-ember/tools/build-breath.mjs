@@ -1,4 +1,4 @@
-// Build for The Breath (Home page script). No dependencies: plain Node, STS-authored. It turns the four ES modules in src/client/ into ONE script, so the page makes one
+// Build for The Breath (Home page script). No dependencies: plain Node, STS-authored. It turns the four ES modules in client/ into ONE script, so the page makes one
 // script request instead of three, and removes what a visitor never needs.
 //   node tools/build-breath.mjs    writes breath.js (shipped) and .build/breath.lab.js (same code plus the lab hooks used by the test tooling; git-ignored, never shipped)
 // What it does: concatenates the modules (each in its own scope, imports resolved by name), strips lab-only code, comments and surplus whitespace
@@ -113,11 +113,11 @@ function minify(src) {
 function bundle(keepLab) {
   let all = '';
   for (const m of MODULES) {
-    let text = stripLab(readFileSync(join(root, 'src', 'client', m + '.js'), 'utf8'), keepLab);
+    let text = stripLab(readFileSync(join(root, 'client', m + '.js'), 'utf8'), keepLab);
     const exported = [];
     text = text.replace(/^export\s+(?:async\s+)?(function|const|let|class)\s+([A-Za-z0-9_$]+)/gm, (_, kind, name) => { exported.push(name); return _.replace(/^export\s+/, ''); });
     text = text.replace(/^import\s+[^;]*;\s*$/gm, '');
-    if (/\bimport\s*\{|\bexport\s/.test(text)) throw new Error(`unresolved import/export in src/client/${m}.js`);
+    if (/\bimport\s*\{|\bexport\s/.test(text)) throw new Error(`unresolved import/export in client/${m}.js`);
     if (m === 'breath') all += `(()=>{\n${text}\n})();\n`;
     else all += `const {${exported.join(',')}}=(()=>{\n${text}\nreturn {${exported.join(',')}};\n})();\n`;
   }
@@ -127,7 +127,7 @@ function bundle(keepLab) {
 mkdirSync(join(root, '.build'), { recursive: true });
 const report = {};
 for (const [name, lab] of [['breath.js', false], ['breath.lab.js', true]]) {
-  const raw = bundle(lab), min = `/* The Breath. STS-authored, no third-party code. Built by tools/build-breath.mjs from src/client/. */\n${minify(raw)}\n`;
+  const raw = bundle(lab), min = `/* The Breath. STS-authored, no third-party code. Generated from the project's client sources. */\n${minify(raw)}\n`;
   const tmp = join(tmpdir(), name + '.check.mjs'); writeFileSync(tmp, min);
   const chk = spawnSync(process.execPath, ['--check', tmp], { encoding: 'utf8' }); if (chk.status) { console.error(chk.stderr); process.exit(1); }
   writeFileSync(join(root, name === 'breath.js' ? 'breath.js' : join('.build', name)), min);

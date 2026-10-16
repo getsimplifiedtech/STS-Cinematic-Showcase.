@@ -17,7 +17,7 @@
 .journey-pin{position:sticky;top:0;height:100svh;overflow:hidden;display:flex;align-items:center;isolation:isolate}
 .scenes{position:absolute;inset:0;z-index:-1}
 .scene{position:absolute;inset:0;margin:0;display:flex;align-items:center;pointer-events:none}
-.scene span{font:600 clamp(7rem,27vw,26rem)/1 var(--serif);letter-spacing:-.04em;white-space:nowrap}
+.scene span{font:600 clamp(6rem,20vw,19rem)/1 var(--serif);letter-spacing:-.04em;white-space:nowrap}
 /* 1 the wok: an ember pool low on the left, the word lit from below */
 .scene-1{opacity:clamp(0,calc(1 - max(var(--k) - .5,0)*1.5),1);background:radial-gradient(55% 70% at 8% 108%,rgba(240,138,60,.34),transparent 70%)}
 .scene-1 span{margin-left:-2vw;background:linear-gradient(to top,var(--ember) 0,#2a2018 62%,#1b1815);-webkit-background-clip:text;background-clip:text;color:transparent;-webkit-text-fill-color:transparent;transform:translateX(calc((var(--k) - .5)*-4vw))}
@@ -72,7 +72,7 @@
   .steps li{padding-left:calc(var(--s6) + 2px)}
   .steps h3{font-size:1.375rem}
   .steps p{font-size:1rem}
-  .scene span{font-size:clamp(7rem,48vw,12rem)}
+  .scene span{font-size:clamp(6rem,25vw,10rem)}
   .scene{align-items:flex-end;padding-bottom:var(--s7)}
 }
 @media (max-height:640px) and (min-width:760px){.journey{height:auto}.journey-pin{position:relative;height:auto;padding-block:var(--s8)}.scenes{display:none}}

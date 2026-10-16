@@ -12,9 +12,9 @@ export default function order(cfg) {
   const action = live
     ? `<a class="btn btn-ember" href="${esc(client.ordering.url)}" target="_blank" rel="noopener noreferrer">${esc(client.ordering.label)}<span class="vh"> ${esc(o.newTab)}</span></a>`
     : `<span class="btn btn-off">${esc(client.ordering.label)} ${esc(copy.demo.exampleSuffix)}</span>`;
-  // Three stations in one pinned stage: the wok, the pass, you. The words behind the ticket are decorative (aria-hidden); the ordered steps are the real content,
+  // Three stations in one pinned stage, lit like the wok, the pass and the customer's hand. The words behind the ticket are decorative (aria-hidden); the ordered steps are the real content,
   // printed on a ticket. The order action is a direct child of the track so it can stay in view (sticky) while the stage plays.
-  const words = o.steps.map((s) => s.station).filter(Boolean);
+  const words = o.steps.map((s) => s.name.split(' ')[0]);   // the first word of each real step, set large behind the ticket
   const main = `  <div class="order-track">
     <section class="order-head" aria-labelledby="order-title">
       <div class="wrap order-head-grid">

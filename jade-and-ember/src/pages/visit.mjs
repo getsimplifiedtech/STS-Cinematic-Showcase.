@@ -18,7 +18,7 @@ export default function visit(cfg) {
   // photograph, decorative here) sit behind a frosted panel that holds the address and hours. Real, ordered DOM throughout; the light is the only thing JavaScript moves.
   const img = copy.story.image;
   const main = `  <section class="visit-room" aria-labelledby="visit-title">
-    <figure class="room-bg" aria-hidden="true"><img src="${esc(img.src)}" alt="" width="${img.width}" height="${img.height}" decoding="async"></figure>
+    <figure class="room-bg" aria-hidden="true"><img src="${esc(img.src)}" alt="" width="${img.width}" height="${img.height}" loading="lazy" decoding="async"></figure>
     <div class="candle" aria-hidden="true"></div>
     <div class="wrap room-grid">
       <div class="visit-head">

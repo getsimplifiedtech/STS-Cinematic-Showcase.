@@ -163,9 +163,11 @@ function frame(now) {
   if (!q.has('perf') || q.get('perf') !== 'off') adapt(gap);
 }
 // Adaptive load: first shrink the canvas, then the pressure solver, and only if the frame is still slow, hand over to the calm layout.
-let emaMs = 16.7, adaptN = 0;
+let emaMs = 16.7, adaptN = 0, crawl = 0;
 function adapt(gap) {
-  if (gap > 250) return;
+  if (gap > 3000) { crawl = 0; return; }   // the tab was away, not the solver
+  if (gap > 150) { if (++crawl >= 5) { stats.bails++; bailed = true; applyMode(); } return; }   // frames that crawl (5 in a row over 150 ms): leave the live solver at once, do not wait for the averages
+  crawl = 0;
   emaMs = emaMs * .9 + gap * .1; if (++adaptN % 30) return;
   if (emaMs > 30) {
     if (steam.scale > .55) { steam.setScale(steam.scale * .85); }
@@ -229,8 +231,8 @@ async function ensureSteam() {
   if (steam || steamPending || glFailed) return steamPending;
   steamPending = (async () => {
     try {
-      const img = await loadImage('media/dish-beef.webp');
-      const tier = q.get('quality') || (phone.matches ? 'low' : ((navigator.hardwareConcurrency || 4) >= 8 && (navigator.deviceMemory || 8) >= 8 ? 'high' : 'mid'));
+      const img = await loadImage(document.querySelector('.plate-dish img').getAttribute('src'));   // the finished dish, named once in the page markup
+      const tier = q.get('quality') || (phone.matches ? 'low' : 'mid');   // no device-capability reads (privacy standard): the adaptive load below tunes the rest from measured frame time
       steam = await createSteam({ canvas, tier });
       const lost = () => { steam = dish = null; glFailed = true; applyMode(); };
       canvas.addEventListener('webglcontextlost', (e) => { e.preventDefault(); lost(); });

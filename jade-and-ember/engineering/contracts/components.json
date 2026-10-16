@@ -1,5 +1,5 @@
 {
-  "$comment": "Contracts for the shared components and page renderers (WP4, ledger ENG-070 component tier). A contract states the interface (module, export, number of parameters) and the rendering guarantees a caller can rely on. checks/contracts.mjs runs every component against real configuration and against hostile and varied inputs, so a change that breaks a guarantee fails before it reaches a page. No change to any component is needed or made: the contracts describe what the v0.8 components already do. A component or export without a contract fails the check, and so does a contract without a component.",
+  "$comment": "Contracts for the shared components and page renderers (WP4, ledger ENG-070 component tier). A contract states the interface (module, export, number of parameters) and the rendering guarantees a caller can rely on. checks/contracts.mjs runs every component against real configuration and against hostile and varied inputs, so a change that breaks a guarantee fails before it reaches a page. No change to any component is needed or made: the contracts describe what the v0.8 components already do. A component or export without a contract fails the check, and so does a contract without a component. Firelight (APR-JE-052): the page scripts are breath.js (Home), story.js, menu.js and visit.js; the dish and menu-category renderers carry the photographs of the signature dishes.",
   "common": [
     "returns a string (a page renderer returns { main, scripts, extraHead })",
     "balanced, well-formed tags; no stray angle brackets in text",
@@ -12,28 +12,240 @@
     "deterministic and pure: the same input gives the same output and the input is not modified"
   ],
   "components": {
-    "esc": { "module": "src/lib/util.mjs", "kind": "helper", "arity": 1, "does": "escapes & < > and double quotes" },
-    "money": { "module": "src/lib/util.mjs", "kind": "helper", "arity": 1, "does": "formats a price as $n, escaped" },
-    "heat": { "module": "src/lib/util.mjs", "kind": "helper", "arity": 1, "does": "empty for 0; otherwise a role=img span labelled 'Heat n of 3' with three dots" },
-    "pageHref": { "module": "src/components/shared.mjs", "kind": "helper", "arity": 2, "does": "the file of a page id; throws for an unknown id" },
-    "ctaPage": { "module": "src/components/shared.mjs", "kind": "helper", "arity": 1, "does": "the one page flagged cta" },
-    "orderTarget": { "module": "src/components/shared.mjs", "kind": "helper", "arity": 1, "does": "the Order page, or the live https ordering URL in a new tab only when direct is asked for and a live URL exists" },
-    "orderLink": { "module": "src/components/shared.mjs", "kind": "fragment", "arity": 2, "root": "a", "requires": ["class=\"btn btn-ember\"", "href=\"order-online.html\""], "escapes": ["cls"] },
-    "sealMark": { "module": "src/components/shared.mjs", "kind": "fragment", "arity": 1, "root": "span", "requires": ["class=\"seal\"", "lang=\"zh-Hans\"", "aria-hidden=\"true\""], "escapes": ["client.brand.seal.0", "client.brand.seal.1"] },
-    "frame": { "module": "src/components/frame.mjs", "kind": "fragment", "arity": 1, "root": "figure", "requires": ["<figure class=\"dish-fig\">", "loading=\"lazy\"", "decoding=\"async\""], "inlineStyles": ["--pos"], "escapes": ["src", "alt", "pos", "cls"] },
-    "hours": { "module": "src/components/hours.mjs", "kind": "fragment", "arity": 1, "root": "table", "requires": ["<table class=\"hours\">", "<caption class=\"vh\">Opening hours (sample)</caption>", "scope=\"row\""], "escapes": ["client.hours.rows.0.days", "client.hours.rows.0.time"] },
-    "menuCategory": { "module": "src/components/menu-category.mjs", "kind": "fragment", "arity": 1, "root": "section", "requires": ["<section class=\"cat\"", "<h2 class=\"cat-title\"", "aria-labelledby=", "class=\"item\""], "escapes": ["id", "name", "items.0.name", "items.0.text", "items.0.tags.0"] },
-    "dish": { "module": "src/components/dish.mjs", "kind": "fragment", "arity": 1, "root": "article", "requires": ["<article class=\"dish dish-1\">", "<h3>", "class=\"price\"", "<figure"], "inlineStyles": ["--pos"], "escapes": ["name", "signature.alt", "signature.text", "signature.image", "signature.focus", "tags.0"] },
-    "steps": { "module": "src/components/steps.mjs", "kind": "fragment", "arity": 1, "root": "ol", "requires": ["<ol class=\"steps", "class=\"step-no\" aria-hidden=\"true\""], "escapes": ["0.name", "0.text", "0.link.href", "0.link.label"] },
-    "ctaBand": { "module": "src/components/cta-band.mjs", "kind": "fragment", "arity": 2, "root": "section", "requires": ["<section class=\"cta-band cta-pine\"", "aria-labelledby=\"order-title\"", "<h2 id=\"order-title\">", "class=\"btn btn-ember\"", "class=\"btn btn-ink\""], "escapes": ["heading", "text", "id", "secondary.label"] },
-    "ownerNote": { "module": "src/components/owner-note.mjs", "kind": "fragment", "arity": 1, "root": "section", "requires": ["<section class=\"owner\"", "aria-labelledby=\"owner-title\""], "escapes": ["copy.demo.ownerNoteTitle", "copy.demo.demoNote", "copy.demo.platformNote"], "conditional": "empty unless the demonstration flag is on and the ordering URL is not live" },
-    "document": { "module": "src/components/document.mjs", "kind": "document", "arity": 3, "escapes": ["client.brand.name", "client.seo.themeColor", "site.lang", "copy.home.meta.title", "copy.home.meta.description", "site.demo.bar"] }
+    "esc": {
+      "module": "src/lib/util.mjs",
+      "kind": "helper",
+      "arity": 1,
+      "does": "escapes & < > and double quotes"
+    },
+    "money": {
+      "module": "src/lib/util.mjs",
+      "kind": "helper",
+      "arity": 1,
+      "does": "formats a price as $n, escaped"
+    },
+    "heat": {
+      "module": "src/lib/util.mjs",
+      "kind": "helper",
+      "arity": 1,
+      "does": "empty for 0; otherwise a role=img span labelled 'Heat n of 3' with three dots"
+    },
+    "pageHref": {
+      "module": "src/components/shared.mjs",
+      "kind": "helper",
+      "arity": 2,
+      "does": "the file of a page id; throws for an unknown id"
+    },
+    "ctaPage": {
+      "module": "src/components/shared.mjs",
+      "kind": "helper",
+      "arity": 1,
+      "does": "the one page flagged cta"
+    },
+    "orderTarget": {
+      "module": "src/components/shared.mjs",
+      "kind": "helper",
+      "arity": 1,
+      "does": "the Order page, or the live https ordering URL in a new tab only when direct is asked for and a live URL exists"
+    },
+    "orderLink": {
+      "module": "src/components/shared.mjs",
+      "kind": "fragment",
+      "arity": 2,
+      "root": "a",
+      "requires": [
+        "class=\"btn btn-ember\"",
+        "href=\"order-online.html\""
+      ],
+      "escapes": [
+        "cls"
+      ]
+    },
+    "sealMark": {
+      "module": "src/components/shared.mjs",
+      "kind": "fragment",
+      "arity": 1,
+      "root": "span",
+      "requires": [
+        "class=\"seal\"",
+        "lang=\"zh-Hans\"",
+        "aria-hidden=\"true\""
+      ],
+      "escapes": [
+        "client.brand.seal.0",
+        "client.brand.seal.1"
+      ]
+    },
+    "frame": {
+      "module": "src/components/frame.mjs",
+      "kind": "fragment",
+      "arity": 1,
+      "root": "figure",
+      "requires": [
+        "<figure class=\"dish-fig\">",
+        "loading=\"lazy\"",
+        "decoding=\"async\""
+      ],
+      "inlineStyles": [
+        "--pos"
+      ],
+      "escapes": [
+        "src",
+        "alt",
+        "pos",
+        "cls"
+      ]
+    },
+    "hours": {
+      "module": "src/components/hours.mjs",
+      "kind": "fragment",
+      "arity": 1,
+      "root": "table",
+      "requires": [
+        "<table class=\"hours\">",
+        "<caption class=\"vh\">Opening hours (sample)</caption>",
+        "scope=\"row\""
+      ],
+      "escapes": [
+        "client.hours.rows.0.days",
+        "client.hours.rows.0.time"
+      ]
+    },
+    "menuCategory": {
+      "module": "src/components/menu-category.mjs",
+      "kind": "fragment",
+      "arity": 1,
+      "root": "section",
+      "requires": [
+        "<section class=\"cat\"",
+        "<h2 class=\"cat-title\"",
+        "aria-labelledby=",
+        "class=\"item\""
+      ],
+      "escapes": [
+        "id",
+        "name",
+        "items.0.name",
+        "items.0.text",
+        "items.0.tags.0"
+      ]
+    },
+    "dish": {
+      "module": "src/components/dish.mjs",
+      "kind": "fragment",
+      "arity": 1,
+      "root": "article",
+      "requires": [
+        "<article class=\"dish dish-1\">",
+        "<h3>",
+        "class=\"price\"",
+        "<figure"
+      ],
+      "inlineStyles": [
+        "--pos"
+      ],
+      "escapes": [
+        "name",
+        "signature.alt",
+        "signature.text",
+        "signature.image",
+        "signature.focus",
+        "tags.0"
+      ]
+    },
+    "steps": {
+      "module": "src/components/steps.mjs",
+      "kind": "fragment",
+      "arity": 1,
+      "root": "ol",
+      "requires": [
+        "<ol class=\"steps",
+        "class=\"step-no\" aria-hidden=\"true\""
+      ],
+      "escapes": [
+        "0.name",
+        "0.text",
+        "0.link.href",
+        "0.link.label"
+      ]
+    },
+    "ctaBand": {
+      "module": "src/components/cta-band.mjs",
+      "kind": "fragment",
+      "arity": 2,
+      "root": "section",
+      "requires": [
+        "<section class=\"cta-band cta-pine\"",
+        "aria-labelledby=\"order-title\"",
+        "<h2 id=\"order-title\">",
+        "class=\"btn btn-ember\"",
+        "class=\"btn btn-ink\""
+      ],
+      "escapes": [
+        "heading",
+        "text",
+        "id",
+        "secondary.label"
+      ]
+    },
+    "ownerNote": {
+      "module": "src/components/owner-note.mjs",
+      "kind": "fragment",
+      "arity": 1,
+      "root": "section",
+      "requires": [
+        "<section class=\"owner\"",
+        "aria-labelledby=\"owner-title\""
+      ],
+      "escapes": [
+        "copy.demo.ownerNoteTitle",
+        "copy.demo.demoNote",
+        "copy.demo.platformNote"
+      ],
+      "conditional": "empty unless the demonstration flag is on and the ordering URL is not live"
+    },
+    "document": {
+      "module": "src/components/document.mjs",
+      "kind": "document",
+      "arity": 3,
+      "escapes": [
+        "client.brand.name",
+        "client.seo.themeColor",
+        "site.lang",
+        "copy.home.meta.title",
+        "copy.home.meta.description",
+        "site.demo.bar"
+      ]
+    }
   },
   "pages": {
-    "home": { "module": "src/pages/home.mjs", "scripts": ["hero.js"] },
-    "menu": { "module": "src/pages/menu.mjs", "scripts": ["menu.js"] },
-    "story": { "module": "src/pages/story.mjs", "scripts": [] },
-    "visit": { "module": "src/pages/visit.mjs", "scripts": [] },
-    "order": { "module": "src/pages/order.mjs", "scripts": [] }
+    "home": {
+      "module": "src/pages/home.mjs",
+      "scripts": [
+        "breath.js"
+      ]
+    },
+    "menu": {
+      "module": "src/pages/menu.mjs",
+      "scripts": [
+        "menu.js"
+      ]
+    },
+    "story": {
+      "module": "src/pages/story.mjs",
+      "scripts": [
+        "story.js"
+      ]
+    },
+    "visit": {
+      "module": "src/pages/visit.mjs",
+      "scripts": [
+        "visit.js"
+      ]
+    },
+    "order": {
+      "module": "src/pages/order.mjs",
+      "scripts": []
+    }
   }
 }

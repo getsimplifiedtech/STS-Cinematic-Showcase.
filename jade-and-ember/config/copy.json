@@ -228,18 +228,15 @@
         "link": {
           "page": "menu",
           "label": "See the menu"
-        },
-        "station": "Wok"
+        }
       },
       {
         "name": "Order and pay",
-        "text": "Order on {platform}. Payment is taken there, not on this site.",
-        "station": "Pass"
+        "text": "Order on {platform}. Payment is taken there, not on this site."
       },
       {
         "name": "Collect",
-        "text": "Come to the pass and we hand it over hot. {pickup}",
-        "station": "You"
+        "text": "Come to the pass and we hand it over hot. {pickup}"
       }
     ],
     "pickup": {

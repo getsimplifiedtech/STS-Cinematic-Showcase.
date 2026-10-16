@@ -19,7 +19,7 @@ const report = (name, problems) => { console.log(`${problems.length ? 'FAIL' : '
   for (const f of ['index.html', 'menu.html', 'our-story.html', 'visit-us.html', 'order-online.html', 'styles.css', 'site.js', 'hero.js', 'menu.js']) if (!existsSync(join(dir, f))) p.push(`missing ${f}`);
   for (const f of ['young-serif-latin-400-normal.woff2', 'karla-latin-400-normal.woff2', 'karla-latin-600-normal.woff2', 'noto-serif-sc-seal-600.woff2']) if (!existsSync(join(dir, 'fonts', f))) p.push(`missing fonts/${f}`);
   const media = existsSync(join(dir, 'media')) ? readdirSync(join(dir, 'media')) : [];
-  for (const f of ['hero-wok.webp', 'hero-wok-m.webp', 'hero-loop.webm', 'hero-loop.mp4', 'dish-mapo.webp', 'dish-charsiu.webp', 'dish-dandan.webp', 'story-jade-bowls.webp']) if (!media.includes(f)) p.push(`missing media/${f}`);
+  for (const f of ['hero-wok-v2.webp', 'hero-wok-v2-m.webp', 'hero-wok-v2.webm', 'hero-wok-v2.mp4', 'dish-mapo.webp', 'dish-dandan.webp', 'story-jade-bowls.webp']) if (!media.includes(f)) p.push(`missing media/${f}`);
   // every reference in the pages must be relative and exist
   for (const [file] of nav) {
     const html = readFileSync(join(dir, file), 'utf8');

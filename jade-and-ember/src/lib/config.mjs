@@ -69,6 +69,7 @@ export function validate(cfg) {
       if (it.signature) {
         need(it.signature.alt && it.signature.alt.length > 10, `${w}: signature image needs real alt text`);
         need(fileExists(it.signature.image), `${w}: missing file ${it.signature.image}`);
+        if ((it.signature.width || 0) > 1600) need(fileExists(it.signature.image.replace(/\.webp$/, '-1200.webp')), `${w}: a signature photograph wider than 1600 px needs a 1200 px copy named ${it.signature.image.replace(/\.webp$/, '-1200.webp')} for the Menu`);
       }
     });
   });

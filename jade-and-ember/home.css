@@ -11,8 +11,8 @@
 .media{position:absolute;inset:0}
 .media picture,.poster,.flame{position:absolute;inset:0;width:100%;height:100%}
 .poster,.flame{object-fit:cover;object-position:var(--focus)}
-.flame{opacity:0;transition:opacity 500ms var(--ease)}
-.is-video .flame{opacity:1}
+.flame{opacity:0}   /* the footage fades in when it starts; Pause removes it at once, so nothing is still moving after the press */
+.is-video .flame{opacity:1;transition:opacity 500ms var(--ease)}
 .dark{position:absolute;z-index:3;inset:0;pointer-events:none;background:
   linear-gradient(90deg,rgba(14,13,12,.92) 0,rgba(14,13,12,.7) 26%,rgba(14,13,12,.22) 50%,rgba(14,13,12,0) 66%),
   linear-gradient(0deg,rgba(14,13,12,.78) 0,rgba(14,13,12,0) 28%),
@@ -87,10 +87,10 @@ html:not(.js) .beat-4{align-items:center}
 .is-calm .beat-4{align-items:center}
 .is-calm .poster{opacity:var(--media,1)}
 .plate-fire{opacity:calc(var(--fire,0)*var(--media,1));background:url(media/hero-wok-v2.webp) var(--focus)/cover no-repeat;transform:scale(1.4);transform-origin:50% 68%}   /* the same stills, cropped to each chapter's subject: opacity-only changes, nothing animates */
-.plate-tex{opacity:calc(var(--tex,0)*var(--media,1));background:url(media/steam-plate.webp) var(--focus)/cover no-repeat;transform:scale(1.5);transform-origin:50% 64%}
-.plate-steam{opacity:calc(var(--steam,0)*var(--media,1));background:url(media/steam-plate.webp) var(--focus)/cover no-repeat,
+.plate-tex{opacity:calc(var(--tex,0)*var(--media,1));background:var(--plate-steam) var(--focus)/cover no-repeat;transform:scale(1.5);transform-origin:50% 64%}
+.plate-steam{opacity:calc(var(--steam,0)*var(--media,1));background:var(--plate-steam) var(--focus)/cover no-repeat,
   radial-gradient(90% 70% at 50% 30%,rgba(112,104,96,.78) 0,rgba(66,62,58,.62) 46%,rgba(30,28,26,.4) 100%)}
-.plate-cloud{opacity:var(--cloud,0);background:url(media/cloud-plate.webp) var(--focus)/cover no-repeat,var(--kitchen);filter:brightness(1.18)}   /* the dense cloud alone: the wok sinks into it, then the dish rises out of it, so no frame in between is empty */
+.plate-cloud{opacity:var(--cloud,0);background:var(--plate-cloud) var(--focus)/cover no-repeat,var(--kitchen);filter:brightness(1.18)}   /* the dense cloud alone: the wok sinks into it, then the dish rises out of it, so no frame in between is empty */
 .plate-dish{opacity:var(--dish,0);background:var(--kitchen)}
 .plate-dish img{position:absolute;right:-4%;top:50%;width:min(86vw,112vh,1280px);height:auto;transform:translateY(-50%);filter:brightness(.78) contrast(1.16) saturate(1.1);
   -webkit-mask-image:radial-gradient(ellipse 52% 56% at 50% 50%,#000 36%,transparent 100%);mask-image:radial-gradient(ellipse 52% 56% at 50% 50%,#000 36%,transparent 100%)}
@@ -111,10 +111,10 @@ html:not(.js) .beat-4{align-items:center}
   .beat-4 .word{font-size:clamp(3.4rem,17vw,5rem)}
   .copy{font-size:1.0625rem;max-width:19rem;margin-top:16px}
   .beat-4 .beat-in,.is-live .beat-4,.is-calm .beat-4{margin-block:0;align-items:flex-start}
-  .plate-cloud{background-image:url(media/cloud-plate-m.webp)}
+  .plate-cloud{background-image:var(--plate-cloud-m)}
   .plate-fire{background-image:url(media/hero-wok-v2-m.webp);transform-origin:50% 72%}
-  .plate-tex{background-image:url(media/steam-plate-m.webp);transform-origin:50% 66%}
-  .plate-steam{background-image:url(media/steam-plate-m.webp),radial-gradient(90% 70% at 50% 30%,rgba(112,104,96,.78) 0,rgba(66,62,58,.62) 46%,rgba(30,28,26,.4) 100%)}
+  .plate-tex{background-image:var(--plate-steam-m);transform-origin:50% 66%}
+  .plate-steam{background-image:var(--plate-steam-m),radial-gradient(90% 70% at 50% 30%,rgba(112,104,96,.78) 0,rgba(66,62,58,.62) 46%,rgba(30,28,26,.4) 100%)}
   .pause{top:14px;right:var(--gutter);bottom:auto;width:44px;padding:0;justify-content:center}
   .pause-txt{position:absolute;width:1px;height:1px;margin:-1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
   .is-live .breath{height:560vh;height:560svh}

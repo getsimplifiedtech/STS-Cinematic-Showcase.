@@ -85,7 +85,8 @@
     "evidence:list": "node ../engineering/tools/evidence.mjs list",
     "evidence:docs": "node ../engineering/tools/evidence.mjs docs",
     "evidence:validate": "node ../engineering/tools/evidence.mjs validate",
-    "evidence:hash": "node ../engineering/tools/evidence.mjs hash"
+    "evidence:hash": "node ../engineering/tools/evidence.mjs hash",
+    "check:budgets-firelight": "node engineering/project-owned/budgets-firelight.mjs"
   },
   "devDependencies": {
     "@axe-core/playwright": "4.13.0",

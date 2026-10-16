@@ -54,7 +54,9 @@
           "text": "Sliced flank, broccoli and red chili over a hard flame.",
           "price": 26,
           "heat": 1,
-          "tags": [],
+          "tags": [
+            "Contains soy"
+          ],
           "signature": {
             "image": "media/dish-beef.webp",
             "alt": "Glossy sliced beef, bright green broccoli and red chili in a brown sauce on a matte black plate.",
@@ -149,15 +151,6 @@
       "name": "Roast & braise",
       "items": [
         {
-          "name": "Char Siu",
-          "text": "Maltose-glazed pork shoulder, roasted until lacquered.",
-          "price": 24,
-          "heat": 0,
-          "tags": [
-            "Contains pork"
-          ]
-        },
-        {
           "name": "Mapo Tofu",
           "text": "Silken tofu, fermented bean paste, numbing pepper.",
           "price": 18,
@@ -172,6 +165,15 @@
             "text": "Silken tofu in red chili oil, fermented bean paste and numbing Sichuan pepper. Served with steamed rice.",
             "order": 2
           }
+        },
+        {
+          "name": "Char Siu",
+          "text": "Maltose-glazed pork shoulder, roasted until lacquered.",
+          "price": 24,
+          "heat": 0,
+          "tags": [
+            "Contains pork"
+          ]
         },
         {
           "name": "Red-Braised Pork Belly",

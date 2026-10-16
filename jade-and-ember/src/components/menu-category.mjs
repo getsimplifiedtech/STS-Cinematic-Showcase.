@@ -4,8 +4,14 @@ import { esc, money, heat } from '../lib/util.mjs';
 
 export function menuCategory(cat) {
   const sig = cat.items.find((it) => it.signature && it.signature.image);
-  const plate = sig ? `
-          <figure class="cat-plate"><img src="${esc(sig.signature.image)}" alt="${esc(sig.signature.alt)}" width="${+sig.signature.width || 1200}" height="${+sig.signature.height || 800}" loading="lazy" decoding="async" style="--pos:${esc(sig.signature.focus || '50% 50%')}"></figure>` : '';
+  // A photograph wider than 1600 px (the Home sequence draws the beef at 2400 px) is served here at 1200 px (`name-1200.webp` beside it) with the full file as the high-density candidate.
+  let plate = '';
+  if (sig) {
+    const s = sig.signature, w = +s.width || 1200, h = +s.height || 800, wide = w > 1600;
+    const src = wide ? s.image.replace(/\.webp$/, '-1200.webp') : s.image;
+    plate = `
+          <figure class="cat-plate"><img src="${esc(src)}"${wide ? ` srcset="${esc(src)} 1200w, ${esc(s.image)} ${w}w" sizes="(min-width: 1024px) 640px, 100vw"` : ''} alt="${esc(s.alt)}" width="${wide ? 1200 : w}" height="${wide ? Math.round(h * 1200 / w) : h}" loading="lazy" decoding="async" style="--pos:${esc(s.focus || '50% 50%')}"></figure>`;
+  }
   return `
         <section class="cat" data-p id="${esc(cat.id)}" aria-labelledby="${esc(cat.id)}-h">
           <h2 class="cat-title" id="${esc(cat.id)}-h">${esc(cat.name)}</h2>${plate}

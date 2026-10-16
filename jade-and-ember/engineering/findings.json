@@ -2,17 +2,6 @@
   "$comment": "Defects found by the Gate 2 checks in the frozen v0.8 baseline. Each needs an owner decision before any visible change (Gate 2 rule). `status` is open until the owner approves a correction. A check reports a known finding as a note and fails on any new or worse one, and on any entry that no longer occurs.",
   "findings": [
     {
-      "id": "F-G2-01",
-      "check": "media",
-      "key": "media:provenance-rights:PROVENANCE.md",
-      "severity": "Minor",
-      "visual": false,
-      "status": "accepted (APR-JE-023): Option A adopted as a documentation policy in docs/JADE_AND_EMBER_MEDIA_RIGHTS_POLICY.md; media/PROVENANCE.md deliberately unchanged (frozen); rights remain unverified and are required evidence for any client release",
-      "description": "media/PROVENANCE.md records how the six images and the hero loop were made (generator, seeds, prompts, post-processing, known defects) but states no licence or rights terms for the generated media. Audit finding m-8.",
-      "proposal": "Add a short 'Rights and licence' section to media/PROVENANCE.md naming the generator and account terms that apply, and stating that the media is for the fictional demonstration only and must be replaced for a real client. Documentation only: no pixel, word on any page or behaviour changes. The file sits in the frozen media/ folder and in the preview package, so changing it is a change to the frozen baseline's files and needs owner approval; it would also need an allowlist entry for the media-bytes comparison.",
-      "ledger": "ENG-096"
-    },
-    {
       "id": "F-G3-01",
       "check": "portability",
       "key": "portability:file://:font-preload-cors",

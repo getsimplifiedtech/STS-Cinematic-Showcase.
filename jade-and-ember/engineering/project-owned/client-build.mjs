@@ -16,7 +16,7 @@ const FIXES = [
   [/\(555\) 010-0188/g, '(020) 7946 0000'], [/\+15550100188/g, '+442079460000'], [/"sample": true/g, '"sample": false'], [/ \(fictional concept by STS\)/g, ''],
 ];
 export const BUSINESS = {
-  type: 'Restaurant', servesCuisine: ['Chinese', 'Modern Chinese'], priceRange: '$$', image: 'media/hero-wok.webp',
+  type: 'Restaurant', servesCuisine: ['Chinese', 'Modern Chinese'], priceRange: '$$', image: 'media/hero-wok-v2.webp',
   address: { streetAddress: '88 High Street', addressLocality: 'Springfield', addressRegion: 'ST', postalCode: '12345', addressCountry: 'GB' },
   sameAs: ['https://www.instagram.com/jadeandember.example'],
 };
