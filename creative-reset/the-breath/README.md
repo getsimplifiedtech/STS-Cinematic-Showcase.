@@ -54,6 +54,10 @@ tools/frames.mjs, sweep.mjs, sheet.py   frame grabber, phone cost sweep, contact
 shots/              captured screenshots, evidence sheets, results.json, contrast-results.json
 ```
 
+## Deploying a separate preview
+
+`vercel.json` and `.vercelignore` make this folder a standalone static site (no build step; `js/breath.min.js` is committed). In Vercel, create a NEW project from the repository with Root Directory `creative-reset/the-breath`, Framework Preset "Other", Production Branch `lab/jade-and-ember-the-breath`. It does not touch the existing Jade & Ember project.
+
 ## Build
 
 `node tools/build.mjs` after any change under `src/`. If the Kling clip is replaced, rerun `tools/flame-table.py` and paste its table into `src/breath.js`.
