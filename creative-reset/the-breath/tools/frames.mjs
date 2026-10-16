@@ -7,6 +7,7 @@ const page = await ctx.newPage(); page.on('pageerror', (e) => console.log('pagee
 await page.route('**/js/breath.min.js', (r) => r.fulfill({ path: new URL('../js/breath.lab.js', import.meta.url).pathname, contentType: 'text/javascript' }));
 await page.goto((process.env.BASE || 'http://localhost:8431/') + 'index.html?lab=1&perf=off&video=off' + (process.env.Q || '')); await page.waitForLoadState('load');
 console.log(await page.evaluate(() => window.lab.ready()));
+if (process.env.HIDE) await page.addStyleTag({ content: '.beats,.top,.pause{visibility:hidden!important}' });   // HIDE=1: frames without any text (for luminance checks)
 for (const p of ps) { await page.evaluate(([p, o]) => window.lab.seek(p, o), [+p, { steps: +(process.env.STEPS || 240), span: .3 }]); await page.waitForTimeout(100); await page.screenshot({ path: `${out}-p${String(Math.round(+p * 100)).padStart(3, '0')}.jpg`, type: 'jpeg', quality: 88, timeout: 180000 }); console.log('p', p); }
 console.log(JSON.stringify(await page.evaluate(() => window.lab.stats())));
 await b.close();

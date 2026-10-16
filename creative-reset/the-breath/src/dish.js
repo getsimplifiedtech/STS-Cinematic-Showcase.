@@ -8,7 +8,7 @@ import { createGL, program, quad, texture, bind, ready } from './gl.js';
 
 const FS = `#version 300 es
 precision highp float; precision highp sampler2D; in vec2 uv; out vec4 o;
-uniform sampler2D tex; uniform vec2 texSize, dc; uniform vec4 rect; uniform float aspect, clearR, reach, sharp;
+uniform sampler2D tex; uniform vec2 texSize, dc; uniform vec4 rect; uniform float aspect, clearR, reach, sharp, sweep;
 float h11(vec2 p){ vec3 p3 = fract(vec3(p.xyx)*.1031); p3 += dot(p3, p3.yzx + 33.33); return fract((p3.x + p3.y)*p3.z); }
 float vn(vec2 p){ vec2 i = floor(p), f = fract(p); f = f*f*(3.-2.*f); return mix(mix(h11(i), h11(i+vec2(1,0)), f.x), mix(h11(i+vec2(0,1)), h11(i+1.), f.x), f.y); }
 float fbm(vec2 p){ return vn(p)*.5 + vn(p*2.03+vec2(3.1,1.7))*.25 + vn(p*4.1+vec2(7.7,2.3))*.125; }
@@ -42,6 +42,9 @@ void main(){
   float plate = 1. - smoothstep(.96, 1.3, length((uv - vec2(.49, .53))/vec2(.36, .30)));
   vec2 e = min(uv, 1. - uv); float win = smoothstep(0., .14, e.x)*smoothstep(0., .2, e.y);   // the photograph dissolves into soot before the edge of its canvas
   c = c*mix(.03, 1., plate)*win + vec3(.055, .05, .047)*(1. - plate*win);
+  // one band of warm light crosses the plate as it lands: it only catches what is already bright (glaze, oil, the sheen on the greens)
+  float sb = exp(-pow((uv.x - mix(-.25, 1.25, sweep))/.16, 2.))*step(.001, sweep)*step(sweep, .999);
+  c += vec3(1., .78, .52)*sb*smoothstep(.45, .95, max(c.r, max(c.g, c.b)))*plate*.42;
   c += (h11(gl_FragCoord.xy) - .5)*.02;
   o = vec4(max(c, 0.)*A, A);
 }`;
@@ -62,18 +65,18 @@ export async function createDish({ canvas, image, onLost }) {
       view = { rect, dc, aspect, reach }; S.resize(); dirty = true;
     },
     // draw only while the clearing moves (or after a layout change); hide the canvas while nothing is revealed
-    draw(clear) {
+    draw(clear, sweep = 1) {
       const on = clear > 0.001;
       if (on !== shown) { shown = on; canvas.style.visibility = on ? '' : 'hidden'; dirty = true; }
       if (!on) return false;
-      const sig = clear.toFixed(3);
+      const sig = clear.toFixed(3) + sweep.toFixed(3);
       if (!dirty && sig === last) return false;
       last = sig; dirty = false;
       const up = S.w / image.naturalWidth;                           // output pixels per source pixel
       gl.bindFramebuffer(gl.FRAMEBUFFER, null); gl.viewport(0, 0, S.w, S.h); gl.clearColor(0, 0, 0, 0); gl.clear(gl.COLOR_BUFFER_BIT);
       pr.use(); bind(gl, tex, 0); pr.seti('tex', 0);
       pr.set('texSize', image.naturalWidth, image.naturalHeight); pr.set('rect', ...view.rect); pr.set('dc', ...view.dc);
-      pr.set('aspect', view.aspect); pr.set('clearR', clear); pr.set('reach', view.reach); pr.set('sharp', Math.max(.25, Math.min(.9, .25 + .35 * (up - 1))));
+      pr.set('aspect', view.aspect); pr.set('clearR', clear); pr.set('reach', view.reach); pr.set('sweep', sweep); pr.set('sharp', Math.max(.25, Math.min(.9, .25 + .35 * (up - 1))));
       Q.draw(); return true;
     },
     get size() { return [S.w, S.h]; },

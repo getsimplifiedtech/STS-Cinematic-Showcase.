@@ -13,7 +13,7 @@ Scroll down the page. Scroll back up to run it in reverse. Add `?quality=low|mid
 
 ## What it does
 
-One progress value `p` (0 to 1) runs along a pinned 660svh track (560svh on phones). Everything is a function of `p`:
+One progress value `p` (0 to 1) runs along a pinned 660svh track (560svh on phones; the calm layout uses a shorter 440svh, 400svh on phones). Everything is a function of `p`:
 
 | p | Beat | What the viewer sees |
 | --- | --- | --- |
@@ -51,6 +51,8 @@ tools/contrast.py   text contrast against the rendered frames (Pillow, numpy)
 tools/flame-table.py regenerates the clip's per-frame brightness table (needs ffmpeg)
 tools/plates.mjs    renders the calm-mode steam stills from the solver
 tools/frames.mjs, sweep.mjs, sheet.py   frame grabber, phone cost sweep, contact sheets
+tools/check-layout.mjs  brand, Pause and headings stay inside the viewport and unclipped (13 viewports x 17 positions)
+tools/handover-scan.py  p95 luminance per frame across the wok-to-dish handover (near-black fails)
 shots/              captured screenshots, evidence sheets, results.json, contrast-results.json
 ```
 

@@ -6,6 +6,24 @@ Branch `lab/jade-and-ember-the-breath`, everything inside `creative-reset/the-br
 
 **Reference-first rule (CLAUDE.md).** The STS Technology Reference Registry was consulted before changing the animation and shaders. Its only related entry is Three.js (particles), which is not needed: the steam, the dish pass and the build script are STS-authored code with no third-party dependency. Nothing from the registry or the dormant references was installed, run or integrated. Playwright (already installed, listed in the registry) is used only to test. Lighthouse and axe are not installed, so they were not run (installing them needs your approval); the Lighthouse-style numbers below come from the browser's own APIs and are labelled as such.
 
+## Round 4 (owner review corrections), summary
+
+Changes since `0557834`. Same limits: headless software GL, no real device. The review was worked in its priority order.
+
+1. **Deployment.** The stable lab URL was still serving `acac577` (checked through GitHub's deployment API, since Vercel itself is unreachable from the build container). Newer commits build as Previews until the project's Production Branch is set to `lab/jade-and-ember-the-breath` or the latest Preview is promoted. That is a Vercel setting only the owner can change.
+2. **Brand collision and clipping.** The header is now fixed, with a soft scrim and safe-area padding, so it no longer scrolls out of the viewport. `tools/check-layout.mjs` measures brand, tag, Pause and every chapter heading at 13 viewports (320x568 to 2560x1440) and 17 scroll positions: before 324 problems, after 0 in live and 0 in calm.
+3. **"Texture" clipped.** A rem cap on the heading width was narrower than the word at large font sizes. The heading block is now `fit-content`, line padding is in `em`, and the full word is visible at every position (evidence-6-texture-1920.jpg). The word was not shortened.
+4. **Dark handover.** In the calm layout the wok faded to near-black before the dish arrived (p95 luminance 13 at p .68 to .70). A dense-cloud plate (`cloud-plate`, 7 KB desktop and 5 KB phone) now bridges them. After: no frame is near-black. Lowest p95 is 47 live desktop, 85 live phone, 57 calm desktop, 78 calm phone (threshold 38). `tools/handover-scan.py` repeats it.
+5. **Chapters read as different places.** A camera track per layout (`CAM`) moves media and steam together: Fire is low and close on the burner, Steam is wide, Texture pushes in on the food, then releases. The calm layout has matching crops (fire, steam, texture, cloud, dish).
+6. **Steam.** Texture haze is reduced so the food stays visible, and the cloud concentrates near the cooking surface. Billow lighting from round 3 is kept. Live motion quality is not judged by stills.
+7. **Plate reveal.** The dish is centred on its own canvas with type above and the dish name below on wide screens, and a warm sweep of light crosses it as it settles. The canvas is still at the screen's real pixel density. The 1200 px source remains the limit on 2x screens.
+8. **Pacing.** Calm track shortened to 440svh (400svh phone). The live track is unchanged (660svh and 560svh); headings were reduced to `clamp(3.25rem, 6.6vw, 7rem)`. Not reworked: live pacing beyond that.
+9. **Replacement footage.** Specified only, nothing generated and no credits spent. See the plan document (dish choice, reference still, prompts, model, preflight prices: Pro 6.25 credits, 4K 30 credits for 5 s, expected total about 31, ceiling 65). Original assets are untouched.
+
+Re-verified on this build (headless): handover co-presence 0 on desktop and phone both ways; all fallback modes, keyboard, resize, gating (hidden, off-screen and paused draw calls 0; dish 0 draws at rest); calm layout check 0 problems; contrast 40 text boxes, 0 below threshold (lowest 4.66:1). The matrix caught one regression, the phone Fire copy at 4.26:1 over the closer camera crop, fixed by a stronger phone top scrim. Shipped script 12,775 B gzip (was 12,413).
+
+Known limits of this round: the 1280x720 clip is enlarged about 1.9x at the Texture push-in on a 1440 screen, so footage looks soft there; the phone Fire and Steam crops are close to each other and steam is faint in headless runs; frame rate and GPU memory were not re-measured after the extra compositor reads; Lighthouse and axe are not installed here and were not run; real iPhone Safari and Android testing remain outstanding.
+
 ## Round 3 (Firelight continuation), summary
 
 Changes since round 2 (commit c806243). Same limits: headless software GL, no real device.

@@ -21,25 +21,46 @@ const stillOnly = () => reduce.matches || conn.saveData === true || /^(slow-2g|2
 // p: 0 hero · .105 Fire · .295 Steam · .48 Texture · .665 The plate. All values are linearly interpolated, then eased in time by the caller.
 const TL = {
   emit: [[0, .38], [.10, .46], [.28, .66], [.50, 1], [.66, .9], [.76, .45], [.9, .2], [1, .16]],
-  spread: [[0, 0], [.28, .04], [.34, .3], [.42, .9], [.46, 1], [.66, 1], [.72, .8], [.80, .35], [.88, .08], [1, 0]],
+  spread: [[0, 0], [.28, .04], [.34, .3], [.42, .8], [.47, .62], [.58, .52], [.63, .9], [.67, 1], [.72, .8], [.80, .35], [.88, .08], [1, 0]],   // Texture keeps the plumes local so the food stays readable; the cloud only closes in at the handover
   clear: [[0, 0], [.68, 0], [.70, .04], [.82, .85], [.88, 1], [1, 1.15]],
-  haze: [[0, 1], [.70, 1], [.78, .8], [.86, .6], [.93, .42], [1, .3]],
+  haze: [[0, 1], [.48, .9], [.58, .68], [.64, .95], [.68, 1], [.70, 1], [.78, .8], [.86, .6], [.93, .42], [1, .3]],
   glow: [[0, .55], [.10, .85], [.28, 1], [.46, .6], [.62, .55], [.72, .4], [.86, .2], [1, .15]],
   detail: [[0, .3], [.3, .5], [.5, 1], [.64, 1], [.8, .6], [1, .4]],
 };
+// The camera: each chapter looks at something different, so the four chapters read as four shots even with the headings hidden.
+// [p, zoom, x, y] with x, y the point of the frame the camera looks at (0..1, y down). Fire: low and close on the burner, the wok base and the flame that
+// wraps it. Steam: pulled up and back to the wok mouth, where the vapour leaves the food. Texture: pushed in on the food. Then it settles for the handover.
+const CAM = {
+  desk: [[0, 1, .5, .5], [.085, 1, .5, .5], [.15, 1.4, .5, .64], [.27, 1.4, .5, .64], [.345, 1.1, .5, .5], [.45, 1.1, .5, .48], [.515, 1.5, .5, .62], [.62, 1.58, .5, .64], [.70, 1.04, .5, .5], [1, 1, .5, .5]],
+  phone: [[0, 1, .5, .5], [.085, 1, .5, .5], [.15, 1.38, .52, .68], [.27, 1.38, .52, .68], [.345, 1.1, .52, .54], [.45, 1.1, .52, .52], [.515, 1.45, .52, .66], [.62, 1.5, .52, .67], [.70, 1.04, .5, .5], [1, 1, .5, .5]],
+};
+const ease = (t) => t * t * (3 - 2 * t);
+function camAt(p, ph) {
+  const k = CAM[ph ? 'phone' : 'desk']; let a = k[0], b = k[k.length - 1];
+  for (let i = 1; i < k.length; i++) if (p <= k[i][0]) { a = k[i - 1]; b = k[i]; break; }
+  const t = b[0] === a[0] ? 1 : ease(clamp((p - a[0]) / (b[0] - a[0]))), s = a[1] + (b[1] - a[1]) * t;
+  const lim = .5 * (1 - 1 / s);   // never look past the edge of the picture
+  const x = clamp(a[2] + (b[2] - a[2]) * t, .5 - lim, .5 + lim), y = clamp(a[3] + (b[3] - a[3]) * t, .5 - lim, .5 + lim);
+  return { cs: s, ctx: s * (.5 - x) * 100, cty: s * (.5 - y) * 100 };
+}
 // The handover, in order: the flame and wok sink into their own steam (media, .56 to .68) while the cloud is at its densest; only then does the
 // clearing open (clear, from .70) and the dish rise out of the cleared soot (settle eases it to rest). The footage and the dish are never on screen together.
+// The still (calm) layout shows the same story with opacity only: fire crop, steam, texture crop, cloud, dish.
 const stageVars = (p) => ({
   dark: key(p, [[0, 1], [.1, .8], [.5, .62], [.8, .5], [1, .38]]),
-  push: key(p, [[0, 0], [.08, 0], [.5, 1], [.66, 1], [1, .35]]),
+  ...camAt(p, phone.matches),
   media: 1 - smooth(.56, .68, p),
-  steam: smooth(.2, .36, p),   // calm mode only: the still steam plate; it leaves with the footage (media), not later
+  fire: smooth(.08, .12, p)*(1 - smooth(.27, .31, p)),     // calm mode only: crops of the same stills at each chapter
+  steam: smooth(.27, .31, p)*(1 - smooth(.47, .51, p)),
+  tex: smooth(.47, .51, p),
+  cloud: smooth(.56, .68, p)*(1 - smooth(.74, .88, p)),   // the footage and its steam dissolve into the cloud, the cloud then dissolves into the dish
   dish: smooth(.70, .84, p),
   settle: 1 - smooth(.70, .92, p),
+  sweep: smooth(.74, .97, p),   // a band of light crosses the plate once as it lands
 });
 
 // ---------------------------------------------------------------- state
-let mode = 'nojs', userPaused = false, glFailed = false, bailed = false, steam = null, dish = null, steamPending = null, inView = true, mediaV = 1;
+let mode = 'nojs', userPaused = false, glFailed = false, bailed = false, steam = null, dish = null, steamPending = null, inView = true, mediaV = 1, sweepV = 1;
 let scrollRaf = 0, top = 0, travel = 1, p = 0, lastP = 0, raf = 0, last = 0, parkedAt = 0, catchup = 0, labMode = false;
 labMode = q.has('lab');   //#lab
 const target = {}, cur = {}, cache = new WeakMap(), stats = { frames: 0, ms: [], cpu: [], bails: 0, slow: 0 };
@@ -70,10 +91,10 @@ function layout() {
   const [u, v] = ph ? SRC.phone : SRC.desk;
   Object.assign(steam.L, LOOK[ph ? 'phone' : 'desk']);
   steam.L.src = [(u * rw - ox) / sw, 1 - (v * rh - oy) / sh];
-  // the dish: the plate (72% of the photograph's width) sits where the wok was, right of the type
-  const plateW = ph ? .96 * sw : Math.min(.6 * sw, 1.18 * sh * 1.2), imgW = plateW / .72, imgH = imgW * 800 / 1200;
-  const c = ph ? [.5, .40] : [.64, .5], ex = imgW / sw, ey = imgH / sh;
-  steam.L.dc = c; steam.L.shade = ph ? [0, 1] : [1, 0];
+  // the dish: the plate (72% of the photograph's width) is the centre of the frame, where the wok was; type sits above and below it, not beside it
+  const plateW = ph ? .96 * sw : Math.min(.62 * sw, 1.3 * sh), imgW = plateW / .72, imgH = imgW * 800 / 1200;
+  const c = ph ? [.5, .40] : [.5, .53], ex = imgW / sw, ey = imgH / sh;
+  steam.L.dc = c; steam.L.shade = ph ? [0, 1] : [.55, .45];
   stage.style.setProperty('--ox', (steam.L.src[0] * 100).toFixed(2) + '%'); stage.style.setProperty('--oy', ((1 - steam.L.src[1]) * 100).toFixed(2) + '%');
   const a = sw / sh; steam.L.aspect = a;
   steam.L.reach = Math.max(Math.hypot(c[0] * a, c[1]), Math.hypot((1 - c[0]) * a, c[1]), Math.hypot(c[0] * a, 1 - c[1]), Math.hypot((1 - c[0]) * a, 1 - c[1]));
@@ -97,10 +118,12 @@ function applyDom(pp, force) {
   }
   const sv = stageVars(pp);
   const c = cache.get(stage);
-  const sig = [sv.dark, sv.push, sv.steam, sv.dish, sv.media, sv.settle].map((x) => x.toFixed(3)).join();
+  const sig = [sv.dark, sv.cs, sv.ctx, sv.cty, sv.fire, sv.steam, sv.tex, sv.cloud, sv.dish, sv.media, sv.settle].map((x) => x.toFixed(3)).join();
   mediaV = sv.media;
   if (force || c !== sig) {
-    for (const k of ['dark', 'push', 'steam', 'dish', 'media', 'settle']) stage.style.setProperty('--' + k, sv[k].toFixed(3));
+    for (const k of ['dark', 'cs', 'fire', 'steam', 'tex', 'cloud', 'dish', 'media', 'settle']) stage.style.setProperty('--' + k, sv[k].toFixed(3));
+    stage.style.setProperty('--ctx', sv.ctx.toFixed(2) + '%'); stage.style.setProperty('--cty', sv.cty.toFixed(2) + '%');
+    sweepV = sv.sweep;
     stage.classList.toggle('media-off', sv.media < .01);
     cache.set(stage, sig);
   }
@@ -134,7 +157,7 @@ function frame(now) {
   setTargets(p); relax(dtReal);
   Object.assign(steam.P, cur, { flick: readFlicker(now), media: mediaV });
   if (catchup > 0) { const n = Math.min(catchup, 10); steam.warm(n); catchup -= n; }
-  steam.frame(dtReal); dish.draw(cur.clear);
+  steam.frame(dtReal); dish.draw(cur.clear, sweepV);
   stats.frames++; stats.cpu.push(performance.now() - t0); if (stats.cpu.length > 360) stats.cpu.shift();   //#lab
   syncVideoForDish();
   if (!q.has('perf') || q.get('perf') !== 'off') adapt(gap);
@@ -224,7 +247,7 @@ function applyMode() {
   if (next === 'live' && !steam) { if (!steamPending) ensureSteam(); if (mode === 'nojs') root.classList.add('is-calm'); return; }   // until the solver is ready, the calm layout is a complete page
   if (next !== mode) {
     mode = next; root.classList.toggle('is-live', mode === 'live'); root.classList.toggle('is-calm', mode === 'calm');
-    if (mode === 'calm') { stopVideo(); canvas.style.visibility = 'hidden'; } else { canvas.style.visibility = ''; if (dish) dish.draw(cur.clear); }
+    if (mode === 'calm') { stopVideo(); canvas.style.visibility = 'hidden'; } else { canvas.style.visibility = ''; if (dish) dish.draw(cur.clear, sweepV); }
   }
   root.classList.toggle('is-calm', mode === 'calm' || (mode === 'nojs'));
   // Pause control: offered whenever the live sequence is possible at all
@@ -276,7 +299,7 @@ window.lab = {
     if (mode !== 'live' || !steam) return { mode };
     const p0 = Math.max(0, pp - span); setTargets(p0); Object.assign(cur, target); Object.assign(steam.P, cur); steam.settle();
     for (let i = 0; i <= steps; i++) { const pi = p0 + (pp - p0) * (i / steps); setTargets(pi); relax(1 / 60); Object.assign(steam.P, cur, { flick: .5 + .1 * Math.sin(i * .21), dbg: +(q.get('view') === 'dye') + 2 * +(q.get('view') === 'vel') }); steam.warm(1); }
-    Object.assign(steam.P, { media: mediaV }); steam.draw(); dish.draw(steam.P.clear); return { mode, p: pp };
+    Object.assign(steam.P, { media: mediaV }); steam.draw(); dish.draw(steam.P.clear, sweepV); return { mode, p: pp };
   },
   stats() {
     const m = stats.ms; const mem = performance.memory ? { usedJSHeapMB: +(performance.memory.usedJSHeapSize / 1048576).toFixed(1) } : {};

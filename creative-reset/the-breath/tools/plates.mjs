@@ -9,15 +9,16 @@ import { fileURLToPath } from 'node:url';
 const root = join(dirname(fileURLToPath(import.meta.url)), '..');
 const { chromium } = await import(process.env.PLAYWRIGHT_MODULE || 'playwright');
 const b = await chromium.launch({ args: ['--use-gl=angle', '--use-angle=swiftshader', '--enable-unsafe-swiftshader', '--ignore-gpu-blocklist'] });
-for (const [vp, name, q] of [['1920x1080', 'steam-plate.webp', 'mid'], ['810x1440', 'steam-plate-m.webp', 'mid']]) {
+// steam plates: the poster with plumes rising off the food (p .40: ingredients stay visible); cloud plates: the dense cloud alone on soot (p .66, footage off), which the calm layout passes through on its way to the dish
+for (const [vp, name, q, at, withMedia] of [['1920x1080', 'steam-plate.webp', 'mid', .40, true], ['810x1440', 'steam-plate-m.webp', 'mid', .40, true], ['1920x1080', 'cloud-plate.webp', 'mid', .66, false], ['810x1440', 'cloud-plate-m.webp', 'mid', .66, false]]) {
   const [w, h] = vp.split('x').map(Number);
   const ctx = await b.newContext({ viewport: { width: w, height: h }, deviceScaleFactor: 1 });
   const pg = await ctx.newPage();
   await pg.route('**/js/breath.min.js', (r) => r.fulfill({ path: join(root, 'js', 'breath.lab.js'), contentType: 'text/javascript' }));   // lab bundle: seek()
   await pg.goto(`http://localhost:8431/index.html?lab=1&perf=off&video=off&quality=${q}`); await pg.waitForLoadState('load');
   await pg.evaluate(() => window.lab.ready());
-  await pg.evaluate(() => window.lab.seek(.5, { steps: 360, span: .3 }));
-  await pg.addStyleTag({ content: '.beats,.top,.pause,.dark{display:none!important}.is-live .media,.is-live .steam{transform:none!important}.is-live .media{opacity:1!important}' });
+  await pg.evaluate((at) => window.lab.seek(at, { steps: 360, span: .3 }), at);
+  await pg.addStyleTag({ content: '.beats,.top,.pause,.dark{display:none!important}.is-live .media,.is-live .steam{transform:none!important}.is-live .media{opacity:' + (withMedia ? 1 : 0) + '!important}' });
   const png = join(root, 'shots', name.replace('.webp', '.png')); mkdirSync(join(root, 'shots'), { recursive: true });
   await pg.waitForTimeout(150); await pg.screenshot({ path: png, timeout: 180000 });
   execFileSync('python3', ['-I', '-c', 'import sys;from PIL import Image;im=Image.open(sys.argv[1]).convert("RGB");im.save(sys.argv[2],"WEBP",quality=int(sys.argv[3]),method=6)', png, join(root, 'media', name), w < 1000 ? '68' : '70']);
