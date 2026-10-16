@@ -54,7 +54,14 @@
           "text": "Sliced flank, broccoli and red chili over a hard flame.",
           "price": 26,
           "heat": 1,
-          "tags": []
+          "tags": [],
+          "signature": {
+            "image": "media/dish-beef.webp",
+            "alt": "Glossy sliced beef, bright green broccoli and red chili in a brown sauce on a matte black plate.",
+            "focus": "50% 50%",
+            "text": "Sliced flank, broccoli and red chili over a hard flame, finished in the last seconds and plated while it is still singing.",
+            "order": 1
+          }
         },
         {
           "name": "Kung Pao Chicken",
@@ -148,14 +155,7 @@
           "heat": 0,
           "tags": [
             "Contains pork"
-          ],
-          "signature": {
-            "image": "media/dish-charsiu.webp",
-            "alt": "Sliced char siu pork with lacquered, charred edges on a matte black plate beside two stalks of blanched gai lan.",
-            "focus": "58% 52%",
-            "text": "Pork shoulder lacquered in maltose and five-spice, roasted until the edges blacken and caramelise.",
-            "order": 2
-          }
+          ]
         },
         {
           "name": "Mapo Tofu",
@@ -170,7 +170,7 @@
             "alt": "Mapo tofu in a jade-green celadon bowl: silken tofu in red chili oil with minced beef, Sichuan peppercorns and scallion, steam rising, on a slate board.",
             "focus": "50% 58%",
             "text": "Silken tofu in red chili oil, fermented bean paste and numbing Sichuan pepper. Served with steamed rice.",
-            "order": 1
+            "order": 2
           }
         },
         {

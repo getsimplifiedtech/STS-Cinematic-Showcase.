@@ -56,7 +56,7 @@
     "titleTemplate": "{page} | {brand}",
     "noindex": true,
     "structuredData": false,
-    "themeColor": "#12302a"
+    "themeColor": "#0e0d0c"
   },
   "flags": {
     "demo": true,

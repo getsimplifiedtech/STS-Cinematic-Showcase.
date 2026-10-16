@@ -3,6 +3,7 @@
 import { readFileSync, existsSync } from 'node:fs';
 import { join } from 'node:path';
 import { seoErrors } from './seo.mjs';
+import { webpSize } from './image-size.mjs';
 
 const read = (configDir, name) => JSON.parse(readFileSync(join(configDir, `${name}.json`), 'utf8'));
 
@@ -17,6 +18,8 @@ export function loadConfig(dir, configDir = join(dir, 'config')) {
   const ordering = client.ordering;
   const live = typeof ordering.url === 'string' && /^https:\/\//.test(ordering.url);
   const signature = menu.categories.flatMap((k) => k.items).filter((i) => i.signature).sort((a, b) => a.signature.order - b.signature.order);
+  // the signature photographs are not all the same size (the Home sequence ends on a 2400 px plate), so each carries its real pixel size for width and height attributes
+  signature.forEach((i) => { const z = webpSize(join(dir, i.signature.image)); if (z) { i.signature.width = z.width; i.signature.height = z.height; } });
   return { dir, client, menu, copy, site, pages, byId, live, signature, demo: client.flags.demo === true };
 }
 

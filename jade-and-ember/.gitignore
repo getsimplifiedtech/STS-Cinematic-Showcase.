@@ -8,3 +8,4 @@ engineering/.reports/
 /release/
 /host/
 /hashed/
+.build/

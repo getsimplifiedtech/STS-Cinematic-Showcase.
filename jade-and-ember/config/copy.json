@@ -17,21 +17,21 @@
       },
       "caption": "Wok-seared beef, broccoli, red chili",
       "image": {
-        "desktop": "media/hero-wok.webp",
-        "mobile": "media/hero-wok-m.webp",
-        "width": 1920,
-        "height": 1080,
+        "desktop": "media/hero-wok-v2.webp",
+        "mobile": "media/hero-wok-v2-m.webp",
+        "width": 1928,
+        "height": 1072,
         "mobileWidth": 810,
         "mobileHeight": 1440,
-        "alt": "A carbon steel wok on a roaring burner: sliced beef, broccoli and red chili in the pan under a tall flare of orange flame, with steam rising into a dark kitchen.",
-        "focusDesktop": "56% 50%",
-        "focusMobile": "50% 62%"
+        "alt": "A carbon steel wok over a gas burner, blue and orange flames curling around its base, sliced beef, broccoli and red chili sizzling inside, in a dark kitchen.",
+        "focusDesktop": "34% 50%",
+        "focusMobile": "72% 62%"
       },
       "video": {
-        "webm": "media/hero-loop.webm",
-        "mp4": "media/hero-loop.mp4",
-        "width": 1280,
-        "height": 720,
+        "webm": "media/hero-wok-v2.webm",
+        "mp4": "media/hero-wok-v2.mp4",
+        "width": 1928,
+        "height": 1072,
         "loopSeconds": 5.04
       }
     },
@@ -91,11 +91,11 @@
       ]
     },
     "band": {
-      "src": "media/hero-wok.webp",
-      "width": 1920,
-      "height": 1080,
+      "src": "media/hero-wok-v2.webp",
+      "width": 1928,
+      "height": 1072,
       "alt": "",
-      "pos": "56% 40%",
+      "pos": "60% 40%",
       "decorative": true
     },
     "orderBand": {

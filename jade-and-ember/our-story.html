@@ -6,15 +6,16 @@
 <title>Our story | Jade &amp; Ember (fictional concept by STS)</title>
 <meta name="description" content="The story of Jade &amp; Ember, a fictional modern Chinese kitchen built around one very hot wok.">
 <meta name="robots" content="noindex, nofollow">
-<meta name="theme-color" content="#12302a">
+<meta name="theme-color" content="#0e0d0c">
 <meta property="og:title" content="Our story | Jade &amp; Ember (fictional concept by STS)">
 <meta property="og:description" content="The story of Jade &amp; Ember, a fictional modern Chinese kitchen built around one very hot wok.">
 <meta property="og:type" content="website">
 
-<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' fill='%23101211'/%3E%3Ccircle cx='16' cy='16' r='7' fill='none' stroke='%23a9d2be' stroke-width='2.5'/%3E%3Ccircle cx='16' cy='16' r='2.6' fill='%23f08a3c'/%3E%3C/svg%3E">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' fill='%230e0d0c'/%3E%3Ccircle cx='16' cy='16' r='7' fill='none' stroke='%23c2e3d2' stroke-width='2.5'/%3E%3Ccircle cx='16' cy='16' r='2.6' fill='%23f08a3c'/%3E%3C/svg%3E">
 <link rel="preload" as="font" type="font/woff2" href="fonts/young-serif-latin-400-normal.woff2" crossorigin>
 <link rel="preload" as="font" type="font/woff2" href="fonts/karla-latin-400-normal.woff2" crossorigin>
 <link rel="stylesheet" href="styles.css">
+<link rel="stylesheet" href="story.css">
 <script>document.documentElement.className+=' js'</script>
 </head>
 <body>
@@ -30,51 +31,51 @@
 </header>
 
 <main id="main">
-  <section class="story-head" aria-labelledby="story-title">
-    <div class="wrap"><h1 id="story-title">A small kitchen, one very hot wok.</h1></div>
+  <section class="story-open" data-p="pin" aria-labelledby="story-title">
+    <div class="story-pin">
+      <p class="name-glyph" lang="zh-Hans" aria-hidden="true"><span class="g-jade">玉</span><span class="g-fire">火</span></p>
+      <canvas class="embers" aria-hidden="true"></canvas>
+      <div class="story-intro"><h1 id="story-title">A small kitchen, one very hot wok.</h1></div>
+      <button class="pause" type="button" aria-pressed="false" hidden><span class="pause-ico" aria-hidden="true"></span><span class="pause-txt">Pause motion</span></button>
+    </div>
   </section>
 
-  <figure class="story-fig">
-    <img src="media/story-jade-bowls.webp" alt="Three stacked jade-green celadon bowls beside a bowl of steamed white rice on a matte black plate, on a slate board." width="1200" height="757" fetchpriority="high" decoding="async">
-    <figcaption class="wrap">Celadon rice bowls, stacked on the pass.</figcaption>
-  </figure>
-
-  <div class="chapters"><div class="wrap">
-      <section class="chapter" aria-labelledby="question-h">
-        <div class="chapter-body">
+  <div class="chapters">
+    <div class="wrap">
+      <section class="chapter chapter-question" aria-labelledby="question-h">
+        <div class="chapter-body" data-p>
           <h2 id="question-h">The question</h2>
           <p>Jade &amp; Ember began as a question about a single flame: what if a dining room felt like standing beside a wok at full heat, without the noise or the smoke?</p>
           <p>The answer was not a bigger kitchen. It was a smaller one, with the burner close enough to feel and a counter where you can watch the pan do its work.</p>
         </div>
       </section>
-      <section class="chapter" aria-labelledby="room-h">
-        <div class="chapter-body">
+      <section class="chapter chapter-room" aria-labelledby="room-h">
+        <figure class="story-plate"><img src="media/story-jade-bowls.webp" alt="Three stacked jade-green celadon bowls beside a bowl of steamed white rice on a matte black plate, on a slate board." width="1200" height="757" loading="lazy" decoding="async"><figcaption>Celadon rice bowls, stacked on the pass.</figcaption></figure>
+        <div class="chapter-body" data-p>
           <h2 id="room-h">The room</h2>
           <p>The room is charcoal and slate, lit low, with celadon bowls stacked on the pass. Nothing is bright except the flame.</p>
           <p>The wok counter seats eight, so the quickest way to understand the menu is to sit where the cooking happens.</p>
         </div>
       </section>
-      <section class="chapter" aria-labelledby="wok-h">
-        <div class="chapter-body">
+      <section class="chapter chapter-wok" aria-labelledby="wok-h">
+        <div class="chapter-body" data-p>
           <h2 id="wok-h">The wok</h2>
           <p>The kitchen cooks Cantonese and Sichuan dishes with a lighter hand. A carbon steel wok is seasoned until it is nearly black, then kept hotter than a home stove can reach.</p>
           <p>That heat gives wok hei, the smoky, singed sweetness this place is named for. It is also why the menu stays short: every dish gets its turn at the fire.</p>
         </div>
       </section>
-  </div></div>
+    </div>
+  </div>
 
   <section class="name" aria-labelledby="name-h">
     <div class="wrap name-grid">
-      <p class="seal-xl" lang="zh-Hans" aria-hidden="true"><span>玉</span><span>火</span></p>
-      <div class="name-text">
-        <h2 id="name-h">The name</h2>
-        <p class="name-line">Jade for the bowls, ember for the flame. The name is the whole palette.</p>
-        <p class="name-note"><span lang="zh-Hans">玉</span> is the character for jade. <span lang="zh-Hans">火</span> is the character for fire.</p>
-      </div>
+      <h2 id="name-h">The name</h2>
+      <p class="name-line">Jade for the bowls, ember for the flame. The name is the whole palette.</p>
+      <p class="name-note"><span lang="zh-Hans">玉</span> is the character for jade. <span lang="zh-Hans">火</span> is the character for fire.</p>
     </div>
   </section>
 
-  <section class="cta-band cta-lacquer" id="order-band" aria-labelledby="order-band-title">
+  <section class="cta-band cta-pine" id="order-band" aria-labelledby="order-band-title">
     <div class="wrap cta-grid">
       <h2 id="order-band-title">Taste the fire.</h2>
       <p class="cta-text">Start with the menu, then collect it hot from the pass.</p>
@@ -92,5 +93,6 @@
   </div>
 </footer>
 <script src="site.js" defer></script>
+<script src="story.js" defer></script>
 </body>
 </html>

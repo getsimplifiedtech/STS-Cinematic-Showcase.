@@ -3,9 +3,9 @@ import { esc } from '../lib/util.mjs';
 import { pageHref, ctaPage, orderLink, sealMark } from './shared.mjs';
 import { canonicalFor, jsonLdFor } from '../lib/seo.mjs';
 
-const FAVICON = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' fill='%23101211'/%3E%3Ccircle cx='16' cy='16' r='7' fill='none' stroke='%23a9d2be' stroke-width='2.5'/%3E%3Ccircle cx='16' cy='16' r='2.6' fill='%23f08a3c'/%3E%3C/svg%3E";
+const FAVICON = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' fill='%230e0d0c'/%3E%3Ccircle cx='16' cy='16' r='7' fill='none' stroke='%23c2e3d2' stroke-width='2.5'/%3E%3Ccircle cx='16' cy='16' r='2.6' fill='%23f08a3c'/%3E%3C/svg%3E";
 
-function headTags(cfg, page, extraHead) {
+function headTags(cfg, page, extraHead, styles) {
   const { client, copy, site } = cfg;
   const meta = copy[page.id].meta;
   const title = client.seo.titleTemplate.replace('{page}', meta.title).replace('{brand}', client.brand.name) + (cfg.demo ? site.demo.titleSuffix : '');
@@ -24,6 +24,7 @@ ${canonical}${jsonLd ? '\n' + jsonLd : ''}
 <link rel="preload" as="font" type="font/woff2" href="fonts/young-serif-latin-400-normal.woff2" crossorigin>
 <link rel="preload" as="font" type="font/woff2" href="fonts/karla-latin-400-normal.woff2" crossorigin>
 ${extraHead || ''}<link rel="stylesheet" href="styles.css">
+${styles.map((f) => `<link rel="stylesheet" href="${f}">`).join('\n')}
 <script>document.documentElement.className+=' js'</script>`;
 }
 
@@ -66,7 +67,7 @@ function footer(cfg, page) {
 </footer>`;
 }
 
-export function document(cfg, page, { main, scripts = [], extraHead = '' }) {
+export function document(cfg, page, { main, scripts = [], extraHead = '', styles = [] }) {
   const body = `<body>
 <a class="skip" href="#main">Skip to content</a>
 ${disclosureBar(cfg)}
@@ -79,5 +80,5 @@ ${main}
 ${footer(cfg, page)}
 ${['site.js', ...scripts].map((s) => `<script src="${s}" defer></script>`).join('\n')}
 </body>`;
-  return `<!doctype html>\n<html lang="${esc(cfg.site.lang)}" data-page="${esc(page.id)}">\n<head>\n${headTags(cfg, page, extraHead)}\n</head>\n${body}\n</html>\n`;
+  return `<!doctype html>\n<html lang="${esc(cfg.site.lang)}" data-page="${esc(page.id)}">\n<head>\n${headTags(cfg, page, extraHead, styles)}\n</head>\n${body}\n</html>\n`;
 }
