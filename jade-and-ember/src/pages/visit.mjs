@@ -19,7 +19,7 @@ export default function visit(cfg) {
   const img = copy.story.image;
   const main = `  <section class="visit-room" aria-labelledby="visit-title">
     <figure class="room-bg" aria-hidden="true"><img src="${esc(img.src)}" alt="" width="${img.width}" height="${img.height}" loading="lazy" decoding="async"></figure>
-    <div class="candle" aria-hidden="true"></div>
+    <div class="room-fx" aria-hidden="true"><div class="candle"></div></div>
     <div class="wrap room-grid">
       <div class="visit-head">
         <h1 id="visit-title">${esc(v.h1)}</h1>

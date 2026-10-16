@@ -27,7 +27,7 @@ const IDX = ['index.html'];
 const cases = [
   // ---- keyboard
   ['keyboard: a positive tabindex', (d) => html(d, 'index.html', (t) => t.replace('<a href="menu.html">Menu</a>', '<a href="menu.html" tabindex="5">Menu</a>')), (d) => checkKeyboard({ root: d, pages: IDX }), /positive-tabindex|:order:/],
-  ['keyboard: a link taken out of the tab order', (d) => html(d, 'index.html', (t) => t.replace('<a class="btn btn-ink" href="menu.html">', '<a class="btn btn-ink" tabindex="-1" href="menu.html">')), (d) => checkKeyboard({ root: d, pages: IDX }), /unreachable|tabindex/],
+  ['keyboard: a link taken out of the tab order', (d) => html(d, 'index.html', (t) => t.replace('<a class="btn btn-ember" href="menu.html">', '<a class="btn btn-ember" tabindex="-1" href="menu.html">')), (d) => checkKeyboard({ root: d, pages: IDX }), /unreachable|tabindex/],
   ['keyboard: focus outlines removed', (d) => css(d, '*:focus,*:focus-visible{outline:0!important;box-shadow:none!important;background-image:none!important}\na:focus-visible,button:focus-visible{background:transparent!important;color:inherit!important;text-decoration:none!important;border-color:transparent!important;filter:none!important}'), (d) => checkKeyboard({ root: d, pages: IDX }), /focus-visible/],
   ['keyboard: a fixed panel covers the focused element', (d) => html(d, 'index.html', (t) => t.replace('</body>', '<div id="cover" style="position:fixed;left:0;right:0;bottom:0;height:300px;background:#000;z-index:9999"></div></body>')), (d) => checkKeyboard({ root: d, pages: IDX }), /obscured/],
   ['keyboard: the skip link removed', (d) => html(d, 'index.html', (t) => t.replace(/<a class="skip"[^>]*>[^<]*<\/a>\n/, '')), (d) => checkKeyboard({ root: d, pages: IDX }), /skip-link-first/],
@@ -38,8 +38,8 @@ const cases = [
   ['reflow: text pulled over other text', (d) => css(d, 'p{margin-top:-1.4em!important}'), (d) => checkReflow({ root: d, pages: IDX }), /text-overlap|overlap/],
   // ---- forced colours
   ['forced-colors: button text made invisible', (d) => css(d, '.btn{forced-color-adjust:none!important;background:#fff!important;color:#fff!important}'), (d) => checkForcedColors({ root: d, pages: IDX }), /text-(contrast|background)/],
-  ['forced-colors: hero text left on the photograph', (d) => css(d, '.hero-text,.hero h1,.hero .eyebrow{forced-color-adjust:none!important;color:#222!important}'), (d) => checkForcedColors({ root: d, pages: IDX }), /text-(contrast|background)/],
-  ['forced-colors: the menu button draws nothing', (d) => css(d, '.nav-toggle{forced-color-adjust:none!important;background:transparent!important;color:transparent!important;border:0!important;box-shadow:none!important}\n.nav-toggle::before,.nav-toggle::after,.nav-toggle span::before,.nav-toggle span::after{display:none!important}'), (d) => checkForcedColors({ root: d, pages: IDX }), /control-invisible|text-contrast/],
+  ['forced-colors: hero text left on the photograph', (d) => css(d, '.beat-0 h1,.beat-0 .eyebrow,.beat-0 .lede{forced-color-adjust:none!important;color:#222!important}'), (d) => checkForcedColors({ root: d, pages: IDX }), /text-(contrast|background)/],
+  ['forced-colors: the menu button draws nothing', (d) => css(d, '.nav-toggle{forced-color-adjust:none!important;background:transparent!important;color:transparent!important;border:0!important;box-shadow:none!important}\n.nav-toggle::before,.nav-toggle::after,.nav-toggle span::before,.nav-toggle span::after{display:none!important}'), (d) => checkForcedColors({ root: d, pages: IDX }), /control-invisible|text-contrast|text-background/],
   // ---- accessibility tree
   ['a11y-tree: an image loses its alt text', (d) => html(d, 'index.html', (t) => t.replace(/(<img[^>]*?) alt="[^"]+"/, '$1')), (d) => checkA11yTree({ root: d, pages: IDX }), /name-missing|alt/],
   ['a11y-tree: a heading level is skipped', (d) => html(d, 'index.html', (t) => t.replace('<h2 id="sig-title">', '<h5 id="sig-title">').replace(/(<h5 id="sig-title">[^<]*)<\/h2>/, '$1</h5>')), (d) => checkA11yTree({ root: d, pages: IDX }), /heading-skip/],
@@ -48,7 +48,7 @@ const cases = [
   ['a11y-tree: aria-labelledby points nowhere', (d) => html(d, 'index.html', (t) => t.replace('aria-labelledby="sig-title"', 'aria-labelledby="sig-title-x"')), (d) => checkA11yTree({ root: d, pages: IDX }), /aria-reference/],
   ['a11y-tree: a link with no name', (d) => html(d, 'index.html', (t) => t.replace('</main>', '<p><a href="menu.html"></a></p></main>')), (d) => checkA11yTree({ root: d, pages: IDX }), /name-missing/],
   // ---- reading order
-  ['order: a column reversed with CSS', (d) => css(d, '@media (min-width:960px){.dishes{display:flex!important;flex-direction:column-reverse!important}}'), (d) => checkOrder({ root: d, pages: IDX }), /order:index\.html@desktop/],
+  ['order: a column reversed with CSS', (d) => css(d, '@media (min-width:960px){.cats{display:flex!important;flex-direction:column-reverse!important}}'), (d) => checkOrder({ root: d, pages: ['menu.html'] }), /order:menu\.html@desktop/],
   // ---- budgets
   ['budgets: 30 KB added to the stylesheet', (d) => appendFileSync(join(d, 'styles.css'), `\n/* ${Buffer.from(Array.from({ length: 30000 }, (_, i) => (i * 7919 + (i >> 3) * 31) & 255)).toString('base64').slice(0, 30000)} */\n`), (d) => checkBudgets({ root: d, browser: false }), /stylesheet \(gzip\)|initial transfer|full page weight/],
   ['budgets: a 120 KB image', (d) => appendFileSync(join(d, 'media', 'dish-mapo.webp'), Buffer.alloc(120000, 7)), (d) => checkBudgets({ root: d, browser: false }), /largest image|delivered/],
@@ -60,7 +60,7 @@ const cases = [
   ['media: a WebP that is not a WebP', (d) => { const f = join(d, 'media', 'dish-dandan.webp'); const b = readFileSync(f); b.write('XXXX', 0); writeFileSync(f, b); }, (d) => checkMedia({ root: d, browser: false }), /media:format/],
   ['media: alt text that is a file name', (d) => html(d, 'menu.html', (t) => t.replace(/<img([^>]*) alt="[^"]*"/, '<img$1 alt="dish-mapo.webp"')), (d) => checkMedia({ root: d, browser: false }), /alt-filename|alt-short/],
   ['media: width and height that do not match the file', (d) => html(d, 'index.html', (t) => t.replace(/width="1200" height="800"/, 'width="1200" height="400"')), (d) => checkMedia({ root: d, browser: false }), /dimensions-ratio/],
-  ['media: the hero video autoplays', (d) => html(d, 'index.html', (t) => t.replace('<video class="hero-video" muted', '<video class="hero-video" autoplay muted')), (d) => checkMedia({ root: d, browser: false }), /video-attr/],
+  ['media: the hero video autoplays', (d) => html(d, 'index.html', (t) => t.replace('<video class="flame" muted', '<video class="flame" autoplay muted')), (d) => checkMedia({ root: d, browser: false }), /video-attr/],
   ['media: a media file without provenance', (d) => { writeFileSync(join(d, 'media', 'extra.webp'), readFileSync(join(d, 'media', 'dish-mapo.webp'))); }, (d) => checkMedia({ root: d, browser: false }), /orphan|provenance-row/],
   ['media: the video is made preload=auto', (d) => html(d, 'index.html', (t) => t.replace('preload="none"', 'preload="auto"')), (d) => checkMedia({ root: d, browser: false }), /video-preload/],
   ['media: an endless animation ignores reduced motion', (d) => css(d, '@keyframes jeSpin{to{transform:rotate(1turn)}}.seal{animation:jeSpin 8s linear infinite!important}'), (d) => checkMedia({ root: d, pages: IDX }), /animation-running|no-pause/],

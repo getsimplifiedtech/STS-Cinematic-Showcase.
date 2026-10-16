@@ -8,6 +8,19 @@ import { createDish } from './dish.js';
 const $ = (s, r = document) => r.querySelector(s);
 const root = document.documentElement, section = $('[data-breath]'), stage = $('[data-stage]'), canvas = $('.steam'), video = $('.flame'), poster = $('.poster');
 const dishCanvas = $('.dish'), pauseBtn = $('.pause'), beats = [...document.querySelectorAll('.beat')];
+// The four panels overlap on screen. For assistive technology the same words go into an ordered, visually hidden list after the section, and the panels are set aside.
+{
+  const vis = $('[data-visual]'), sr = document.createElement('ol');
+  sr.className = 'vh steps-sr'; sr.setAttribute('aria-label', vis.getAttribute('aria-label'));
+  for (const li of vis.children) {
+    const n = document.createElement('li'), add = (tag, text) => { const e = document.createElement(tag); e.textContent = text; n.append(e); };
+    add('h2', $('h2', li).textContent);
+    for (const p of li.querySelectorAll('.copy, .dish-name')) add('p', p.textContent.replace(/\s+/g, ' ').trim());
+    const img = $('img', li); if (img) add('p', img.alt);
+    sr.append(n);
+  }
+  vis.setAttribute('aria-hidden', 'true'); vis.closest('[data-breath]').after(sr);
+}
 const q = new URLSearchParams(location.search);
 const mq = (s) => matchMedia(s), listen = (m, f) => (m.addEventListener ? m.addEventListener('change', f) : m.addListener(f));
 const reduce = mq('(prefers-reduced-motion: reduce)'), wide = mq('(min-width: 960px)'), phone = mq('(max-aspect-ratio: 1/1) and (max-width: 959px)');
@@ -60,7 +73,8 @@ const stageVars = (p) => ({
 });
 
 // ---------------------------------------------------------------- state
-let mode = 'nojs', userPaused = false, glFailed = false, bailed = false, steam = null, dish = null, steamPending = null, inView = true, mediaV = 1, sweepV = 1;
+// opened straight from a folder (file://), browsers refuse to hand an image to WebGL (every file is its own origin), so the calm layout is the page there, with no console noise
+let steamHold = false, mode = 'nojs', userPaused = false, glFailed = location.protocol === 'file:', glUnsupported = glFailed, bailed = false, steam = null, dish = null, steamPending = null, inView = true, mediaV = 1, sweepV = 1;
 let scrollRaf = 0, top = 0, travel = 1, p = 0, lastP = 0, raf = 0, last = 0, parkedAt = 0, catchup = 0, labMode = false;
 labMode = q.has('lab');   //#lab
 const target = {}, cur = {}, cache = new WeakMap(), stats = { frames: 0, ms: [], cpu: [], bails: 0, slow: 0 };
@@ -162,18 +176,30 @@ function frame(now) {
   syncVideoForDish();
   if (!q.has('perf') || q.get('perf') !== 'off') adapt(gap);
 }
-// Adaptive load: first shrink the canvas, then the pressure solver, and only if the frame is still slow, hand over to the calm layout.
-let emaMs = 16.7, adaptN = 0, crawl = 0;
+// Adaptive load: first shrink the canvas, then the pressure solver, and only if frames still crawl with nothing left to give, hand over to the calm layout.
+// A frame over 120 ms is not averaged away: every 8 of them in a row step the load down, and one over 400 ms drops it to the floor at once (a step cannot help a frame that slow).
+let emaMs = 16.7, adaptN = 0, crawl = 0, framesSeen = 0;
+function degrade() {
+  if (steam.scale > .55) { steam.setScale(steam.scale * .85); return true; }
+  if (steam.jacobi > 8) { steam.setJacobi(steam.jacobi - 3); return true; }
+  return false;
+}
+const atFloor = () => steam.scale <= .55 && steam.jacobi <= 8;
+const bail = () => { stats.bails++; bailed = true; applyMode(); };
 function adapt(gap) {
   if (gap > 3000) { crawl = 0; return; }   // the tab was away, not the solver
-  if (gap > 150) { if (++crawl >= 5) { stats.bails++; bailed = true; applyMode(); } return; }   // frames that crawl (5 in a row over 150 ms): leave the live solver at once, do not wait for the averages
+  framesSeen++;
+  if (gap > 120) {
+    crawl++;
+    if (gap > 400 && framesSeen > 12) while (degrade());   // not in the first frames: shader compilation and uploads hitch once on any device
+    else if (crawl % 8 === 0) degrade();
+    if (atFloor() && crawl >= 6) bail();
+    return;
+  }
   crawl = 0;
   emaMs = emaMs * .9 + gap * .1; if (++adaptN % 30) return;
-  if (emaMs > 30) {
-    if (steam.scale > .55) { steam.setScale(steam.scale * .85); }
-    else if (steam.jacobi > 8) steam.setJacobi(steam.jacobi - 3);
-    else if (++stats.slow >= 3) { stats.bails++; bailed = true; applyMode(); }
-  } else if (emaMs < 18 && steam.scale < 1 && adaptN % 120 === 0) steam.setScale(Math.min(1, steam.scale * 1.08));
+  if (emaMs > 30) { if (!degrade() && ++stats.slow >= 3) bail(); }
+  else if (emaMs < 18 && steam.scale < 1 && adaptN % 120 === 0) steam.setScale(Math.min(1, steam.scale * 1.08));
 }
 
 // ---------------------------------------------------------------- run / park: the loop exists only while it can be seen
@@ -189,9 +215,11 @@ const now_gap = () => parkedAt && performance.now() - parkedAt > 1500;
 // ---------------------------------------------------------------- the Kling clip: same protections as the production hero (idle start, 960px gate, Save-Data, startup and stall fallbacks, Pause)
 let vState = 'idle', vStart = 0, vStall = 0, vQueued = false;
 const dishCovered = () => mediaV < .01;   // the footage is faded out into the cloud: stop decoding it
+// The footage plays in the live sequence, and also where the solver cannot run at all (no WebGL2, or a file:// folder): there the poster and footage are still the hero. A slow-device hand-over, a Pause, or a reduced-motion setting stops it.
+const videoOk = () => !stillOnly() && !userPaused && !bailed && (mode !== 'calm' || glUnsupported);
 function syncVideo() {
   if (vState !== 'playing') return;
-  const go = mode === 'live' && !userPaused && inView && !document.hidden && !dishCovered();
+  const go = videoOk() && inView && !document.hidden && !dishCovered();
   if (go && video.paused) { const pr = video.play(); if (pr && pr.catch) pr.catch(vFail); }
   else if (!go && !video.paused) video.pause();
 }
@@ -206,7 +234,7 @@ function stopVideo() {
 function vFail() { vState = 'failed'; stopVideo(); }
 function startVideo() {
   vQueued = false;
-  if (vState !== 'idle' || mode !== 'live' || stillOnly() || !wide.matches || q.get('video') === 'off') return;
+  if (vState !== 'idle' || !videoOk() || !wide.matches || q.get('video') === 'off') return;
   vState = 'loading'; let bad = 0;
   const add = (src, type) => { const n = document.createElement('source'); n.src = src; n.type = type; n.addEventListener('error', () => { if (++bad >= video.querySelectorAll('source').length) vFail(); }); video.appendChild(n); };
   if (video.canPlayType('video/webm; codecs="vp9"')) add(video.dataset.webm, 'video/webm; codecs="vp9"');
@@ -239,25 +267,30 @@ async function ensureSteam() {
       dish = await createDish({ canvas: dishCanvas, image: img, onLost: lost });
       layout(); setTargets(progress()); Object.assign(cur, target); Object.assign(steam.P, cur); steam.settle();
       catchup = 150;
-    } catch (err) { console.warn('The Breath: WebGL2 unavailable, using the calm layout.', err && err.message); if (steam) steam.dispose(); glFailed = true; steam = dish = null; }
+    } catch (err) { console.warn('The Breath: WebGL2 unavailable, using the calm layout.', err && err.message); if (steam) steam.dispose(); glFailed = glUnsupported = true; steam = dish = null; }
     steamPending = null; applyMode();
   })();
   return steamPending;
 }
 function applyMode() {
   const next = wantCalm() ? 'calm' : 'live';
-  if (next === 'live' && !steam) { if (!steamPending) ensureSteam(); if (mode === 'nojs') root.classList.add('is-calm'); return; }   // until the solver is ready, the calm layout is a complete page
+  if (next === 'live' && !steam) {   // until the solver is ready, the calm layout is a complete page; the footage starts first (it is what the visitor sees move) and the solver is built a moment later, off the critical moment
+    if (mode === 'nojs') root.classList.add('is-calm');
+    queueVideo();
+    if (!steamPending && !steamHold) { steamHold = true; setTimeout(() => { steamHold = false; if (!wantCalm()) ensureSteam(); }, wide.matches ? 1000 : 0); }
+    return;
+  }
   if (next !== mode) {
     mode = next; root.classList.toggle('is-live', mode === 'live'); root.classList.toggle('is-calm', mode === 'calm');
-    if (mode === 'calm') { stopVideo(); canvas.style.visibility = 'hidden'; } else { canvas.style.visibility = ''; if (dish) dish.draw(cur.clear, sweepV); }
+    if (mode === 'calm') { if (!videoOk()) stopVideo(); canvas.style.visibility = 'hidden'; } else { canvas.style.visibility = ''; if (dish) dish.draw(cur.clear, sweepV); }
   }
   root.classList.toggle('is-calm', mode === 'calm' || (mode === 'nojs'));
-  // Pause control: offered whenever the live sequence is possible at all
-  const canLive = !stillOnly() && !glFailed && !bailed;
+  // Pause control: offered whenever the live sequence is possible at all. It stays after an automatic bail-out, so a control the visitor has focused never vanishes under them.
+  const canLive = !stillOnly() && (!glUnsupported || wide.matches);   // a lost context or a slow device hands over to the calm layout, but a control the visitor may be using stays
   pauseBtn.hidden = !canLive;
   pauseBtn.setAttribute('aria-pressed', String(userPaused));
   $('.pause-txt', pauseBtn).textContent = userPaused ? 'Play motion' : 'Pause motion';
-  if (mode === 'live') queueVideo();
+  if (videoOk()) queueVideo(); else if (mode === 'calm') stopVideo();
   p = progress(); applyDom(p, true);
   sync();
 }
@@ -292,7 +325,7 @@ document.fonts && document.fonts.ready.then(() => { measure(); p = progress(); a
 const pct = (a, f) => { if (!a.length) return 0; const s = [...a].sort((x, y) => x - y); return s[Math.min(s.length - 1, Math.floor(f * s.length))]; };
 window.lab = {
   get mode() { return mode; }, get p() { return p; }, get steam() { return steam; }, get dish() { return dish; },
-  async ready() { applyMode(); if (steamPending) await steamPending; applyMode(); return mode; },
+  async ready() { applyMode(); if (!steam && !wantCalm()) ensureSteam(); if (steamPending) await steamPending; applyMode(); return mode; },
   // jump to progress pp, replay the last stretch of the sequence through the solver, draw one frame
   async seek(pp, { span = .3, steps = 300, scroll = true } = {}) {
     await this.ready();

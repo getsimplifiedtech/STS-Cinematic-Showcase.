@@ -64,12 +64,11 @@ export default function home(cfg) {
           <p class="actions"><a class="btn btn-ember" href="${link(h.primaryCta.page)}">${esc(h.primaryCta.label)}</a> ${orderLink(cfg, 'btn btn-ink')}</p>
         </div>
       </div>
-      <ol class="beat-list" aria-label="${esc(c.process.heading)}">${c.process.steps.map(beat).join('')}
+      <ol class="beat-list" data-visual aria-label="${esc(c.process.heading)}">${c.process.steps.map(beat).join('')}
       </ol>
     </div>
     <p class="vh">${esc(h.caption)}${cfg.demo ? esc(copy.demo.heroCaptionNote) : ''}</p>
   </section>
-
   <section class="signature" id="signature" aria-labelledby="sig-title">
     <div class="wrap">
       <header class="sec-head"><h2 id="sig-title">${esc(c.signature.heading)}</h2></header>

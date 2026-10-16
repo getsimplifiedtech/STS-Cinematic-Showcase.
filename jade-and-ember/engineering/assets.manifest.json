@@ -2,13 +2,13 @@
   "$comment": "Integrity record of the delivered site (every page, shared script and stylesheet, font and media file). Generated from a fresh build by engineering/tools/asset-manifest.mjs; check:assets fails when the built site differs from it, so every change to a delivered byte is a reviewed change to this file. SRI strings are for hosts or tools that want them; the pages carry none (SRI adds nothing for same-origin files and is unreliable over file://).",
   "algorithm": "sha256 (hex) and sha384 (SRI)",
   "fileCount": 35,
-  "totalBytes": 2034753,
-  "treeSha256": "41db182acda464460e0c121c09221398ac6ef3a0e3b03f23fcc96d9f2f248033",
+  "totalBytes": 2037422,
+  "treeSha256": "0f8bdd44ae91ce460b0d4a6ff48c4c49a778680f4f9fb493d6bd50d99a159e30",
   "files": {
     "breath.js": {
-      "bytes": 34834,
-      "sha256": "f79968b6f6aec433441cb45e3ee7b3edb82553e95a3fce9673b3f1c644d1bdb3",
-      "integrity": "sha384-qT6H0tBeuH3kzHFoszlEQZCrwgiKy0SfIptSFgwsbZT0Ged+6faWVw7TSyol0Wod"
+      "bytes": 35929,
+      "sha256": "33b3279793dc8b44e839b01da469dbff94c4026dd3388b2716f64a7f4c107c1d",
+      "integrity": "sha384-ZFcmfU2DQZfq9CxZv0mQwxbLVom8nc/PMAGqcmwFzIRgQqQ9w6txWWbZTfeWq32P"
     },
     "fonts/LICENSES.txt": {
       "bytes": 13351,
@@ -36,14 +36,14 @@
       "integrity": "sha384-mC26+gOPbM+kF3DtNSe058awroabPXu3/RV0slX2qPokKrPDFSRK0KpAd562gjTb"
     },
     "home.css": {
-      "bytes": 15370,
-      "sha256": "fc42b901d80e1d881ff26070b691c2b8fb16523a83c49d285f5cd6816d531cea",
-      "integrity": "sha384-uAauMofDEvmttfmARpBj76DzQk3kV/AzzpjbmOQshiffPptw50AMc6XET9ibFePM"
+      "bytes": 16598,
+      "sha256": "d6ff1425b596a1b8332e3ca3ef41a612dc43559965c29182c609ed87c81d3e05",
+      "integrity": "sha384-gheRHrcvanluEB6hzpOoWNK4pXeyKhCmjf2RoO59I/xm6rg+MaYoHTpn3v1J/FRx"
     },
     "index.html": {
-      "bytes": 12921,
-      "sha256": "f7d6b923d38180b448f558109daf3acc54cfe2422949efb9581d9f38fabba9a3",
-      "integrity": "sha384-VVDNcLzc9zRkGO9Y70PuQlFb8wLI2Jf9TvEoe4P5TlWpSzRZWnXUNkrTRhaOF1gD"
+      "bytes": 12932,
+      "sha256": "089abb87e88780faf0f9ec20163a74aba0f6cd3952cfb6ff836b06594f21b021",
+      "integrity": "sha384-PiMkSFGJYAAsz+U2TLWrOgTi4bO1mvYzqKUWdFraG1D1bqvfiAuye1Wij9ot3npe"
     },
     "media/PROVENANCE.md": {
       "bytes": 3865,
@@ -151,9 +151,9 @@
       "integrity": "sha384-GOZE12vybzmOMPeo+NIQFn1e8ryhYe0CSR0TWpBAwFLGA4iKVU6/9QJ8gO+zw/FS"
     },
     "story.css": {
-      "bytes": 6720,
-      "sha256": "056167b8126053494b35faab2e1b71c9780eb1aa5a365ee40326f1758447e8ba",
-      "integrity": "sha384-ThUKOURnXCge4K97YkTCFRTLDqfmFFMeRBlVHWk/wqrhmnYk6iud7580VSvkplpS"
+      "bytes": 6789,
+      "sha256": "840cc44a417bb33f38d9fa81b78bfd0176bc8b75a9e34921049565047e985be5",
+      "integrity": "sha384-uEE8cQ7QR0GbZqK25a+C4enkLqnLy9dhpAK2RgPMxpQGCKn8vkoDWh/GAF9igK71"
     },
     "story.js": {
       "bytes": 3258,
@@ -161,19 +161,19 @@
       "integrity": "sha384-/PeHNWL3gFUnI9fZW8NF4p4tYdKhGiR36xcs62xPX6+dFNkCKRExbd6irivcBjdF"
     },
     "styles.css": {
-      "bytes": 15446,
-      "sha256": "4a1224dcbfa90365bbdb78dc2b1eaaf3e0c382f9944ddcc93d40851f52afa68a",
-      "integrity": "sha384-rWLuvMHqetcx4j5w8brB6ORjWANZ2cSRYkBW/KHr3Y715GUmxoFjTSAPncuGPuuo"
+      "bytes": 15511,
+      "sha256": "1c2eb9a10da0fc2690252a4522937ca4241034096f49788723d162bdad79dcb5",
+      "integrity": "sha384-jZUa+FdzXAQ+cPQc+3X7jy3ybYG4M59waCjIkclFpi1bGh5gMrYBBeh8zxmdoWTz"
     },
     "visit-us.html": {
-      "bytes": 6944,
-      "sha256": "b4c59561163e5d8e6dfbad7dea996648ec054fec4a2401263aa1ab5736edd3b8",
-      "integrity": "sha384-GFVxV/oa8OsBdbxieOBTVHim/8rkzh13uy5uR34ydwZXc28r4LKqhaQxAff7z4B4"
+      "bytes": 6971,
+      "sha256": "ea06da4da5fffdd496cf92d15c9716ef52058f962efa5012fa70f6a129fe6d75",
+      "integrity": "sha384-0W1Ui/HpoTIldnw7Wd/yy3GxTpGtkSD10ccL1RO361sAx6aieuiOqs8qla0Ys5wR"
     },
     "visit.css": {
-      "bytes": 4404,
-      "sha256": "a0247617a794e1269d672dede5a41d0e43fd304e58409b2f41adabddea3d3d83",
-      "integrity": "sha384-FHycqXeiM//oMKXl2rOKt3yQ2vXjiAWl92n9unbMHi3j9RpGSmLm94CvrwWi1pVs"
+      "bytes": 4578,
+      "sha256": "c02f0199ae52a9f80746f654b8361af4ec7443b68fac8e011d9995717c5f39ad",
+      "integrity": "sha384-q2rxbZnuqeQINdIi2eVNZmjKyQnumx4y/53W4RuSliLfy5cW7wtJ1nGnVSUPSOcx"
     },
     "visit.js": {
       "bytes": 2201,

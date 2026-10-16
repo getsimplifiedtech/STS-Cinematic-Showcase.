@@ -115,10 +115,10 @@ address{font-family:var(--serif);font-size:clamp(1.5rem,2.4vw,2rem);line-height:
 .hours-compact dd{margin:0;font-variant-numeric:tabular-nums}
 
 /* Closing band: one heading, one sentence, one action. */
-.cta-band{position:relative;isolation:isolate;padding-block:min(var(--s10),max(var(--s9),calc(var(--sec) * .7)));background:var(--kitchen);overflow:hidden}
+.cta-band{position:relative;isolation:isolate;padding-block:min(var(--s10),max(var(--s9),calc(var(--sec) * .7)));background:var(--kitchen)}
 .cta-pine{background:var(--pine);border-top:1px solid var(--line)}
 .cta-lacquer{background:var(--lacquer);border-top:1px solid var(--line)}
-.cta-band::before{content:"";position:absolute;z-index:-1;left:-12%;bottom:-70%;width:62%;aspect-ratio:1;background:radial-gradient(closest-side,rgba(240,138,60,.2),rgba(240,138,60,0));pointer-events:none}
+.cta-band::before{content:"";position:absolute;z-index:-1;inset:0;background:radial-gradient(circle 31vw at 19% 125%,rgba(240,138,60,.2),rgba(240,138,60,0));pointer-events:none}   /* the glow's centre sits below the band; the box itself never leaves it, so the band needs no clipping */
 .cta-grid{display:grid;grid-template-columns:repeat(12,minmax(0,1fr));column-gap:var(--s5);row-gap:var(--s4);align-items:end}
 .cta-grid h2{grid-column:1/8}
 .cta-text{grid-column:1/7;color:var(--rice-dim);font-size:1.125rem;max-width:26rem}

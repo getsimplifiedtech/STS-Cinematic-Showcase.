@@ -23,7 +23,7 @@
 .is-calm canvas.dish{visibility:hidden!important}
 .plates{position:absolute;z-index:1;inset:0;display:none;pointer-events:none}
 .plate{position:absolute;inset:0;opacity:0}
-.pause{position:absolute;z-index:6;right:var(--gutter);bottom:28px;display:none;align-items:center;gap:12px;min-height:44px;padding:0 16px;background:rgba(14,13,12,.78);color:var(--rice);border:1px solid #8b857a;border-radius:2px;font:600 .9375rem/1 var(--sans);cursor:pointer;transition:border-color 180ms var(--ease),box-shadow 180ms var(--ease)}
+.pause{position:absolute;z-index:6;right:var(--gutter);bottom:72px;display:none;align-items:center;gap:12px;min-height:44px;padding:0 16px;background:rgba(14,13,12,.78);color:var(--rice);border:1px solid #8b857a;border-radius:2px;font:600 .9375rem/1 var(--sans);cursor:pointer;transition:border-color 180ms var(--ease),box-shadow 180ms var(--ease)}
 .pause:not([hidden]){display:inline-flex}
 .pause:hover{border-color:var(--ember-hi);box-shadow:0 0 22px rgba(240,138,60,.28)}
 .pause-ico{width:10px;height:12px;border-left:3px solid currentColor;border-right:3px solid currentColor}
@@ -46,6 +46,8 @@ h1 .ln{display:block}
 .dish-static{display:block;margin:28px 0 0;max-width:36rem}
 .dish-static img{width:100%;height:auto;border-radius:2px;filter:brightness(.82) contrast(1.12) saturate(1.05)}
 
+/* The pinned panels overlap on screen, so once the script runs it sets them aside for assistive technology and adds the same words as an ordered, visually hidden list (see breath.js). Without the script the panels are the only copy. */
+
 /* no-JS: every panel is full height but sparse; the last one carries the figure */
 .js .dish-static{display:none}
 html:not(.js) .beat-4{align-items:center}
@@ -57,7 +59,10 @@ html:not(.js) .beat-4{align-items:center}
 .js .steam{display:block}
 .is-live .beats{position:sticky;top:0;height:100vh;height:100svh;margin-top:-100vh;margin-top:-100svh;pointer-events:none}
 .is-live .beats .beat{position:absolute;inset:0;min-height:0}
-.beat.off .actions{visibility:hidden}
+/* A faded action is no longer clickable but stays in the Tab order (hiding it would drop it from the keyboard walk); focus brings it back into view. */
+.beat.off .actions a{pointer-events:none}
+.beat .actions:focus-within{opacity:1;transform:none;background:rgba(14,13,12,.82);border-radius:2px}
+.beat.off .actions:focus-within a{pointer-events:auto}
 .is-live .beats a{pointer-events:auto}
 .is-live .dark,.is-calm .dark{opacity:var(--dark,1)}
 .is-live .media,.is-live .steam{transform:translate(var(--ctx,0%),var(--cty,0%)) scale(var(--cs,1));transform-origin:50% 50%}   /* the camera (see CAM in breath.js): media and steam move as one, so the vapour stays on the wok */
@@ -68,7 +73,7 @@ html:not(.js) .beat-4{align-items:center}
 .is-live .dish-static{display:none}
 
 /* each word rises out of a line mask and leaves upward; the copy follows it */
-.beat .ln{display:block;overflow:hidden;padding:.08em .07em .14em;margin:-.08em -.07em -.14em}
+.beat .ln{display:block;overflow:hidden;padding:.18em .07em .22em;margin:-.18em -.07em -.22em}
 .beat .ln>span{display:block;transform:translate3d(0,calc((1 - var(--in))*140% - var(--out)*140%),0);will-change:transform}
 .beat .copy,.beat .lede,.beat .eyebrow,.beat .actions,.beat .dish-name{opacity:calc(var(--in)*(1 - var(--out)));transform:translate3d(0,calc((1 - var(--in))*18px - var(--out)*10px),0)}
 .beat .copy,.beat .dish-name{transition:none}
@@ -103,7 +108,8 @@ html:not(.js) .beat-4{align-items:center}
     linear-gradient(0deg,rgba(14,13,12,.92) 0,rgba(14,13,12,.6) 18%,rgba(14,13,12,0) 38%)}
   .beat{align-items:flex-start;padding-top:96px;padding-bottom:var(--gutter)}
   .beat-0{align-items:stretch}
-  .beat-0 .beat-in{display:flex;flex-direction:column;width:100%;min-height:calc(100svh - 96px - var(--gutter))}
+  .beat-0{padding-bottom:calc(var(--gutter) + 56px)}   /* the notice bar above the header pushes the stage down at the top of the page: the actions stay inside the first screen */
+  .beat-0 .beat-in{display:flex;flex-direction:column;width:100%;min-height:calc(100svh - 96px - var(--gutter) - 56px)}
   .beat-0 .lede{margin-top:auto;font-size:1.0625rem}
   .beat-0 .actions{margin-top:20px}
   h1{font-size:clamp(3.1rem,15.6vw,4.6rem)}
@@ -115,7 +121,7 @@ html:not(.js) .beat-4{align-items:center}
   .plate-fire{background-image:url(media/hero-wok-v2-m.webp);transform-origin:50% 72%}
   .plate-tex{background-image:var(--plate-steam-m);transform-origin:50% 66%}
   .plate-steam{background-image:var(--plate-steam-m),radial-gradient(90% 70% at 50% 30%,rgba(112,104,96,.78) 0,rgba(66,62,58,.62) 46%,rgba(30,28,26,.4) 100%)}
-  .pause{top:14px;right:var(--gutter);bottom:auto;width:44px;padding:0;justify-content:center}
+  .pause{top:calc(var(--header-h) + 8px);right:var(--gutter);bottom:auto;width:44px;padding:0;justify-content:center}   /* under the header, never over its Menu button */
   .pause-txt{position:absolute;width:1px;height:1px;margin:-1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
   .is-live .breath{height:560vh;height:560svh}
   .is-calm .breath{height:400vh;height:400svh}
@@ -155,8 +161,8 @@ html:not(.js) .beat-4{align-items:center}
 .dish-3 .dish-fig{grid-column:1/9}.dish-3 .dish-text{grid-column:9/13}
 .more{margin-top:var(--s9)}
 
-.story-teaser{position:relative;isolation:isolate;overflow:hidden;background:var(--pine);padding-block:var(--sec)}
-.story-teaser::before{content:"";position:absolute;z-index:-1;right:-8%;top:-30%;width:58%;aspect-ratio:1;background:radial-gradient(closest-side,rgba(194,227,210,.12),rgba(194,227,210,0));pointer-events:none}
+.story-teaser{position:relative;isolation:isolate;background:var(--pine);padding-block:var(--sec)}
+.story-teaser::before{content:"";position:absolute;z-index:-1;inset:0;background:radial-gradient(circle 29vw at 79% 0,rgba(194,227,210,.12),rgba(194,227,210,0));pointer-events:none}
 .teaser-grid{display:grid;grid-template-columns:repeat(12,minmax(0,1fr));column-gap:var(--s5)}
 .story-teaser .pull{grid-column:3/13}
 .teaser-text{grid-column:3/9;margin-top:var(--s6);color:var(--rice-dim);font-size:1.125rem;max-width:32rem}
@@ -184,3 +190,10 @@ html:not(.js) .beat-4{align-items:center}
   .teaser-text,.teaser-link{grid-column:1/-1}
 }
 @media (prefers-reduced-motion:reduce){.dish-fig,.dish-text{opacity:1;transform:none}.dish-fig::after{display:none}}
+
+/* forced colours: the system draws text in its own colours, so the pinned panels (text over a photograph) are replaced by the same words as an ordinary visible list */
+@media (forced-colors:active){
+  .beat-list{display:none}
+  .steps-sr{position:static!important;width:auto;height:auto;margin:0;padding:var(--s7) var(--gutter);overflow:visible;clip:auto;clip-path:none;white-space:normal;list-style:none;display:block}
+  .steps-sr h2{font-size:1.5rem}
+}

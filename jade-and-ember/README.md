@@ -1,9 +1,20 @@
-# Jade & Ember — fictional modern Chinese kitchen (STS concept v0.8, all five pages)
+# Jade & Ember — fictional modern Chinese kitchen (STS concept, Firelight build, all five pages)
 
 A five-page static website: **Home, Menu, Our story, Visit us, Order online** (`index.html`, `menu.html`, `our-story.html`, `visit-us.html`, `order-online.html`).
 No framework, no runtime dependencies, no external requests, no Lovable. Target path: `/jade-and-ember/`.
 Design authority: Anthropic's `frontend-design` skill. Approved visual design: v0.5 Jade Lacquer. Architecture: `../docs/JADE_AND_EMBER_FIVE_PAGE_ARCHITECTURE.md`.
 Governance: framework and skill reference `../docs/JADE_AND_EMBER_FRAMEWORK_REFERENCE.md`; approval records `../docs/JADE_AND_EMBER_APPROVALS.md` (v0.8 is recorded as the **design baseline**, approved on 2026-10-10, and as **not approved** for public deployment or client production; frozen record: `../baselines/jade-and-ember-v0.8/BASELINE.md`).
+
+## Firelight build (branch `feature/jade-and-ember-firelight`)
+The v0.9 framework with the approved **Firelight** direction (one warm light from the lower left, one jade accent, soot and deep jade lacquer) and its signature experience **The Breath** on Home. The v0.9 branch is unchanged. Owner approval: APR-JE-052 in `../docs/JADE_AND_EMBER_APPROVALS.md`.
+- **Home**: The Breath (pinned scroll sequence: flame, live WebGL2 steam, texture, the finished dish), the other two signature dishes, a story teaser, the visit strip. `breath.js` is generated from `client/` by `node tools/build-breath.mjs`; its calm layout (reduced motion, Save-Data, no WebGL2, a failed performance check) is plain DOM and CSS.
+- **Our story**: 玉火 set monumentally, ember light climbing into the strokes as you scroll, embers rising (`story.js`, own code), then the headline and short chapters.
+- **Menu**: deep jade lacquer panels per category with a slow sheen driven by scroll; three photographed dishes lead their categories; every category stays visible and printable.
+- **Visit us**: a nearly black room lit by one drifting, flickering pool of candle-like light (`visit.js`), the address and hours on a frosted panel; no map embed.
+- **Order online**: three scroll stations (the wok, the pass, you) behind a printed ticket that holds the three real steps; the Order action stays in view.
+- Scroll effects use one helper (`site.js`, `[data-p]` sets `--p`); every page shows a finished resting state without JavaScript or with reduced motion. Cross-document view transitions in Chromium, instant navigation elsewhere. No GSAP, Lenis or Three.js; no third-party code.
+- Budgets: v0.9 limits for Menu, Our story, Visit us and Order online; Home has its own documented limits (`../docs/JADE_AND_EMBER_FIRELIGHT_HOME_BUDGET.md`, `npm run check:budgets-firelight`). Gate status against the frozen v0.8 baseline: `../docs/JADE_AND_EMBER_FIRELIGHT_GATE_STATUS.md`.
+- The sections below that describe the v0.9 hero video and `hero.js` are the v0.9 behaviour and are kept for reference; the Firelight Home replaces that script with `breath.js`.
 
 **All five pages are built** (Gate 1: shared configuration and components, Home, Menu; Gate 2: Our story, Visit us, Order online). Open `index.html`, or run `python3 serve.py`.
 
@@ -19,7 +30,7 @@ npm i && npm run test:site && npm run test:a11y && npm run test:contrast && npm 
 npm run verify:fast        # v0.9 engineering checks without a browser (baseline, schema, determinism, delivery, authority; Node 24.8 or later, tested on 24.21.0)
 npm run verify             # all v0.9 Gate 1 checks including the regression harness against the frozen v0.8 baseline (about 4 minutes); see engineering/README.md
 node tests/extracted.mjs [folder]   # opens index.html in a browser (file:// and serve.py, desktop and phone) and clicks through all five pages; point it at an extracted preview ZIP
-python3 tools/video-qa.py media/hero-loop.webm --poster media/hero-wok.webp   # numeric checks on the loop (needs ffmpeg, numpy, Pillow)
+python3 tools/video-qa.py media/hero-wok-v2.webm --poster media/hero-wok-v2.webp   # numeric checks on the loop (needs ffmpeg, numpy, Pillow)
 npm run test:video-tools   # dry run of that checker on synthetic clips
 ```
 If Playwright cannot find its browser, set `CHROMIUM_PATH` (tests and Lighthouse; `CHROME_PATH` also works for Lighthouse) to a Chromium binary. `npm run test:lighthouse` is the direct Lighthouse runner (`engineering/tools/lighthouse.mjs`, thresholds in `engineering/lighthouse.json`); it replaced Lighthouse CI in Gate 6 (G6-1).
@@ -32,7 +43,7 @@ config/   client.json  business facts and switches (address, phone, hours, order
           site.json    the page registry (file, nav label, order, status), the demo disclosure texts, the credit line
 src/      lib/ (config loader and validator, small helpers) · components/ · pages/
 build.mjs reads config/, validates, and writes one standalone HTML file per page in the registry
-styles.css one shared stylesheet · site.js (nav, every page) · hero.js (Home only) · menu.js (Menu only)
+styles.css shared base · home.css, story.css, menu.css, visit.css, order.css (one per page) · site.js (nav and scroll progress, every page) · breath.js (Home) · story.js · menu.js · visit.js
 ```
 Components are build-time functions (`src/components`): `document` (head, disclosure bar, header, footer), `frame`, `dish`, `steps`, `hours`,
 `menu-category`, `cta-band`, `owner-note`. Pages: `src/pages/` (home, menu, story, visit, order). Business facts exist once and appear identically wherever they are shown (`tests/site.mjs` checks this).
@@ -77,7 +88,7 @@ The loop's first frame is the poster, so the handoff is invisible; its last fram
 - No scroll hijacking, no sound, no carousels. Every page works without JavaScript.
 
 ## Files
-`serve.py` local server · `config/` content · `src/` and `build.mjs` generator · the five `*.html` built pages · `styles.css` · `site.js`, `hero.js`, `menu.js` (progressive enhancement only) · `media/` · `fonts/` (OFL licences in `LICENSES.txt`) ·
+`serve.py` local server · `config/` content · `src/` and `build.mjs` generator · the five `*.html` built pages · `styles.css` and the per-page stylesheets · `site.js`, `breath.js`, `story.js`, `menu.js`, `visit.js` (progressive enhancement only) · `client/` (Home script sources) · `media/` · `fonts/` (OFL licences in `LICENSES.txt`) ·
 `tests/site.mjs` (page registry, navigation, links, titles, facts, and the structure of every page) · `tests/variants.mjs` (invalid configs fail, live ordering URL, a client build with no demonstration text) · `tests/extracted.mjs` (click through the five pages from index.html in a folder or extracted ZIP) · `tests/qa.mjs` (axe on every page, behaviour, every video fallback, the Menu and its print layout) · `tests/contrast.mjs` (hero text over the photo and video frames) ·
 `tests/contrast-sections.mjs` (all other text, every page) · `tests/serve.mjs` · `tools/video-qa.py` and `tools/video-qa-selftest.py` · `engineering/lighthouse.json` (five URLs; replaced `lighthouserc.json`) · `QA.md` results and critique · `media/PROVENANCE.md`.
 

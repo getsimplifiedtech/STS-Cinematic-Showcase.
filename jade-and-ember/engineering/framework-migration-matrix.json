@@ -896,7 +896,9 @@
       "summary": "Page-weight budgets with growth against a reference and Core Web Vitals under throttling.",
       "paths": [
         "jade-and-ember/engineering/checks/budgets.mjs",
-        "jade-and-ember/engineering/budgets.json"
+        "jade-and-ember/engineering/budgets.json",
+        "jade-and-ember/engineering/budgets-firelight.json",
+        "jade-and-ember/engineering/project-owned/budgets-firelight.mjs"
       ],
       "target": "engineering/checks/ with defaults in engineering/policies/",
       "external": [
@@ -1087,6 +1089,8 @@
         "docs/JADE_AND_EMBER_APPROVALS.md",
         "docs/JADE_AND_EMBER_BUILD_BRIEF.md",
         "docs/JADE_AND_EMBER_ENGINEERING_REQUIREMENTS_LEDGER.md",
+        "docs/JADE_AND_EMBER_FIRELIGHT_GATE_STATUS.md",
+        "docs/JADE_AND_EMBER_FIRELIGHT_HOME_BUDGET.md",
         "docs/JADE_AND_EMBER_FIVE_PAGE_ARCHITECTURE.md",
         "docs/JADE_AND_EMBER_FRAMEWORK_REFERENCE.md",
         "docs/JADE_AND_EMBER_GATE_A_PREFLIGHT.md",

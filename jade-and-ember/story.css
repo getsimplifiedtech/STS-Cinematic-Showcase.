@@ -3,7 +3,7 @@
    rule falls back to a finished, readable resting state. */
 
 .story-open{position:relative;height:240svh;background:var(--kitchen)}
-.story-pin{position:sticky;top:0;height:100svh;overflow:hidden;display:grid;place-items:center;isolation:isolate}
+.story-pin{position:sticky;top:0;height:100svh;display:grid;place-items:center;isolation:isolate}
 /* the light: one warm pool low on the left, one jade breath high on the right */
 .story-pin::before{content:"";position:absolute;inset:0;z-index:-2;background:
   radial-gradient(60% 55% at 22% 108%,rgba(240,138,60,calc(.1 + var(--p,.85)*.22)),transparent 70%),
@@ -12,8 +12,8 @@
 /* The glyphs: soot on soot. The fill gradient is the light climbing; --f runs past 100% so the top strokes finish lit. */
 .name-glyph{--f:calc(var(--p,.85)*150% - 10%);position:absolute;inset:0;margin:0;display:flex;align-items:center;justify-content:center;gap:.04em;
   font:600 min(35vw,66svh)/1 var(--seal);letter-spacing:0;color:#1d1a17;user-select:none;pointer-events:none;
-  opacity:clamp(.14,calc(1 - (var(--p,.85) - .42)*2.4),1);transform:scale(calc(1 + var(--p,.85)*.06))}
-.name-glyph span{display:block;color:#1d1a17}
+  opacity:clamp(.14,calc(1 - (var(--p,.85) - .42)*2.4),1)}
+.name-glyph span{display:block;color:#1d1a17;transform:scale(calc(1 + var(--p,.85)*.06))}   /* the slow push is on each glyph, so the box itself never grows past the screen */
 @supports ((-webkit-background-clip:text) or (background-clip:text)){
   .g-jade{background:linear-gradient(to top,#6fae96 0%,#2f6a57 calc(var(--f) - 34%),#1d1a17 var(--f));-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;color:transparent}
   .g-fire{background:linear-gradient(to top,var(--ember-hi) 0%,var(--ember) calc(var(--f) - 30%),#1d1a17 var(--f));-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;color:transparent}
@@ -23,7 +23,7 @@
 /* The headline arrives as the glyph dims. */
 .story-intro{position:relative;z-index:2;width:min(1200px,100% - 2*var(--gutter));padding-top:var(--header-h);
   opacity:clamp(0,calc((var(--p,.85) - .38)*4.2),1);transform:translateY(calc((1 - clamp(0,calc((var(--p,.85) - .38)*4.2),1))*36px))}
-.story-intro::before{content:"";position:absolute;inset:-12% -10%;z-index:-1;background:radial-gradient(closest-side,rgba(14,13,12,.82),rgba(14,13,12,0));pointer-events:none}
+.story-intro::before{content:"";position:absolute;inset:-12% -5%;z-index:-1;background:radial-gradient(closest-side,rgba(14,13,12,.82),rgba(14,13,12,0));pointer-events:none}
 .story-intro h1{font-family:var(--serif);font-weight:400;font-size:clamp(2.75rem,7.4vw,6.5rem);line-height:1.02;letter-spacing:-.02em;text-wrap:balance;max-width:14ch}
 
 /* Chapters: short, staggered, each rising out of the dark as it arrives. */
