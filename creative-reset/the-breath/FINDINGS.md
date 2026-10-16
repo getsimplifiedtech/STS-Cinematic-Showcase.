@@ -6,6 +6,17 @@ Branch `lab/jade-and-ember-the-breath`, everything inside `creative-reset/the-br
 
 **Reference-first rule (CLAUDE.md).** The STS Technology Reference Registry was consulted before changing the animation and shaders. Its only related entry is Three.js (particles), which is not needed: the steam, the dish pass and the build script are STS-authored code with no third-party dependency. Nothing from the registry or the dormant references was installed, run or integrated. Playwright (already installed, listed in the registry) is used only to test. Lighthouse and axe are not installed, so they were not run (installing them needs your approval); the Lighthouse-style numbers below come from the browser's own APIs and are labelled as such.
 
+## Round 3 (Firelight continuation), summary
+
+Changes since round 2 (commit c806243). Same limits: headless software GL, no real device.
+
+- **Steam now reads as volume.** The compositor lights the vapour from the wok through the vapour itself (four light-march samples toward the source) and uses a wide gradient scale for whole-billow lobes, so lobes facing the flame are lit and the folds and far sides fall into shadow, instead of one even veil. Desktop got finer wisps (noise 3.4, wisp .85, narrower vents, lobe 1.4). A crease that appeared over the wok when the light direction flipped is fixed by shrinking the step over the source. Evidence: `shots/evidence-4-steam-volume-r3.jpg` (phone p .36, .62, .66) and `shots/evidence-4-steam-volume-r3-desktop.jpg` (p .66). Stills only; motion is unjudged.
+- **Headline gap closed.** "Texture" leaves at p .625 and "The plate" arrives at p .645, so there is always a headline while the cloud covers the footage.
+- **Warmer cloud at the handover.** The ember wash that lights the cloud once the footage has faded is a little stronger (.05 to .09).
+- **Re-verified on this build:** handover co-presence 0 on desktop and phone in both directions; all four fallback modes (reduced motion, Save-Data, no WebGL2, no JavaScript); keyboard; resize; hidden-tab, off-screen and paused draw calls 0; dish 0 draws at rest; contrast 40 text boxes, 0 below threshold (lowest 4.89:1). Shipped script 12,413 B gzip (was 12,251).
+- **Not re-measured:** frame rate and GPU memory. The compositor gained about six texture reads per pixel, so phone cost should be a little higher than round 2; check on a real phone.
+- **Vercel:** deployed by the owner as `jade-ember-the-breath-lab` from this folder (`vercel.json`, `.vercelignore`).
+
 ## 1. The three corrections
 
 Contact sheets for the whole sequence: `shots/choreography-desktop.jpg`, `shots/choreography-mobile.jpg`. The round-1 frames are kept in `shots/before/`.

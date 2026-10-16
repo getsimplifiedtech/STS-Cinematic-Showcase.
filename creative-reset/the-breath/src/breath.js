@@ -58,8 +58,8 @@ const SRC = { desk: [0.50, 0.58], phone: [0.55, 0.62] };   // measured on the po
 // How the steam looks on each composition. A phone frame is narrow: vents are slimmer and closer together, the detail is finer, the source stays
 // small, the lower frame gives off less vapour, and vapour thins out as it climbs, so plumes rise as separate billows instead of one sheet of fog.
 const LOOK = {
-  desk: { vent: [.9, .02], noise: 2.3, wisp: .5, band: 1.1, radMax: .14, alt: .1 },
-  phone: { vent: [.8, .0065], noise: 4.2, wisp: 1, band: .75, radMax: .1, alt: .9 },
+  desk: { vent: [.85, .011], noise: 3.4, wisp: .85, band: .95, radMax: .12, alt: .35, lobe: 1.4 },
+  phone: { vent: [.8, .0065], noise: 4.2, wisp: 1, band: .75, radMax: .1, alt: .9, lobe: 1 },
 };
 function layout() {
   if (!steam) return;

@@ -66,7 +66,10 @@ export async function createSteam({ canvas, tier = 'mid' }) {
   const P = { emit: 0.4, spread: 0, clear: 0, haze: 1, glow: 0.6, detail: 0.4, flick: 0.5, media: 1 };   // set by the caller each frame
   // placement and look (stage uv, y up); the caller sets these per layout. vent: [span, width^2], noise: detail frequency, wisp: how ragged the vapour is,
   // band: how much the lower frame gives off vapour, radMax: widest the source gets, alt: dissipation with height
-  const L = { src: [0.5, 0.45], dc: [0.62, 0.5], shade: [1, 0], aspect: 1.6, reach: 1.1, vent: [.9, .02], noise: 2.3, wisp: .5, band: 1, radMax: .14, alt: .25 };
+  const L = { src: [0.5, 0.45], dc: [0.62, 0.5], shade: [1, 0], aspect: 1.6, reach: 1.1, vent: [.9, .02], noise: 2.3, wisp: .5, band: 1, radMax: .14, alt: .25, lobe: 1 };
+  //#lab
+  { const l = new URLSearchParams(location.search).get('lobe'); if (l !== null) L.lobe = +l; }   // lab: A/B the billow lighting (0 = round-1 shading)
+  //#endlab
   let vel, prs, dye, div, crl, SIM = { w: 2, h: 2 }, DYE = { w: 2, h: 2 }, gpuBytes = 0, acc = 0, time = 0, lastClear = 0, push = 0, stirs = [];
   let jacobi = T.jacobi;
 
@@ -162,7 +165,7 @@ void main(){
   // turbulence (curls and ragged edges), thin vapour is eroded away (so it breaks into wisps), and only thick vapour holds a body.
   const COMP = prog( `${HEAD}
 uniform sampler2D tDye, tVel; uniform vec2 dyePx, src, dc, shade;
-uniform float aspect, time, clearR, haze, glow, detail, flick, reach, media, noise, wisp;
+uniform float aspect, time, clearR, haze, glow, detail, flick, reach, media, noise, wisp, lobe;
 //#lab
 uniform float dbg;
 //#endlab
@@ -177,19 +180,26 @@ void main(){
   float nz = fbm(wp*1.3 + wv);
   float dd = d*(.55 + .9*nz);
   float a = min(1. - exp(-max(dd - .04*wisp, 0.)*1.8), .9)*haze;
-  // thick parts bulge toward the camera and catch the flame light; the gradient is taken over a narrow stencil so the folds stay sharp
-  vec2 gs = dyePx*5.;
+  // thick parts bulge toward the camera and catch the flame light. Two gradient scales: a narrow one keeps the wisps sharp, a wide one gives whole billows
+  // their lobes. Then the light is marched a few steps back toward the wok through the vapour itself: lobes facing the flame are lit, the folds between
+  // them and the far side fall into shadow, so the cloud reads as volume with gaps instead of one even veil.
+  vec2 gs = dyePx*5., gw = dyePx*15.;
   vec2 g = vec2(texture(tDye, uw + vec2(gs.x,0)).x - texture(tDye, uw - vec2(gs.x,0)).x, texture(tDye, uw + vec2(0,gs.y)).x - texture(tDye, uw - vec2(0,gs.y)).x);
-  vec3 n = normalize(vec3(-g*(.55 + 1.0*detail)*(1. - .5*smoothstep(.6, 1.6, d)), 1.));   // dense cloud shades as one soft body, not a crumpled surface
+  vec2 gb = vec2(texture(tDye, uw + vec2(gw.x,0)).x - texture(tDye, uw - vec2(gw.x,0)).x, texture(tDye, uw + vec2(0,gw.y)).x - texture(tDye, uw - vec2(0,gw.y)).x)*.4;
+  vec3 n = normalize(vec3(-(g*(.55 + 1.0*detail)*(1. - .55*smoothstep(.6, 1.6, d)) + gb*lobe), 1.));
   vec2 toS = (src - uv)*asp; float dist = length(toS);
+  vec2 stp = toS/(dist + .12)/asp;                                                    // one step toward the wok, in uv (shrinks to nothing over the wok, so there is no crease where the direction flips)
+  float occ = 0.;
+  for(int i = 1; i <= 4; i++) occ += texture(tDye, uw + stp*(.018*float(i*i)*(1. + 1.6*lobe))).x;
+  float lit = mix(.5, 1., exp(-occ*.4*lobe));
   vec3 Ld = normalize(vec3(toS/(dist + .08), .55));
   float diff = max(dot(n, Ld), 0.);
   float near = exp(-dist*dist/.075), mid = exp(-dist*dist/.55);
-  vec3 ember = vec3(1., .5, .2), cool = vec3(.62, .60, .60), warm = vec3(1., .66, .38);
+  vec3 ember = vec3(1., .5, .2), cool = vec3(.56, .58, .64), warm = vec3(1., .66, .38);
   float rim = pow(1. - n.z, 2.)*(.3 + .5*detail);
-  float lightK = clamp(.20 + .7*mid*(.5 + .8*diff), 0., 1.4)*(.78 + .5*flick)*mix(.8, 1., media);   // how much flame light reaches this bit of cloud
-  vec3 sc = mix(cool*.5, warm, clamp(lightK*.8, 0., 1.))*lightK*(.62 + .8*nz) + cool*rim*.2;
-  sc *= 1. - .45*smoothstep(.7, 1.8, d)*(1. - near);                                      // the heart of a thick cloud is in its own shadow
+  float lightK = clamp(.24 + .8*mid*(.4 + .9*diff)*mix(1., lit, lobe), 0., 1.5)*(.78 + .5*flick)*mix(.8, 1., media);   // how much flame light reaches this bit of cloud
+  vec3 sc = mix(cool*.42, warm, clamp(lightK*.8, 0., 1.))*lightK*(.6 + .85*nz) + cool*rim*.2;
+  sc *= 1. - .35*smoothstep(.7, 1.8, d)*(1. - near);                                      // the heart of a thick cloud is in its own shadow
   sc *= 1. - shade.x*.6*(1. - smoothstep(0., .62, uv.x)) - shade.y*.55*smoothstep(.5, .92, uv.y);   // keep the type side dark
   vec3 rgb = sc*a;
   float al = a;
@@ -199,7 +209,7 @@ void main(){
   float R = clearR*reach*1.08, wid = .22*reach;
   float open = (1. - smoothstep(R - wid, R + .02*reach, length(e))) * step(.001, clearR);
   float f = .6 + .8*flick;
-  float glw = glow*exp(-dist*dist/.16)*.07*f*(1. - open) + (1. - media)*.05*exp(-dist*dist/.42)*f*(1. - open) + (1. - media)*.07*exp(-length((uv - vec2(.0, .45))*asp)*1.6)*smoothstep(.0, .4, clearR);
+  float glw = glow*exp(-dist*dist/.16)*.07*f*(1. - open) + (1. - media)*.09*exp(-dist*dist/.42)*f*(1. - open) + (1. - media)*.07*exp(-length((uv - vec2(.0, .45))*asp)*1.6)*smoothstep(.0, .4, clearR);
   rgb += ember*glw; al = max(al, max(rgb.r, max(rgb.g, rgb.b)));
   rgb += (h11(gl_FragCoord.xy + fract(time)*61.) - .5)*.014*al;
 //#lab
@@ -241,7 +251,7 @@ void main(){
     COMP.use(); bindTex(COMP, 'tDye', dye.read.tex, 4); bindTex(COMP, 'tVel', vel.read.tex, 5);
     COMP.set('dyePx', 1 / DYE.w, 1 / DYE.h); COMP.set('src', ...L.src); COMP.set('dc', ...L.dc); COMP.set('shade', ...L.shade);
     COMP.set('aspect', L.aspect); COMP.set('time', time); COMP.set('clearR', P.clear); COMP.set('reach', L.reach); COMP.set('haze', P.haze); COMP.set('glow', P.glow); COMP.set('detail', P.detail); COMP.set('flick', P.flick);
-    COMP.set('media', P.media); COMP.set('noise', L.noise); COMP.set('wisp', L.wisp);
+    COMP.set('media', P.media); COMP.set('noise', L.noise); COMP.set('wisp', L.wisp); COMP.set('lobe', L.lobe);
     COMP.set('dbg', P.dbg || 0);   //#lab
     Q.draw();
   }

@@ -810,26 +810,26 @@
  },
  "gating": {
   "visible": {
-   "drawCallsIn2s": 133
+   "drawCallsIn2s": 294
   },
   "hiddenTab": {
    "drawCallsIn2s": 0
   },
   "resumed": {
-   "drawCallsIn2s": 266
+   "drawCallsIn2s": 304
   },
   "offScreen": {
    "drawCallsIn2s": 0
   },
   "backOnScreen": {
-   "drawCallsIn2s": 180
+   "drawCallsIn2s": 80
   },
   "pausedByVisitor": {
    "drawCallsIn2s": 0,
    "mode": "calm"
   },
   "playAgain": {
-   "drawCallsIn2s": 399,
+   "drawCallsIn2s": 285,
    "mode": "live"
   },
   "dishAtRest": {
@@ -949,7 +949,7 @@
   "index.html": {
    "bytes": 6254,
    "gzip": 2349,
-   "brotli": 1856
+   "brotli": 1860
   },
   "breath.css": {
    "bytes": 12830,
@@ -957,14 +957,14 @@
    "brotli": 3592
   },
   "js/breath.min.js": {
-   "bytes": 32876,
-   "gzip": 12251,
-   "brotli": 11063
+   "bytes": 33280,
+   "gzip": 12413,
+   "brotli": 11187
   },
   "src/breath.js": {
-   "bytes": 21892,
-   "gzip": 8280,
-   "brotli": 7216
+   "bytes": 21916,
+   "gzip": 8290,
+   "brotli": 7233
   },
   "src/dish.js": {
    "bytes": 6146,
@@ -977,9 +977,9 @@
    "brotli": 1882
   },
   "src/steam.js": {
-   "bytes": 21599,
-   "gzip": 7959,
-   "brotli": 7019
+   "bytes": 22611,
+   "gzip": 8302,
+   "brotli": 7310
   },
   "media/dish-charsiu.webp": {
    "bytes": 61404
@@ -997,10 +997,10 @@
    "bytes": 61464
   },
   "media/steam-plate-m.webp": {
-   "bytes": 14574
+   "bytes": 17884
   },
   "media/steam-plate.webp": {
-   "bytes": 28174
+   "bytes": 24308
   },
   "fonts/karla-latin-400-normal.woff2": {
    "bytes": 13140
@@ -1223,7 +1223,7 @@
      "media": 1,
      "dishCanvas": "hidden",
      "clear": 0,
-     "spread": 0.994,
+     "spread": 0.981,
      "mediaOff": false
     },
     {
@@ -1258,8 +1258,8 @@
      "p": 0.74,
      "media": 0,
      "dishCanvas": "visible",
-     "clear": 0.311,
-     "spread": 0.69,
+     "clear": 0.31,
+     "spread": 0.693,
      "mediaOff": true
     },
     {
@@ -1268,7 +1268,7 @@
      "media": 0,
      "dishCanvas": "visible",
      "clear": 0.579,
-     "spread": 0.471,
+     "spread": 0.473,
      "mediaOff": true
     },
     {
@@ -1277,7 +1277,7 @@
      "media": 0,
      "dishCanvas": "visible",
      "clear": 0.9,
-     "spread": 0.221,
+     "spread": 0.225,
      "mediaOff": true
     },
     {
@@ -1286,7 +1286,7 @@
      "media": 0,
      "dishCanvas": "visible",
      "clear": 0.581,
-     "spread": 0.447,
+     "spread": 0.443,
      "mediaOff": true
     },
     {
@@ -1294,8 +1294,8 @@
      "p": 0.74,
      "media": 0,
      "dishCanvas": "visible",
-     "clear": 0.309,
-     "spread": 0.683,
+     "clear": 0.31,
+     "spread": 0.678,
      "mediaOff": true
     },
     {
@@ -1304,7 +1304,7 @@
      "media": 0,
      "dishCanvas": "visible",
      "clear": 0.04,
-     "spread": 0.866,
+     "spread": 0.865,
      "mediaOff": true
     },
     {
@@ -1313,7 +1313,7 @@
      "media": 0.073,
      "dishCanvas": "hidden",
      "clear": 0,
-     "spread": 0.999,
+     "spread": 0.998,
      "mediaOff": false
     },
     {
@@ -1340,7 +1340,7 @@
      "media": 1,
      "dishCanvas": "hidden",
      "clear": 0,
-     "spread": 0.032,
+     "spread": 0.038,
      "mediaOff": false
     },
     {
@@ -1484,7 +1484,7 @@
      "media": 1,
      "dishCanvas": "hidden",
      "clear": 0,
-     "spread": 0.991,
+     "spread": 0.981,
      "mediaOff": false
     },
     {
@@ -1511,7 +1511,7 @@
      "media": 0,
      "dishCanvas": "visible",
      "clear": 0.041,
-     "spread": 0.867,
+     "spread": 0.869,
      "mediaOff": true
     },
     {
@@ -1520,7 +1520,7 @@
      "media": 0,
      "dishCanvas": "visible",
      "clear": 0.309,
-     "spread": 0.691,
+     "spread": 0.694,
      "mediaOff": true
     },
     {
@@ -1529,7 +1529,7 @@
      "media": 0,
      "dishCanvas": "visible",
      "clear": 0.58,
-     "spread": 0.465,
+     "spread": 0.471,
      "mediaOff": true
     },
     {
@@ -1538,7 +1538,7 @@
      "media": 0,
      "dishCanvas": "visible",
      "clear": 0.9,
-     "spread": 0.221,
+     "spread": 0.224,
      "mediaOff": true
     },
     {
@@ -1547,7 +1547,7 @@
      "media": 0,
      "dishCanvas": "visible",
      "clear": 0.58,
-     "spread": 0.457,
+     "spread": 0.455,
      "mediaOff": true
     },
     {
@@ -1556,7 +1556,7 @@
      "media": 0,
      "dishCanvas": "visible",
      "clear": 0.311,
-     "spread": 0.684,
+     "spread": 0.681,
      "mediaOff": true
     },
     {
@@ -1565,7 +1565,7 @@
      "media": 0,
      "dishCanvas": "visible",
      "clear": 0.04,
-     "spread": 0.866,
+     "spread": 0.862,
      "mediaOff": true
     },
     {
@@ -1574,7 +1574,7 @@
      "media": 0.074,
      "dishCanvas": "hidden",
      "clear": 0,
-     "spread": 0.999,
+     "spread": 0.997,
      "mediaOff": false
     },
     {
@@ -1601,7 +1601,7 @@
      "media": 1,
      "dishCanvas": "hidden",
      "clear": 0,
-     "spread": 0.039,
+     "spread": 0.048,
      "mediaOff": false
     },
     {
@@ -1610,7 +1610,7 @@
      "media": 1,
      "dishCanvas": "hidden",
      "clear": 0,
-     "spread": 0,
+     "spread": 0.001,
      "mediaOff": false
     }
    ],
