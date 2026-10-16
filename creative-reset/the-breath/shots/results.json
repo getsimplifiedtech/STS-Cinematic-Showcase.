@@ -333,13 +333,13 @@
  },
  "keyboard": {
   "order": [
-   "a.brand|玉火Jade & Ember|20|outline:solid/2px",
+   "a.brand|\u7389\u706bJade & Ember|20|outline:solid/2px",
    "button.pause|Pause motion|828|outline:solid/2px",
    "a.btn|See the menu|753|outline:solid/2px",
    "a.btn-link|Order online|755|outline:solid/2px",
-   "a.btn|Back to the top|548|outline:solid/2px",
+   "a.btn|Back to the top|458|outline:solid/2px",
    "body",
-   "a.brand|玉火Jade & Ember|20|outline:solid/2px",
+   "a.brand|\u7389\u706bJade & Ember|20|outline:solid/2px",
    "button.pause|Pause motion|828|outline:solid/2px"
   ],
   "pause": {
@@ -358,7 +358,7 @@
     "mode": "live"
    }
   },
-  "pageDownMovedTo": 0,
+  "pageDownMovedTo": 787,
   "headings": [
    {
     "t": "The breath of the wok.",
@@ -490,7 +490,7 @@
       0
      ]
     },
-    "clear": 0.0000024194034797563874,
+    "clear": 2.4194034797563874e-06,
     "spread": 0.9967578138044914
    },
    {
@@ -665,13 +665,13 @@
    "raf": false
   },
   "resumed": {
-   "frames": 6,
+   "frames": 4,
    "raf": true
   },
   "offScreen": {
-   "frames": 4,
-   "raf": true,
-   "inView": true
+   "frames": 0,
+   "raf": false,
+   "inView": false
   },
   "errors": []
  },
@@ -681,13 +681,13 @@
    "raf": true,
    "frames": 8,
    "rafMs": {
-    "p50": 0,
-    "p95": 0,
-    "n": 0
+    "p50": 1083.2,
+    "p95": 2066.5,
+    "n": 8
    },
    "cpuMs": {
-    "p50": 0.6,
-    "p95": 0.7
+    "p50": 0.5,
+    "p95": 0.6
    },
    "bails": 0,
    "grids": {
@@ -719,11 +719,11 @@
   "390x844-low": {
    "mode": "live",
    "raf": true,
-   "frames": 136,
+   "frames": 132,
    "rafMs": {
     "p50": 66.6,
-    "p95": 83.4,
-    "n": 136
+    "p95": 83.3,
+    "n": 132
    },
    "cpuMs": {
     "p50": 0.2,
@@ -763,8 +763,8 @@
    "gzip": 2301
   },
   "breath.css": {
-   "bytes": 12262,
-   "gzip": 3997
+   "bytes": 12263,
+   "gzip": 3992
   },
   "js/gl.js": {
    "bytes": 4117,
@@ -775,8 +775,8 @@
    "gzip": 7338
   },
   "js/breath.js": {
-   "bytes": 18836,
-   "gzip": 6903
+   "bytes": 18837,
+   "gzip": 6904
   },
   "media/dish-charsiu.webp": {
    "bytes": 61404

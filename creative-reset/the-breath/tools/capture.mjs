@@ -30,7 +30,7 @@ async function open(vp, { ctx = {}, query = '', init, js = true } = {}) {
   return { context, page, errors };
 }
 const seek = (page, p) => page.evaluate(([p, o]) => window.lab.seek(p, o), [p, { steps: STEPS, span: .3 }]);
-const shot = (page, name) => page.screenshot({ path: join(OUT, name + '.png') });
+const shot = (page, name) => page.screenshot({ path: join(OUT, name + '.jpg'), type: 'jpeg', quality: 84 });
 
 // ---------------------------------------------------------------- 1. the sequence, desktop and mobile
 if (ONLY.includes('shots')) {
