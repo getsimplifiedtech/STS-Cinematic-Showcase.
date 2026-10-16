@@ -1,6 +1,6 @@
 # Media provenance (The Breath lab)
 
-Everything here is AI-generated concept media for a lab prototype. None of it depicts a real restaurant or real dishes. Generated with the owner's Higgsfield account on 2026-10-16 under owner-approved dish, stills and credit ceiling (65 credits). The original media (`hero-loop.*`, `hero-wok.webp`, `hero-wok-m.webp`, `dish-charsiu.webp`) is kept in this folder unchanged and is no longer referenced by the page; it stays until the owner approves the replacement.
+Everything here is AI-generated concept media for a lab prototype. None of it depicts a real restaurant or real dishes. Generated with the owner's Higgsfield account on 2026-10-16 under owner-approved dish, stills and credit ceiling (65 credits). The original media (`hero-loop.*`, `hero-wok.webp`, `hero-wok-m.webp`, `dish-charsiu.webp`) was removed from this folder on 2026-10-16 after the owner approved the replacement. It remains in git history (commit `8265ade` and earlier) and in the deployed Jade & Ember.
 
 | File | What it is | Source |
 | --- | --- | --- |

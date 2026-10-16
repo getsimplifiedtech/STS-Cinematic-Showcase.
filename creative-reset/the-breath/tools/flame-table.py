@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Regenerate the FLAME brightness table in src/breath.js after the flame clip changes. Needs ffmpeg and numpy (both already on the machine; nothing is installed).
 Prints a JSON array: mean brightness of each frame (scaled to 24x14, weighted like the old runtime probe), 5th to 95th percentile mapped to 0..99.
-Usage: python3 tools/flame-table.py media/hero-loop.mp4"""
+Usage: python3 tools/flame-table.py media/hero-wok-v2.mp4"""
 import subprocess, sys, json
 import numpy as np
 src = sys.argv[1]
