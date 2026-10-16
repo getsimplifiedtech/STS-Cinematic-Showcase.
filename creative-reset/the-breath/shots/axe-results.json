@@ -1,0 +1,218 @@
+[
+ {
+  "name": "desktop-live",
+  "p": 0,
+  "violations": [],
+  "passes": 36,
+  "incomplete": [
+   "color-contrast"
+  ]
+ },
+ {
+  "name": "desktop-live",
+  "p": 0.2,
+  "violations": [],
+  "passes": 36,
+  "incomplete": [
+   "color-contrast"
+  ]
+ },
+ {
+  "name": "desktop-live",
+  "p": 0.4,
+  "violations": [],
+  "passes": 36,
+  "incomplete": [
+   "color-contrast"
+  ]
+ },
+ {
+  "name": "desktop-live",
+  "p": 0.6,
+  "violations": [],
+  "passes": 36,
+  "incomplete": [
+   "color-contrast"
+  ]
+ },
+ {
+  "name": "desktop-live",
+  "p": 0.8,
+  "violations": [],
+  "passes": 34,
+  "incomplete": [
+   "color-contrast"
+  ]
+ },
+ {
+  "name": "desktop-live",
+  "p": 1,
+  "violations": [],
+  "passes": 34,
+  "incomplete": [
+   "color-contrast"
+  ]
+ },
+ {
+  "name": "mobile-live",
+  "p": 0,
+  "violations": [],
+  "passes": 36,
+  "incomplete": [
+   "color-contrast"
+  ]
+ },
+ {
+  "name": "mobile-live",
+  "p": 0.2,
+  "violations": [],
+  "passes": 36,
+  "incomplete": [
+   "color-contrast"
+  ]
+ },
+ {
+  "name": "mobile-live",
+  "p": 0.4,
+  "violations": [],
+  "passes": 36,
+  "incomplete": [
+   "color-contrast"
+  ]
+ },
+ {
+  "name": "mobile-live",
+  "p": 0.6,
+  "violations": [],
+  "passes": 36,
+  "incomplete": [
+   "color-contrast"
+  ]
+ },
+ {
+  "name": "mobile-live",
+  "p": 0.8,
+  "violations": [],
+  "passes": 34,
+  "incomplete": [
+   "color-contrast"
+  ]
+ },
+ {
+  "name": "mobile-live",
+  "p": 1,
+  "violations": [],
+  "passes": 34,
+  "incomplete": [
+   "color-contrast"
+  ]
+ },
+ {
+  "name": "desktop-calm",
+  "p": 0,
+  "violations": [],
+  "passes": 35,
+  "incomplete": [
+   "color-contrast"
+  ]
+ },
+ {
+  "name": "desktop-calm",
+  "p": 0.2,
+  "violations": [],
+  "passes": 35,
+  "incomplete": [
+   "color-contrast"
+  ]
+ },
+ {
+  "name": "desktop-calm",
+  "p": 0.4,
+  "violations": [],
+  "passes": 35,
+  "incomplete": [
+   "color-contrast"
+  ]
+ },
+ {
+  "name": "desktop-calm",
+  "p": 0.6,
+  "violations": [],
+  "passes": 35,
+  "incomplete": [
+   "color-contrast"
+  ]
+ },
+ {
+  "name": "desktop-calm",
+  "p": 0.8,
+  "violations": [],
+  "passes": 35,
+  "incomplete": [
+   "color-contrast"
+  ]
+ },
+ {
+  "name": "desktop-calm",
+  "p": 1,
+  "violations": [],
+  "passes": 35,
+  "incomplete": [
+   "color-contrast"
+  ]
+ },
+ {
+  "name": "mobile-calm",
+  "p": 0,
+  "violations": [],
+  "passes": 35,
+  "incomplete": [
+   "color-contrast"
+  ]
+ },
+ {
+  "name": "mobile-calm",
+  "p": 0.2,
+  "violations": [],
+  "passes": 35,
+  "incomplete": [
+   "color-contrast"
+  ]
+ },
+ {
+  "name": "mobile-calm",
+  "p": 0.4,
+  "violations": [],
+  "passes": 35,
+  "incomplete": [
+   "color-contrast"
+  ]
+ },
+ {
+  "name": "mobile-calm",
+  "p": 0.6,
+  "violations": [],
+  "passes": 35,
+  "incomplete": [
+   "color-contrast"
+  ]
+ },
+ {
+  "name": "mobile-calm",
+  "p": 0.8,
+  "violations": [],
+  "passes": 35,
+  "incomplete": [
+   "color-contrast"
+  ]
+ },
+ {
+  "name": "mobile-calm",
+  "p": 1,
+  "violations": [],
+  "passes": 35,
+  "incomplete": [
+   "color-contrast"
+  ]
+ }
+]

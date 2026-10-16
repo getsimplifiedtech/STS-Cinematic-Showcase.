@@ -1,0 +1,9 @@
+{
+  "name": "the-breath-lab-tools",
+  "private": true,
+  "description": "Dev-only test tooling for the isolated The Breath lab. Not shipped, not part of the site, not shared with the STS framework.",
+  "devDependencies": {
+    "lighthouse": "13.5.0",
+    "@axe-core/playwright": "4.13.0"
+  }
+}

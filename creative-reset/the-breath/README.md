@@ -52,6 +52,7 @@ tools/flame-table.py regenerates the clip's per-frame brightness table (needs ff
 tools/plates.mjs    renders the calm-mode steam stills from the solver
 tools/frames.mjs, sweep.mjs, sheet.py   frame grabber, phone cost sweep, contact sheets
 tools/check-layout.mjs  brand, Pause and headings stay inside the viewport and unclipped (13 viewports x 17 positions)
+tools/axe-audit.mjs, tools/package.json  axe audit (dev-only deps: lighthouse, @axe-core/playwright; `cd tools && npm install`)
 tools/handover-scan.py  p95 luminance per frame across the wok-to-dish handover (near-black fails)
 shots/              captured screenshots, evidence sheets, results.json, contrast-results.json
 ```

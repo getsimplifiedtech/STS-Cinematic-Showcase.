@@ -6,6 +6,15 @@ Branch `lab/jade-and-ember-the-breath`, everything inside `creative-reset/the-br
 
 **Reference-first rule (CLAUDE.md).** The STS Technology Reference Registry was consulted before changing the animation and shaders. Its only related entry is Three.js (particles), which is not needed: the steam, the dish pass and the build script are STS-authored code with no third-party dependency. Nothing from the registry or the dormant references was installed, run or integrated. Playwright (already installed, listed in the registry) is used only to test. Lighthouse and axe are not installed, so they were not run (installing them needs your approval); the Lighthouse-style numbers below come from the browser's own APIs and are labelled as such.
 
+## Round 4 follow-up: Lighthouse and axe (installed with the owner's approval)
+
+Dev-only, isolated in `tools/package.json` (not at the lab root, so Vercel never installs them; `tools/` is in `.vercelignore`): `lighthouse` 13.5.0 (Apache-2.0) and `@axe-core/playwright` 4.13.0 (MPL-2.0), pinned, installed with `--ignore-scripts`. Nothing was added to the shared framework or the site bundle. Run with `node tools/axe-audit.mjs` and `tools/node_modules/.bin/lighthouse`.
+
+- **axe:** 24 audits (live and calm, desktop and phone, six scroll positions each): 0 violations. `color-contrast` is reported as incomplete everywhere because text sits over video and canvas, which axe cannot sample; `tools/contrast.py` covers that (40 boxes, 0 below threshold).
+- **Lighthouse 13.5.0 (headless Chromium, software GL, local server, not a real device):** desktop performance 90 to 99 across runs, accessibility 100, best practices 100 after fixes, SEO 63. Phone preset: performance 83 (FCP and LCP 2.2 s, TBT 540 ms under 4x CPU throttle), accessibility 100, best practices 96 before fixes. SEO 63 is the deliberate `noindex` on the lab.
+- **Two things it found and I fixed:** the brand link's `aria-label` did not contain its visible text ("Jade & Ember"), so the label was removed and the link name is now its visible text; and a missing favicon logged a 404, so an empty `data:` icon was added. Re-run on desktop only after the fix.
+- Real-device performance is still unmeasured.
+
 ## Round 4 (owner review corrections), summary
 
 Changes since `0557834`. Same limits: headless software GL, no real device. The review was worked in its priority order.
