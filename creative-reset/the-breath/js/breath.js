@@ -109,7 +109,7 @@ function relax(dt) { for (const k in target) cur[k] += (target[k] - cur[k]) * (1
 function frame(now) {
   raf = requestAnimationFrame(frame);
   const dtReal = Math.min(.05, (now - last) / 1000); const gap = now - last; last = now;
-  if (gap < 250) { stats.ms.push(gap); if (stats.ms.length > 360) stats.ms.shift(); }
+  if (gap < 3000) { stats.ms.push(gap); if (stats.ms.length > 360) stats.ms.shift(); }
   const t0 = performance.now();
   p = progress();
   if (Math.abs(p - lastP) > .12) catchup = Math.max(catchup, 120);   // a jump (anchor, scrollbar drag, reload mid-way): let the fluid catch up quickly

@@ -120,7 +120,7 @@ h1 .ln{display:block}
   -webkit-mask-image:radial-gradient(ellipse 52% 56% at 50% 50%,#000 36%,transparent 100%);mask-image:radial-gradient(ellipse 52% 56% at 50% 50%,#000 36%,transparent 100%)}
 
 /* ---------------------------------------------------------------- the rest of the page */
-.after{min-height:80vh;display:flex;align-items:center;background:var(--soot);padding:clamp(72px,14vh,160px) var(--gutter)}
+.after{min-height:100vh;display:flex;align-items:center;background:var(--soot);padding:clamp(72px,14vh,160px) var(--gutter)}
 .after-in{max-width:42rem}
 .after h2{margin:0;font:400 clamp(2.5rem,6vw,5.5rem)/1 var(--serif);letter-spacing:-.015em}
 .after-text{margin:24px 0 0;max-width:34rem;color:var(--rice-dim);font-size:1.125rem}
@@ -150,7 +150,7 @@ h1 .ln{display:block}
   .pause{top:14px;right:var(--gutter);bottom:auto;width:44px;padding:0;justify-content:center}
   .pause-txt{position:absolute;width:1px;height:1px;margin:-1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
   .is-live .breath,.is-calm .breath{height:560vh;height:560svh}
-  .plate-dish img{right:50%;top:62%;width:210vw;transform:translate(50%,-50%)}
+  .plate-dish img{right:50%;top:60%;width:133vw;transform:translate(50%,-50%)}
 }
 @media (max-height:520px) and (orientation:landscape){.word{font-size:clamp(3rem,13vh,6rem)}h1{font-size:clamp(2.4rem,11vh,4.5rem)}.lede{display:none}}
 @media (prefers-reduced-motion:reduce){.flame{display:none}.pause{display:none!important}}

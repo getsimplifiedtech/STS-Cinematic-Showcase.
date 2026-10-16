@@ -85,7 +85,7 @@ if (ONLY.includes('keyboard')) {
   await page.keyboard.press('Space'); await page.waitForTimeout(500);
   const back = await page.evaluate(() => ({ pressed: document.querySelector('.pause').getAttribute('aria-pressed'), label: document.querySelector('.pause-txt').textContent, mode: window.lab.mode }));
   // keyboard scrolling keeps working while the pointer is over the stage
-  await page.keyboard.press('PageDown'); await page.waitForTimeout(300);
+  await page.keyboard.press('PageDown'); await page.waitForTimeout(2500);
   const y = await page.evaluate(() => scrollY);
   // the narrative stays readable by assistive technology: every beat heading is in the accessibility tree in order
   const tree = await page.evaluate(() => [...document.querySelectorAll('.beat h1, .beat h2')].map((h) => ({ t: h.textContent.trim(), hidden: getComputedStyle(h).visibility === 'hidden' || getComputedStyle(h.closest('.beat')).display === 'none' })));
@@ -153,5 +153,6 @@ if (ONLY.includes('assets')) {
   for (const f of files) { const b = readFileSync(join(root, f)); results.assets[f] = { bytes: statSync(join(root, f)).size, ...(/\.(html|css|js)$/.test(f) ? { gzip: gzipSync(b).length } : {}) }; }
 }
 
-writeFileSync(join(OUT, 'results.json'), JSON.stringify(results, null, 1));
+let prev = {}; try { prev = JSON.parse(readFileSync(join(OUT, 'results.json'), 'utf8')); } catch (e) { /* first run */ }
+writeFileSync(join(OUT, 'results.json'), JSON.stringify({ ...prev, ...results }, null, 1));   // sections run now replace their old values; the rest are kept
 await browser.close(); log('wrote', join(OUT, 'results.json'));
