@@ -1,0 +1,96 @@
+/* Order online (Firelight). The heading, then three stations in one pinned stage: the wok, the pass, you. Soot and light behind a printed ticket that holds the three
+   real, ordered steps. The station words are decorative; --p (site.js, data-p="pin") crossfades them and lights the ticket's markers. Without JavaScript or with
+   reduced motion the stage is not pinned and the ticket is simply shown whole. */
+
+.order-track{position:relative;background:var(--kitchen)}
+.order-head{position:relative;isolation:isolate;padding-block:calc(var(--header-h) + var(--s8)) var(--s5)}
+.order-head::before{content:"";position:absolute;inset:0;z-index:-1;background:radial-gradient(50% 80% at 0% 100%,rgba(240,138,60,.13),transparent 70%),radial-gradient(40% 60% at 92% 0%,rgba(20,58,48,.6),transparent 70%)}
+.order-head-grid{display:grid;grid-template-columns:repeat(12,minmax(0,1fr));column-gap:var(--s5);row-gap:var(--s5)}
+.order-head h1{grid-column:1/11;font-family:var(--serif);font-weight:400;font-size:clamp(3rem,9vw,7.5rem);line-height:.98;letter-spacing:-.02em}
+.order-lede{grid-column:1/7;color:var(--rice-dim);font-size:1.25rem;max-width:28rem}
+/* the action stays under the header while the stage plays (the header's own Order button is hidden on a phone) */
+.order-action{position:sticky;top:calc(var(--header-h) + var(--s3));z-index:30;width:min(1200px,100% - 2*var(--gutter));margin:var(--s5) auto 0;display:flex}
+.order-action .btn,.order-action .btn-off{background:rgba(14,13,12,.88);border:1px solid rgba(240,138,60,.7);padding:0 var(--s5);min-height:48px;font-size:1.125rem;box-shadow:0 0 30px rgba(240,138,60,.18)}
+.order-action .btn-off{display:inline-flex;align-items:center;border-radius:2px;color:var(--rice);cursor:default}
+
+.journey{--k:calc(var(--p,1)*3);position:relative;height:300svh;margin-top:calc(var(--s5) * -1)}
+.journey-pin{position:sticky;top:0;height:100svh;overflow:hidden;display:flex;align-items:center;isolation:isolate}
+.scenes{position:absolute;inset:0;z-index:-1}
+.scene{position:absolute;inset:0;margin:0;display:flex;align-items:center;pointer-events:none}
+.scene span{font:600 clamp(7rem,27vw,26rem)/1 var(--serif);letter-spacing:-.04em;white-space:nowrap}
+/* 1 the wok: an ember pool low on the left, the word lit from below */
+.scene-1{opacity:clamp(0,calc(1 - max(var(--k) - .5,0)*1.5),1);background:radial-gradient(55% 70% at 8% 108%,rgba(240,138,60,.34),transparent 70%)}
+.scene-1 span{margin-left:-2vw;background:linear-gradient(to top,var(--ember) 0,#2a2018 62%,#1b1815);-webkit-background-clip:text;background-clip:text;color:transparent;-webkit-text-fill-color:transparent;transform:translateX(calc((var(--k) - .5)*-4vw))}
+/* 2 the pass: a cool jade light along the steel */
+.scene-2{opacity:clamp(0,calc(1 - max(var(--k) - 1.5,1.5 - var(--k))*1.5),1);justify-content:flex-end;background:linear-gradient(180deg,transparent 52%,rgba(111,174,150,.16) 62%,transparent 63%),radial-gradient(60% 50% at 80% 62%,rgba(20,58,48,.8),transparent 75%)}
+.scene-2 span{margin-right:-1vw;background:linear-gradient(to top,#6fae96 0,#244e41 60%,#1b1815);-webkit-background-clip:text;background-clip:text;color:transparent;-webkit-text-fill-color:transparent;transform:translateX(calc((var(--k) - 1.5)*-4vw))}
+/* 3 you: a warm round light, like a plate handed over */
+.scene-3{opacity:clamp(0,calc(1 - max(2.5 - var(--k),0)*1.5),1);background:radial-gradient(40% 60% at 70% 55%,rgba(247,161,92,.22),transparent 72%)}
+.scene-3 span{margin-left:auto;margin-right:2vw;background:linear-gradient(to top,#8a7f6d 0,#3a332b 62%,#1b1815);-webkit-background-clip:text;background-clip:text;color:transparent;-webkit-text-fill-color:transparent;transform:translateX(calc((var(--k) - 2.5)*-4vw))}
+
+.journey-grid{display:grid;grid-template-columns:repeat(12,minmax(0,1fr));column-gap:var(--s5);align-items:center;padding-top:calc(var(--header-h) + var(--s9))}
+.journey-grid h2{grid-column:1/6;font-size:clamp(2rem,4.2vw,3.5rem)}
+
+/* the ticket: rice paper, a torn bottom edge, the three steps printed on it */
+.ticket{grid-column:7/13;position:relative;padding:var(--s6) var(--s6) calc(var(--s7) + 6px);background:var(--rice);color:#1a1713;transform:rotate(-1deg) translateY(calc((1 - clamp(0,calc(var(--p,1)*8),1))*48px));
+  clip-path:polygon(0 0,100% 0,100.0% 100%,92.86% calc(100% - 9px),85.71% 100%,78.57% calc(100% - 9px),71.43% 100%,64.29% calc(100% - 9px),57.14% 100%,50.0% calc(100% - 9px),42.86% 100%,35.71% calc(100% - 9px),28.57% 100%,21.43% calc(100% - 9px),14.29% 100%,7.14% calc(100% - 9px),0.0% 100%);box-shadow:0 24px 60px rgba(0,0,0,.5)}
+.ticket-top{display:flex;justify-content:space-between;gap:var(--s4);padding-bottom:var(--s3);margin-bottom:var(--s4);border-bottom:2px dashed #b9ad98;font:600 .875rem/1.2 var(--sans);letter-spacing:.06em;text-transform:uppercase;color:#4a4137}
+.steps{display:grid;gap:var(--s5)}
+.steps li{position:relative;display:grid;gap:var(--s1);padding-left:calc(var(--s6) + 4px);--on:clamp(0,calc((var(--k) - var(--i,0) + .5)*2),1)}
+.steps li:nth-child(2){--i:1}.steps li:nth-child(3){--i:2}.steps li:nth-child(4){--i:3}
+.steps h3{display:flex;align-items:baseline;gap:var(--s3);font-size:clamp(1.5rem,2.2vw,1.875rem);color:#1a1713}
+.steps h3 .step-no{position:absolute;left:0;top:2px;display:grid;place-items:center;width:28px;height:28px;border:1.5px solid #8f3f0f;border-radius:50%;font:600 .9375rem/1 var(--sans);color:#8f3f0f;
+  background:linear-gradient(rgba(240,138,60,calc(var(--on)*.9)),rgba(240,138,60,calc(var(--on)*.9))),transparent;color:#1a1713}
+.steps p{color:#3d352c;font-size:1.0625rem;line-height:1.5}
+.steps a{display:inline-block;min-height:24px;line-height:24px;color:#8f3f0f;font-weight:600}
+
+.order-info{background:var(--kitchen);padding-block:var(--s7) var(--sec);border-top:1px solid #1b1917}
+.info-grid{display:grid;grid-template-columns:repeat(12,minmax(0,1fr));column-gap:var(--s5);row-gap:var(--s7)}
+.info-pickup{grid-column:1/6;display:grid;gap:var(--s3);align-content:start;justify-items:start}
+.info-allergy{grid-column:7/13;display:grid;gap:var(--s3);align-content:start}
+.info-grid h2{font-size:clamp(1.5rem,2.4vw,2rem)}
+.info-grid p{color:var(--rice-dim);font-size:1.125rem;max-width:30rem}
+.info-call{margin-top:var(--s3)}
+.owner{background:var(--pine);border-top:1px solid var(--line);padding-block:var(--s8)}
+.owner-grid{display:grid;grid-template-columns:repeat(12,minmax(0,1fr));column-gap:var(--s5);row-gap:var(--s4)}
+.note-title{grid-column:1/5;font-family:var(--sans);font-weight:600;font-size:1.0625rem;color:var(--rice);line-height:1.5}
+.owner-body{grid-column:5/12;display:grid;gap:var(--s3);color:var(--rice-dim);font-size:1rem;max-width:36rem}
+
+@media (max-width:1023px){
+  .order-head h1,.order-lede{grid-column:1/-1}
+  .journey-grid h2,.ticket{grid-column:1/-1}
+  .journey-grid{row-gap:var(--s5);align-items:start;padding-top:calc(var(--header-h) + var(--s9))}
+  .info-pickup,.info-allergy,.note-title,.owner-body{grid-column:1/-1}
+}
+@media (max-width:759px){
+  .order-head{padding-block:calc(var(--header-h) + var(--s6)) var(--s4)}
+  .journey{height:270svh}
+  .journey-grid{padding-top:calc(var(--header-h) + 76px);row-gap:var(--s4)}
+  .journey-grid h2{font-size:1.75rem}
+  .ticket{padding:var(--s5) var(--s5) var(--s7)}
+  .steps{gap:var(--s4)}
+  .steps li{padding-left:calc(var(--s6) + 2px)}
+  .steps h3{font-size:1.375rem}
+  .steps p{font-size:1rem}
+  .scene span{font-size:clamp(7rem,48vw,12rem)}
+  .scene{align-items:flex-end;padding-bottom:var(--s7)}
+}
+@media (max-height:640px) and (min-width:760px){.journey{height:auto}.journey-pin{position:relative;height:auto;padding-block:var(--s8)}.scenes{display:none}}
+
+/* Resting state: not pinned, no station words, the ticket shown whole with every marker lit. */
+html:not(.js) .journey{height:auto}
+html:not(.js) .journey-pin{position:relative;height:auto;padding-block:var(--s8)}
+html:not(.js) .scenes{display:none}
+html:not(.js) .order-action{position:static}
+@media (prefers-reduced-motion:reduce){
+  .journey{height:auto}
+  .journey-pin{position:relative;height:auto;padding-block:var(--s8)}
+  .scenes{display:none}
+  .order-action{position:static}
+  .ticket{transform:rotate(-1deg)}
+}
+@media (forced-colors:active){.scenes{display:none}.ticket{border:1px solid CanvasText}}
+@media print{
+  .scenes{display:none}.journey{height:auto}.journey-pin{position:static;height:auto;display:block}.journey-grid{display:block;padding:0}
+  .ticket{transform:none;clip-path:none;box-shadow:none;border:1px solid #999;background:none}.order-action{position:static}
+}

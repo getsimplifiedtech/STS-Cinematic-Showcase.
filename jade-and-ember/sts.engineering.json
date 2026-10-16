@@ -27,9 +27,16 @@
   "delivery": {
     "sharedFiles": [
       "styles.css",
+      "home.css",
+      "story.css",
+      "menu.css",
+      "visit.css",
+      "order.css",
       "site.js",
-      "hero.js",
-      "menu.js"
+      "breath.js",
+      "story.js",
+      "menu.js",
+      "visit.js"
     ],
     "assetFolders": [
       "fonts",
@@ -74,7 +81,7 @@
       "footerLinkPage": "visit-us.html",
       "sectionJumpPage": "menu.html"
     },
-    "heroPreloadPattern": "media\\/hero-wok(-m)?\\.webp"
+    "heroPreloadPattern": "media\\/hero-wok-v2(-m)?\\.webp"
   },
   "generators": {
     "seo": "src/lib/seo.mjs",

@@ -642,6 +642,11 @@
               },
               "link": {
                 "$ref": "#/$defs/link"
+              },
+              "station": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 24
               }
             },
             "required": [

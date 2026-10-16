@@ -33,7 +33,7 @@ export default function menu(cfg) {
     </div>
   </section>
 
-  ${ctaBand(cfg, { ...m.orderBand, tone: 'lacquer', id: 'order-band' })}`;
+  ${ctaBand(cfg, { ...m.orderBand, tone: 'pine', id: 'order-band' })}`;
 
-  return { main, scripts: ['menu.js'] };
+  return { main, scripts: ['menu.js'], styles: ['menu.css'] };
 }

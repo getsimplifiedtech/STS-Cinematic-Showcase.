@@ -15,7 +15,7 @@
 <link rel="preload" as="font" type="font/woff2" href="fonts/young-serif-latin-400-normal.woff2" crossorigin>
 <link rel="preload" as="font" type="font/woff2" href="fonts/karla-latin-400-normal.woff2" crossorigin>
 <link rel="stylesheet" href="styles.css">
-
+<link rel="stylesheet" href="menu.css">
 <script>document.documentElement.className+=' js'</script>
 </head>
 <body>
@@ -49,7 +49,7 @@
 
   <section class="menu-body" aria-label="Menu">
     <div class="wrap cats">
-        <section class="cat" id="small" aria-labelledby="small-h">
+        <section class="cat" data-p id="small" aria-labelledby="small-h">
           <h2 class="cat-title" id="small-h">Small plates</h2>
           <ul class="items">
             <li class="item"><div class="item-head"><span class="item-name">Smashed Cucumber</span><span class="leader" aria-hidden="true"></span><span class="price">$9</span></div>
@@ -64,8 +64,9 @@
               <p class="item-text">Chilled, with soy, pickled ginger and coriander.</p></li>
           </ul>
         </section>
-        <section class="cat" id="wok" aria-labelledby="wok-h">
+        <section class="cat" data-p id="wok" aria-labelledby="wok-h">
           <h2 class="cat-title" id="wok-h">From the wok</h2>
+          <figure class="cat-plate"><img src="media/dish-beef.webp" alt="Glossy sliced beef, bright green broccoli and red chili in a brown sauce on a matte black plate." width="2400" height="1610" loading="lazy" decoding="async" style="--pos:50% 50%"></figure>
           <ul class="items">
             <li class="item"><div class="item-head"><span class="item-name">Wok-Seared Beef &amp; Broccoli</span><span class="heat" role="img" aria-label="Heat 1 of 3"><i class="on"></i><i class=""></i><i class=""></i></span><span class="leader" aria-hidden="true"></span><span class="price">$26</span></div>
               <p class="item-text"><span class="item-fav">House favourite</span>Sliced flank, broccoli and red chili over a hard flame.</p></li>
@@ -79,8 +80,9 @@
               <p class="item-text">Water spinach, garlic and fermented tofu. <span class="item-tags">Vegetarian</span></p></li>
           </ul>
         </section>
-        <section class="cat" id="noodle" aria-labelledby="noodle-h">
+        <section class="cat" data-p id="noodle" aria-labelledby="noodle-h">
           <h2 class="cat-title" id="noodle-h">Noodles &amp; rice</h2>
+          <figure class="cat-plate"><img src="media/dish-dandan.webp" alt="Dan dan noodles in a matte black bowl, topped with spiced pork, crushed peanuts, sesame and scallion, steam rising." width="1200" height="800" loading="lazy" decoding="async" style="--pos:50% 60%"></figure>
           <ul class="items">
             <li class="item"><div class="item-head"><span class="item-name">Dan Dan Noodles</span><span class="heat" role="img" aria-label="Heat 2 of 3"><i class="on"></i><i class="on"></i><i class=""></i></span><span class="leader" aria-hidden="true"></span><span class="price">$17</span></div>
               <p class="item-text"><span class="item-fav">House favourite</span>Spiced pork, sesame paste, chili oil, peanut. <span class="item-tags">Contains peanuts, sesame</span></p></li>
@@ -92,8 +94,9 @@
               <p class="item-text">Prawn and pork wontons in a clear pork broth.</p></li>
           </ul>
         </section>
-        <section class="cat" id="roast" aria-labelledby="roast-h">
+        <section class="cat" data-p id="roast" aria-labelledby="roast-h">
           <h2 class="cat-title" id="roast-h">Roast &amp; braise</h2>
+          <figure class="cat-plate"><img src="media/dish-mapo.webp" alt="Mapo tofu in a jade-green celadon bowl: silken tofu in red chili oil with minced beef, Sichuan peppercorns and scallion, steam rising, on a slate board." width="1200" height="800" loading="lazy" decoding="async" style="--pos:50% 58%"></figure>
           <ul class="items">
             <li class="item"><div class="item-head"><span class="item-name">Char Siu</span><span class="leader" aria-hidden="true"></span><span class="price">$24</span></div>
               <p class="item-text">Maltose-glazed pork shoulder, roasted until lacquered. <span class="item-tags">Contains pork</span></p></li>
@@ -105,7 +108,7 @@
               <p class="item-text">Half a duck with pancakes, cucumber and hoisin.</p></li>
           </ul>
         </section>
-        <section class="cat" id="sweet" aria-labelledby="sweet-h">
+        <section class="cat" data-p id="sweet" aria-labelledby="sweet-h">
           <h2 class="cat-title" id="sweet-h">Sweet &amp; tea</h2>
           <ul class="items">
             <li class="item"><div class="item-head"><span class="item-name">Sesame Balls</span><span class="leader" aria-hidden="true"></span><span class="price">$9</span></div>
@@ -121,7 +124,7 @@
     </div>
   </section>
 
-  <section class="cta-band cta-lacquer" id="order-band" aria-labelledby="order-band-title">
+  <section class="cta-band cta-pine" id="order-band" aria-labelledby="order-band-title">
     <div class="wrap cta-grid">
       <h2 id="order-band-title">Dinner, to go.</h2>
       <p class="cta-text">Choose from the menu and collect it hot from the pass.</p>

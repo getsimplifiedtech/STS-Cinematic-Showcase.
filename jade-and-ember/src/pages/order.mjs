@@ -12,20 +12,31 @@ export default function order(cfg) {
   const action = live
     ? `<a class="btn btn-ember" href="${esc(client.ordering.url)}" target="_blank" rel="noopener noreferrer">${esc(client.ordering.label)}<span class="vh"> ${esc(o.newTab)}</span></a>`
     : `<span class="btn btn-off">${esc(client.ordering.label)} ${esc(copy.demo.exampleSuffix)}</span>`;
-  const main = `  <section class="order-head" aria-labelledby="order-title">
-    <div class="wrap order-head-grid">
-      <h1 id="order-title">${esc(o.h1)}</h1>
-      <p class="order-lede">${esc(o.text)}</p>
-      <p class="order-action">${action}</p>
-    </div>
-  </section>
+  // Three stations in one pinned stage: the wok, the pass, you. The words behind the ticket are decorative (aria-hidden); the ordered steps are the real content,
+  // printed on a ticket. The order action is a direct child of the track so it can stay in view (sticky) while the stage plays.
+  const words = o.steps.map((s) => s.station).filter(Boolean);
+  const main = `  <div class="order-track">
+    <section class="order-head" aria-labelledby="order-title">
+      <div class="wrap order-head-grid">
+        <h1 id="order-title">${esc(o.h1)}</h1>
+        <p class="order-lede">${esc(o.text)}</p>
+      </div>
+    </section>
+    <p class="order-action">${action}</p>
 
-  <section class="order-steps" aria-labelledby="steps-title">
-    <div class="wrap">
-      <h2 id="steps-title">${esc(o.stepsHeading)}</h2>
-      ${steps(items, { cls: 'steps-3' })}
-    </div>
-  </section>
+    <section class="journey" data-p="pin" aria-labelledby="steps-title">
+      <div class="journey-pin">${words.length ? `
+        <div class="scenes" aria-hidden="true">${words.map((w, i) => `<p class="scene scene-${i + 1}"><span>${esc(w)}</span></p>`).join('')}</div>` : ''}
+        <div class="wrap journey-grid">
+          <h2 id="steps-title">${esc(o.stepsHeading)}</h2>
+          <div class="ticket">
+            <p class="ticket-top" aria-hidden="true">${esc(client.brand.name)} <span>${esc(o.pickup.heading)}</span></p>
+            ${steps(items, { cls: 'steps-3' })}
+          </div>
+        </div>
+      </div>
+    </section>
+  </div>
 
   <section class="order-info" aria-label="Pickup, allergies and phone">
     <div class="wrap info-grid">
@@ -43,5 +54,5 @@ export default function order(cfg) {
   </section>
 
   ${ownerNote(cfg)}`;
-  return { main, scripts: [] };
+  return { main, scripts: [], styles: ['order.css'] };
 }

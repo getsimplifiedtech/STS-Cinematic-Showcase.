@@ -15,7 +15,7 @@
 <link rel="preload" as="font" type="font/woff2" href="fonts/young-serif-latin-400-normal.woff2" crossorigin>
 <link rel="preload" as="font" type="font/woff2" href="fonts/karla-latin-400-normal.woff2" crossorigin>
 <link rel="stylesheet" href="styles.css">
-
+<link rel="stylesheet" href="order.css">
 <script>document.documentElement.className+=' js'</script>
 </head>
 <body>
@@ -31,24 +31,32 @@
 </header>
 
 <main id="main">
-  <section class="order-head" aria-labelledby="order-title">
-    <div class="wrap order-head-grid">
-      <h1 id="order-title">Dinner, to go.</h1>
-      <p class="order-lede">Choose from the full menu and collect it hot from the pass.</p>
-      <p class="order-action"><span class="btn btn-off">Order online (example)</span></p>
-    </div>
-  </section>
+  <div class="order-track">
+    <section class="order-head" aria-labelledby="order-title">
+      <div class="wrap order-head-grid">
+        <h1 id="order-title">Dinner, to go.</h1>
+        <p class="order-lede">Choose from the full menu and collect it hot from the pass.</p>
+      </div>
+    </section>
+    <p class="order-action"><span class="btn btn-off">Order online (example)</span></p>
 
-  <section class="order-steps" aria-labelledby="steps-title">
-    <div class="wrap">
-      <h2 id="steps-title">How ordering works</h2>
-      <ol class="steps steps-3">
+    <section class="journey" data-p="pin" aria-labelledby="steps-title">
+      <div class="journey-pin">
+        <div class="scenes" aria-hidden="true"><p class="scene scene-1"><span>Wok</span></p><p class="scene scene-2"><span>Pass</span></p><p class="scene scene-3"><span>You</span></p></div>
+        <div class="wrap journey-grid">
+          <h2 id="steps-title">How ordering works</h2>
+          <div class="ticket">
+            <p class="ticket-top" aria-hidden="true">Jade &amp; Ember <span>Pickup</span></p>
+            <ol class="steps steps-3">
         <li><h3><span class="step-no" aria-hidden="true">1</span>Choose</h3><p>Pick your dishes from the menu. <a href="menu.html">See the menu</a></p></li>
         <li><h3><span class="step-no" aria-hidden="true">2</span>Order and pay</h3><p>Order on the restaurant's ordering page. Payment is taken there, not on this site.</p></li>
         <li><h3><span class="step-no" aria-hidden="true">3</span>Collect</h3><p>Come to the pass and we hand it over hot. Ready in about 20 minutes.</p></li>
       </ol>
-    </div>
-  </section>
+          </div>
+        </div>
+      </div>
+    </section>
+  </div>
 
   <section class="order-info" aria-label="Pickup, allergies and phone">
     <div class="wrap info-grid">

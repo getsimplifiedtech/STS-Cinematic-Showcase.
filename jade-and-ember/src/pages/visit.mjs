@@ -14,30 +14,36 @@ export default function visit(cfg) {
         <ul>${g.items.map((i) => `<li>${esc(i)}</li>`).join('')}</ul>${g.link ? `
         <p class="good-link"><a href="${esc(pageHref(cfg, g.link.page))}">${esc(g.link.label)}</a></p>` : ''}
       </div>`;
-  const main = `  <section class="visit-head" aria-labelledby="visit-title">
-    <div class="wrap">
-      <h1 id="visit-title">${esc(v.h1)}</h1>
-      ${cfg.demo ? `<p class="sample-flag">${esc(v.fictionalNote)}</p>` : ''}
-    </div>
-  </section>
-
-  <section class="visit-main" aria-label="Address and opening hours">
-    <div class="wrap visit-grid">
-      <div class="visit-where">
-        <address class="visit-address">${client.address.lines.map(esc).join('<br>')}</address>
-        <p class="visit-contact"><a class="phone" href="${esc(client.contact.phone.href)}">${esc(client.contact.phone.display)}</a>${cfg.demo ? ' <span class="sample-inline">(sample number)</span>' : ''}${client.contact.email ? ` <a href="mailto:${esc(client.contact.email)}">${esc(client.contact.email)}</a>` : ''}</p>
-        ${client.address.mapUrl ? `<p><a class="btn btn-ink" href="${esc(client.address.mapUrl)}" target="_blank" rel="noopener noreferrer">${esc(v.directionsLabel)}<span class="vh"> (opens a map in a new tab)</span></a></p>` : ''}
+  // The room: the page opens on the address in a nearly black room lit by one drifting, flickering pool of candle-like light. The dim jade bowls (the Our story
+  // photograph, decorative here) sit behind a frosted panel that holds the address and hours. Real, ordered DOM throughout; the light is the only thing JavaScript moves.
+  const img = copy.story.image;
+  const main = `  <section class="visit-room" aria-labelledby="visit-title">
+    <figure class="room-bg" aria-hidden="true"><img src="${esc(img.src)}" alt="" width="${img.width}" height="${img.height}" decoding="async"></figure>
+    <div class="candle" aria-hidden="true"></div>
+    <div class="wrap room-grid">
+      <div class="visit-head">
+        <h1 id="visit-title">${esc(v.h1)}</h1>
+        ${cfg.demo ? `<p class="sample-flag">${esc(v.fictionalNote)}</p>` : ''}
       </div>
-      ${hours(cfg)}
+      <section class="visit-main" aria-label="Address and opening hours">
+        <div class="visit-where">
+          <address class="visit-address">${client.address.lines.map(esc).join('<br>')}</address>
+          <p class="visit-contact"><a class="phone" href="${esc(client.contact.phone.href)}">${esc(client.contact.phone.display)}</a>${cfg.demo ? ' <span class="sample-inline">(sample number)</span>' : ''}${client.contact.email ? ` <a href="mailto:${esc(client.contact.email)}">${esc(client.contact.email)}</a>` : ''}</p>
+          ${client.address.mapUrl ? `<p><a class="btn btn-ink" href="${esc(client.address.mapUrl)}" target="_blank" rel="noopener noreferrer">${esc(v.directionsLabel)}<span class="vh"> (opens a map in a new tab)</span></a></p>` : ''}
+        </div>
+        ${hours(cfg)}
+      </section>
     </div>
+    <button class="pause" type="button" aria-pressed="false" hidden><span class="pause-ico" aria-hidden="true"></span><span class="pause-txt">Pause motion</span></button>
   </section>
 
   <section class="good" aria-labelledby="good-title">
-    <div class="wrap">
-      <h2 id="good-title">${esc(v.goodToKnow.heading)}</h2>${v.goodToKnow.groups.map(group).join('')}
+    <div class="wrap good-grid">
+      <h2 id="good-title">${esc(v.goodToKnow.heading)}</h2>
+      <div class="good-groups">${v.goodToKnow.groups.map(group).join('')}</div>
     </div>
   </section>
 
-  ${ctaBand(cfg, { ...v.orderBand, tone: 'lacquer', id: 'order-band' })}`;
-  return { main, scripts: [] };
+  ${ctaBand(cfg, { ...v.orderBand, tone: 'pine', id: 'order-band' })}`;
+  return { main, scripts: ['visit.js'], styles: ['visit.css'] };
 }
