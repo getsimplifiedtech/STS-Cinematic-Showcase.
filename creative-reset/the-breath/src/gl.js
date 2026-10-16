@@ -22,18 +22,30 @@ export function createGL(canvas, { dprCap = 1.5, maxPixels = 1.6e6 } = {}) {
 }
 const VS = `#version 300 es
 in vec2 p; out vec2 uv; void main(){ uv = p*.5+.5; gl_Position = vec4(p,0.,1.); }`;
+// Programs are compiled without waiting: linking is started here and checked later by ready(). With KHR_parallel_shader_compile the driver compiles on its
+// own threads and the page keeps painting and scrolling meanwhile (a synchronous link can block the main thread for hundreds of milliseconds on phones).
 export function program(gl, fs) {
-  const mk = (type, src) => { const s = gl.createShader(type); gl.shaderSource(s, src); gl.compileShader(s);
-    if (!gl.getShaderParameter(s, gl.COMPILE_STATUS)) throw new Error('shader: ' + gl.getShaderInfoLog(s)); return s; };
-  const pr = gl.createProgram(); gl.attachShader(pr, mk(gl.VERTEX_SHADER, VS)); gl.attachShader(pr, mk(gl.FRAGMENT_SHADER, fs)); gl.bindAttribLocation(pr, 0, 'p'); gl.linkProgram(pr);
-  if (!gl.getProgramParameter(pr, gl.LINK_STATUS)) throw new Error('link: ' + gl.getProgramInfoLog(pr));
+  const mk = (type, src) => { const s = gl.createShader(type); gl.shaderSource(s, src); gl.compileShader(s); return s; };
+  const vsh = mk(gl.VERTEX_SHADER, VS), fsh = mk(gl.FRAGMENT_SHADER, fs);
+  const pr = gl.createProgram(); gl.attachShader(pr, vsh); gl.attachShader(pr, fsh); gl.bindAttribLocation(pr, 0, 'p'); gl.linkProgram(pr);
   const loc = {}; const L = (n) => (n in loc ? loc[n] : (loc[n] = gl.getUniformLocation(pr, n)));
   return {
     pr,
+    check() { if (!gl.getProgramParameter(pr, gl.LINK_STATUS)) throw new Error('shader: ' + (gl.getShaderInfoLog(fsh) || gl.getProgramInfoLog(pr))); },
     set(name, ...v) { const l = L(name); if (l === null) return; gl[v.length === 1 ? 'uniform1f' : v.length === 2 ? 'uniform2f' : v.length === 3 ? 'uniform3f' : 'uniform4f'](l, ...v); },
     seti(name, v) { const l = L(name); if (l !== null) gl.uniform1i(l, v); },
     use() { gl.useProgram(pr); },
   };
+}
+// Resolves when every program has linked (polling the completion flag so the main thread stays free), rejects with the compiler log if one failed.
+export function ready(gl, list) {
+  const ext = gl.getExtension('KHR_parallel_shader_compile');
+  return new Promise((res, rej) => {
+    const poll = () => {
+      try { if (ext && !list.every((p) => gl.getProgramParameter(p.pr, ext.COMPLETION_STATUS_KHR))) { setTimeout(poll, 8); return; } list.forEach((p) => p.check()); res(); } catch (e) { rej(e); }
+    };
+    poll();
+  });
 }
 export function quad(gl) {
   const vao = gl.createVertexArray(); gl.bindVertexArray(vao);

@@ -32,7 +32,11 @@
      "scale": 1,
      "jacobi": 14
     },
-    "gpuMB": 6.35,
+    "gpuMB": 10.01,
+    "dishPx": [
+     1200,
+     800
+    ],
     "video": "idle",
     "inView": true,
     "hidden": false,
@@ -40,6 +44,117 @@
     "glFailed": false,
     "bailed": false,
     "usedJSHeapMB": 9.5
+   },
+   "overlap": {
+    "worst": 0,
+    "at": 0,
+    "samples": [
+     [
+      0,
+      1,
+      0
+     ],
+     [
+      0.05,
+      1,
+      0
+     ],
+     [
+      0.1,
+      1,
+      0
+     ],
+     [
+      0.15,
+      1,
+      0
+     ],
+     [
+      0.2,
+      1,
+      0
+     ],
+     [
+      0.25,
+      1,
+      0
+     ],
+     [
+      0.3,
+      1,
+      0
+     ],
+     [
+      0.35,
+      1,
+      0
+     ],
+     [
+      0.4,
+      1,
+      0
+     ],
+     [
+      0.45,
+      1,
+      0
+     ],
+     [
+      0.5,
+      1,
+      0
+     ],
+     [
+      0.55,
+      1,
+      0
+     ],
+     [
+      0.6,
+      0.741,
+      0
+     ],
+     [
+      0.65,
+      0.156,
+      0
+     ],
+     [
+      0.7,
+      0,
+      0.172
+     ],
+     [
+      0.75,
+      0,
+      1
+     ],
+     [
+      0.8,
+      0,
+      1
+     ],
+     [
+      0.85,
+      0,
+      1
+     ],
+     [
+      0.9,
+      0,
+      1
+     ],
+     [
+      0.95,
+      0,
+      1
+     ],
+     [
+      1,
+      0,
+      1
+     ]
+    ]
    }
   },
   "mobile-390x844": {
@@ -60,12 +175,12 @@
     "bails": 0,
     "grids": {
      "sim": [
-      52,
-      112
+      91,
+      197
      ],
      "dye": [
-      133,
-      288
+      215,
+      465
      ],
      "canvas": [
       390,
@@ -74,7 +189,11 @@
      "scale": 1,
      "jacobi": 10
     },
-    "gpuMB": 5.11,
+    "gpuMB": 6.21,
+    "dishPx": [
+     520,
+     347
+    ],
     "video": "idle",
     "inView": true,
     "hidden": false,
@@ -82,269 +201,283 @@
     "glFailed": false,
     "bailed": false,
     "usedJSHeapMB": 9.5
+   },
+   "overlap": {
+    "worst": 0,
+    "at": 0,
+    "samples": [
+     [
+      0,
+      1,
+      0
+     ],
+     [
+      0.05,
+      1,
+      0
+     ],
+     [
+      0.1,
+      1,
+      0
+     ],
+     [
+      0.15,
+      1,
+      0
+     ],
+     [
+      0.2,
+      1,
+      0
+     ],
+     [
+      0.25,
+      1,
+      0
+     ],
+     [
+      0.3,
+      1,
+      0
+     ],
+     [
+      0.35,
+      1,
+      0
+     ],
+     [
+      0.4,
+      1,
+      0
+     ],
+     [
+      0.45,
+      1,
+      0
+     ],
+     [
+      0.5,
+      1,
+      0
+     ],
+     [
+      0.55,
+      1,
+      0
+     ],
+     [
+      0.6,
+      0.741,
+      0
+     ],
+     [
+      0.65,
+      0.156,
+      0
+     ],
+     [
+      0.7,
+      0,
+      0.172
+     ],
+     [
+      0.75,
+      0,
+      1
+     ],
+     [
+      0.8,
+      0,
+      1
+     ],
+     [
+      0.85,
+      0,
+      1
+     ],
+     [
+      0.9,
+      0,
+      1
+     ],
+     [
+      0.95,
+      0,
+      1
+     ],
+     [
+      1,
+      0,
+      1
+     ]
+    ]
    }
   }
  },
  "modes": {
   "reduced-motion@1440x900": {
    "mode": "calm",
-   "stats": {
-    "mode": "calm",
-    "raf": false,
-    "frames": 0,
-    "rafMs": {
-     "p50": 0,
-     "p95": 0,
-     "n": 0
-    },
-    "cpuMs": {
-     "p50": 0,
-     "p95": 0
-    },
-    "bails": 0,
-    "grids": null,
-    "gpuMB": 0,
-    "video": "idle",
-    "inView": true,
-    "hidden": false,
-    "userPaused": false,
-    "glFailed": false,
-    "bailed": false,
-    "usedJSHeapMB": 9.5
-   },
-   "canvasVisible": "hidden",
-   "video": false,
+   "media": 1,
+   "dish": 0,
+   "dishCanvas": "hidden",
+   "steamCanvas": "hidden",
+   "videoPlaying": false,
+   "videoRequested": false,
+   "pauseHidden": true,
    "errors": [],
-   "scrollHeight": 5884,
+   "scrollHeight": 6064,
    "positions": {
     "top": 0,
-    "mid": 2001,
-    "steam": 3060,
-    "plate": 5296
-   }
+    "mid": 2062,
+    "steam": 3153,
+    "handover": 4245,
+    "plate": 5458
+   },
+   "overflowX": false
   },
   "reduced-motion@390x844": {
    "mode": "calm",
-   "stats": {
-    "mode": "calm",
-    "raf": false,
-    "frames": 0,
-    "rafMs": {
-     "p50": 0,
-     "p95": 0,
-     "n": 0
-    },
-    "cpuMs": {
-     "p50": 0,
-     "p95": 0
-    },
-    "bails": 0,
-    "grids": null,
-    "gpuMB": 0,
-    "video": "idle",
-    "inView": true,
-    "hidden": false,
-    "userPaused": false,
-    "glFailed": false,
-    "bailed": false,
-    "usedJSHeapMB": 9.5
-   },
-   "canvasVisible": "hidden",
-   "video": false,
+   "media": 1,
+   "dish": 0,
+   "dishCanvas": "hidden",
+   "steamCanvas": "hidden",
+   "videoPlaying": false,
+   "videoRequested": false,
+   "pauseHidden": true,
    "errors": [],
-   "scrollHeight": 4725,
+   "scrollHeight": 4894,
    "positions": {
     "top": 0,
-    "mid": 1607,
-    "steam": 2457,
-    "plate": 4253
-   }
+    "mid": 1664,
+    "steam": 2545,
+    "handover": 3426,
+    "plate": 4405
+   },
+   "overflowX": false
   },
   "save-data@1440x900": {
    "mode": "calm",
-   "stats": {
-    "mode": "calm",
-    "raf": false,
-    "frames": 0,
-    "rafMs": {
-     "p50": 0,
-     "p95": 0,
-     "n": 0
-    },
-    "cpuMs": {
-     "p50": 0,
-     "p95": 0
-    },
-    "bails": 0,
-    "grids": null,
-    "gpuMB": 0,
-    "video": "idle",
-    "inView": true,
-    "hidden": false,
-    "userPaused": false,
-    "glFailed": false,
-    "bailed": false,
-    "usedJSHeapMB": 9.5
-   },
-   "canvasVisible": "hidden",
-   "video": false,
+   "media": 1,
+   "dish": 0,
+   "dishCanvas": "hidden",
+   "steamCanvas": "hidden",
+   "videoPlaying": false,
+   "videoRequested": false,
+   "pauseHidden": true,
    "errors": [],
-   "scrollHeight": 5884,
+   "scrollHeight": 6064,
    "positions": {
     "top": 0,
-    "mid": 2001,
-    "steam": 3060,
-    "plate": 5296
-   }
+    "mid": 2062,
+    "steam": 3153,
+    "handover": 4245,
+    "plate": 5458
+   },
+   "overflowX": false
   },
   "save-data@390x844": {
    "mode": "calm",
-   "stats": {
-    "mode": "calm",
-    "raf": false,
-    "frames": 0,
-    "rafMs": {
-     "p50": 0,
-     "p95": 0,
-     "n": 0
-    },
-    "cpuMs": {
-     "p50": 0,
-     "p95": 0
-    },
-    "bails": 0,
-    "grids": null,
-    "gpuMB": 0,
-    "video": "idle",
-    "inView": true,
-    "hidden": false,
-    "userPaused": false,
-    "glFailed": false,
-    "bailed": false,
-    "usedJSHeapMB": 9.5
-   },
-   "canvasVisible": "hidden",
-   "video": false,
+   "media": 1,
+   "dish": 0,
+   "dishCanvas": "hidden",
+   "steamCanvas": "hidden",
+   "videoPlaying": false,
+   "videoRequested": false,
+   "pauseHidden": true,
    "errors": [],
-   "scrollHeight": 4725,
+   "scrollHeight": 4894,
    "positions": {
     "top": 0,
-    "mid": 1607,
-    "steam": 2457,
-    "plate": 4253
-   }
+    "mid": 1664,
+    "steam": 2545,
+    "handover": 3426,
+    "plate": 4405
+   },
+   "overflowX": false
   },
   "no-webgl2@1440x900": {
    "mode": "calm",
-   "stats": {
-    "mode": "calm",
-    "raf": false,
-    "frames": 0,
-    "rafMs": {
-     "p50": 0,
-     "p95": 0,
-     "n": 0
-    },
-    "cpuMs": {
-     "p50": 0,
-     "p95": 0
-    },
-    "bails": 0,
-    "grids": null,
-    "gpuMB": 0,
-    "video": "idle",
-    "inView": true,
-    "hidden": false,
-    "userPaused": false,
-    "glFailed": true,
-    "bailed": false,
-    "usedJSHeapMB": 9.5
-   },
-   "canvasVisible": "hidden",
-   "video": false,
+   "media": 1,
+   "dish": 0,
+   "dishCanvas": "hidden",
+   "steamCanvas": "hidden",
+   "videoPlaying": false,
+   "videoRequested": false,
+   "pauseHidden": true,
    "errors": [],
-   "scrollHeight": 5884,
+   "scrollHeight": 6064,
    "positions": {
     "top": 0,
-    "mid": 2001,
-    "steam": 3060,
-    "plate": 5296
-   }
+    "mid": 2062,
+    "steam": 3153,
+    "handover": 4245,
+    "plate": 5458
+   },
+   "overflowX": false
   },
   "no-webgl2@390x844": {
    "mode": "calm",
-   "stats": {
-    "mode": "calm",
-    "raf": false,
-    "frames": 0,
-    "rafMs": {
-     "p50": 0,
-     "p95": 0,
-     "n": 0
-    },
-    "cpuMs": {
-     "p50": 0,
-     "p95": 0
-    },
-    "bails": 0,
-    "grids": null,
-    "gpuMB": 0,
-    "video": "idle",
-    "inView": true,
-    "hidden": false,
-    "userPaused": false,
-    "glFailed": true,
-    "bailed": false,
-    "usedJSHeapMB": 9.5
-   },
-   "canvasVisible": "hidden",
-   "video": false,
+   "media": 1,
+   "dish": 0,
+   "dishCanvas": "hidden",
+   "steamCanvas": "hidden",
+   "videoPlaying": false,
+   "videoRequested": false,
+   "pauseHidden": true,
    "errors": [],
-   "scrollHeight": 4725,
+   "scrollHeight": 4894,
    "positions": {
     "top": 0,
-    "mid": 1607,
-    "steam": 2457,
-    "plate": 4253
-   }
+    "mid": 1664,
+    "steam": 2545,
+    "handover": 3426,
+    "plate": 4405
+   },
+   "overflowX": false
   },
   "no-javascript@1440x900": {
    "mode": "no-js",
    "errors": [],
-   "scrollHeight": 4463,
+   "scrollHeight": 4643,
    "positions": {
     "top": 0,
-    "mid": 1517,
-    "steam": 2321,
-    "plate": 4017
-   }
+    "mid": 1579,
+    "steam": 2414,
+    "handover": 3250,
+    "plate": 4179
+   },
+   "overflowX": false
   },
   "no-javascript@390x844": {
    "mode": "no-js",
    "errors": [],
-   "scrollHeight": 4219,
+   "scrollHeight": 4388,
    "positions": {
     "top": 0,
-    "mid": 1434,
-    "steam": 2194,
-    "plate": 3797
-   }
+    "mid": 1492,
+    "steam": 2282,
+    "handover": 3072,
+    "plate": 3949
+   },
+   "overflowX": false
   }
  },
  "keyboard": {
   "order": [
-   "a.brand|\u7389\u706bJade & Ember|20|outline:solid/2px",
+   "a.brand|玉火Jade & Ember|20|outline:solid/2px",
    "button.pause|Pause motion|828|outline:solid/2px",
    "a.btn|See the menu|753|outline:solid/2px",
    "a.btn-link|Order online|755|outline:solid/2px",
    "a.btn|Back to the top|458|outline:solid/2px",
    "body",
-   "a.brand|\u7389\u706bJade & Ember|20|outline:solid/2px",
+   "a.brand|玉火Jade & Ember|20|outline:solid/2px",
    "button.pause|Pause motion|828|outline:solid/2px"
   ],
   "pause": {
    "before": {
     "pressed": "false",
+    "label": "Pause motion",
     "mode": "live"
    },
    "after": {
@@ -380,6 +513,10 @@
     "t": "The plate",
     "hidden": false
    }
+  ],
+  "canvasAriaHidden": [
+   "true",
+   "true"
   ],
   "errors": []
  },
@@ -490,7 +627,7 @@
       0
      ]
     },
-    "clear": 2.4194034797563874e-06,
+    "clear": 0.0000024194034797563874,
     "spread": 0.9967578138044914
    },
    {
@@ -555,21 +692,25 @@
    {
     "vp": "1024x768",
     "canvas": [
-     1000,
-     750
+     816,
+     612
+    ],
+    "dish": [
+     853,
+     569
     ],
     "grids": {
      "sim": [
-      149,
-      112
+      155,
+      116
      ],
      "dye": [
-      384,
-      288
+      365,
+      274
      ],
      "canvas": [
-      1000,
-      750
+      816,
+      612
      ],
      "scale": 1,
      "jacobi": 10
@@ -583,14 +724,18 @@
      390,
      844
     ],
+    "dish": [
+     520,
+     347
+    ],
     "grids": {
      "sim": [
-      52,
-      112
+      91,
+      197
      ],
      "dye": [
-      133,
-      288
+      215,
+      465
      ],
      "canvas": [
       390,
@@ -608,14 +753,18 @@
      844,
      390
     ],
+    "dish": [
+     703,
+     469
+    ],
     "grids": {
      "sim": [
-      242,
-      112
+      197,
+      91
      ],
      "dye": [
-      623,
-      288
+      465,
+      215
      ],
      "canvas": [
       844,
@@ -630,21 +779,25 @@
    {
     "vp": "1440x900",
     "canvas": [
-     1095,
-     685
+     894,
+     559
+    ],
+    "dish": [
+     1200,
+     800
     ],
     "grids": {
      "sim": [
-      179,
-      112
+      170,
+      106
      ],
      "dye": [
-      461,
-      288
+      400,
+      250
      ],
      "canvas": [
-      1095,
-      685
+      894,
+      559
      ],
      "scale": 1,
      "jacobi": 10
@@ -657,126 +810,176 @@
  },
  "gating": {
   "visible": {
-   "frames": 4,
-   "raf": true
+   "drawCallsIn2s": 133
   },
   "hiddenTab": {
-   "frames": 0,
-   "raf": false
+   "drawCallsIn2s": 0
   },
   "resumed": {
-   "frames": 4,
-   "raf": true
+   "drawCallsIn2s": 266
   },
   "offScreen": {
-   "frames": 0,
-   "raf": false,
-   "inView": false
+   "drawCallsIn2s": 0
+  },
+  "backOnScreen": {
+   "drawCallsIn2s": 180
+  },
+  "pausedByVisitor": {
+   "drawCallsIn2s": 0,
+   "mode": "calm"
+  },
+  "playAgain": {
+   "drawCallsIn2s": 399,
+   "mode": "live"
+  },
+  "dishAtRest": {
+   "dishDrawCallsIn3s": 0
   },
   "errors": []
  },
  "perf": {
-  "1440x900-mid": {
-   "mode": "live",
-   "raf": true,
-   "frames": 8,
-   "rafMs": {
-    "p50": 1083.2,
-    "p95": 2066.5,
-    "n": 8
+  "1440x900-mid-dpr1": {
+   "steam-at-fullest": {
+    "p": 0.55,
+    "framesPerSecond": 1.5,
+    "frameIntervalMs": {
+     "p50": 774,
+     "p95": 852
+    },
+    "cpuSecondsPerSecond": {
+     "browser": 0,
+     "renderer": 0,
+     "GPU": 3.71,
+     "network.mojom.NetworkService": 0
+    },
+    "steamDrawCallsPerFrame": 155,
+    "dishDrawCalls": 0
    },
-   "cpuMs": {
-    "p50": 0.5,
-    "p95": 0.6
+   "dish-reveal": {
+    "p": 0.76,
+    "framesPerSecond": 1.12,
+    "frameIntervalMs": {
+     "p50": 978,
+     "p95": 1107
+    },
+    "cpuSecondsPerSecond": {
+     "browser": 0,
+     "renderer": 0,
+     "GPU": 3.7,
+     "network.mojom.NetworkService": 0
+    },
+    "steamDrawCallsPerFrame": 118.3,
+    "dishDrawCalls": 8
    },
-   "bails": 0,
-   "grids": {
-    "sim": [
-     230,
-     144
-    ],
-    "dye": [
-     640,
-     400
-    ],
-    "canvas": [
-     1440,
-     900
-    ],
-    "scale": 1,
-    "jacobi": 14
+   "dish-at-rest": {
+    "p": 0.97,
+    "framesPerSecond": 1.12,
+    "frameIntervalMs": {
+     "p50": 961,
+     "p95": 1082
+    },
+    "cpuSecondsPerSecond": {
+     "browser": 0,
+     "renderer": 0,
+     "GPU": 3.68,
+     "network.mojom.NetworkService": 0
+    },
+    "steamDrawCallsPerFrame": 142.8,
+    "dishDrawCalls": 9
    },
-   "gpuMB": 6.35,
-   "video": "idle",
-   "inView": true,
-   "hidden": false,
-   "userPaused": false,
-   "glFailed": false,
-   "bailed": false,
-   "usedJSHeapMB": 9.5,
+   "heapMB": 1.5,
+   "longTasksOver50ms": 1,
    "errors": []
   },
-  "390x844-low": {
-   "mode": "live",
-   "raf": true,
-   "frames": 132,
-   "rafMs": {
-    "p50": 66.6,
-    "p95": 83.3,
-    "n": 132
+  "390x844-low-dpr2": {
+   "steam-at-fullest": {
+    "p": 0.55,
+    "framesPerSecond": 12.85,
+    "frameIntervalMs": {
+     "p50": 71,
+     "p95": 122
+    },
+    "cpuSecondsPerSecond": {
+     "browser": 0,
+     "renderer": 0.02,
+     "GPU": 3.73,
+     "network.mojom.NetworkService": 0
+    },
+    "steamDrawCallsPerFrame": 19,
+    "dishDrawCalls": 0
    },
-   "cpuMs": {
-    "p50": 0.2,
-    "p95": 0.3
+   "dish-reveal": {
+    "p": 0.76,
+    "framesPerSecond": 11.73,
+    "frameIntervalMs": {
+     "p50": 75,
+     "p95": 157
+    },
+    "cpuSecondsPerSecond": {
+     "browser": 0,
+     "renderer": 0.02,
+     "GPU": 3.64,
+     "network.mojom.NetworkService": 0
+    },
+    "steamDrawCallsPerFrame": 19,
+    "dishDrawCalls": 1
    },
-   "bails": 0,
-   "grids": {
-    "sim": [
-     52,
-     112
-    ],
-    "dye": [
-     133,
-     288
-    ],
-    "canvas": [
-     390,
-     844
-    ],
-    "scale": 1,
-    "jacobi": 10
+   "dish-at-rest": {
+    "p": 0.97,
+    "framesPerSecond": 9.87,
+    "frameIntervalMs": {
+     "p50": 93,
+     "p95": 193
+    },
+    "cpuSecondsPerSecond": {
+     "browser": 0,
+     "renderer": 0.02,
+     "GPU": 3.64,
+     "network.mojom.NetworkService": 0
+    },
+    "steamDrawCallsPerFrame": 19,
+    "dishDrawCalls": 3
    },
-   "gpuMB": 5.11,
-   "video": "idle",
-   "inView": true,
-   "hidden": false,
-   "userPaused": false,
-   "glFailed": false,
-   "bailed": false,
-   "usedJSHeapMB": 9.5,
+   "heapMB": 1.8,
+   "longTasksOver50ms": 0,
    "errors": []
   }
  },
  "assets": {
   "index.html": {
-   "bytes": 6072,
-   "gzip": 2301
+   "bytes": 6254,
+   "gzip": 2349,
+   "brotli": 1856
   },
   "breath.css": {
-   "bytes": 12263,
-   "gzip": 3992
+   "bytes": 12830,
+   "gzip": 4205,
+   "brotli": 3592
   },
-  "js/gl.js": {
-   "bytes": 4117,
-   "gzip": 1820
+  "js/breath.min.js": {
+   "bytes": 32876,
+   "gzip": 12251,
+   "brotli": 11063
   },
-  "js/steam.js": {
-   "bytes": 20182,
-   "gzip": 7338
+  "src/breath.js": {
+   "bytes": 21892,
+   "gzip": 8280,
+   "brotli": 7216
   },
-  "js/breath.js": {
-   "bytes": 18837,
-   "gzip": 6904
+  "src/dish.js": {
+   "bytes": 6146,
+   "gzip": 2731,
+   "brotli": 2410
+  },
+  "src/gl.js": {
+   "bytes": 4925,
+   "gzip": 2194,
+   "brotli": 1882
+  },
+  "src/steam.js": {
+   "bytes": 21599,
+   "gzip": 7959,
+   "brotli": 7019
   },
   "media/dish-charsiu.webp": {
    "bytes": 61404
@@ -810,6 +1013,730 @@
   },
   "fonts/young-serif-latin-400-normal.woff2": {
    "bytes": 26992
+  }
+ },
+ "load": {
+  "desktop-unthrottled": {
+   "loadEventMs": 38,
+   "fcpMs": 52,
+   "lcpMs": 52,
+   "cls": 0,
+   "totalBlockingTimeMs": 10,
+   "longTasks": [
+    [
+     45,
+     60
+    ]
+   ],
+   "requests": 11,
+   "transferredKB": 837.9,
+   "byType": {
+    "Document": {
+     "requests": 1,
+     "bytes": 6467
+    },
+    "Font": {
+     "requests": 4,
+     "bytes": 55439
+    },
+    "Stylesheet": {
+     "requests": 1,
+     "bytes": 13043
+    },
+    "Image": {
+     "requests": 3,
+     "bytes": 151687
+    },
+    "Script": {
+     "requests": 1,
+     "bytes": 33096
+    },
+    "Media": {
+     "requests": 1,
+     "bytes": 598316
+    }
+   },
+   "scriptDurationMs": 0,
+   "taskDurationMs": 3,
+   "modeAfterLoad": "live",
+   "jsFiles": [
+    "js/breath.min.js"
+   ]
+  },
+  "desktop-slow4g-cpu4x": {
+   "loadEventMs": 1245,
+   "fcpMs": 876,
+   "lcpMs": 876,
+   "cls": 0.0314,
+   "totalBlockingTimeMs": 182,
+   "longTasks": [
+    [
+     763,
+     98
+    ],
+    [
+     1855,
+     184
+    ]
+   ],
+   "requests": 12,
+   "transferredKB": 837.9,
+   "byType": {
+    "Document": {
+     "requests": 1,
+     "bytes": 6467
+    },
+    "Stylesheet": {
+     "requests": 1,
+     "bytes": 13043
+    },
+    "Image": {
+     "requests": 4,
+     "bytes": 151687
+    },
+    "Font": {
+     "requests": 4,
+     "bytes": 55439
+    },
+    "Script": {
+     "requests": 1,
+     "bytes": 33096
+    },
+    "Media": {
+     "requests": 1,
+     "bytes": 598316
+    }
+   },
+   "scriptDurationMs": 0,
+   "taskDurationMs": 0,
+   "modeAfterLoad": "live",
+   "jsFiles": [
+    "js/breath.min.js"
+   ]
+  },
+  "mobile-unthrottled": {
+   "loadEventMs": 54,
+   "fcpMs": 56,
+   "lcpMs": 56,
+   "cls": 0,
+   "totalBlockingTimeMs": 33,
+   "longTasks": [
+    [
+     57,
+     83
+    ]
+   ],
+   "requests": 10,
+   "transferredKB": 233.5,
+   "byType": {
+    "Document": {
+     "requests": 1,
+     "bytes": 6467
+    },
+    "Image": {
+     "requests": 3,
+     "bytes": 131059
+    },
+    "Font": {
+     "requests": 4,
+     "bytes": 55439
+    },
+    "Stylesheet": {
+     "requests": 1,
+     "bytes": 13043
+    },
+    "Script": {
+     "requests": 1,
+     "bytes": 33096
+    }
+   },
+   "scriptDurationMs": 0,
+   "taskDurationMs": 0,
+   "modeAfterLoad": "live",
+   "jsFiles": [
+    "js/breath.min.js"
+   ]
+  },
+  "mobile-slow4g-cpu4x": {
+   "loadEventMs": 1159,
+   "fcpMs": 864,
+   "lcpMs": 864,
+   "cls": 0,
+   "totalBlockingTimeMs": 144,
+   "longTasks": [
+    [
+     776,
+     72
+    ],
+    [
+     1710,
+     172
+    ]
+   ],
+   "requests": 10,
+   "transferredKB": 233.5,
+   "byType": {
+    "Document": {
+     "requests": 1,
+     "bytes": 6467
+    },
+    "Stylesheet": {
+     "requests": 1,
+     "bytes": 13043
+    },
+    "Image": {
+     "requests": 3,
+     "bytes": 131059
+    },
+    "Font": {
+     "requests": 4,
+     "bytes": 55439
+    },
+    "Script": {
+     "requests": 1,
+     "bytes": 33096
+    }
+   },
+   "scriptDurationMs": 0,
+   "taskDurationMs": 0,
+   "modeAfterLoad": "live",
+   "jsFiles": [
+    "js/breath.min.js"
+   ]
+  }
+ },
+ "handover": {
+  "desktop": {
+   "trace": [
+    {
+     "target": 0.2,
+     "p": 0.2,
+     "media": 1,
+     "dishCanvas": "hidden",
+     "clear": 0,
+     "spread": 0.028,
+     "mediaOff": false
+    },
+    {
+     "target": 0.5,
+     "p": 0.5,
+     "media": 1,
+     "dishCanvas": "hidden",
+     "clear": 0,
+     "spread": 0.994,
+     "mediaOff": false
+    },
+    {
+     "target": 0.62,
+     "p": 0.62,
+     "media": 0.5,
+     "dishCanvas": "hidden",
+     "clear": 0,
+     "spread": 1,
+     "mediaOff": false
+    },
+    {
+     "target": 0.66,
+     "p": 0.66,
+     "media": 0.075,
+     "dishCanvas": "hidden",
+     "clear": 0,
+     "spread": 1,
+     "mediaOff": false
+    },
+    {
+     "target": 0.7,
+     "p": 0.7,
+     "media": 0,
+     "dishCanvas": "visible",
+     "clear": 0.04,
+     "spread": 0.868,
+     "mediaOff": true
+    },
+    {
+     "target": 0.74,
+     "p": 0.74,
+     "media": 0,
+     "dishCanvas": "visible",
+     "clear": 0.311,
+     "spread": 0.69,
+     "mediaOff": true
+    },
+    {
+     "target": 0.78,
+     "p": 0.78,
+     "media": 0,
+     "dishCanvas": "visible",
+     "clear": 0.579,
+     "spread": 0.471,
+     "mediaOff": true
+    },
+    {
+     "target": 0.84,
+     "p": 0.84,
+     "media": 0,
+     "dishCanvas": "visible",
+     "clear": 0.9,
+     "spread": 0.221,
+     "mediaOff": true
+    },
+    {
+     "target": 0.78,
+     "p": 0.78,
+     "media": 0,
+     "dishCanvas": "visible",
+     "clear": 0.581,
+     "spread": 0.447,
+     "mediaOff": true
+    },
+    {
+     "target": 0.74,
+     "p": 0.74,
+     "media": 0,
+     "dishCanvas": "visible",
+     "clear": 0.309,
+     "spread": 0.683,
+     "mediaOff": true
+    },
+    {
+     "target": 0.7,
+     "p": 0.7,
+     "media": 0,
+     "dishCanvas": "visible",
+     "clear": 0.04,
+     "spread": 0.866,
+     "mediaOff": true
+    },
+    {
+     "target": 0.66,
+     "p": 0.66,
+     "media": 0.073,
+     "dishCanvas": "hidden",
+     "clear": 0,
+     "spread": 0.999,
+     "mediaOff": false
+    },
+    {
+     "target": 0.62,
+     "p": 0.62,
+     "media": 0.5,
+     "dishCanvas": "hidden",
+     "clear": 0,
+     "spread": 1,
+     "mediaOff": false
+    },
+    {
+     "target": 0.5,
+     "p": 0.5,
+     "media": 1,
+     "dishCanvas": "hidden",
+     "clear": 0,
+     "spread": 1,
+     "mediaOff": false
+    },
+    {
+     "target": 0.2,
+     "p": 0.2,
+     "media": 1,
+     "dishCanvas": "hidden",
+     "clear": 0,
+     "spread": 0.032,
+     "mediaOff": false
+    },
+    {
+     "target": 0,
+     "p": 0,
+     "media": 1,
+     "dishCanvas": "hidden",
+     "clear": 0,
+     "spread": 0,
+     "mediaOff": false
+    }
+   ],
+   "samplesWithFootageAndDishTogether": 0,
+   "scan": {
+    "worst": 0,
+    "at": 0,
+    "samples": [
+     [
+      0,
+      1,
+      0
+     ],
+     [
+      0.05,
+      1,
+      0
+     ],
+     [
+      0.1,
+      1,
+      0
+     ],
+     [
+      0.15,
+      1,
+      0
+     ],
+     [
+      0.2,
+      1,
+      0
+     ],
+     [
+      0.25,
+      1,
+      0
+     ],
+     [
+      0.3,
+      1,
+      0
+     ],
+     [
+      0.35,
+      1,
+      0
+     ],
+     [
+      0.4,
+      1,
+      0
+     ],
+     [
+      0.45,
+      1,
+      0
+     ],
+     [
+      0.5,
+      1,
+      0
+     ],
+     [
+      0.55,
+      1,
+      0
+     ],
+     [
+      0.6,
+      0.741,
+      0
+     ],
+     [
+      0.65,
+      0.156,
+      0
+     ],
+     [
+      0.7,
+      0,
+      0.172
+     ],
+     [
+      0.75,
+      0,
+      1
+     ],
+     [
+      0.8,
+      0,
+      1
+     ],
+     [
+      0.85,
+      0,
+      1
+     ],
+     [
+      0.9,
+      0,
+      1
+     ],
+     [
+      0.95,
+      0,
+      1
+     ],
+     [
+      1,
+      0,
+      1
+     ]
+    ]
+   },
+   "errors": []
+  },
+  "mobile": {
+   "trace": [
+    {
+     "target": 0.2,
+     "p": 0.2,
+     "media": 1,
+     "dishCanvas": "hidden",
+     "clear": 0,
+     "spread": 0.028,
+     "mediaOff": false
+    },
+    {
+     "target": 0.5,
+     "p": 0.5,
+     "media": 1,
+     "dishCanvas": "hidden",
+     "clear": 0,
+     "spread": 0.991,
+     "mediaOff": false
+    },
+    {
+     "target": 0.62,
+     "p": 0.62,
+     "media": 0.499,
+     "dishCanvas": "hidden",
+     "clear": 0,
+     "spread": 1,
+     "mediaOff": false
+    },
+    {
+     "target": 0.66,
+     "p": 0.66,
+     "media": 0.074,
+     "dishCanvas": "hidden",
+     "clear": 0,
+     "spread": 1,
+     "mediaOff": false
+    },
+    {
+     "target": 0.7,
+     "p": 0.7,
+     "media": 0,
+     "dishCanvas": "visible",
+     "clear": 0.041,
+     "spread": 0.867,
+     "mediaOff": true
+    },
+    {
+     "target": 0.74,
+     "p": 0.74,
+     "media": 0,
+     "dishCanvas": "visible",
+     "clear": 0.309,
+     "spread": 0.691,
+     "mediaOff": true
+    },
+    {
+     "target": 0.78,
+     "p": 0.78,
+     "media": 0,
+     "dishCanvas": "visible",
+     "clear": 0.58,
+     "spread": 0.465,
+     "mediaOff": true
+    },
+    {
+     "target": 0.84,
+     "p": 0.84,
+     "media": 0,
+     "dishCanvas": "visible",
+     "clear": 0.9,
+     "spread": 0.221,
+     "mediaOff": true
+    },
+    {
+     "target": 0.78,
+     "p": 0.78,
+     "media": 0,
+     "dishCanvas": "visible",
+     "clear": 0.58,
+     "spread": 0.457,
+     "mediaOff": true
+    },
+    {
+     "target": 0.74,
+     "p": 0.74,
+     "media": 0,
+     "dishCanvas": "visible",
+     "clear": 0.311,
+     "spread": 0.684,
+     "mediaOff": true
+    },
+    {
+     "target": 0.7,
+     "p": 0.7,
+     "media": 0,
+     "dishCanvas": "visible",
+     "clear": 0.04,
+     "spread": 0.866,
+     "mediaOff": true
+    },
+    {
+     "target": 0.66,
+     "p": 0.66,
+     "media": 0.074,
+     "dishCanvas": "hidden",
+     "clear": 0,
+     "spread": 0.999,
+     "mediaOff": false
+    },
+    {
+     "target": 0.62,
+     "p": 0.62,
+     "media": 0.499,
+     "dishCanvas": "hidden",
+     "clear": 0,
+     "spread": 1,
+     "mediaOff": false
+    },
+    {
+     "target": 0.5,
+     "p": 0.5,
+     "media": 1,
+     "dishCanvas": "hidden",
+     "clear": 0,
+     "spread": 1,
+     "mediaOff": false
+    },
+    {
+     "target": 0.2,
+     "p": 0.2,
+     "media": 1,
+     "dishCanvas": "hidden",
+     "clear": 0,
+     "spread": 0.039,
+     "mediaOff": false
+    },
+    {
+     "target": 0,
+     "p": 0,
+     "media": 1,
+     "dishCanvas": "hidden",
+     "clear": 0,
+     "spread": 0,
+     "mediaOff": false
+    }
+   ],
+   "samplesWithFootageAndDishTogether": 0,
+   "scan": {
+    "worst": 0,
+    "at": 0,
+    "samples": [
+     [
+      0,
+      1,
+      0
+     ],
+     [
+      0.05,
+      1,
+      0
+     ],
+     [
+      0.1,
+      1,
+      0
+     ],
+     [
+      0.15,
+      1,
+      0
+     ],
+     [
+      0.2,
+      1,
+      0
+     ],
+     [
+      0.25,
+      1,
+      0
+     ],
+     [
+      0.3,
+      1,
+      0
+     ],
+     [
+      0.35,
+      1,
+      0
+     ],
+     [
+      0.4,
+      1,
+      0
+     ],
+     [
+      0.45,
+      1,
+      0
+     ],
+     [
+      0.5,
+      1,
+      0
+     ],
+     [
+      0.55,
+      1,
+      0
+     ],
+     [
+      0.6,
+      0.741,
+      0
+     ],
+     [
+      0.65,
+      0.156,
+      0
+     ],
+     [
+      0.7,
+      0,
+      0.172
+     ],
+     [
+      0.75,
+      0,
+      1
+     ],
+     [
+      0.8,
+      0,
+      1
+     ],
+     [
+      0.85,
+      0,
+      1
+     ],
+     [
+      0.9,
+      0,
+      1
+     ],
+     [
+      0.95,
+      0,
+      1
+     ],
+     [
+      1,
+      0,
+      1
+     ]
+    ]
+   },
+   "errors": []
+  }
+ },
+ "contrast": {
+  "desktop": {
+   "file": "_contrast/desktop.json",
+   "errors": []
+  },
+  "mobile": {
+   "file": "_contrast/mobile.json",
+   "errors": []
   }
  }
 }

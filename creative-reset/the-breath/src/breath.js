@@ -3,10 +3,11 @@
 // reachable in both directions. The Kling clip plays normally underneath; it is never scrubbed.
 import { loadImage } from './gl.js';
 import { createSteam } from './steam.js';
+import { createDish } from './dish.js';
 
 const $ = (s, r = document) => r.querySelector(s);
 const root = document.documentElement, section = $('[data-breath]'), stage = $('[data-stage]'), canvas = $('.steam'), video = $('.flame'), poster = $('.poster');
-const pauseBtn = $('.pause'), beats = [...document.querySelectorAll('.beat')];
+const dishCanvas = $('.dish'), pauseBtn = $('.pause'), beats = [...document.querySelectorAll('.beat')];
 const q = new URLSearchParams(location.search);
 const mq = (s) => matchMedia(s), listen = (m, f) => (m.addEventListener ? m.addEventListener('change', f) : m.addListener(f));
 const reduce = mq('(prefers-reduced-motion: reduce)'), wide = mq('(min-width: 960px)'), phone = mq('(max-aspect-ratio: 1/1) and (max-width: 959px)');
@@ -19,24 +20,29 @@ const stillOnly = () => reduce.matches || conn.saveData === true || /^(slow-2g|2
 // ---------------------------------------------------------------- the choreography (weather as a function of progress)
 // p: 0 hero · .105 Fire · .295 Steam · .48 Texture · .665 The plate. All values are linearly interpolated, then eased in time by the caller.
 const TL = {
-  emit: [[0, .38], [.10, .46], [.28, .66], [.50, 1], [.66, .85], [.76, .4], [.9, .2], [1, .16]],
-  spread: [[0, 0], [.28, .04], [.34, .3], [.42, .9], [.46, 1], [.62, 1], [.70, .55], [.80, .1], [1, 0]],
-  clear: [[0, 0], [.60, 0], [.64, .04], [.78, .85], [.84, 1], [1, 1.15]],
-  haze: [[0, 1], [.80, 1], [.93, .42], [1, .3]],
-  glow: [[0, .55], [.10, .85], [.28, 1], [.46, .6], [.62, .35], [.80, .25], [1, .25]],
+  emit: [[0, .38], [.10, .46], [.28, .66], [.50, 1], [.66, .9], [.76, .45], [.9, .2], [1, .16]],
+  spread: [[0, 0], [.28, .04], [.34, .3], [.42, .9], [.46, 1], [.66, 1], [.72, .8], [.80, .35], [.88, .08], [1, 0]],
+  clear: [[0, 0], [.68, 0], [.70, .04], [.82, .85], [.88, 1], [1, 1.15]],
+  haze: [[0, 1], [.70, 1], [.78, .8], [.86, .6], [.93, .42], [1, .3]],
+  glow: [[0, .55], [.10, .85], [.28, 1], [.46, .6], [.62, .55], [.72, .4], [.86, .2], [1, .15]],
   detail: [[0, .3], [.3, .5], [.5, 1], [.64, 1], [.8, .6], [1, .4]],
 };
+// The handover, in order: the flame and wok sink into their own steam (media, .56 to .68) while the cloud is at its densest; only then does the
+// clearing open (clear, from .70) and the dish rise out of the cleared soot (settle eases it to rest). The footage and the dish are never on screen together.
 const stageVars = (p) => ({
   dark: key(p, [[0, 1], [.1, .8], [.5, .62], [.8, .5], [1, .38]]),
   push: key(p, [[0, 0], [.08, 0], [.5, 1], [.66, 1], [1, .35]]),
-  steam: smooth(.2, .36, p) * (1 - smooth(.6, .72, p)),
-  dish: smooth(.62, .76, p),
+  media: 1 - smooth(.56, .68, p),
+  steam: smooth(.2, .36, p),   // calm mode only: the still steam plate; it leaves with the footage (media), not later
+  dish: smooth(.70, .84, p),
+  settle: 1 - smooth(.70, .92, p),
 });
 
 // ---------------------------------------------------------------- state
-let mode = 'nojs', userPaused = false, glFailed = false, bailed = false, steam = null, steamPending = null, inView = true;
-let scrollRaf = 0, top = 0, travel = 1, p = 0, lastP = 0, raf = 0, last = 0, parkedAt = 0, catchup = 0, labMode = q.has('lab');
-const target = {}, cur = {}, cache = new WeakMap(), stats = { frames: 0, raf: 0, ms: [], cpu: [], bails: 0, slow: 0, drawn: 0, parkedFrames: 0 };
+let mode = 'nojs', userPaused = false, glFailed = false, bailed = false, steam = null, dish = null, steamPending = null, inView = true, mediaV = 1;
+let scrollRaf = 0, top = 0, travel = 1, p = 0, lastP = 0, raf = 0, last = 0, parkedAt = 0, catchup = 0, labMode = false;
+labMode = q.has('lab');   //#lab
+const target = {}, cur = {}, cache = new WeakMap(), stats = { frames: 0, ms: [], cpu: [], bails: 0, slow: 0 };
 const setTargets = (pp) => { for (const k in TL) target[k] = key(pp, TL[k]); target.dishLight = 1; };
 setTargets(0); Object.assign(cur, target);
 
@@ -49,6 +55,12 @@ const progress = () => clamp((scrollY - top) / travel);
 
 // ---------------------------------------------------------------- placement of the steam source and the dish in stage uv (y up)
 const SRC = { desk: [0.50, 0.58], phone: [0.55, 0.62] };   // measured on the posters: where the vapour leaves the wok (image uv, y down)
+// How the steam looks on each composition. A phone frame is narrow: vents are slimmer and closer together, the detail is finer, the source stays
+// small, the lower frame gives off less vapour, and vapour thins out as it climbs, so plumes rise as separate billows instead of one sheet of fog.
+const LOOK = {
+  desk: { vent: [.9, .02], noise: 2.3, wisp: .5, band: 1.1, radMax: .14, alt: .1 },
+  phone: { vent: [.8, .0065], noise: 4.2, wisp: 1, band: .75, radMax: .1, alt: .9 },
+};
 function layout() {
   if (!steam) return;
   const sw = stage.clientWidth, sh = stage.clientHeight, ph = phone.matches;
@@ -56,15 +68,20 @@ function layout() {
   const [fx, fy] = (getComputedStyle(poster).objectPosition || '50% 50%').split(' ').map((v) => parseFloat(v) / 100);
   const s = Math.max(sw / iw, sh / ih), rw = iw * s, rh = ih * s, ox = (rw - sw) * (fx ?? .5), oy = (rh - sh) * (fy ?? .5);
   const [u, v] = ph ? SRC.phone : SRC.desk;
+  Object.assign(steam.L, LOOK[ph ? 'phone' : 'desk']);
   steam.L.src = [(u * rw - ox) / sw, 1 - (v * rh - oy) / sh];
   // the dish: the plate (72% of the photograph's width) sits where the wok was, right of the type
   const plateW = ph ? .96 * sw : Math.min(.6 * sw, 1.18 * sh * 1.2), imgW = plateW / .72, imgH = imgW * 800 / 1200;
   const c = ph ? [.5, .40] : [.64, .5], ex = imgW / sw, ey = imgH / sh;
-  steam.L.dishRect = [c[0] + .01 * ex, c[1] - .03 * ey, ex, ey];
   steam.L.dc = c; steam.L.shade = ph ? [0, 1] : [1, 0];
   stage.style.setProperty('--ox', (steam.L.src[0] * 100).toFixed(2) + '%'); stage.style.setProperty('--oy', ((1 - steam.L.src[1]) * 100).toFixed(2) + '%');
   const a = sw / sh; steam.L.aspect = a;
   steam.L.reach = Math.max(Math.hypot(c[0] * a, c[1]), Math.hypot((1 - c[0]) * a, c[1]), Math.hypot(c[0] * a, 1 - c[1]), Math.hypot((1 - c[0]) * a, 1 - c[1]));
+  if (dish) {
+    // whole CSS pixels, so the canvas lands on the pixel grid and is never resampled by the compositor at rest
+    const w = Math.round(imgW), h = Math.round(imgH), x = Math.round((c[0] + .01 * ex) * sw - w / 2), y = Math.round((1 - (c[1] - .03 * ey)) * sh - h / 2);
+    dish.layout({ css: [x, y, w, h], rect: [(x + w / 2) / sw, 1 - (y + h / 2) / sh, w / sw, h / sh], dc: c, aspect: a, reach: steam.L.reach });
+  }
 }
 
 // ---------------------------------------------------------------- DOM beats: all text is real, ordered DOM; only opacity and a transform change
@@ -80,25 +97,24 @@ function applyDom(pp, force) {
   }
   const sv = stageVars(pp);
   const c = cache.get(stage);
-  const sig = [sv.dark, sv.push, sv.steam, sv.dish].map((x) => x.toFixed(3)).join();
+  const sig = [sv.dark, sv.push, sv.steam, sv.dish, sv.media, sv.settle].map((x) => x.toFixed(3)).join();
+  mediaV = sv.media;
   if (force || c !== sig) {
-    stage.style.setProperty('--dark', sv.dark.toFixed(3)); stage.style.setProperty('--push', sv.push.toFixed(3));
-    stage.style.setProperty('--steam', sv.steam.toFixed(3)); stage.style.setProperty('--dish', sv.dish.toFixed(3));
+    for (const k of ['dark', 'push', 'steam', 'dish', 'media', 'settle']) stage.style.setProperty('--' + k, sv[k].toFixed(3));
+    stage.classList.toggle('media-off', sv.media < .01);
     cache.set(stage, sig);
   }
 }
 
-// ---------------------------------------------------------------- flame light (video luminance) for the steam to pick up
-const probe = document.createElement('canvas'); probe.width = 24; probe.height = 14;
-const pctx = probe.getContext('2d', { willReadFrequently: true });
-let flick = .5, lo = 1, hi = 0, probeAt = 0, lum = 0;
+// ---------------------------------------------------------------- flame light for the steam to pick up
+// Brightness of each frame of the flame clip (24 fps, 121 frames), measured offline with ffmpeg on media/hero-loop.mp4 (see tools/flame-table.py) and scaled 0..99.
+// Reading it by frame number replaces copying the video into a canvas and reading the pixels back every few frames, which makes the CPU wait for the GPU.
+// If the clip is replaced, regenerate the table.
+const FLAME = [99, 99, 99, 87, 20, 15, 35, 43, 54, 77, 99, 80, 28, 0, 2, 12, 48, 62, 98, 77, 17, 5, 13, 34, 72, 92, 76, 0, 1, 19, 18, 35, 78, 99, 90, 31, 7, 11, 56, 74, 83, 99, 74, 32, 39, 39, 35, 8, 37, 58, 71, 40, 0, 6, 9, 16, 27, 58, 85, 25, 51, 73, 87, 29, 0, 7, 14, 62, 73, 79, 66, 0, 2, 10, 18, 55, 61, 66, 72, 19, 23, 55, 58, 20, 20, 38, 78, 92, 99, 32, 20, 42, 60, 87, 64, 0, 0, 4, 29, 60, 85, 46, 20, 6, 35, 76, 99, 80, 4, 13, 35, 25, 34, 52, 76, 82, 36, 25, 38, 44, 64];
+let flick = .5;
 function readFlicker(now) {
   const playing = stage.classList.contains('is-video') && !video.paused;
-  if (playing && now - probeAt > 120) {
-    probeAt = now;
-    try { pctx.drawImage(video, 0, 0, 24, 14); const d = pctx.getImageData(0, 0, 24, 14).data; let s = 0; for (let i = 0; i < d.length; i += 4) s += d[i] * .5 + d[i + 1] * .35 + d[i + 2] * .15; lum = s / (d.length / 4) / 255; lo = Math.min(lum, lo + .0004); hi = Math.max(lum, hi - .0004); } catch (e) { /* tainted or not ready: keep the last value */ }
-  }
-  const raw = playing ? clamp((lum - lo) / Math.max(.04, hi - lo)) : .5 + .16 * Math.sin(now * .0011) * Math.sin(now * .00037 + 1);   // a still poster gets a slow ember breath instead
+  const raw = playing ? FLAME[Math.floor(video.currentTime * 24) % FLAME.length] / 99 : .5 + .16 * Math.sin(now * .0011) * Math.sin(now * .00037 + 1);   // a still poster gets a slow ember breath instead
   flick += (raw - flick) * .2;
   return flick;
 }
@@ -109,17 +125,17 @@ function relax(dt) { for (const k in target) cur[k] += (target[k] - cur[k]) * (1
 function frame(now) {
   raf = requestAnimationFrame(frame);
   const dtReal = Math.min(.05, (now - last) / 1000); const gap = now - last; last = now;
-  if (gap < 3000) { stats.ms.push(gap); if (stats.ms.length > 360) stats.ms.shift(); }
-  const t0 = performance.now();
+  if (gap < 3000) { stats.ms.push(gap); if (stats.ms.length > 360) stats.ms.shift(); }   //#lab
+  const t0 = performance.now();   //#lab
   p = progress();
   if (Math.abs(p - lastP) > .12) catchup = Math.max(catchup, 120);   // a jump (anchor, scrollbar drag, reload mid-way): let the fluid catch up quickly
   lastP = p;
   applyDom(p);
   setTargets(p); relax(dtReal);
-  Object.assign(steam.P, cur, { flick: readFlicker(now) });
+  Object.assign(steam.P, cur, { flick: readFlicker(now), media: mediaV });
   if (catchup > 0) { const n = Math.min(catchup, 10); steam.warm(n); catchup -= n; }
-  steam.frame(dtReal);
-  stats.frames++; stats.cpu.push(performance.now() - t0); if (stats.cpu.length > 360) stats.cpu.shift();
+  steam.frame(dtReal); dish.draw(cur.clear);
+  stats.frames++; stats.cpu.push(performance.now() - t0); if (stats.cpu.length > 360) stats.cpu.shift();   //#lab
   syncVideoForDish();
   if (!q.has('perf') || q.get('perf') !== 'off') adapt(gap);
 }
@@ -147,7 +163,7 @@ const now_gap = () => parkedAt && performance.now() - parkedAt > 1500;
 
 // ---------------------------------------------------------------- the Kling clip: same protections as the production hero (idle start, 960px gate, Save-Data, startup and stall fallbacks, Pause)
 let vState = 'idle', vStart = 0, vStall = 0, vQueued = false;
-const dishCovered = () => cur.clear > 1.0;
+const dishCovered = () => mediaV < .01;   // the footage is faded out into the cloud: stop decoding it
 function syncVideo() {
   if (vState !== 'playing') return;
   const go = mode === 'live' && !userPaused && inView && !document.hidden && !dishCovered();
@@ -190,13 +206,15 @@ async function ensureSteam() {
   if (steam || steamPending || glFailed) return steamPending;
   steamPending = (async () => {
     try {
-      const dish = await loadImage('media/dish-charsiu.webp');
+      const img = await loadImage('media/dish-charsiu.webp');
       const tier = q.get('quality') || (phone.matches ? 'low' : ((navigator.hardwareConcurrency || 4) >= 8 && (navigator.deviceMemory || 8) >= 8 ? 'high' : 'mid'));
-      steam = createSteam({ canvas, dish, tier });
-      canvas.addEventListener('webglcontextlost', (e) => { e.preventDefault(); steam = null; glFailed = true; applyMode(); });
+      steam = await createSteam({ canvas, tier });
+      const lost = () => { steam = dish = null; glFailed = true; applyMode(); };
+      canvas.addEventListener('webglcontextlost', (e) => { e.preventDefault(); lost(); });
+      dish = await createDish({ canvas: dishCanvas, image: img, onLost: lost });
       layout(); setTargets(progress()); Object.assign(cur, target); Object.assign(steam.P, cur); steam.settle();
       catchup = 150;
-    } catch (err) { console.warn('The Breath: WebGL2 unavailable, using the calm layout.', err && err.message); glFailed = true; steam = null; }
+    } catch (err) { console.warn('The Breath: WebGL2 unavailable, using the calm layout.', err && err.message); if (steam) steam.dispose(); glFailed = true; steam = dish = null; }
     steamPending = null; applyMode();
   })();
   return steamPending;
@@ -206,7 +224,7 @@ function applyMode() {
   if (next === 'live' && !steam) { if (!steamPending) ensureSteam(); if (mode === 'nojs') root.classList.add('is-calm'); return; }   // until the solver is ready, the calm layout is a complete page
   if (next !== mode) {
     mode = next; root.classList.toggle('is-live', mode === 'live'); root.classList.toggle('is-calm', mode === 'calm');
-    if (mode === 'calm') { stopVideo(); canvas.style.visibility = 'hidden'; } else { canvas.style.visibility = ''; }
+    if (mode === 'calm') { stopVideo(); canvas.style.visibility = 'hidden'; } else { canvas.style.visibility = ''; if (dish) dish.draw(cur.clear); }
   }
   root.classList.toggle('is-calm', mode === 'calm' || (mode === 'nojs'));
   // Pause control: offered whenever the live sequence is possible at all
@@ -227,7 +245,7 @@ listen(phone, () => { layout(); catchup = 150; });
 new IntersectionObserver(([e]) => { inView = e.isIntersecting; sync(); }, { rootMargin: '120px 0px' }).observe(section);
 document.addEventListener('visibilitychange', sync);
 let rz = 0;
-new ResizeObserver(() => { cancelAnimationFrame(rz); rz = requestAnimationFrame(() => { measure(); if (steam) { steam.relayout(); layout(); } p = progress(); applyDom(p, true); if (mode !== 'live') return; if (labMode) steam.draw(); }); }).observe(stage);
+new ResizeObserver(() => { cancelAnimationFrame(rz); rz = requestAnimationFrame(() => { measure(); if (steam) { steam.relayout(); layout(); } p = progress(); applyDom(p, true); if (mode !== 'live') return; if (labMode) { steam.draw(); dish.draw(steam.P.clear); } }); }).observe(stage);
 addEventListener('scroll', () => { if (mode !== 'live' || !raf) { cancelAnimationFrame(scrollRaf); scrollRaf = requestAnimationFrame(() => { p = progress(); applyDom(p); }); } }, { passive: true });
 // the pointer parts the steam on desktop; touch is never read (no pointer capture, no touch-action override: scrolling is never taken from the visitor)
 let pm = null;
@@ -244,10 +262,11 @@ measure(); p = progress(); applyDom(p, true);
 document.fonts && document.fonts.ready.then(() => { measure(); p = progress(); applyDom(p, true); });
 (() => { const go = () => { applyMode(); }; if (stillOnly()) go(); else if (document.readyState === 'complete') go(); else addEventListener('load', () => setTimeout(go, 0), { once: true }); })();
 
-// ---------------------------------------------------------------- lab hooks: deterministic capture and measurement (no effect on visitors)
+// ---------------------------------------------------------------- lab hooks: deterministic capture and measurement. Stripped from the shipped bundle by tools/build.mjs.
+//#lab
 const pct = (a, f) => { if (!a.length) return 0; const s = [...a].sort((x, y) => x - y); return s[Math.min(s.length - 1, Math.floor(f * s.length))]; };
 window.lab = {
-  get mode() { return mode; }, get p() { return p; }, get steam() { return steam; },
+  get mode() { return mode; }, get p() { return p; }, get steam() { return steam; }, get dish() { return dish; },
   async ready() { applyMode(); if (steamPending) await steamPending; applyMode(); return mode; },
   // jump to progress pp, replay the last stretch of the sequence through the solver, draw one frame
   async seek(pp, { span = .3, steps = 300, scroll = true } = {}) {
@@ -257,12 +276,25 @@ window.lab = {
     if (mode !== 'live' || !steam) return { mode };
     const p0 = Math.max(0, pp - span); setTargets(p0); Object.assign(cur, target); Object.assign(steam.P, cur); steam.settle();
     for (let i = 0; i <= steps; i++) { const pi = p0 + (pp - p0) * (i / steps); setTargets(pi); relax(1 / 60); Object.assign(steam.P, cur, { flick: .5 + .1 * Math.sin(i * .21), dbg: +(q.get('view') === 'dye') + 2 * +(q.get('view') === 'vel') }); steam.warm(1); }
-    steam.draw(); return { mode, p: pp };
+    Object.assign(steam.P, { media: mediaV }); steam.draw(); dish.draw(steam.P.clear); return { mode, p: pp };
   },
   stats() {
     const m = stats.ms; const mem = performance.memory ? { usedJSHeapMB: +(performance.memory.usedJSHeapSize / 1048576).toFixed(1) } : {};
     return { mode, raf: !!raf, frames: stats.frames, rafMs: { p50: +pct(m, .5).toFixed(1), p95: +pct(m, .95).toFixed(1), n: m.length }, cpuMs: { p50: +pct(stats.cpu, .5).toFixed(2), p95: +pct(stats.cpu, .95).toFixed(2) },
-      bails: stats.bails, grids: steam && steam.grids, gpuMB: steam ? +(steam.gpuBytes / 1048576).toFixed(2) : 0, video: vState, inView, hidden: document.hidden, userPaused, glFailed, bailed, ...mem };
+      bails: stats.bails, grids: steam && steam.grids, gpuMB: steam ? +((steam.gpuBytes + (dish ? dish.gpuBytes : 0)) / 1048576).toFixed(2) : 0, dishPx: dish && dish.size, video: vState, inView, hidden: document.hidden, userPaused, glFailed, bailed, ...mem };
+  },
+  // steady-state check of the handover: for every p, how visible is the footage (media) and how visible is the dish (centre alpha of the clearing)?
+  // The worst overlap is the largest min(media, dish) over the whole track. 0 means they are never on screen together.
+  overlap() {
+    let worst = 0, at = 0; const out = [];
+    for (let i = 0; i <= 200; i++) {
+      const pp = i / 200, m = stageVars(pp).media, c = key(pp, TL.clear), dwarp = 0;
+      const R = c * 1.08, wid = .22, dA = c > .001 ? 1 - smooth(R - wid, R + .02, 0 + dwarp) : 0;   // centre of the plate, in units of reach
+      const v = Math.min(m, dA); if (v > worst) { worst = v; at = pp; }
+      if (i % 10 === 0) out.push([pp, +m.toFixed(3), +dA.toFixed(3)]);
+    }
+    return { worst: +worst.toFixed(4), at, samples: out };
   },
   resetStats() { stats.ms.length = 0; stats.cpu.length = 0; stats.frames = 0; },
 };
+//#endlab

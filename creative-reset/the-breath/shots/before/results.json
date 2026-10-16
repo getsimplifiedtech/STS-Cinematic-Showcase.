@@ -1,0 +1,815 @@
+{
+ "shots": {
+  "desktop-1440x900": {
+   "errors": [],
+   "stats": {
+    "mode": "live",
+    "raf": false,
+    "frames": 0,
+    "rafMs": {
+     "p50": 0,
+     "p95": 0,
+     "n": 0
+    },
+    "cpuMs": {
+     "p50": 0,
+     "p95": 0
+    },
+    "bails": 0,
+    "grids": {
+     "sim": [
+      230,
+      144
+     ],
+     "dye": [
+      640,
+      400
+     ],
+     "canvas": [
+      1440,
+      900
+     ],
+     "scale": 1,
+     "jacobi": 14
+    },
+    "gpuMB": 6.35,
+    "video": "idle",
+    "inView": true,
+    "hidden": false,
+    "userPaused": false,
+    "glFailed": false,
+    "bailed": false,
+    "usedJSHeapMB": 9.5
+   }
+  },
+  "mobile-390x844": {
+   "errors": [],
+   "stats": {
+    "mode": "live",
+    "raf": false,
+    "frames": 0,
+    "rafMs": {
+     "p50": 0,
+     "p95": 0,
+     "n": 0
+    },
+    "cpuMs": {
+     "p50": 0,
+     "p95": 0
+    },
+    "bails": 0,
+    "grids": {
+     "sim": [
+      52,
+      112
+     ],
+     "dye": [
+      133,
+      288
+     ],
+     "canvas": [
+      390,
+      844
+     ],
+     "scale": 1,
+     "jacobi": 10
+    },
+    "gpuMB": 5.11,
+    "video": "idle",
+    "inView": true,
+    "hidden": false,
+    "userPaused": false,
+    "glFailed": false,
+    "bailed": false,
+    "usedJSHeapMB": 9.5
+   }
+  }
+ },
+ "modes": {
+  "reduced-motion@1440x900": {
+   "mode": "calm",
+   "stats": {
+    "mode": "calm",
+    "raf": false,
+    "frames": 0,
+    "rafMs": {
+     "p50": 0,
+     "p95": 0,
+     "n": 0
+    },
+    "cpuMs": {
+     "p50": 0,
+     "p95": 0
+    },
+    "bails": 0,
+    "grids": null,
+    "gpuMB": 0,
+    "video": "idle",
+    "inView": true,
+    "hidden": false,
+    "userPaused": false,
+    "glFailed": false,
+    "bailed": false,
+    "usedJSHeapMB": 9.5
+   },
+   "canvasVisible": "hidden",
+   "video": false,
+   "errors": [],
+   "scrollHeight": 5884,
+   "positions": {
+    "top": 0,
+    "mid": 2001,
+    "steam": 3060,
+    "plate": 5296
+   }
+  },
+  "reduced-motion@390x844": {
+   "mode": "calm",
+   "stats": {
+    "mode": "calm",
+    "raf": false,
+    "frames": 0,
+    "rafMs": {
+     "p50": 0,
+     "p95": 0,
+     "n": 0
+    },
+    "cpuMs": {
+     "p50": 0,
+     "p95": 0
+    },
+    "bails": 0,
+    "grids": null,
+    "gpuMB": 0,
+    "video": "idle",
+    "inView": true,
+    "hidden": false,
+    "userPaused": false,
+    "glFailed": false,
+    "bailed": false,
+    "usedJSHeapMB": 9.5
+   },
+   "canvasVisible": "hidden",
+   "video": false,
+   "errors": [],
+   "scrollHeight": 4725,
+   "positions": {
+    "top": 0,
+    "mid": 1607,
+    "steam": 2457,
+    "plate": 4253
+   }
+  },
+  "save-data@1440x900": {
+   "mode": "calm",
+   "stats": {
+    "mode": "calm",
+    "raf": false,
+    "frames": 0,
+    "rafMs": {
+     "p50": 0,
+     "p95": 0,
+     "n": 0
+    },
+    "cpuMs": {
+     "p50": 0,
+     "p95": 0
+    },
+    "bails": 0,
+    "grids": null,
+    "gpuMB": 0,
+    "video": "idle",
+    "inView": true,
+    "hidden": false,
+    "userPaused": false,
+    "glFailed": false,
+    "bailed": false,
+    "usedJSHeapMB": 9.5
+   },
+   "canvasVisible": "hidden",
+   "video": false,
+   "errors": [],
+   "scrollHeight": 5884,
+   "positions": {
+    "top": 0,
+    "mid": 2001,
+    "steam": 3060,
+    "plate": 5296
+   }
+  },
+  "save-data@390x844": {
+   "mode": "calm",
+   "stats": {
+    "mode": "calm",
+    "raf": false,
+    "frames": 0,
+    "rafMs": {
+     "p50": 0,
+     "p95": 0,
+     "n": 0
+    },
+    "cpuMs": {
+     "p50": 0,
+     "p95": 0
+    },
+    "bails": 0,
+    "grids": null,
+    "gpuMB": 0,
+    "video": "idle",
+    "inView": true,
+    "hidden": false,
+    "userPaused": false,
+    "glFailed": false,
+    "bailed": false,
+    "usedJSHeapMB": 9.5
+   },
+   "canvasVisible": "hidden",
+   "video": false,
+   "errors": [],
+   "scrollHeight": 4725,
+   "positions": {
+    "top": 0,
+    "mid": 1607,
+    "steam": 2457,
+    "plate": 4253
+   }
+  },
+  "no-webgl2@1440x900": {
+   "mode": "calm",
+   "stats": {
+    "mode": "calm",
+    "raf": false,
+    "frames": 0,
+    "rafMs": {
+     "p50": 0,
+     "p95": 0,
+     "n": 0
+    },
+    "cpuMs": {
+     "p50": 0,
+     "p95": 0
+    },
+    "bails": 0,
+    "grids": null,
+    "gpuMB": 0,
+    "video": "idle",
+    "inView": true,
+    "hidden": false,
+    "userPaused": false,
+    "glFailed": true,
+    "bailed": false,
+    "usedJSHeapMB": 9.5
+   },
+   "canvasVisible": "hidden",
+   "video": false,
+   "errors": [],
+   "scrollHeight": 5884,
+   "positions": {
+    "top": 0,
+    "mid": 2001,
+    "steam": 3060,
+    "plate": 5296
+   }
+  },
+  "no-webgl2@390x844": {
+   "mode": "calm",
+   "stats": {
+    "mode": "calm",
+    "raf": false,
+    "frames": 0,
+    "rafMs": {
+     "p50": 0,
+     "p95": 0,
+     "n": 0
+    },
+    "cpuMs": {
+     "p50": 0,
+     "p95": 0
+    },
+    "bails": 0,
+    "grids": null,
+    "gpuMB": 0,
+    "video": "idle",
+    "inView": true,
+    "hidden": false,
+    "userPaused": false,
+    "glFailed": true,
+    "bailed": false,
+    "usedJSHeapMB": 9.5
+   },
+   "canvasVisible": "hidden",
+   "video": false,
+   "errors": [],
+   "scrollHeight": 4725,
+   "positions": {
+    "top": 0,
+    "mid": 1607,
+    "steam": 2457,
+    "plate": 4253
+   }
+  },
+  "no-javascript@1440x900": {
+   "mode": "no-js",
+   "errors": [],
+   "scrollHeight": 4463,
+   "positions": {
+    "top": 0,
+    "mid": 1517,
+    "steam": 2321,
+    "plate": 4017
+   }
+  },
+  "no-javascript@390x844": {
+   "mode": "no-js",
+   "errors": [],
+   "scrollHeight": 4219,
+   "positions": {
+    "top": 0,
+    "mid": 1434,
+    "steam": 2194,
+    "plate": 3797
+   }
+  }
+ },
+ "keyboard": {
+  "order": [
+   "a.brand|\u7389\u706bJade & Ember|20|outline:solid/2px",
+   "button.pause|Pause motion|828|outline:solid/2px",
+   "a.btn|See the menu|753|outline:solid/2px",
+   "a.btn-link|Order online|755|outline:solid/2px",
+   "a.btn|Back to the top|458|outline:solid/2px",
+   "body",
+   "a.brand|\u7389\u706bJade & Ember|20|outline:solid/2px",
+   "button.pause|Pause motion|828|outline:solid/2px"
+  ],
+  "pause": {
+   "before": {
+    "pressed": "false",
+    "mode": "live"
+   },
+   "after": {
+    "pressed": "true",
+    "label": "Play motion",
+    "mode": "calm"
+   },
+   "back": {
+    "pressed": "false",
+    "label": "Pause motion",
+    "mode": "live"
+   }
+  },
+  "pageDownMovedTo": 787,
+  "headings": [
+   {
+    "t": "The breath of the wok.",
+    "hidden": false
+   },
+   {
+    "t": "Fire",
+    "hidden": false
+   },
+   {
+    "t": "Steam",
+    "hidden": false
+   },
+   {
+    "t": "Texture",
+    "hidden": false
+   },
+   {
+    "t": "The plate",
+    "hidden": false
+   }
+  ],
+  "errors": []
+ },
+ "reverse": {
+  "trace": [
+   {
+    "p": 0.2,
+    "beats": {
+     "beat-0": [
+      1,
+      1
+     ],
+     "beat-1": [
+      1,
+      0
+     ],
+     "beat-2": [
+      0,
+      0
+     ],
+     "beat-3": [
+      0,
+      0
+     ],
+     "beat-4": [
+      0,
+      0
+     ]
+    },
+    "clear": 0,
+    "spread": 0.027452664175854555
+   },
+   {
+    "p": 0.52,
+    "beats": {
+     "beat-0": [
+      1,
+      1
+     ],
+     "beat-1": [
+      1,
+      1
+     ],
+     "beat-2": [
+      1,
+      1
+     ],
+     "beat-3": [
+      1,
+      0
+     ],
+     "beat-4": [
+      0,
+      0
+     ]
+    },
+    "clear": 0,
+    "spread": 0.9718823517942147
+   },
+   {
+    "p": 0.8,
+    "beats": {
+     "beat-0": [
+      1,
+      1
+     ],
+     "beat-1": [
+      1,
+      1
+     ],
+     "beat-2": [
+      1,
+      1
+     ],
+     "beat-3": [
+      1,
+      1
+     ],
+     "beat-4": [
+      1,
+      0
+     ]
+    },
+    "clear": 0.8994616440580693,
+    "spread": 0.1288387012053178
+   },
+   {
+    "p": 0.52,
+    "beats": {
+     "beat-0": [
+      1,
+      1
+     ],
+     "beat-1": [
+      1,
+      1
+     ],
+     "beat-2": [
+      1,
+      1
+     ],
+     "beat-3": [
+      1,
+      0
+     ],
+     "beat-4": [
+      0,
+      0
+     ]
+    },
+    "clear": 2.4194034797563874e-06,
+    "spread": 0.9967578138044914
+   },
+   {
+    "p": 0.2,
+    "beats": {
+     "beat-0": [
+      1,
+      1
+     ],
+     "beat-1": [
+      1,
+      0
+     ],
+     "beat-2": [
+      0,
+      0
+     ],
+     "beat-3": [
+      0,
+      0
+     ],
+     "beat-4": [
+      0,
+      0
+     ]
+    },
+    "clear": 2.2527620401169938e-17,
+    "spread": 0.04479731875288215
+   },
+   {
+    "p": 0,
+    "beats": {
+     "beat-0": [
+      1,
+      0
+     ],
+     "beat-1": [
+      0,
+      0
+     ],
+     "beat-2": [
+      0,
+      0
+     ],
+     "beat-3": [
+      0,
+      0
+     ],
+     "beat-4": [
+      0,
+      0
+     ]
+    },
+    "clear": 2.090509814660143e-27,
+    "spread": 0.0010204597575032043
+   }
+  ],
+  "errors": []
+ },
+ "resize": {
+  "steps": [
+   {
+    "vp": "1024x768",
+    "canvas": [
+     1000,
+     750
+    ],
+    "grids": {
+     "sim": [
+      149,
+      112
+     ],
+     "dye": [
+      384,
+      288
+     ],
+     "canvas": [
+      1000,
+      750
+     ],
+     "scale": 1,
+     "jacobi": 10
+    },
+    "mode": "live",
+    "overflowX": false
+   },
+   {
+    "vp": "390x844",
+    "canvas": [
+     390,
+     844
+    ],
+    "grids": {
+     "sim": [
+      52,
+      112
+     ],
+     "dye": [
+      133,
+      288
+     ],
+     "canvas": [
+      390,
+      844
+     ],
+     "scale": 1,
+     "jacobi": 10
+    },
+    "mode": "live",
+    "overflowX": false
+   },
+   {
+    "vp": "844x390",
+    "canvas": [
+     844,
+     390
+    ],
+    "grids": {
+     "sim": [
+      242,
+      112
+     ],
+     "dye": [
+      623,
+      288
+     ],
+     "canvas": [
+      844,
+      390
+     ],
+     "scale": 1,
+     "jacobi": 10
+    },
+    "mode": "live",
+    "overflowX": false
+   },
+   {
+    "vp": "1440x900",
+    "canvas": [
+     1095,
+     685
+    ],
+    "grids": {
+     "sim": [
+      179,
+      112
+     ],
+     "dye": [
+      461,
+      288
+     ],
+     "canvas": [
+      1095,
+      685
+     ],
+     "scale": 1,
+     "jacobi": 10
+    },
+    "mode": "live",
+    "overflowX": false
+   }
+  ],
+  "errors": []
+ },
+ "gating": {
+  "visible": {
+   "frames": 4,
+   "raf": true
+  },
+  "hiddenTab": {
+   "frames": 0,
+   "raf": false
+  },
+  "resumed": {
+   "frames": 4,
+   "raf": true
+  },
+  "offScreen": {
+   "frames": 0,
+   "raf": false,
+   "inView": false
+  },
+  "errors": []
+ },
+ "perf": {
+  "1440x900-mid": {
+   "mode": "live",
+   "raf": true,
+   "frames": 8,
+   "rafMs": {
+    "p50": 1083.2,
+    "p95": 2066.5,
+    "n": 8
+   },
+   "cpuMs": {
+    "p50": 0.5,
+    "p95": 0.6
+   },
+   "bails": 0,
+   "grids": {
+    "sim": [
+     230,
+     144
+    ],
+    "dye": [
+     640,
+     400
+    ],
+    "canvas": [
+     1440,
+     900
+    ],
+    "scale": 1,
+    "jacobi": 14
+   },
+   "gpuMB": 6.35,
+   "video": "idle",
+   "inView": true,
+   "hidden": false,
+   "userPaused": false,
+   "glFailed": false,
+   "bailed": false,
+   "usedJSHeapMB": 9.5,
+   "errors": []
+  },
+  "390x844-low": {
+   "mode": "live",
+   "raf": true,
+   "frames": 132,
+   "rafMs": {
+    "p50": 66.6,
+    "p95": 83.3,
+    "n": 132
+   },
+   "cpuMs": {
+    "p50": 0.2,
+    "p95": 0.3
+   },
+   "bails": 0,
+   "grids": {
+    "sim": [
+     52,
+     112
+    ],
+    "dye": [
+     133,
+     288
+    ],
+    "canvas": [
+     390,
+     844
+    ],
+    "scale": 1,
+    "jacobi": 10
+   },
+   "gpuMB": 5.11,
+   "video": "idle",
+   "inView": true,
+   "hidden": false,
+   "userPaused": false,
+   "glFailed": false,
+   "bailed": false,
+   "usedJSHeapMB": 9.5,
+   "errors": []
+  }
+ },
+ "assets": {
+  "index.html": {
+   "bytes": 6072,
+   "gzip": 2301
+  },
+  "breath.css": {
+   "bytes": 12263,
+   "gzip": 3992
+  },
+  "js/gl.js": {
+   "bytes": 4117,
+   "gzip": 1820
+  },
+  "js/steam.js": {
+   "bytes": 20182,
+   "gzip": 7338
+  },
+  "js/breath.js": {
+   "bytes": 18837,
+   "gzip": 6904
+  },
+  "media/dish-charsiu.webp": {
+   "bytes": 61404
+  },
+  "media/hero-loop.mp4": {
+   "bytes": 913066
+  },
+  "media/hero-loop.webm": {
+   "bytes": 598073
+  },
+  "media/hero-wok-m.webp": {
+   "bytes": 54436
+  },
+  "media/hero-wok.webp": {
+   "bytes": 61464
+  },
+  "media/steam-plate-m.webp": {
+   "bytes": 14574
+  },
+  "media/steam-plate.webp": {
+   "bytes": 28174
+  },
+  "fonts/karla-latin-400-normal.woff2": {
+   "bytes": 13140
+  },
+  "fonts/karla-latin-600-normal.woff2": {
+   "bytes": 13432
+  },
+  "fonts/noto-serif-sc-seal-600.woff2": {
+   "bytes": 1016
+  },
+  "fonts/young-serif-latin-400-normal.woff2": {
+   "bytes": 26992
+  }
+ }
+}

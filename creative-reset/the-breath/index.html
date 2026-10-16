@@ -31,6 +31,8 @@
       <video class="flame" muted loop playsinline preload="none" disablepictureinpicture disableremoteplayback aria-hidden="true" tabindex="-1" width="1280" height="720" data-webm="media/hero-loop.webm" data-mp4="media/hero-loop.mp4"></video>
     </div>
     <div class="dark" aria-hidden="true"></div>
+    <!-- Live sequence only: the finished dish on its own canvas at full pixel density (js), and the steam over it. -->
+    <canvas class="dish" aria-hidden="true"></canvas>
     <canvas class="steam" aria-hidden="true"></canvas>
     <!-- Calm mode plates (reduced motion, Save-Data, no WebGL2, or a failed performance check): opacity-only crossfades, no movement. -->
     <div class="plates" aria-hidden="true">
@@ -75,7 +77,7 @@
           <h2 class="word"><span class="ln"><span>The plate</span></span></h2>
           <p class="copy">Out of the wok and onto jade or slate within seconds, while it is still singing.</p>
           <p class="dish-name">Char siu, maltose and five-spice <span class="price">$24</span></p>
-          <!-- No-JS and calm fallback: the finished dish as an ordinary figure. Hidden in the live sequence, where the dish is drawn on the canvas. -->
+          <!-- No-JS and calm fallback: the finished dish as an ordinary figure. Hidden in the live sequence, where the dish is drawn on its own canvas. -->
           <figure class="dish-static"><img src="media/dish-charsiu.webp" alt="Sliced char siu pork with lacquered, charred edges on a matte black plate beside two stalks of blanched gai lan." width="1200" height="800" loading="lazy" decoding="async"></figure>
         </div>
       </li>
@@ -97,6 +99,6 @@
   <p>Jade &amp; Ember is a fictional restaurant concept by Simplified Tech Solutions. Imagery and the flame clip are AI-generated concept media. This page is a lab prototype for owner review.</p>
 </footer>
 
-<script type="module" src="js/breath.js"></script>
+<script type="module" src="js/breath.min.js"></script>
 </body>
 </html>

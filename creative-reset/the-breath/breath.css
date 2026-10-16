@@ -14,7 +14,7 @@
 
 :root{
   color-scheme:dark;
-  --soot:#0e0d0c; --charcoal:#1a1816; --rice:#efe7d8; --rice-dim:#c4bcad; --ember:#f08a3c; --ember-hi:#f7a15c; --jade:#a9d2be;
+  --soot:#0e0d0c; --charcoal:#1a1816; --rice:#efe7d8; --rice-dim:#c4bcad; --ember:#f08a3c; --ember-hi:#f7a15c; --jade:#c2e3d2;
   --serif:"Young Serif","YS Fallback",Georgia,"Times New Roman",serif;
   --sans:"Karla","KA Fallback",system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
   --seal:"JE Seal","Noto Serif SC","Songti SC",serif;
@@ -45,11 +45,14 @@ a{color:inherit}
 .poster,.flame{object-fit:cover;object-position:var(--focus)}
 .flame{opacity:0;transition:opacity 500ms var(--ease)}
 .is-video .flame{opacity:1}
-.dark{position:absolute;z-index:2;inset:0;pointer-events:none;background:
+.dark{position:absolute;z-index:3;inset:0;pointer-events:none;background:
   linear-gradient(90deg,rgba(14,13,12,.92) 0,rgba(14,13,12,.7) 26%,rgba(14,13,12,.22) 50%,rgba(14,13,12,0) 66%),
   linear-gradient(0deg,rgba(14,13,12,.78) 0,rgba(14,13,12,0) 28%),
   linear-gradient(180deg,rgba(14,13,12,.55) 0,rgba(14,13,12,0) 20%)}
-.steam{position:absolute;z-index:1;inset:0;width:100%;height:100%;display:none;pointer-events:none}
+.steam{position:absolute;z-index:2;inset:0;width:100%;height:100%;display:none;pointer-events:none}
+/* the dish canvas is placed and sized by script (whole CSS pixels); it is hidden until the clearing opens and is removed in calm mode */
+.js .dish{position:absolute;z-index:1;display:block;pointer-events:none}
+.is-calm .dish{visibility:hidden!important}
 .plates{position:absolute;z-index:1;inset:0;display:none;pointer-events:none}
 .plate{position:absolute;inset:0;opacity:0}
 .pause{position:absolute;z-index:6;right:var(--gutter);bottom:28px;display:none;align-items:center;gap:12px;min-height:44px;padding:0 16px;background:rgba(14,13,12,.78);color:var(--rice);border:1px solid #8b857a;border-radius:2px;font:600 .9375rem/1 var(--sans);cursor:pointer;transition:border-color 180ms var(--ease),box-shadow 180ms var(--ease)}
@@ -92,6 +95,10 @@ h1 .ln{display:block}
 .is-live .beats a{pointer-events:auto}
 .is-live .dark,.is-calm .dark{opacity:var(--dark,1)}
 .is-live .media,.is-live .steam{transform:scale(calc(1 + var(--push,0)*.1));transform-origin:var(--ox,50%) var(--oy,58%)}
+/* the handover: the footage sinks into its own steam (media 1 to 0) before the dish is revealed; the dish then settles back to rest at exactly 1x */
+.is-live .media{opacity:var(--media,1)}
+.is-live .media-off .media{visibility:hidden}
+.is-live .dish{transform:scale(calc(1 + var(--settle,0)*.035))}
 .is-live .dish-static{display:none}
 
 /* each word rises out of a line mask and leaves upward; the copy follows it */
@@ -112,8 +119,8 @@ h1 .ln{display:block}
 .is-calm .beat .ln>span,.is-calm .beat .copy,.is-calm .beat .lede,.is-calm .beat .eyebrow,.is-calm .beat .actions,.is-calm .beat .dish-name{transform:none}
 .is-calm .beat .ln>span{opacity:calc(var(--in)*(1 - var(--out)))}
 .is-calm .beat-4{align-items:center}
-.is-calm .poster{opacity:calc(1 - var(--dish,0))}
-.plate-steam{opacity:var(--steam,0);background:url(media/steam-plate.webp) var(--focus)/cover no-repeat,
+.is-calm .poster{opacity:var(--media,1)}
+.plate-steam{opacity:calc(var(--steam,0)*var(--media,1));background:url(media/steam-plate.webp) var(--focus)/cover no-repeat,
   radial-gradient(90% 70% at 50% 30%,rgba(112,104,96,.78) 0,rgba(66,62,58,.62) 46%,rgba(30,28,26,.4) 100%)}
 .plate-dish{opacity:var(--dish,0);background:var(--soot)}
 .plate-dish img{position:absolute;right:-4%;top:50%;width:min(86vw,112vh,1280px);height:auto;transform:translateY(-50%);filter:brightness(.78) contrast(1.16) saturate(1.1);

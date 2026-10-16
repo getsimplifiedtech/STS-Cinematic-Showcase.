@@ -1,106 +1,169 @@
-# The Breath: findings
+# The Breath: findings, round 2 (corrected prototype)
 
-Prototype for the Jade & Ember **Firelight** direction. Branch `lab/jade-and-ember-the-breath`, cut from the tip of `feature/jade-and-ember-v0.9`. Everything lives in `creative-reset/the-breath/`. Nothing under `jade-and-ember/` differs from v0.9, MONOLITH was not touched, no package was added, and nothing was generated or downloaded.
+Branch `lab/jade-and-ember-the-breath`, everything inside `creative-reset/the-breath/`. Nothing under `jade-and-ember/` differs from v0.9, MONOLITH was not touched, no production budget was changed, nothing was generated, bought or downloaded, and no package was added.
 
-**Real-device status: not validated.** All measurements below come from headless Chromium with software WebGL (SwiftShader). They show the worst case for the code path, not how it will run on an iPhone or a mid-range Android phone. Those tests are still required.
+**Real-device status: not validated.** Every measurement below comes from headless Chromium with software WebGL (SwiftShader) on a 4-core container. It is a floor for the code path, not a prediction for an iPhone or a mid-range Android phone. **Real iPhone Safari and Android testing remain outstanding.** Screenshots and contact sheets are evidence of composition, not of motion quality: judge the steam by scrolling the live prototype.
 
-## 1. Visual choreography
+**Reference-first rule (CLAUDE.md).** The STS Technology Reference Registry was consulted before changing the animation and shaders. Its only related entry is Three.js (particles), which is not needed: the steam, the dish pass and the build script are STS-authored code with no third-party dependency. Nothing from the registry or the dormant references was installed, run or integrated. Playwright (already installed, listed in the registry) is used only to test. Lighthouse and axe are not installed, so they were not run (installing them needs your approval); the Lighthouse-style numbers below come from the browser's own APIs and are labelled as such.
 
-One progress value runs along a pinned track (660svh on desktop, 560svh on phones). Contact sheets: `shots/choreography-desktop.jpg`, `shots/choreography-mobile.jpg`.
+## 1. The three corrections
 
-| p | Beat | What happens |
+Contact sheets for the whole sequence: `shots/choreography-desktop.jpg`, `shots/choreography-mobile.jpg`. The round-1 frames are kept in `shots/before/`.
+
+### Priority 1: plate and wok overlap (p ≈ 0.62 to 0.74)
+
+**Cause.** The dish was drawn through a soft-edged hole over footage that was still fully visible. At p = 0.70 the plate floated over the lit wok, and the hole in the steam opened exactly where the wok was.
+
+**Fix (default I chose, since the brief left the mechanism open).** The handover now happens in a fixed order, so the footage and the dish are never on screen together:
+
+| p | What happens |
+| --- | --- |
+| 0.56 to 0.68 | The flame and wok sink into their own steam. The cloud is at its densest and carries the transition; the footage fades to soot and the flame light dims with it. The clip stops decoding once it is hidden. |
+| 0.70 | Only now does the clearing open. Steam is pushed aside and the dish rises out of cleared soot. |
+| 0.70 to 0.92 | The dish settles back from 1.035× to exactly 1× so it lands on the pixel grid. |
+| 0.74 to 1 | The type side keeps a soft ember floor that the plate sits in. |
+
+The calm layout (reduced motion, Save-Data, no WebGL2) had the same overlap because its steam still contains the wok. It now dissolves poster and steam still to soot first, then brings the dish in over soot.
+
+**Evidence** (`shots/evidence-1-handover-desktop.jpg`, `shots/evidence-1-handover-mobile.jpg`, desktop and mobile composed independently):
+
+| Measure | Before | After |
 | --- | --- | --- |
-| 0 – .09 | Hero | The Kling flame sets the scene. Wok steam rises from a live fluid solver and drifts across the baked steam in the footage. |
-| .105 – .275 | Fire | Flame at full height. Slow push-in on the footage and the steam together. Ember light warms the vapour near the wok. |
-| .295 – .46 | Steam | Five vents along the wok's reach pulse out of phase. Plumes bulge, collide and merge. The cloud grows to the edges of the frame. |
-| .48 – .645 | Texture | Densest, most turbulent point. Vorticity rises, the cloud fills the viewport and the flame glows through it. |
-| .665 – 1 | The plate | A clearing opens from the middle and shoves steam aside. The char siu plate appears through the haze, lit warm from the flame side, then settles on soot. The stage hands over to the page in the same soot colour. |
+| Worst co-presence of footage and dish over the whole track, `min(footage opacity, dish opacity at plate centre)` (`lab.overlap()`) | 1.00 at p ≈ 0.67 (calm layout 0.50) | 0.00, desktop and phone |
+| Real scroll loop, 16 stops forward and back (p 0.2, 0.5, 0.62, 0.66, 0.70, 0.74, 0.78, 0.84 and back to 0), stops with footage above 2% opacity and the dish canvas visible | not measured | 0 of 16, desktop and phone |
+| Reverse | closed (round 1) | Clearing closed from 0.90 to 0 and footage returned to 1.0 by p = 0.5 on both layouts. Frames: `shots/handover-{desktop,mobile}-{fwd,back}-p0xx.jpg` |
 
-Scroll sets the weather (emission, spread, clearing radius), never the fluid directly, so reverse scrolling is not a recording played backwards. In the reverse test the clearing closed (0.90 to 0.000002) and the spread returned (0.13 to 0.99) when going back from p = .8 to p = .52.
+### Priority 2: steam realism on phones
 
-Type: each word rises out of its own line mask and leaves upward; the copy follows. Words are real headings in DOM order (checked: all five headings are exposed). On phones the type sits at the top and the dish below, a separate composition rather than a scaled desktop.
+**Cause.** Five wide vents (about 84 px across in a 390 px frame, 88 px apart) overlapped into one sheet, so the plume read as fog. The phone solver also had only about 5.8 thousand cells, a source that spread wide, and an alpha curve that saturated.
 
-## 2. Reused STS components
+**Fix.**
+- Phone gets its own look: narrower vents (about 46 px), a smaller source, finer noise, less lower-frame vapour, and vapour that thins out as it climbs, so plumes rise as separate billows.
+- The vapour is read through a turbulence warp and eroded where it is thin, so edges curl and break into wisps instead of fading smoothly; dense cloud shades as one soft body, not a crumpled surface.
+- Phone grid: 52×112 solver and 133×288 dye became 91×197 and 215×465. Velocities are now in reference units, so motion looks the same on every quality tier.
+- The same shader also gives desktop sharper wisps (`shots/evidence-2-steam-desktop.jpg`).
+- Heat, flame and steam stay linked: the steam is lit from the wok, and once the footage fades the dying ember wash lights the cloud.
 
-| Component | Status in this prototype |
-| --- | --- |
-| Stir (stable-fluids solver) | **Reused and reworked.** Same method (Stam: advect, vorticity confinement, pressure projection). New: buoyancy, vents, a sign-correct clearing force, sharper dye advection with a limiter, R16F / RG16F targets (half the memory), scroll-driven weather, no touch handling. |
-| `shared/gl.js` | **Reused with fixes.** No `preserveDrawingBuffer`, premultiplied alpha, DPR and pixel caps. The loop moved to the caller, which fixes the no-op `document.hidden \|\| 0`. |
-| MONOLITH native scroll timeline | **Pattern reused.** One progress value on a CSS-sticky track, no scroll library. Written fresh. |
-| Ambient Cinematic Hero | **Reused.** Idle-time start, 960px gate, Save-Data and 2g stop, startup and stall fallbacks, Pause control, off-screen pause. The clip plays normally and is never scrubbed. |
-| Dust (GPU particles) | **Not used.** The footage already carries its own sparks, and extra particles would be the purposeless effect the brief rules out. |
-| Glass (refraction) | **Not used here.** Kept for the jade lacquer surfaces in the wider redesign. |
-| CSS View Transitions | **Not exercised.** A single-page lab has no navigation. The handoff to the other pages is untested. |
-| HorizonX fluid-mask reference | Inspiration only. Nothing copied. |
+**Evidence:** `shots/evidence-2-steam-mobile.jpg` (before and after at p 0.20, 0.36, 0.52) and `shots/choreography-mobile.jpg` (p 0.62 to 0.74 is where the difference is largest). Honest read: the early beats were already wispy on phones, the mid beats are noticeably more structured, and the dense cloud around the handover now reads as billowing smoke. A still cannot prove "rising and dissipating"; that needs your eye on the live scroll.
 
-## 3. Engineering requirements
+### Priority 3: dish sharpness
 
-| Requirement | Result | Evidence |
+**Cause.** The dish was drawn inside the steam canvas, which renders at 1 to 1.5 device pixels per CSS pixel and shrinks under load. On a 3× phone the plate was resampled down to about 0.65× of the source and then enlarged by the browser, and on a 2× laptop it was enlarged 2× with plain bilinear filtering.
+
+**Source image (reviewed).** `dish-charsiu.webp` is 1200×800, cropped from a 1472×1104 generation (seed 9903, `jade-and-ember/media/PROVENANCE.md`). The unselected and original files were not kept. The plate is 72% of the width, so about 864 source pixels. Displayed plate sizes: 864 CSS px on a 1440 desktop (1728 device px at 2×, a 2.0× upscale) and 374 CSS px on a 390 phone (1122 device px at 3×, a 1.3× upscale).
+
+**Fix (no new imagery).** The dish has its own canvas, sized to the dish and the screen's real pixel density (up to 3× and 4 megapixels), placed on whole CSS pixels. It resamples with Catmull-Rom, applies an unsharp mask clamped to the range of the four nearest source pixels (so no halos), and adds a fine static grain so upscaled areas keep a photographic texture. The same grade as before is kept (flame side warm, far side cooled). It redraws only while the clearing moves: 0 draw calls in 3 seconds at rest.
+
+**Evidence:** `shots/evidence-3-dish-sharpness-desktop-2x.jpg` (1440 px viewport at 2×) and `shots/evidence-3-dish-sharpness-mobile-3x.jpg` (390 px viewport at 3×), the same region before and after, 1:1 pixels. The desktop gain is clear (glaze edges, fibre, seeds). The phone gain is smaller because the source is nearer its natural size there.
+
+**Limit.** At 2× desktop the plate is still enlarged 2× from the source. The new path is as good as the existing pixels allow, but real crispness at that size needs a source of at least about 2400×1600. Options needing your approval: a regenerated or real photograph, or re-rendering seed 9903 at larger size. I did not generate anything.
+
+## 2. Performance
+
+Software GL, headless, 4-core container, shipped bundle `js/breath.min.js` unless stated. Treat as a floor. Raw numbers: `shots/results.json` (`perf`, `load`, `gating`, `assets`).
+
+### JavaScript size and what was trimmed
+
+| | Round 1 | Round 2 |
 | --- | --- | --- |
-| Solver mobile touch handling | Fixed by removal. No touch listeners, no pointer capture, no `touch-action` override. Only a mouse parts the steam, via a passive listener. | Code; mobile emulation. **Not tested on a real touch device.** |
-| Pause GPU off-screen and on hidden tab | Done. | 0 frames in 2 s with a hidden tab, 0 frames in 2 s when the track is off-screen, loop resumes on return. `results.json` → `gating`. |
-| Remove drawing-buffer preservation | Done. | `js/gl.js` |
-| Adaptive resolution, DPR and GPU workload limits | Done: DPR cap (1 to 1.5), pixel cap, canvas scale 0.55 to 1, Jacobi iterations 14 to 8, then hand over to the calm layout after three slow windows. | Logic only. **Never exercised on real hardware.** Headless runs use `perf=off`. |
-| Scrolling and navigation preserved | Yes. | PageDown moved the page by 787px with the Pause button focused. Tab order is brand, Pause, See the menu, Order online. |
-| Accessible Pause control | Yes. 44px target, `aria-pressed`, label changes to "Play motion", works with Enter and Space, visible focus ring. Pausing switches to the calm layout at the same scroll position. | `results.json` → `keyboard`. |
-| Narrative text as real DOM | Yes. Hidden beats stay in the accessibility tree (opacity, not `visibility`). Only the hero links are removed from the tab order when off-screen. | Heading check. Screen-reader testing was **not** done. |
-| Reduced motion, Save-Data, no WebGL2, no JS | All four have a designed fallback. | Screenshots in `shots/mode-*`. Reduced motion and Save-Data load no video. |
-| Hero media-loading protections | Ported from v0.9 `hero.js`. | With video on, the clip reached `playing` and advanced about 1.7s of playback in 1.5s, no errors. |
+| Shipped JS | 3 modules, 16,062 B gzip, unminified | 1 file, **12,251 B gzip** (11,063 brotli, 32,876 B raw), including the new dish pass |
+| Same code without the build | n/a | 17,017 B gzip |
+| Requests for script | 3 | 1 |
 
-## 4. Performance, memory and size
+Done: one bundle (one request), comments and whitespace removed including inside the shaders, lab and debug code stripped (about 0.7 KB gzip), per-frame video readback removed, dish moved out of the steam shader. `tools/build.mjs` is plain Node with no dependency and does not rename identifiers. Not done: identifier mangling (my estimate is about 1 to 1.5 KB gzip, unmeasured) and shader simplification (shader text is about 3 KB gzip of the 12). The 3,000 B per page budget cannot hold a fluid solver; the production budget was not touched.
 
-Software GL only. Treat as a floor.
+### Findings that changed the code
 
-| Case | Frames | Frame interval (p50 / p95) | JS per frame |
-| --- | --- | --- | --- |
-| 1440×900, `mid` tier | 8 in 8 s | 1083 ms / 2067 ms | 0.5 ms |
-| 390×844, `low` tier | 132 in 8 s | 67 ms / 83 ms | 0.2 ms |
+1. **A CPU-waits-for-GPU stall.** Every 120 ms the page copied the video into a canvas and read the pixels back, to measure flame brightness. With the video running, headless showed a 4,047 ms long task at start and a ~900 ms long task on every frame afterwards. Now: one 212 ms task at start and none after. The brightness of each clip frame is read from a 121-entry table measured offline (`tools/flame-table.py`); regenerate it if the clip is replaced. On real hardware the stall will be smaller than in software, but the pattern (CPU readback queued behind GPU work) is a known risk on phones.
+2. **Shader compile no longer blocks the page.** Programs compile with `KHR_parallel_shader_compile` where the driver offers it and are checked when ready. In headless this showed no change (about 200 ms either way), so the benefit is unproven; it matters on drivers with slow synchronous links.
+3. **Where the phone cost is.** A sweep at p = 0.55 on a 390×844 viewport at 2×: solver and dye grids hardly matter (26k/150k cells 9.0 fps, 5.8k/38k cells 12.0 fps), while canvas pixels matter a lot (0.75 Mpx 10.6 fps, 0.45 Mpx 14.4 fps, 0.33 Mpx 16.3 fps). The final phone tier is 18k/100k cells and 0.5 Mpx (about 12.9 fps in the same software setup).
 
-The JS side is negligible, so cost is all in the shaders. No real-GPU number exists yet.
+### Desktop (1440×900, tier `mid`, DPR 1)
 
-Memory: JS heap about 9.5 MB. GPU textures, estimated from allocation sizes, 6.4 MB on desktop and 5.1 MB on phones (the 1200×800 dish texture is 5.1 MB of that).
-
-Sizes (bytes, gzip for text):
-
-| Asset | Bytes |
+| Measure | Result |
 | --- | --- |
-| `index.html` | 6,072 (2,301 gz) |
-| `breath.css` | 12,262 (3,997 gz) |
-| `js/breath.js`, `steam.js`, `gl.js` | 18,836 / 20,182 / 4,117 (6,903 / 7,338 / 1,820 gz, 16,062 gz total, not minified) |
-| `hero-wok.webp`, `hero-wok-m.webp` | 61,464, 54,436 |
-| `dish-charsiu.webp` | 61,404 |
-| `steam-plate.webp`, `steam-plate-m.webp` (calm mode only) | 28,174, 14,574 |
-| `hero-loop.webm`, `.mp4` (unchanged, 960px+ only) | 598,073, 913,066 |
-| Fonts (same files as production) | 54,580 |
+| Frame rate in software GL | 1.1 to 1.5 fps (p50 774 to 978 ms). Meaningless as a device number; it shows the load is GPU-bound |
+| Main-thread (renderer) CPU while animating | 0.00 s per s |
+| GPU process CPU (software GL) | about 3.7 s per s (saturated), no real-GPU number exists |
+| Solver passes per frame | 47 (2 sub-steps × 23 passes + 1 composite). The measured draw-call counts in `results.json` are inflated by a start-up catch-up burst, so use this figure |
+| GPU memory (estimated from allocations) | 10.0 MB at DPR 1 (was 6.4), **21 MB at DPR 2** because the dish canvas is 2400×1600 |
+| Dish draws | about 1 per frame while the clearing moves, 0 at rest |
 
-**Budgets.** The v0.9 budgets are unchanged and the prototype is measured separately. Against them: JS is 16,062 B gzip against 3,000 B per page, and three modules against two scripts. Images are within the 68 KB limit. A revised envelope should wait for real-device numbers, but the shape I would propose is: Home gets its own JS budget (about 16 KB gzip unminified, to be re-measured minified and bundled into one request), the other four pages keep 3,000 B and load none of it, and a frame-time target and bail-out threshold are set from real phones.
+### Phone (390×844, tier `low`, DPR 2 and 3)
 
-## 5. Known defects and unresolved risks
-
-1. **No real-device validation.** Frame rate, thermal behaviour, Safari's handling of float render targets and the premultiplied glow are all untested. Highest risk.
-2. **Stills cannot show motion quality.** Judge the steam by scrolling the live prototype.
-3. **Captures used `video=off`.** The clip was checked separately (plays, advances, no errors) but the full sequence with moving footage was not photographed.
-4. **Phone steam is softer.** The `low` tier (112-row solver) reads closer to fog than billows. The dish is drawn in the canvas at up to 1.5× DPR, so it is softer than a DOM image on high-density screens.
-5. **Mid-transition overlap.** Around p = .70 the plate hovers over the still-visible wok before the steam closes around it. It looks deliberate in stills but needs a motion check.
-6. **Fast jumps.** Landing mid-sequence (anchor, scrollbar drag, reload) runs a catch-up of 120 to 150 solver steps over about 15 frames, so the first moments after a jump can look thin.
-7. **No-JS height differs.** The no-JS layout is about 500svh against 660svh live, so a browser restoring scroll before the script runs lands slightly off.
-8. **Not measured:** text contrast over the steam at p = .52, Lighthouse, axe, screen-reader behaviour. The type looks strong in captures, which is not a measurement.
-9. **The 45-check v0.9 gate was not run.** The lab sits outside `jade-and-ember/`, and the verify workflow triggers on pushes to the v0.9 branch and on pull requests. No pull request was opened.
-10. Mouse-parting of the steam is implemented but was not visually checked.
-
-## 6. Comparison against Firelight
-
-| Principle | Result |
+| Measure | Result |
 | --- | --- |
-| Soot and charcoal set the environment | Met. Soot ground, dark gradients, dish floor in the same soot as the page that follows. |
-| Ember as illumination, not orange buttons | Met. Warm light appears in the steam and on the plate. Buttons stay outlined rice. |
-| Jade selectively, as lacquer | Light touch only: the eyebrow and the gai lan. The lacquer surfaces are still to come. |
-| Rice-coloured type carries contrast | Met visually. Not measured. |
-| Fire, steam, texture, plating as the narrative | Met. |
-| Flame-lit photography | The dish is regraded warm on the flame side and cooled on the far side. It is the existing studio photograph, graded, not re-shot. A real flame-lit shoot would improve it. |
-| Preserve footage, hero composition, wok-hei idea, brand, functionality | Met. The hero composition is unchanged, links and copy are the production ones. |
-| No MONOLITH Drawing Set language | Met. |
+| Frame rate in software GL | 10 to 13 fps (p50 71 to 93 ms, p95 122 to 193 ms). Round 1 measured 15 fps with the old, coarser phone solver |
+| Main-thread CPU while animating | 0.02 s per s |
+| Solver passes per frame | 20 (1 step × 19 + 1 composite) |
+| GPU memory (estimated) | about 6 MB at DPR 1, **12 MB at DPR 3** (dish canvas 1560×1041) |
+| Adaptive load | Unchanged and never exercised on real hardware: canvas scale 0.55 to 1, then fewer pressure iterations, then hand over to the calm layout after three slow windows. The dish canvas is not scaled down by it |
 
-## 7. Recommendation
+### Loading (cold cache, shipped bundle, Lighthouse-style, not Lighthouse)
 
-**The Breath is ready for your visual review, not yet for integration.** The direction works: the steam reads as steam, the dish reveal is the strongest moment, and the phone composition holds. Before integrating I would want, in order: (1) a real-device pass on an iPhone and a mid-range Android phone with the tier and bail-out thresholds adjusted, (2) your visual sign-off, (3) approval of a Home-only budget, then (4) minify and bundle the three modules into one. If a real phone cannot hold the sequence, the calm layout is a complete page, so the downside is a still page, not a broken one.
+| Run | FCP / LCP | Total blocking time | CLS | Requests | Transferred |
+| --- | --- | --- | --- | --- | --- |
+| Desktop, unthrottled | 52 ms | 10 ms | 0 | 11 | 838 KB (598 KB is the clip) |
+| Desktop, slow 4G + 4× CPU | 876 ms | 182 ms | 0.031 | 12 | 838 KB |
+| Phone, unthrottled | 56 ms | 33 ms | 0 | 10 | 234 KB (no clip) |
+| Phone, slow 4G + 4× CPU | 864 ms | 144 ms | 0 | 10 | 234 KB |
+
+The clip loads only on 960 px and wider, after load and when idle. Phones never request it. The 0.031 desktop CLS appeared only in the throttled run and was not diagnosed (below the 0.1 threshold).
+
+### Suspension and Pause (draw calls on the steam and dish canvases in 2 s)
+
+Visible 133, hidden tab **0**, resumed 266, off-screen **0**, back on screen 180, paused by the visitor **0** (calm layout), played again 399. Also checked: the clip pauses when the footage is hidden at p = 0.8 and plays again at p = 0.3.
+
+### Recommended Home-specific budget (a recommendation only; no production budget was changed)
+
+- Home: one script request, **up to 14 KB gzip** (12.3 KB shipped now), no inline JS beyond today's 64 B. The other four pages keep the 3,000 B budget and load none of it.
+- Runtime ceilings, to be set from real phones: main-thread work under 2 ms per frame, steam canvas up to 0.5 Mpx on phones and 1.3 Mpx on desktop, GPU memory up to about 25 MB, zero draw calls while hidden or off-screen (met in headless).
+- Images: the dish stays within 68 KB today. If a sharper dish source is approved, a Home-only exception of about 180 KB for that one image is the cost of crispness at 2×.
+- The "delivered bytes +0.5% over v0.8" rule cannot apply to Home. Give Home its own baseline.
+- Do not set thresholds on frame time until an iPhone and a mid-range Android phone have been measured.
+
+## 3. Verification (shipped bundle for the first block; headless, not a real device)
+
+| Check | Result | Evidence |
+| --- | --- | --- |
+| Desktop and phone viewports | Live sequence runs on both, no console errors, no horizontal overflow | `shots/results.json`, `shots/*-p0xx.jpg` |
+| Reduced motion | Calm layout, no clip requested, Pause hidden, new dissolve-through-soot handover | `shots/mode-reduced-motion-*` |
+| Save-Data | Same as reduced motion | `shots/mode-save-data-*` |
+| No WebGL2 | Calm layout, no errors | `shots/mode-no-webgl2-*` |
+| JavaScript disabled | Complete page, dish as an ordinary figure | `shots/mode-no-javascript-*` |
+| Keyboard | Tab order: brand, Pause, See the menu, Order online; 2px focus ring; Enter and Space toggle Pause (live, calm, live); PageDown scrolled 787 px; all five headings in the accessibility tree; both canvases `aria-hidden` | `results.json` → `keyboard`, `shots/keyboard-focus-pause.jpg` |
+| Reverse scrolling | Handover and clearing reverse correctly on both layouts (section 1) | `shots/handover-*` |
+| Viewport resizing | 1024×768, 390×844, 844×390 and back to 1440×900: grids, steam canvas and dish canvas re-allocated, no overflow, still live | `results.json` → `resize` |
+| Pause and resume | Pause switches to calm at the same scroll position and back | `results.json` → `keyboard`, `gating` |
+| Off-screen and hidden-tab suspension | 0 draw calls hidden, off-screen and paused | section 2 |
+| Contrast | 36 text boxes measured against the rendered frames without the text (95th-percentile background, worst case). **All pass**: lowest are the hero eyebrow at 4.9:1 (needs 4.5, raised from 4.07 by lightening the jade), "Texture" at 3.2:1 and the hero headline at 3.5:1 (large text needs 3:1). Means are 7:1 and above | `shots/contrast-results.json`, `tools/contrast.py` |
+| Lighthouse | **Not run.** Not installed; installing needs your approval | |
+| Screen reader, axe | **Not run** | |
+
+Limits of the contrast check: headless frames at seven positions on each layout, text shadows ignored, boxes under 50% opacity (mid-transition) excluded. It samples the sequence; it does not prove every frame.
+
+## 4. Remaining defects and limitations
+
+1. **No real-device validation.** Frame rate, thermal behaviour, Safari's float render targets, `KHR_parallel_shader_compile` support and premultiplied glow are unverified. Highest risk.
+2. **Dish still enlarged 2× on a 2× laptop.** A larger source needs your approval (section 1).
+3. **More GPU memory.** 21 MB on a 2× laptop and 12 MB on a 3× phone, up from 6.4 and 5.1, because the dish now has real pixels. The adaptive logic does not shrink it. A cap at about 3 megapixels would save about 5 MB on desktop.
+4. **Phone cost rose in software GL** (15 fps to about 13 fps) after the finer grid and richer shader. The sweep says canvas size is the lever if a real phone struggles.
+5. **Stills cannot show motion quality.** Steam, dissipation and the mouse-parting effect (still not visually checked) need your eye on the live scroll.
+6. **A short text gap.** Around p = 0.66 the Texture copy has left and "The plate" has not arrived yet, about a ninth of a screen without a headline. It reads as a breath over the cloud; say if you want it closed.
+7. **Fast jumps** (anchor, scrollbar drag, reload mid-way) still run a 120 to 150 step catch-up over about 15 frames.
+8. **No-JS height** is about 500svh against 660svh live, so scroll restoration before the script runs can land slightly off.
+9. **Calm layout** now reaches the dish through soot with no steam in between. That is deliberate for reduced motion, and the calm steam stills were re-rendered from the new solver.
+10. **The 45-check v0.9 gate was not run** on this lab: it sits outside `jade-and-ember/` and no pull request was opened. The gate was not changed or weakened.
+11. **Preview frame.** The hosted preview is a claude.ai artifact; whether it runs WebGL2 and a tall sticky scroll inside that frame was not verified. If it does not, the local server in `tools/serve.py` is the reference.
+12. **CLS 0.031** on desktop under throttling was not diagnosed.
+
+## 5. Reproduce
+
+```
+python3 creative-reset/the-breath/tools/serve.py 8431
+node creative-reset/the-breath/tools/build.mjs          # src/ -> js/breath.min.js (shipped) and js/breath.lab.js (adds window.lab for tests)
+PLAYWRIGHT_MODULE=/path/to/playwright/index.mjs node creative-reset/the-breath/tools/capture.mjs --only=shots,modes,keyboard,handover,resize,gating,perf,load,contrast,assets
+python3 creative-reset/the-breath/tools/contrast.py
+```
+
+`tools/frames.mjs` grabs single frames at any DPR, `tools/sweep.mjs` runs the phone-tier sweep, `tools/sheet.py` builds contact sheets and crops, `tools/plates.mjs` re-renders the calm steam stills.
