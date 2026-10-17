@@ -11,6 +11,10 @@ Everything here is AI-generated concept media for a fictional restaurant. None o
 | `hero-wok-v2-m.webp` | Phone poster, 810x1440 | A 9:16 crop of the same still at the focus the phone layout uses, WebP q60. No 9:16 video was generated. |
 | `dish-beef.webp` | Plated dish, 2400x1610 | Plated still, resized from 5056x3392, WebP q74. |
 | `dish-beef-1200.webp` | The same dish at 1200x805, for the Menu | `dish-beef.webp` resized (Lanczos), WebP q74. |
+| `visit-room-a.webp` | Visit page opening photograph, 1280x859 | Higgsfield (owner's account) Nano Banana 2 at 4K, Shot A Candidate 2 (owner-approved master, 5056x3392), job `f2236920-1890-4a96-a781-3376e93b3612`, 3 credits, 2026-10-17. Resized (Lanczos), WebP q46. |
+| `visit-room-a-m.webp` | The phone crop of the same photograph, 720x900 | A 4:5 crop of Shot A (x 1400 to 4114, full height), resized, WebP q56. |
+| `visit-counter-b.webp` | The wok counter from a stool, 780x968 | Nano Banana 2 at 4K, Shot B image 1 (owner-approved), job `ecae65c4-09a8-448b-9abd-e8e1d2ecca76`, 3 credits, Shot A as the image reference. Resized from 3712x4608, WebP q66. |
+| `visit-materials-c.webp` | The jade wall and niche, 1200x805 | Nano Banana 2 at 4K, Shot C image 2 (owner-approved; image 4 of the five in the review gallery), job `2b7e3a9d-8eaf-4a34-92d9-a16b102313b4`, 3 credits, Shot A as the image reference. Resized from 5056x3392, WebP q66. |
 | `story-jade-bowls-860.webp` | The celadon bowls at 860x543, for the Home teaser | `story-jade-bowls.webp` resized (Lanczos), WebP q76. |
 | `steam-plate.webp`, `steam-plate-m.webp`, `cloud-plate.webp`, `cloud-plate-m.webp` | Calm-mode stills (reduced motion, Save-Data, no WebGL2) | Rendered from the Breath's own steam solver over the new poster; no third-party code. |
 

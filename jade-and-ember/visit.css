@@ -3,21 +3,24 @@
 
 .visit-room{position:relative;isolation:isolate;min-height:max(100svh,720px);display:flex;align-items:center;
   padding-block:calc(var(--header-h) + var(--s8)) var(--s9);background:radial-gradient(45% 40% at 94% 0%,rgba(20,58,48,.6),transparent 70%),#0a0908}
-.room-bg{position:absolute;inset:0 0 0 38%;z-index:-3;margin:0}
-.room-bg img{width:100%;height:100%;object-fit:cover;object-position:30% 50%;opacity:.42;
-  -webkit-mask-image:linear-gradient(90deg,transparent,#000 40%);mask-image:linear-gradient(90deg,transparent,#000 40%)}
-.room-bg::after{content:"";position:absolute;inset:0;background:linear-gradient(0deg,#0a0908,transparent 30%,transparent 70%,#0a0908)}
+.room-photo{position:absolute;inset:0 0 0 auto;width:min(100%,1600px);z-index:-3;margin:0;clip-path:inset(0)}   /* capped in width so the photograph is never stretched past about 1.25x; clip-path, not overflow, crops the scroll drift without clipping content */
+.room-photo img{width:100%;height:100%;object-fit:cover;object-position:56% 50%}
+.room-photo::after{content:"";position:absolute;inset:0;   /* the words sit on the dark side; the fire stays clear on the right */
+  background:linear-gradient(90deg,rgba(10,9,8,.95),rgba(10,9,8,.8) 34%,rgba(10,9,8,.12) 64%,transparent 82%),linear-gradient(0deg,#0a0908,transparent 22%),linear-gradient(180deg,#0a0908,transparent 14%)}
+.room-photo figcaption,.pair-fig figcaption{font-size:.8125rem;color:var(--rice-dim)}
+.room-photo figcaption{position:absolute;z-index:1;right:var(--gutter);top:calc(var(--header-h) + var(--s3));text-align:right;text-shadow:0 1px 8px #000}
+@media (min-width:1601px){.room-photo img{-webkit-mask-image:linear-gradient(90deg,transparent,#000 22%);mask-image:linear-gradient(90deg,transparent,#000 22%)}}
 .room-fx{position:absolute;inset:0;z-index:-2;overflow:hidden;pointer-events:none}   /* the glow is larger than the room; this box is what crops it */
 .candle{position:absolute;left:-8%;bottom:-24%;width:92vmax;aspect-ratio:1;border-radius:50%;pointer-events:none;will-change:transform,opacity;opacity:.86;
   background:radial-gradient(closest-side,rgba(247,161,92,.26),rgba(240,138,60,.12) 38%,rgba(240,138,60,0) 72%)}
 
 .room-grid{position:relative;display:grid;grid-template-columns:repeat(12,minmax(0,1fr));column-gap:var(--s5);align-items:center;width:min(1280px,100% - 2*var(--gutter))}
-.visit-head{grid-column:1/6;display:grid;gap:var(--s5);align-content:center}
-.visit-head h1{font-family:var(--serif);font-weight:400;font-size:clamp(2.75rem,6.4vw,5.5rem);line-height:1.02;letter-spacing:-.02em;text-wrap:balance}
+.visit-head{grid-column:1/8;grid-row:1;display:grid;gap:var(--s4);align-content:center}
+.visit-head h1{font-family:var(--serif);font-weight:400;font-size:clamp(2.75rem,5.4vw,4.75rem);line-height:1.02;letter-spacing:-.02em;text-wrap:balance}
 .visit-head .sample-flag{max-width:24rem;color:var(--celadon)}
 
 /* the frosted panel: the room behind it stays alive but quiet, so the text sits on a steady surface */
-.visit-main{grid-column:7/13;display:grid;gap:var(--s6);padding:clamp(var(--s5),3.2vw,var(--s7));
+.visit-main{grid-column:1/7;grid-row:2;margin-top:var(--s6);display:grid;gap:var(--s6);padding:clamp(var(--s5),3.2vw,var(--s7));
   background:rgba(14,13,12,.86);border:1px solid rgba(239,231,216,.14);border-radius:2px;box-shadow:0 30px 80px rgba(0,0,0,.45)}
 @supports ((-webkit-backdrop-filter:blur(2px)) or (backdrop-filter:blur(2px))){
   .visit-main{background:rgba(14,13,12,.5);-webkit-backdrop-filter:blur(18px) saturate(1.15);backdrop-filter:blur(18px) saturate(1.15)}
@@ -27,8 +30,31 @@
 .visit-contact{display:flex;flex-wrap:wrap;gap:var(--s1) var(--s4);align-items:baseline}
 .visit-main .hours td{font-size:clamp(1.25rem,1.9vw,1.625rem)}
 @media (min-width:1180px){.visit-main .hours td{white-space:nowrap}}
+@media (min-width:1280px){
+  .visit-main{grid-column:1/8;grid-template-columns:minmax(0,.8fr) minmax(0,1.2fr);column-gap:var(--s6);align-items:start}   /* address beside the hours keeps the opening to one screen, so the photograph shows whole */
+  .visit-main{padding:clamp(var(--s5),2.4vw,var(--s6))}
+  .visit-main .visit-address{font-size:clamp(1.375rem,2.05vw,1.875rem)}
+  .visit-main .hours td{font-size:clamp(1.0625rem,1.5vw,1.5rem)}
+  .visit-main .hours th{width:34%}
+  .visit-main .hours{border-top:0}
+}
 .visit-main .hours{border-top:1px solid rgba(239,231,216,.14)}
 .visit-main .hours th,.visit-main .hours td{border-bottom:1px solid rgba(239,231,216,.08)}
+
+/* two editorial pairs under the opening: the counter (photograph left) and the materials (photograph right, bleeding off the page edge) */
+.visit-pair{padding-block:clamp(var(--s7),7vw,var(--s9))}
+.pair-grid{display:grid;grid-template-columns:repeat(12,minmax(0,1fr));column-gap:var(--s5);align-items:center}
+.pair-fig{margin:0}
+.pair-fig img{display:block;width:100%;height:auto}
+.pair-fig figcaption{margin-top:var(--s2)}
+.pair-body{display:grid;gap:var(--s4);align-content:center;max-width:30rem}
+.pair-body h2{font-family:var(--serif);font-weight:400;font-size:clamp(2rem,4vw,3.25rem);line-height:1.08;letter-spacing:-.015em;text-wrap:balance}
+.pair-body p{color:var(--rice-dim);font-size:1.125rem;line-height:1.6}
+.pair-link a{color:var(--ember-hi);font-weight:600}
+.visit-counter .pair-fig{grid-column:1/7;grid-row:1}
+.visit-counter .pair-body{grid-column:8/13;grid-row:1}
+.visit-materials .pair-body{grid-column:1/6;grid-row:1}
+.visit-materials .pair-fig{grid-column:6/13;grid-row:1;margin-right:calc(var(--gutter) * -1)}
 
 .good{background:var(--kitchen);padding-block:var(--s9) var(--s8);border-top:1px solid #1b1917}
 .good-grid{display:grid;grid-template-columns:repeat(12,minmax(0,1fr));column-gap:var(--s5);row-gap:var(--s7)}
@@ -41,23 +67,53 @@
 .good-link a{color:var(--ember-hi);font-weight:600}
 
 @media (max-width:1023px){
-  .visit-head{grid-column:1/-1;margin-bottom:var(--s7)}
-  .visit-main{grid-column:1/-1}
-  .room-bg{inset:0}
+  /* below the desktop layout the opening is the photograph on top, with the title rising over its foot, then the panel */
+  .visit-room{display:block;padding-block:var(--header-h) var(--s8);min-height:0}   /* the header floats over the top of the page, so the photograph starts below it */
+  .room-photo{position:relative;inset:auto;z-index:-3;width:100%;aspect-ratio:3/2;max-height:80svh}
+  .room-photo img{object-position:50% 50%;-webkit-mask-image:linear-gradient(180deg,#000 58%,transparent);mask-image:linear-gradient(180deg,#000 58%,transparent)}
+  .room-photo::after{background:linear-gradient(180deg,rgba(10,9,8,.55),transparent 22%)}
+  .room-photo figcaption{left:var(--gutter);right:calc(var(--gutter) + 56px);top:var(--s3);text-align:left}
+  .room-grid{margin-top:calc(var(--s8) * -1)}
+  .visit-head{grid-column:1/-1;grid-row:auto;margin-bottom:var(--s5)}
+  .visit-main{grid-column:1/-1;grid-row:auto;margin-top:0}
+  .visit-counter .pair-fig{grid-column:1/7}
+  .visit-counter .pair-body{grid-column:7/13;padding-left:var(--s4)}
+  .visit-materials .pair-body{grid-column:1/6}
+  .visit-materials .pair-fig{grid-column:6/13}
   .good-grid h2,.good-groups{grid-column:1/-1}
 }
 @media (max-width:759px){
-  .visit-room{align-items:flex-start;padding-block:calc(var(--header-h) + 72px) var(--s8);min-height:0}
+  .room-photo{aspect-ratio:4/5;max-height:74svh}
+  .visit-pair{padding-block:var(--s7)}
+  .pair-grid{display:flex;flex-direction:column;gap:var(--s5);align-items:stretch}
+  .pair-body{max-width:none}
+  .visit-counter .pair-body,.visit-materials .pair-body{padding-left:0}
+  .visit-counter .pair-fig,.visit-materials .pair-fig{margin-inline:calc(var(--gutter) * -1)}
+  .visit-counter .pair-fig img{aspect-ratio:4/5;object-fit:cover;max-height:78svh}
+  .visit-counter .pair-fig figcaption,.visit-materials .pair-fig figcaption{padding-inline:var(--gutter)}
   .visit-main .hours th{width:36%;white-space:normal}
   .visit-main .hours td{white-space:nowrap;font-size:clamp(.875rem,4.3vw,1.25rem)}   /* a time never breaks across two lines on a phone; it steps down in size instead */
   .good-groups{grid-template-columns:1fr;gap:var(--s6)}
   .visit-room .pause{top:calc(var(--header-h) + 8px);right:var(--gutter);bottom:auto;width:44px;padding:0;justify-content:center}
   .visit-room .pause-txt{position:absolute;width:1px;height:1px;margin:-1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
 }
+/* scroll choreography: CSS only, no script. The photograph drifts slowly against the scroll; each pair's picture is drawn up from below and its words rise a little.
+   Only where the browser supports scroll-driven animation, and only when motion is allowed; everywhere else the page simply rests in its finished state. */
+@supports (animation-timeline:view()){
+  @media (prefers-reduced-motion:no-preference){
+    .v-art .room-photo img{animation:visit-drift linear both;animation-timeline:scroll(root block);animation-range:0 100svh}
+    .v-art .pair-fig{animation:visit-draw linear both;animation-timeline:view();animation-range:entry 0% entry 70%}
+    .v-art .pair-body{animation:visit-rise linear both;animation-timeline:view();animation-range:entry 10% entry 75%}
+    @keyframes visit-drift{from{transform:scale(1.02) translate3d(0,0,0)}to{transform:scale(1.08) translate3d(0,4%,0)}}
+    @keyframes visit-draw{from{clip-path:inset(14% 0 0 0);transform:translate3d(0,36px,0)}to{clip-path:inset(0);transform:none}}
+    @keyframes visit-rise{from{opacity:.25;transform:translate3d(0,28px,0)}to{opacity:1;transform:none}}
+  }
+}
 @media (prefers-reduced-motion:reduce){.visit-room .pause{display:none!important}.candle{will-change:auto}}
-@media (forced-colors:active){.room-bg,.candle{display:none}.visit-main{border-color:CanvasText;background:Canvas}}
+@media (forced-colors:active){.room-photo::after,.candle{display:none}.room-photo img{opacity:1}.visit-main{border-color:CanvasText;background:Canvas}}
 @media print{
-  .room-bg,.candle,.visit-room .pause{display:none}
+  .room-photo,.candle,.visit-room .pause{display:none}
+  .pair-fig{width:60%;break-inside:avoid}.pair-grid{display:block}
   .visit-room{display:block;min-height:0;padding:0;background:none;overflow:visible}
   .visit-main{background:none;border:0;box-shadow:none;padding:0}
   .good,.cta-band{background:none}

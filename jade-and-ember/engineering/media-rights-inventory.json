@@ -663,6 +663,139 @@
       ],
       "useNow": "Delivered with the website under the licence text shipped alongside it (SIL OFL 1.1: the fonts may not be sold by themselves; the copyright notice and licence travel with them).",
       "clientUse": "Allowed to continue under the same licence text if the upstream sources are confirmed (T-OFL, T-FONT-UPSTREAM); keep fonts/LICENSES.txt with the fonts."
+    },
+    {
+      "path": "media/visit-room-a.webp",
+      "kind": "image",
+      "description": "1280x859 WebP of the dining room (Shot A), for the Visit page",
+      "bytes": 66828,
+      "sha256": "7495081277014c568dbcc883c08ff5363cadb74c6ef5141e4f5c77146654e3e8",
+      "origin": {
+        "type": "ai-generated",
+        "service": "Higgsfield (the owner's account): Nano Banana 2 interior still",
+        "generatedOn": "2026-10-17",
+        "recordedIn": "media/PROVENANCE.md",
+        "job": "Shot A (Candidate 2), master 5056x3392, job f2236920-1890-4a96-a781-3376e93b3612, Nano Banana 2 at 4K, 3 credits",
+        "postProcessing": "resize to 1280 px wide (Lanczos), WebP q46"
+      },
+      "rights": {
+        "status": "unverified",
+        "established": [
+          "The platform, model, job id, credits and date are recorded in media/PROVENANCE.md."
+        ],
+        "notEstablished": [
+          "Any licence or ownership of the output under the service and model terms.",
+          "Whether the connected paid account changes what may be done with the output.",
+          "Which terms govern an output made with a reference image from another generation.",
+          "Whether any attribution or AI-disclosure duty applies."
+        ]
+      },
+      "termsToVerify": [
+        "T-HIGGS-TOU",
+        "T-LEGAL"
+      ],
+      "useNow": "Fictional Jade & Ember demonstration only, as adopted in docs/JADE_AND_EMBER_MEDIA_RIGHTS_POLICY.md (APR-JE-023). Public deployment of the demonstration is not approved.",
+      "clientUse": "Not permitted. Replace with real photography or footage, or with media whose licence has been verified and recorded in a rights-verification approval."
+    },
+    {
+      "path": "media/visit-room-a-m.webp",
+      "kind": "image",
+      "description": "720x900 WebP phone crop of Shot A, for the Visit page",
+      "bytes": 51302,
+      "sha256": "91f4c046574ea2926f9bd1da61231c40fcc667a87cdedb61c9dcb9d235a9054d",
+      "origin": {
+        "type": "ai-generated",
+        "service": "Higgsfield (the owner's account): Nano Banana 2 interior still",
+        "generatedOn": "2026-10-17",
+        "recordedIn": "media/PROVENANCE.md",
+        "job": "Shot A (Candidate 2), master 5056x3392, job f2236920-1890-4a96-a781-3376e93b3612",
+        "postProcessing": "4:5 crop of the master (x 1400 to 4114, full height), resize to 720 px wide (Lanczos), WebP q56",
+        "derivedFrom": "media/visit-room-a.webp (the same source image, so the same terms bear on this one)"
+      },
+      "rights": {
+        "status": "unverified",
+        "established": [
+          "The platform, model, job id, credits and date are recorded in media/PROVENANCE.md."
+        ],
+        "notEstablished": [
+          "Any licence or ownership of the output under the service and model terms.",
+          "Whether the connected paid account changes what may be done with the output.",
+          "Which terms govern an output made with a reference image from another generation.",
+          "Whether any attribution or AI-disclosure duty applies."
+        ]
+      },
+      "termsToVerify": [
+        "T-HIGGS-TOU",
+        "T-LEGAL"
+      ],
+      "useNow": "Fictional Jade & Ember demonstration only, as adopted in docs/JADE_AND_EMBER_MEDIA_RIGHTS_POLICY.md (APR-JE-023). Public deployment of the demonstration is not approved.",
+      "clientUse": "Not permitted. Replace with real photography or footage, or with media whose licence has been verified and recorded in a rights-verification approval."
+    },
+    {
+      "path": "media/visit-counter-b.webp",
+      "kind": "image",
+      "description": "780x968 WebP of the wok counter (Shot B, image 1), for the Visit page",
+      "bytes": 50834,
+      "sha256": "20f633445a784f1ab9e73464e88b954867ea1985010ff21952235bf601ddefd8",
+      "origin": {
+        "type": "ai-generated",
+        "service": "Higgsfield (the owner's account): Nano Banana 2 interior still",
+        "generatedOn": "2026-10-17",
+        "recordedIn": "media/PROVENANCE.md",
+        "job": "Shot B image 1, job ecae65c4-09a8-448b-9abd-e8e1d2ecca76, Nano Banana 2 at 4K, 3 credits, Shot A (Candidate 2) as the image reference",
+        "postProcessing": "resize 3712x4608 to 780 px wide (Lanczos), WebP q66"
+      },
+      "rights": {
+        "status": "unverified",
+        "established": [
+          "The platform, model, job id, credits and date are recorded in media/PROVENANCE.md."
+        ],
+        "notEstablished": [
+          "Any licence or ownership of the output under the service and model terms.",
+          "Whether the connected paid account changes what may be done with the output.",
+          "Which terms govern an output made with a reference image from another generation.",
+          "Whether any attribution or AI-disclosure duty applies."
+        ]
+      },
+      "termsToVerify": [
+        "T-HIGGS-TOU",
+        "T-LEGAL"
+      ],
+      "useNow": "Fictional Jade & Ember demonstration only, as adopted in docs/JADE_AND_EMBER_MEDIA_RIGHTS_POLICY.md (APR-JE-023). Public deployment of the demonstration is not approved.",
+      "clientUse": "Not permitted. Replace with real photography or footage, or with media whose licence has been verified and recorded in a rights-verification approval."
+    },
+    {
+      "path": "media/visit-materials-c.webp",
+      "kind": "image",
+      "description": "1200x805 WebP of the jade wall and niche (Shot C, image 2), for the Visit page",
+      "bytes": 66658,
+      "sha256": "c899fd8ab977dc9d83296ffd6dd562aff3130581a275779de74021498a7068a6",
+      "origin": {
+        "type": "ai-generated",
+        "service": "Higgsfield (the owner's account): Nano Banana 2 interior still",
+        "generatedOn": "2026-10-17",
+        "recordedIn": "media/PROVENANCE.md",
+        "job": "Shot C image 2 (gallery image 4 of A, B1, B2, C1, C2), job 2b7e3a9d-8eaf-4a34-92d9-a16b102313b4, Nano Banana 2 at 4K, 3 credits, Shot A (Candidate 2) as the image reference",
+        "postProcessing": "resize 5056x3392 to 1200 px wide (Lanczos), WebP q66"
+      },
+      "rights": {
+        "status": "unverified",
+        "established": [
+          "The platform, model, job id, credits and date are recorded in media/PROVENANCE.md."
+        ],
+        "notEstablished": [
+          "Any licence or ownership of the output under the service and model terms.",
+          "Whether the connected paid account changes what may be done with the output.",
+          "Which terms govern an output made with a reference image from another generation.",
+          "Whether any attribution or AI-disclosure duty applies."
+        ]
+      },
+      "termsToVerify": [
+        "T-HIGGS-TOU",
+        "T-LEGAL"
+      ],
+      "useNow": "Fictional Jade & Ember demonstration only, as adopted in docs/JADE_AND_EMBER_MEDIA_RIGHTS_POLICY.md (APR-JE-023). Public deployment of the demonstration is not approved.",
+      "clientUse": "Not permitted. Replace with real photography or footage, or with media whose licence has been verified and recorded in a rights-verification approval."
     }
   ]
 }

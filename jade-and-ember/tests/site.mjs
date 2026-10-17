@@ -171,7 +171,12 @@ for (const pg of pages) {
     groups: [...document.querySelectorAll('.good-group h3')].map((h) => h.textContent.trim()),
     map: !!document.querySelector('a[target=_blank]'),
     photos: [...document.querySelectorAll('main img')].filter((i) => i.alt.length < 10 && !i.closest('[aria-hidden=true]')).length,   // a picture is either decorative (hidden with its figure) or has real alt text
+    room: [...document.querySelectorAll('main figure img')].map((i) => ({ alt: i.alt.length, w: i.getAttribute('width'), h: i.getAttribute('height'), lazy: i.loading === 'lazy', cap: !!i.closest('figure').querySelector('figcaption') })),
+    h2: [...document.querySelectorAll('main h2')].map((h) => h.textContent.trim()),
   }));
+  // the three interior photographs: the opening one loads at once (and has a phone crop), the other two are lazy; each is described, sized and captioned
+  if (v.room.length !== 3 || v.room.some((r) => r.alt < 40 || r.alt > 250 || !r.w || !r.h || !r.cap) || v.room[0].lazy || !v.room[1].lazy || !v.room[2].lazy) p.push(`Visit interior photographs: ${JSON.stringify(v.room)}`);
+  if (v.h2.length !== 4 || v.h2[2] !== copy.visit.goodToKnow.heading) p.push(`Visit should have the counter and materials sections, then good to know, then the order band: ${v.h2}`);
   if (JSON.stringify(v.rows) !== JSON.stringify(client.hours.rows.map((r) => [r.days, r.time]))) p.push(`Visit hours differ from config: ${JSON.stringify(v.rows)}`);
   if (JSON.stringify(v.addr) !== JSON.stringify(client.address.lines)) p.push(`Visit address differs from config: ${JSON.stringify(v.addr)}`);
   if (v.tel !== client.contact.phone.href) p.push(`Visit phone link differs from config: ${v.tel}`);
