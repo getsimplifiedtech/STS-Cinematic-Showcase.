@@ -79,7 +79,7 @@ export async function checkSelftest({ quick = false } = {}) {
       c = mk(); edit(join(c, 'site.js'), (t) => `import { x } from './lib.mjs';\n${t}`);
       expect(checkDelivery({ root: c }).problems.some((p) => /module system/.test(p)), 'delivery: a module import in a delivered script must be caught');
       c = mk(); writeFileSync(join(c, 'media', 'extra.webp'), 'x');
-      expect(checkDelivery({ root: c }).problems.some((p) => /not in the v0.8 preview package/.test(p)), 'delivery: an extra delivered file must be caught');
+      expect(checkDelivery({ root: c }).problems.some((p) => /not in the .* preview package/.test(p)), 'delivery: an extra delivered file must be caught');
       notes.push('delivery: an absolute path, a missing file, a module import and an unexpected delivered file are caught');
     }
 
@@ -117,7 +117,7 @@ export async function checkSelftest({ quick = false } = {}) {
     const ALL = ['source', 'text', 'structure', 'styles', 'pixels', 'behaviour'];
     const cases = [
       ['one added character of visible text', (d) => edit(join(d, 'index.html'), (t) => t.replace(/(<h1[^>]*>[\s\S]*?)(<\/h1>)/, '$1!$2')), ['source', 'text', 'structure'], ['behaviour']],
-      ['a 2 px change to the brand seal width', (d) => edit(join(d, 'styles.css'), (t) => t.replace('.seal{display:inline-flex;flex-direction:column;align-items:center;justify-content:center;width:32px', '.seal{display:inline-flex;flex-direction:column;align-items:center;justify-content:center;width:34px')), ['source', 'styles', 'pixels'], ['text', 'structure']],
+      ['a 2 px change to the brand seal width', (d) => edit(join(d, 'styles.css'), (t) => t.replace('.seal{display:inline-grid;grid-template-rows:1fr 1fr;place-items:center;width:34px', '.seal{display:inline-grid;grid-template-rows:1fr 1fr;place-items:center;width:36px')), ['source', 'styles', 'pixels'], ['text', 'structure']],
       ['a one-step change to the ember colour', (d) => edit(join(d, 'styles.css'), (t) => t.replace('--ember:#f08a3c', '--ember:#f08a3d')), ['source', 'styles'], ['text', 'structure', 'behaviour']],
       ['the Pause control label changed in breath.js', (d) => edit(join(d, 'breath.js'), (t) => t.replace('Pause motion', 'Pause video')), ['source', 'behaviour'], ['text', 'structure', 'styles', 'pixels']],
       ['a font file replaced', (d) => { const f = join(d, 'fonts', 'karla-latin-400-normal.woff2'); const b = readFileSync(f); b[b.length - 5] ^= 0xff; writeFileSync(f, b); }, ['source'], ['text', 'structure']],

@@ -134,12 +134,21 @@ Authorized: a narrowly scoped reconciliation of the eight baseline-bound checks.
 
 **Result.** Run on this tree: 38 of 45 pass (delivery, selftest and, with the exact repository identity, ci now pass). Seven fail:
 - security and portability: only Chromium's software-GL "GPU stall" console notice. Environmental; not waived.
-- regression: source, text, structure, styles, pixels and behaviour all show 0 differences; it fails only because this sandbox runs Node 22 and the harness needs Node 24.8 or later.
+- regression: source, text, structure, pixels and behaviour show 0 differences. The styles layer shows 7 differences, all on Home, all the test server's port number inside computed `background-image` URLs (baseline and candidate are served on different ports); a scratch copy with the framework edit that removes the origin shows 0. It also fails here because this sandbox runs Node 22 and the harness needs Node 24.8 or later. (An earlier note in this section and in the status report said all six layers were clean; that was true only of the scratch copy with the framework edit.)
 - assets and budgets: need three framework edits (hashed copy with several stylesheets, per-page budget limits, hash-name-neutral style comparison). Tested in a scratch copy: both pass.
 - selftest-gate2: three generic test cases assume the old hero markup and message names.
-- selftest-je-markup: four project self-test expectations still name the old design (extra-file case, brand-seal case, styles layer on the pause case, a timed-out click in the blocking-time case).
+- selftest-je-markup: the stale Firelight expectations are corrected (see the second part below); one case remains, blocked on the same server-port difference in the styles layer.
 
 **Not done.** The framework edits need the controlled snapshot re-export and the owner's approval; the framework repository and `engineering/` were not touched. Patches and gate logs: `/mnt/project-files/jade-and-ember/firelight-2026-10-16/closeout/reconciliation-wip/`.
+
+## Update: project self-test corrections (owner approval, 2026-10-17, Continue Self-Test Reconciliation)
+
+Corrected in project-owned self-tests only, each keeping its assertion:
+- `je-selftest.mjs`, "an unexpected delivered file": the expected message now names whichever baseline is current ("not in the ... preview package") instead of the literal "v0.8".
+- `je-selftest.mjs`, "a 2 px change to the brand seal width": Firelight's seal is `inline-grid` and 34 px wide, so the mutation now changes that rule from 34 to 36 px. It must still be caught by the source, styles and pixels layers.
+- `je-selftest-gate2.mjs`, "the main thread blocked at load": Home's blocking-time guard is the owner-approved 9 s for the live WebGL sequence, so a 700 ms stall can no longer be seen there. The stall now goes into `menu.js` and is measured on Menu, whose limit is the original 200 ms. The case still fails if the check stops reporting blocking time.
+- Not stale, left as is: "the Pause control label changed" must leave the styles layer clean. It fails today only because of the server-port artifact above, so it waits for framework edit 3.
+- The three generic `check:selftest-gate2` cases ("hero text left on the photograph", "the menu button draws nothing", "the main thread blocked at load") are hard-coded in the framework snapshot and cannot be corrected project-side without removing or relaxing a check, which `check:project` forbids. The project-owned equivalents in `je-selftest-gate2.mjs` cover all three and pass. They need the framework's not-applicable mechanism.
 
 ## What was fixed in the site, not in the checks
 
