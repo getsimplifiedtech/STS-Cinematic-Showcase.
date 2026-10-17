@@ -92,13 +92,12 @@
   .visit-counter .pair-fig img{aspect-ratio:4/5;object-fit:cover;max-height:78svh}
   .visit-counter .pair-fig figcaption,.visit-materials .pair-fig figcaption{padding-inline:var(--gutter)}
   .visit-main{padding:var(--s5) var(--s4)}
-  .visit-main .hours th{width:auto;padding-right:var(--s3);font-size:.9375rem;white-space:nowrap}   /* a day range stays on one line down to 360 px; below that it may wrap */
+  .visit-main .hours th{width:auto;min-width:0;padding-right:var(--s3);font-size:.9375rem;white-space:normal}   /* sized to its text, so a day range stays on one line when there is room; it can still wrap under increased text spacing */
   .visit-main .hours td{white-space:nowrap;font-size:clamp(.875rem,4.1vw,1.25rem)}   /* a time never breaks across two lines on a phone; it steps down in size instead */
   .good-groups{grid-template-columns:1fr;gap:var(--s6)}
   .visit-room .pause{top:calc(var(--header-h) + 8px);right:var(--gutter);bottom:auto;width:44px;padding:0;justify-content:center}
   .visit-room .pause-txt{position:absolute;width:1px;height:1px;margin:-1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
 }
-@media (max-width:359px){.visit-main .hours th{white-space:normal}}
 /* scroll choreography: CSS only, no script. The photograph drifts slowly against the scroll; each pair's picture is drawn up from below and its words rise a little.
    Only where the browser supports scroll-driven animation, and only when motion is allowed; everywhere else the page simply rests in its finished state. */
 @supports (animation-timeline:view()){
