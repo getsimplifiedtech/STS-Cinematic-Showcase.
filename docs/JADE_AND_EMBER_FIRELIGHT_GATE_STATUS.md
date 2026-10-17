@@ -122,6 +122,25 @@ Left as they are, by cause:
 - Home chapter text at opacity 0 in the resting state the test screenshots (the beats are stacked there and only one shows at a time): 5 rows. A separate probe that scrolls through the sequence and measures only text that is visible (calm and live, 7 viewports) finds all body copy at or above 4.5:1.
 - Large display words ("Fire", "Steam", "Texture") over flame and steam at 844 x 390 live, 97.7 to 98.1% of pixels at 3:1 while they fade in: the test measures the whole line box, not the glyphs. Not changed; no design compromise made to chase the number.
 
+## Update: framework reconciliation, first part (owner authorization, 2026-10-17, Contrast Acceptance and Framework Reconciliation)
+
+Authorized: a narrowly scoped reconciliation of the eight baseline-bound checks. Not authorized and not done: freezing Firelight, merging, or changing the frozen v0.8 record (`engineering/baseline.json`, `baselines/jade-and-ember-v0.8`, branch `baseline/jade-and-ember-v0.8`).
+
+**What changed (all project-owned).**
+- A **provisional reference** pinned to the Firelight commit `e264589` (`baselines/jade-and-ember-firelight-provisional-1/`, `engineering/baseline-firelight-provisional.json`, branch `reference/jade-and-ember-firelight-provisional-1`). `sts.engineering.json` now points the baseline-bound checks at it. It is a ratchet, not a freeze: no owner sign-off, tag, merge or deployment. Deleting the branch and reverting this commit undoes it.
+- `immutability-allowlist.json` is empty again: the reference already contains the one entry (IMM-1) it used to explain.
+- `budgets.json` carries the owner-approved Firelight values (delivered 2,777,089 B, Home page limits, three image exceptions) and the Firelight measurements for the 5% drift guard. The Home limits and image exceptions are read by the check only once the framework snapshot has per-page support (see below).
+- Self-test expectations that named the old design were updated, with the same protections: the Pause label mutant now edits `breath.js`, the blocking-time mutant replaces the 41-byte inline script instead of adding a second one, and the blocked-video scenario no longer waits for a class Firelight does not add.
+
+**Result.** Run on this tree: 38 of 45 pass (delivery, selftest and, with the exact repository identity, ci now pass). Seven fail:
+- security and portability: only Chromium's software-GL "GPU stall" console notice. Environmental; not waived.
+- regression: source, text, structure, styles, pixels and behaviour all show 0 differences; it fails only because this sandbox runs Node 22 and the harness needs Node 24.8 or later.
+- assets and budgets: need three framework edits (hashed copy with several stylesheets, per-page budget limits, hash-name-neutral style comparison). Tested in a scratch copy: both pass.
+- selftest-gate2: three generic test cases assume the old hero markup and message names.
+- selftest-je-markup: four project self-test expectations still name the old design (extra-file case, brand-seal case, styles layer on the pause case, a timed-out click in the blocking-time case).
+
+**Not done.** The framework edits need the controlled snapshot re-export and the owner's approval; the framework repository and `engineering/` were not touched. Patches and gate logs: `/mnt/project-files/jade-and-ember/firelight-2026-10-16/closeout/reconciliation-wip/`.
+
 ## What was fixed in the site, not in the checks
 
 - Reading order on Home: the four overlapping chapter panels are set aside for screen readers (script-added `aria-hidden`) and the same words are added as an ordered, visually hidden list, shown as ordinary text in forced colours.

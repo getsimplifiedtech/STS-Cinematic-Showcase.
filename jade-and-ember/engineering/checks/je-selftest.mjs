@@ -119,7 +119,7 @@ export async function checkSelftest({ quick = false } = {}) {
       ['one added character of visible text', (d) => edit(join(d, 'index.html'), (t) => t.replace(/(<h1[^>]*>[\s\S]*?)(<\/h1>)/, '$1!$2')), ['source', 'text', 'structure'], ['behaviour']],
       ['a 2 px change to the brand seal width', (d) => edit(join(d, 'styles.css'), (t) => t.replace('.seal{display:inline-flex;flex-direction:column;align-items:center;justify-content:center;width:32px', '.seal{display:inline-flex;flex-direction:column;align-items:center;justify-content:center;width:34px')), ['source', 'styles', 'pixels'], ['text', 'structure']],
       ['a one-step change to the ember colour', (d) => edit(join(d, 'styles.css'), (t) => t.replace('--ember:#f08a3c', '--ember:#f08a3d')), ['source', 'styles'], ['text', 'structure', 'behaviour']],
-      ['the Pause control label changed in hero.js', (d) => edit(join(d, 'hero.js'), (t) => t.replace('Pause motion', 'Pause video')), ['source', 'behaviour'], ['text', 'structure', 'styles', 'pixels']],
+      ['the Pause control label changed in breath.js', (d) => edit(join(d, 'breath.js'), (t) => t.replace('Pause motion', 'Pause video')), ['source', 'behaviour'], ['text', 'structure', 'styles', 'pixels']],
       ['a font file replaced', (d) => { const f = join(d, 'fonts', 'karla-latin-400-normal.woff2'); const b = readFileSync(f); b[b.length - 5] ^= 0xff; writeFileSync(f, b); }, ['source'], ['text', 'structure']],
       ['a demonstration config value changed', (d) => edit(join(d, 'config', 'client.json'), (t) => t.replace('(555) 010-0188', '(555) 010-0189')), ['source'], []],
     ];

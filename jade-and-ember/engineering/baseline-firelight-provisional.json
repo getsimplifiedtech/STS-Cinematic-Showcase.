@@ -1,0 +1,19 @@
+{
+  "$comment": "PROVISIONAL reference for the Firelight redesign (owner authorization 2026-10-17, Contrast Acceptance and Framework Reconciliation). Not a frozen baseline: see baselines/jade-and-ember-firelight-provisional-1/BASELINE.md. The frozen v0.8 record (baseline.json, baselines/jade-and-ember-v0.8) is unchanged. Moving this reference to a later commit is a reviewed change; freezing Firelight is a separate owner decision.",
+  "version": "provisional-1",
+  "branch": "reference/jade-and-ember-firelight-provisional-1",
+  "commit": "e264589215c8a251644aaee432a95ec42a0d83c4",
+  "repositoryTree": "27eba22d7d3e0c99001c4071913941debbf21f1c",
+  "projectTree": "1699f2d50b5cf67a3baa5d7a06b3dbfc60272a0b",
+  "projectPath": "jade-and-ember",
+  "recordsDir": "baselines/jade-and-ember-firelight-provisional-1",
+  "sourceTreeChecksums": {
+    "file": "SHA256SUMS.source-tree.txt",
+    "files": 352
+  },
+  "previewPackage": {
+    "file": "jade-and-ember-provisional-1-preview.zip",
+    "sha256": "9f5e96d7cc16b9face2f83eee155a6aab772baf3672b5b38bbabd3d4396e408f",
+    "bytes": 2527708
+  }
+}

@@ -1,5 +1,5 @@
 {
-  "$comment": "Performance and page-weight budgets (ledger ENG-060, ENG-061). Limits are the v0.8 measurements plus about 10 percent headroom, rounded; Core Web Vitals limits are the 'good' thresholds. Text is measured gzip-compressed (as a host would serve it), images, fonts and video as stored. `measured` is the recorded v0.8 measurement; a value more than regressionTolerancePercent above it fails even when it is under its limit, so small regressions are caught early. `baselineGrowthPercent` caps the delivered total against the v0.8 baseline commit itself. To change a limit or the recorded values, change this file in a reviewed commit: `node engineering/checks/budgets.mjs --update-measured`. Video is not part of page weight: it is desktop-only, deferred and budgeted by file.",
+  "$comment": "Performance and page-weight budgets (ledger ENG-060, ENG-061). Limits are the v0.8 measurements plus about 10 percent headroom, rounded; Core Web Vitals limits are the 'good' thresholds. Text is measured gzip-compressed (as a host would serve it), images, fonts and video as stored. `measured` is the recorded v0.8 measurement; a value more than regressionTolerancePercent above it fails even when it is under its limit, so small regressions are caught early. `baselineGrowthPercent` caps the delivered total against the v0.8 baseline commit itself. To change a limit or the recorded values, change this file in a reviewed commit: `node engineering/checks/budgets.mjs --update-measured`. Video is not part of page weight: it is desktop-only, deferred and budgeted by file. FIRELIGHT (owner decisions of 2026-10-17, APR-JE-052): the delivered total, the per-file image exceptions and Home's own page limits are the owner-approved values of budgets-firelight.json, written here as limits.deliveredBytes, limits.imageExceptions and limits.pageOverrides so the shared check:budgets can hold Home to them while Menu, Our story, Visit us and Order online keep the v0.9 limits above, unchanged. `measured` is the Firelight measurement. limits.pageOverrides and limits.imageExceptions are read by the check once the framework snapshot carries the per-page support (docs/JADE_AND_EMBER_FIRELIGHT_GATE_STATUS.md); until then they are inert.",
   "regressionTolerancePercent": 5,
   "baselineGrowthPercent": 0.5,
   "limits": {
@@ -17,7 +17,7 @@
     "maxMp4Bytes": 1005000,
     "fontFiles": 4,
     "fontBytes": 60100,
-    "deliveredBytes": 2176000,
+    "deliveredBytes": 2777089,
     "requests": 11,
     "transferBytes": 192000,
     "webVitals": {
@@ -25,104 +25,121 @@
       "cls": 0.1,
       "blockingMs": 200,
       "interactionMs": 200
+    },
+    "imageExceptions": {
+      "media/visit-room-a-1920.webp": 142000,
+      "media/visit-room-a-2560.webp": 200000,
+      "media/dish-beef.webp": 135000
+    },
+    "pageOverrides": {
+      "index.html": {
+        "htmlGzip": 4400,
+        "initialGzip": 280000,
+        "fullGzip": 415000,
+        "jsGzip": 15600,
+        "scripts": 2,
+        "requests": 14,
+        "transferBytes": 330000,
+        "blockingMs": 9000
+      }
     }
   },
   "measured": {
     "static": {
       "pages": {
         "index.html": {
-          "htmlGzip": 3697,
-          "initialGzip": 232012,
-          "fullGzip": 296496,
-          "jsGzip": 2719
+          "htmlGzip": 4132,
+          "initialGzip": 255862,
+          "fullGzip": 393964,
+          "jsGzip": 14746
         },
         "menu.html": {
-          "htmlGzip": 3349,
-          "initialGzip": 114185,
-          "fullGzip": 128633,
-          "jsGzip": 1140
+          "htmlGzip": 3764,
+          "initialGzip": 121233,
+          "fullGzip": 285601,
+          "jsGzip": 2317
         },
         "our-story.html": {
-          "htmlGzip": 2462,
-          "initialGzip": 75897,
-          "fullGzip": 90345,
-          "jsGzip": 579
+          "htmlGzip": 2891,
+          "initialGzip": 55844,
+          "fullGzip": 207552,
+          "jsGzip": 2981
         },
         "visit-us.html": {
-          "htmlGzip": 2234,
-          "initialGzip": 51045,
-          "fullGzip": 65493,
-          "jsGzip": 579
+          "htmlGzip": 3212,
+          "initialGzip": 123547,
+          "fullGzip": 255487,
+          "jsGzip": 2562
         },
         "order-online.html": {
-          "htmlGzip": 2281,
-          "initialGzip": 51092,
-          "fullGzip": 65540,
-          "jsGzip": 579
+          "htmlGzip": 2636,
+          "initialGzip": 100344,
+          "fullGzip": 114792,
+          "jsGzip": 1872
         }
       },
-      "deliveredBytes": 1977386
+      "deliveredBytes": 2653566
     },
     "runtime": {
       "index.html": {
-        "worstEvent": "pointerover",
-        "lcpMs": 1100,
+        "worstEvent": "keyup",
+        "lcpMs": 1056,
         "cls": 0,
-        "blockingMs": 74,
+        "blockingMs": 5480,
         "interactionMs": 3,
-        "inputDelayMs": 15,
-        "endToEndMs": 56,
-        "presentationMs": 52,
-        "requests": 10,
-        "transferBytes": 173982
+        "inputDelayMs": 89,
+        "endToEndMs": 168,
+        "presentationMs": 96,
+        "requests": 13,
+        "transferBytes": 303440
       },
       "menu.html": {
-        "worstEvent": "pointerover",
-        "lcpMs": 1060,
+        "worstEvent": "keydown",
+        "lcpMs": 1096,
         "cls": 0,
-        "blockingMs": 55,
-        "interactionMs": 2,
-        "inputDelayMs": 8,
+        "blockingMs": 35,
+        "interactionMs": 3,
+        "inputDelayMs": 14,
         "endToEndMs": 32,
-        "presentationMs": 31,
-        "requests": 9,
-        "transferBytes": 128633
+        "presentationMs": 27,
+        "requests": 11,
+        "transferBytes": 181069
       },
       "our-story.html": {
-        "worstEvent": "pointerover",
-        "lcpMs": 984,
+        "worstEvent": "keydown",
+        "lcpMs": 816,
         "cls": 0,
-        "blockingMs": 46,
+        "blockingMs": 48,
         "interactionMs": 2,
-        "inputDelayMs": 10,
-        "endToEndMs": 24,
-        "presentationMs": 23,
-        "requests": 8,
-        "transferBytes": 90345
+        "inputDelayMs": 11,
+        "endToEndMs": 32,
+        "presentationMs": 25,
+        "requests": 9,
+        "transferBytes": 70292
       },
       "visit-us.html": {
         "worstEvent": "pointerover",
-        "lcpMs": 844,
+        "lcpMs": 1012,
         "cls": 0,
-        "blockingMs": 31,
-        "interactionMs": 4,
-        "inputDelayMs": 14,
-        "endToEndMs": 40,
-        "presentationMs": 38,
-        "requests": 7,
-        "transferBytes": 65493
+        "blockingMs": 33,
+        "interactionMs": 2,
+        "inputDelayMs": 10,
+        "endToEndMs": 48,
+        "presentationMs": 44,
+        "requests": 11,
+        "transferBytes": 173303
       },
       "order-online.html": {
-        "worstEvent": "pointerdown",
-        "lcpMs": 860,
+        "worstEvent": "keydown",
+        "lcpMs": 988,
         "cls": 0,
-        "blockingMs": 41,
-        "interactionMs": 3,
-        "inputDelayMs": 13,
-        "endToEndMs": 40,
-        "presentationMs": 32,
-        "requests": 7,
-        "transferBytes": 65540
+        "blockingMs": 50,
+        "interactionMs": 2,
+        "inputDelayMs": 10,
+        "endToEndMs": 32,
+        "presentationMs": 30,
+        "requests": 10,
+        "transferBytes": 114792
       }
     }
   }

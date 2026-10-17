@@ -930,6 +930,7 @@
       "paths": [
         "jade-and-ember/engineering/authority.json",
         "jade-and-ember/engineering/baseline.json",
+        "jade-and-ember/engineering/baseline-firelight-provisional.json",
         "jade-and-ember/engineering/immutability-allowlist.json",
         "jade-and-ember/engineering/approved-style-differences.json",
         "jade-and-ember/engineering/findings.json",

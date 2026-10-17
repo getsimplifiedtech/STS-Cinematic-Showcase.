@@ -95,8 +95,8 @@
     "headTag": "engineering/project-owned/head-tag.mjs"
   },
   "baseline": {
-    "label": "v0.8",
-    "record": "baseline.json",
+    "label": "Firelight draft",
+    "record": "baseline-firelight-provisional.json",
     "regression": "engineering/project-owned/regression.mjs"
   },
   "creativeAuthority": {

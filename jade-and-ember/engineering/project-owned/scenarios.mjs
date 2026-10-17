@@ -53,7 +53,8 @@ export const scenarios = [
   { name: 'hero: width under 960 px uses the slow push, no video', run: ({ browser, base }) => withPage(browser, { ...viewport(820, 1180), reducedMotion: 'no-preference' }, async (page, log) => { await page.goto(base); await page.waitForTimeout(1500); return { state: await heroState(page), log }; }) },
   { name: 'hero: blocked video falls back to poster and push', run: ({ browser, base }) => withPage(browser, { ...viewport(1440, 900), reducedMotion: 'no-preference' }, async (page) => {
     await page.route(/\.(webm|mp4)(\?.*)?$/, (r) => r.abort());
-    await page.goto(base); await settled(page); await page.waitForTimeout(500); return { state: await heroState(page) };
+    // Firelight has no slow-push poster mode: with the footage blocked the hero stays on its still (neither is-video nor push-on is added), so this scenario waits for the page to load and settle rather than for a class.
+    await page.goto(base, { waitUntil: 'load' }); await page.waitForTimeout(3000); return { state: await heroState(page) };
   }) },
   { name: 'navigation: phone menu toggle, Escape, resize', run: ({ browser, base }) => withPage(browser, { ...viewport(390, 844), isMobile: true, hasTouch: true, reducedMotion: 'reduce' }, async (page, log) => {
     await page.goto(base);
