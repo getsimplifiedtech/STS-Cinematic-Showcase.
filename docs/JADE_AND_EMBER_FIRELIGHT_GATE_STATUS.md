@@ -107,6 +107,21 @@ Motion gate and Pause: the ember runs only when `<html>` has `lit`, which each p
 
 Budgets and checks: nothing weakened and no limit raised. Colour literals in `styles.css` stay at 29; the other pages' scripts are at most 2,981 B gzip (limit 3,000; Our story is the tightest); Home script 14,746 B (limit 15,600); delivered 2,651,803 B (limit 2,777,089). One side effect handled: removing the Visit panel's 2 px border moved the second photograph 2 px up, which made a phone request it early (12 requests, over 11), so the border is transparent again and the second photograph has 24 px more air above it on a phone. Real-device Safari, frame rate, scroll smoothness and battery for the ember are **[unverified]**.
 
+## Update: contrast review (owner decision, 2026-10-17, Contrast Review and Final Closeout)
+
+`npm run test:contrast-sections` had 60 findings at b389fc1. It is **40 now**; the test, its 99% gate and its thresholds are unchanged.
+
+Genuine defects, fixed in CSS only (ember-lacquer cards untouched):
+- Home, phones: the opening sentence and each chapter's copy sat over the bright wok. Each now has its own soft shade, the phone darkening gradient is deeper at the top and bottom, and the dish name has a shade too.
+- Home, phone held sideways (844 x 390): the dark on the left reaches further and the chapter copy has a shade.
+- Home, tablets: the teaser paragraph no longer runs under the large glyph.
+- Visit us: photograph captions sit on a dark pill so they read over any part of the picture.
+
+Left as they are, by cause:
+- Decorative, `aria-hidden` glyphs on Home (teaser) and Our story (the name characters): 35 rows. They are drawn, not read; the characters carry no information.
+- Home chapter text at opacity 0 in the resting state the test screenshots (the beats are stacked there and only one shows at a time): 5 rows. A separate probe that scrolls through the sequence and measures only text that is visible (calm and live, 7 viewports) finds all body copy at or above 4.5:1.
+- Large display words ("Fire", "Steam", "Texture") over flame and steam at 844 x 390 live, 97.7 to 98.1% of pixels at 3:1 while they fade in: the test measures the whole line box, not the glyphs. Not changed; no design compromise made to chase the number.
+
 ## What was fixed in the site, not in the checks
 
 - Reading order on Home: the four overlapping chapter panels are set aside for screen readers (script-added `aria-hidden`) and the same words are added as an ordered, visually hidden list, shown as ordinary text in forced colours.

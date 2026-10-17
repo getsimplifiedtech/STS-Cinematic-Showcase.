@@ -2,8 +2,8 @@
   "$comment": "Integrity record of the delivered site (every page, shared script and stylesheet, font and media file). Generated from a fresh build by engineering/tools/asset-manifest.mjs; check:assets fails when the built site differs from it, so every change to a delivered byte is a reviewed change to this file. SRI strings are for hosts or tools that want them; the pages carry none (SRI adds nothing for same-origin files and is unreliable over file://).",
   "algorithm": "sha256 (hex) and sha384 (SRI)",
   "fileCount": 43,
-  "totalBytes": 2651803,
-  "treeSha256": "0ec81bb1248446a90e4802f565666f1f88eccecce940b00bfee74ad33fdf9816",
+  "totalBytes": 2653566,
+  "treeSha256": "8da4c35ed0350439ad66b993a331109d06e8e7781106e8bdce9764a2ff6eef4d",
   "files": {
     "breath.js": {
       "bytes": 36024,
@@ -36,9 +36,9 @@
       "integrity": "sha384-mC26+gOPbM+kF3DtNSe058awroabPXu3/RV0slX2qPokKrPDFSRK0KpAd562gjTb"
     },
     "home.css": {
-      "bytes": 18715,
-      "sha256": "63868d3cddeb3cbb6bb48457ff6d334df2ac924034c4b186a6deb8eebec723e9",
-      "integrity": "sha384-dXQTyArGyhArmeUpZVgHXowDPb+yvx4OuCXxpxk1aMpowtk3fDZVWcwJAvKnWFEn"
+      "bytes": 20307,
+      "sha256": "f552734817068adcd13719851b8b61821f1d1949fb4fe13a2795cf20d9a328d1",
+      "integrity": "sha384-DCyi1wK3T3BBap06DwRxUeD5g7NmNud8HQx3jaMqyfi6V56BG2qbhQ1k9lCD29yT"
     },
     "index.html": {
       "bytes": 13230,
@@ -211,9 +211,9 @@
       "integrity": "sha384-+SU449lxoXpO3UVcZ1RA+K60/wfMSgakMId8IN6apTUynmtivnla4v9FnYJdfHBF"
     },
     "visit.css": {
-      "bytes": 10829,
-      "sha256": "0b80173e0a761b6386a2872595064b91c011d3af18eaa53efa8d8a9c0b8c0106",
-      "integrity": "sha384-Lu9xj4wthHDnR08ZX2MBqxZ1g9jdT96F7pwjRFVsXnE0mjgSjZMr9cYyHY5K1lcm"
+      "bytes": 11000,
+      "sha256": "05c2f51a3a391d122c6f9d7631b32f8120fc598b06e1c97860938e33e0793ed0",
+      "integrity": "sha384-hJhPEGxQ6avrwxe+RHwiZarBXH6q+hrTDpmiuulcqu4Fcu0ZZzuIetx19JlQ2IxX"
     },
     "visit.js": {
       "bytes": 2482,

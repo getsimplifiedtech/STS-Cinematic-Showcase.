@@ -8,7 +8,7 @@
 .room-photo::after{content:"";position:absolute;inset:0;   /* the words sit on the dark side; the fire stays clear on the right */
   background:linear-gradient(90deg,rgba(10,9,8,.95),rgba(10,9,8,.8) 34%,rgba(10,9,8,.12) 64%,transparent 82%),linear-gradient(0deg,#0a0908,transparent 22%),linear-gradient(180deg,#0a0908,transparent 14%)}
 .room-photo figcaption,.pair-fig figcaption{font-size:.8125rem;color:var(--rice-dim)}
-.room-photo figcaption{position:absolute;z-index:1;right:var(--gutter);top:calc(var(--header-h) + var(--s3));text-align:right;text-shadow:0 1px 8px #000}
+.room-photo figcaption{position:absolute;z-index:1;right:var(--gutter);top:calc(var(--header-h) + var(--s3));text-align:right;text-shadow:0 1px 8px #000;color:var(--rice);padding:4px 10px;border-radius:8px;background:rgba(14,13,12,.82)}   /* over the bright wood and steel it needs a ground of its own to be read at 4.5:1 */
 @media (min-width:1601px){.room-photo img{-webkit-mask-image:linear-gradient(90deg,transparent,#000 22%);mask-image:linear-gradient(90deg,transparent,#000 22%)}}
 .room-fx{position:absolute;inset:0;z-index:-2;overflow:hidden;pointer-events:none}   /* the glow is larger than the room; this box is what crops it */
 .candle{position:absolute;left:-8%;bottom:-24%;width:92vmax;aspect-ratio:1;border-radius:50%;pointer-events:none;will-change:transform,opacity;opacity:.86;

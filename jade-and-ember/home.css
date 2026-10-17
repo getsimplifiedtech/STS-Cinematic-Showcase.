@@ -110,18 +110,19 @@ html:not(.js) .beat-4{align-items:center}
 @media (max-aspect-ratio:1/1) and (max-width:959px){
   :root{--focus:71.5% 62%;--shift:0px}
   .dark{background:
-    linear-gradient(180deg,rgba(14,13,12,.94) 0,rgba(14,13,12,.78) 22%,rgba(14,13,12,.46) 46%,rgba(14,13,12,0) 66%),
-    linear-gradient(0deg,rgba(14,13,12,.92) 0,rgba(14,13,12,.6) 18%,rgba(14,13,12,0) 38%)}
+    linear-gradient(180deg,rgba(14,13,12,.94) 0,rgba(14,13,12,.84) 22%,rgba(14,13,12,.6) 46%,rgba(14,13,12,0) 68%),
+    linear-gradient(0deg,rgba(14,13,12,.94) 0,rgba(14,13,12,.74) 20%,rgba(14,13,12,.4) 34%,rgba(14,13,12,0) 48%)}
   .beat{align-items:flex-start;padding-top:96px;padding-bottom:var(--gutter)}
   .beat-0{align-items:stretch}
   .beat-0{padding-bottom:calc(var(--gutter) + 56px)}   /* the notice bar above the header pushes the stage down at the top of the page: the actions stay inside the first screen */
   .beat-0 .beat-in{display:flex;flex-direction:column;width:100%;min-height:calc(100svh - 96px - var(--gutter) - 56px)}
-  .beat-0 .lede{margin-top:auto;font-size:1.0625rem}
+  .beat-0 .lede{margin-top:auto;font-size:1.0625rem;padding:10px 14px;margin-inline:-14px;border-radius:12px;background:rgba(14,13,12,.58);box-shadow:0 0 22px 12px rgba(14,13,12,.58)}   /* the opening sentence sits low over the bright wok: a soft shade of its own keeps it readable at 4.5:1 without darkening the picture further */
   .beat-0 .actions{margin-top:20px}
   h1{font-size:clamp(3.1rem,15.6vw,4.6rem)}
   .word{font-size:clamp(3.4rem,17vw,5rem)}
   .beat-4 .word{font-size:clamp(3.4rem,17vw,5rem)}
-  .copy{font-size:1.0625rem;max-width:19rem;margin-top:16px}
+  .copy{font-size:1.0625rem;max-width:19rem;margin-top:16px;padding:8px 12px;margin-inline:-12px;border-radius:12px;background:rgba(14,13,12,.68);box-shadow:0 0 20px 10px rgba(14,13,12,.68)}   /* a soft shade of its own, as on the opening sentence, so a chapter's words stay readable at 4.5:1 wherever the picture is bright behind them */
+  .dish-name{color:var(--rice);padding:6px 12px;margin-inline:-12px;border-radius:12px;background:rgba(14,13,12,.68);box-shadow:0 0 20px 10px rgba(14,13,12,.68)}
   .beat-4 .beat-in,.is-live .beat-4,.is-calm .beat-4{margin-block:0;align-items:flex-start}
   .plate-cloud{background-image:var(--plate-cloud-m)}
   .plate-fire{background-image:url(media/hero-wok-v2-m.webp);transform-origin:50% 72%}
@@ -133,7 +134,12 @@ html:not(.js) .beat-4{align-items:center}
   .is-calm .breath{height:400vh;height:400svh}
   .plate-dish img{right:50%;top:60%;width:133vw;transform:translate(50%,-50%)}
 }
-@media (max-height:520px) and (orientation:landscape){.word{font-size:clamp(3rem,13vh,6rem)}h1{font-size:clamp(2.4rem,11vh,4.5rem)}.lede{display:none}}
+@media (max-height:520px) and (orientation:landscape){.word{font-size:clamp(3rem,13vh,6rem)}h1{font-size:clamp(2.4rem,11vh,4.5rem)}.lede{display:none}.copy{padding:8px 12px;margin-inline:-12px;border-radius:12px;background:rgba(14,13,12,.6);box-shadow:0 0 18px 8px rgba(14,13,12,.6)}}
+@media (max-height:520px) and (orientation:landscape){.dark{background:
+  linear-gradient(90deg,var(--kitchen) 0,rgba(14,13,12,0) calc(var(--shift)*2.4)),
+  linear-gradient(90deg,rgba(14,13,12,.94) 0,rgba(14,13,12,.84) 36%,rgba(14,13,12,.52) 58%,rgba(14,13,12,0) 80%),
+  linear-gradient(0deg,rgba(14,13,12,.78) 0,rgba(14,13,12,0) 28%),
+  linear-gradient(180deg,rgba(14,13,12,.55) 0,rgba(14,13,12,0) 20%)}}   /* a phone held sideways is short, so the words sit over more of the picture: the dark on the left reaches further */
 @media (prefers-reduced-motion:reduce){.flame{display:none}.pause{display:none!important}}
 
 /* wide screens: chapter headings sit top left, in the dark beside and above the action, so the wok and the food are never behind a word; the plate chapter puts its text above and below the centred dish */
@@ -187,6 +193,7 @@ html:not(.js) .beat-4{align-items:center}
 @media (max-width:1023px){
   .story-teaser .pull{grid-column:1/-1}.teaser-text,.teaser-link{grid-column:1/9}
   .teaser-art{inset:0 0 0 30%;opacity:.55}
+  .teaser-text{max-width:min(32rem,50%)}   /* the words stop short of the bowl's pale rim, which the picture puts behind the right-hand end of a longer line */
   .strip-where{grid-column:1/7}.hours-compact{grid-column:7/13}
   .dish-2 .dish-fig{grid-column:4/13}.dish-2 .dish-text{grid-column:1/4}
   .dish-3 .dish-fig{grid-column:1/10}.dish-3 .dish-text{grid-column:10/13}
@@ -200,6 +207,7 @@ html:not(.js) .beat-4{align-items:center}
   .more{margin-top:var(--s8)}
   .strip-where,.hours-compact{grid-column:1/-1}
   .teaser-text,.teaser-link{grid-column:1/-1}
+  .teaser-text{max-width:32rem}
   .story-teaser{padding-block:0 var(--s9)}
   .teaser-art{position:relative;inset:auto;opacity:1;height:62vw;margin:0 0 var(--s7);z-index:0}
   .teaser-glyph{font-size:40vw;right:0;top:-6%}
