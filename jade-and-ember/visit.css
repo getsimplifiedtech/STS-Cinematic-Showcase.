@@ -48,7 +48,8 @@
 }
 @media (max-width:759px){
   .visit-room{align-items:flex-start;padding-block:calc(var(--header-h) + 72px) var(--s8);min-height:0}
-  .visit-main .hours td{white-space:normal}
+  .visit-main .hours th{width:36%;white-space:normal}
+  .visit-main .hours td{white-space:nowrap;font-size:clamp(.875rem,4.3vw,1.25rem)}   /* a time never breaks across two lines on a phone; it steps down in size instead */
   .good-groups{grid-template-columns:1fr;gap:var(--s6)}
   .visit-room .pause{top:calc(var(--header-h) + 8px);right:var(--gutter);bottom:auto;width:44px;padding:0;justify-content:center}
   .visit-room .pause-txt{position:absolute;width:1px;height:1px;margin:-1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}

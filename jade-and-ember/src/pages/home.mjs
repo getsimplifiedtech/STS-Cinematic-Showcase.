@@ -7,6 +7,15 @@ import { dish } from '../components/dish.mjs';
 import { hours } from '../components/hours.mjs';
 import { ctaBand } from '../components/cta-band.mjs';
 
+// The paragraph is set on purpose: its last sentence stays on one line (or, if it is long, its last two words stay together), so it never ends on a single word. The copy is unchanged.
+const tail = (t) => {
+  t = t.trim();
+  const sentence = /^(.*[.!?])\s+([^.!?]{8,34}[.!?])$/.exec(t);
+  if (sentence) return `${esc(sentence[1])} <span class="ls">${esc(sentence[2])}</span>`;
+  const m = /^(.*\S)\s+(\S+\s+\S+)$/.exec(t);
+  return m ? `${esc(m[1])} <span class="nb">${esc(m[2])}</span>` : esc(t);
+};
+
 export default function home(cfg) {
   const { client, copy } = cfg;
   const c = copy.home;
@@ -60,7 +69,7 @@ export default function home(cfg) {
         <div class="beat-in">
           <p class="eyebrow">${esc(h.eyebrow)}</p>
           <h1 id="hero-title">${h.headline.map((l) => `<span class="ln"><span>${esc(l)}</span></span>`).join(' ')}</h1>
-          <p class="lede">${esc(h.text)}</p>
+          <p class="lede">${tail(h.text)}</p>
           <p class="actions"><a class="btn btn-ember" href="${link(h.primaryCta.page)}">${esc(h.primaryCta.label)}</a> ${orderLink(cfg, 'btn btn-ink')}</p>
         </div>
       </div>

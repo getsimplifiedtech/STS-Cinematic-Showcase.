@@ -42,12 +42,20 @@ for (const pg of pages) {
     landmarks: ['header', 'nav[aria-label=Primary]', 'main#main', 'footer', 'nav[aria-label=Footer]', 'a.skip'].map((s) => !!document.querySelector(s)),
     lang: document.documentElement.lang,
     dataPage: document.documentElement.dataset.page,
+    shown: document.body.innerText,
+    hiddenOnly: [...document.querySelectorAll('[aria-label],[title],[alt]')].map((e) => [e.getAttribute('aria-label'), e.getAttribute('title'), e.getAttribute('alt')].join(' ')).join(' '),
   }));
   data[pg.id].requests = requests.filter((u) => !u.startsWith(base) && !u.startsWith('data:'));
   data[pg.id].errors = errors;
   await ctx.close();
 }
 
+{
+  // the finished site never shows development status: no lab or prototype label, no "not the production site" notice, in the text a visitor reads or in labels a screen reader announces
+  const p = [], dev = /lab prototype|prototype|not the production|work in progress|concept v\d|\bWIP\b|staging|lorem ipsum/i;
+  for (const pg of pages) { const m = dev.exec(data[pg.id].shown + ' ' + data[pg.id].hiddenOnly); if (m) p.push(`${pg.file} shows development wording: "${m[0]}"`); }
+  report('no development or lab label on any page', p);
+}
 {
   const p = [];
   for (const pg of pages) if (!existsSync(new URL(pg.file, root)) || statSync(new URL(pg.file, root)).size < 1000) p.push(`${pg.file} is missing or empty`);

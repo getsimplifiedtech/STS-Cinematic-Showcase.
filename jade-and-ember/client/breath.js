@@ -47,13 +47,14 @@ const CAM = {
   desk: [[0, 1, .5, .5], [.085, 1, .5, .5], [.15, 1.4, .64, .72], [.27, 1.4, .64, .72], [.345, 1.1, .6, .5], [.45, 1.1, .62, .48], [.515, 1.5, .66, .56], [.62, 1.62, .66, .56], [.70, 1.04, .5, .5], [1, 1, .5, .5]],
   phone: [[0, 1, .5, .5], [.085, 1, .5, .5], [.15, 1.5, .52, .76], [.27, 1.5, .52, .76], [.345, 1, .5, .46], [.45, 1.04, .5, .44], [.515, 1.55, .52, .56], [.62, 1.6, .52, .58], [.70, 1.04, .5, .5], [1, 1, .5, .5]],
 };
+let shiftF = 0;
 const ease = (t) => t * t * (3 - 2 * t);
 function camAt(p, ph) {
   const k = CAM[ph ? 'phone' : 'desk']; let a = k[0], b = k[k.length - 1];
   for (let i = 1; i < k.length; i++) if (p <= k[i][0]) { a = k[i - 1]; b = k[i]; break; }
   const t = b[0] === a[0] ? 1 : ease(clamp((p - a[0]) / (b[0] - a[0]))), s = a[1] + (b[1] - a[1]) * t;
   const lim = .5 * (1 - 1 / s);   // never look past the edge of the picture
-  const x = clamp(a[2] + (b[2] - a[2]) * t, .5 - lim, .5 + lim), y = clamp(a[3] + (b[3] - a[3]) * t, .5 - lim, .5 + lim);
+  const x = clamp(a[2] + (b[2] - a[2]) * t + (a[1] > 1 || b[1] > 1 ? shiftF : 0), .5 - lim, .5 + lim), y = clamp(a[3] + (b[3] - a[3]) * t, .5 - lim, .5 + lim);
   return { cs: s, ctx: s * (.5 - x) * 100, cty: s * (.5 - y) * 100 };
 }
 // The handover, in order: the flame and wok sink into their own steam (media, .56 to .68) while the cloud is at its densest; only then does the
@@ -103,8 +104,9 @@ function layout() {
   const [fx, fy] = (getComputedStyle(poster).objectPosition || '50% 50%').split(' ').map((v) => parseFloat(v) / 100);
   const s = Math.max(sw / iw, sh / ih), rw = iw * s, rh = ih * s, ox = (rw - sw) * (fx ?? .5), oy = (rh - sh) * (fy ?? .5);
   const [u, v] = ph ? SRC.phone : SRC.desk;
+  shiftF = (poster.parentElement.offsetLeft || 0) / sw;   // the picture is slid right by --shift on wide screens (home.css)
   Object.assign(steam.L, LOOK[ph ? 'phone' : 'desk']);
-  steam.L.src = [(u * rw - ox) / sw, 1 - (v * rh - oy) / sh];
+  steam.L.src = [(u * rw - ox) / sw + shiftF, 1 - (v * rh - oy) / sh];
   // the dish: the plate (72% of the photograph's width) is the centre of the frame, where the wok was; type sits above and below it, not beside it
   const plateW = ph ? .96 * sw : Math.min(.62 * sw, 1.3 * sh), imgW = plateW / .72, imgH = imgW * 1610 / 2400;
   const c = ph ? [.5, .40] : [.5, .53], ex = imgW / sw, ey = imgH / sh;

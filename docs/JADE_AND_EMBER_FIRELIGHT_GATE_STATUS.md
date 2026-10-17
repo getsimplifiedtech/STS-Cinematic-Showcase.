@@ -57,6 +57,12 @@
 | `check:selftest-gate4` | pass |  |
 | `check:selftest-je-markup` | **FAIL** | The project's own copy of the self-tests. Fails only on the same baseline-bound cases (the Gate 1 start-up and the six `budgets` cases); every case re-pointed at the Firelight markup passes. |
 
+## Update: hero refinement (owner review, 2026-10-17)
+
+Result is unchanged: **35 of 45 pass, the same 10 fail** (8 baseline-bound, `check:ci`, `check:portability`), none removed or weakened. Home script is 14,745 B gzip against the 15,600 B Home limit; the other pages stay at 2,900 B or less against 3,000 B.
+
+What changed in the site: the Home headline is 6vw (was 7.2vw, cap 7rem) and the footage is slid right by 3.2vw on wide screens, so the first line ends 6 to 8vw before the wok's rim at every desktop size from 1024 to 1920 px wide (measured). The hero paragraph's closing sentence is its own line and no paragraph width ends on a single word (15 widths from 320 to 1920 px checked). The footer no longer shows the development stamp ("Concept v0.8..."); it stays in the page source as a comment and in `config/site.json`, which `check:release` requires. Visit hours no longer break across lines on phones. A new case in `tests/site.mjs` fails if any page shows lab, prototype, staging or version wording. The lab label named in the review exists only in the retired lab prototype on its own branch, never in this build.
+
 ## What was fixed in the site, not in the checks
 
 - Reading order on Home: the four overlapping chapter panels are set aside for screen readers (script-added `aria-hidden`) and the same words are added as an ordered, visually hidden list, shown as ordinary text in forced colours.

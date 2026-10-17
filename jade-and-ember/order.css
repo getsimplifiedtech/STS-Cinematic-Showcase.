@@ -10,7 +10,7 @@
 .order-lede{grid-column:1/7;color:var(--rice-dim);font-size:1.25rem;max-width:28rem}
 /* the action stays under the header while the stage plays (the header's own Order button is hidden on a phone) */
 .order-action{position:sticky;top:calc(var(--header-h) + var(--s3));z-index:30;width:min(1200px,100% - 2*var(--gutter));margin:var(--s5) auto 0;display:flex}
-.order-action .btn,.order-action .btn-off{background:rgba(14,13,12,.88);border:1px solid rgba(240,138,60,.7);padding:0 var(--s5);min-height:48px;font-size:1.125rem;box-shadow:0 0 30px rgba(240,138,60,.18)}
+.order-action .btn,.order-action .btn-off{background:rgba(14,13,12,.97);border:1px solid rgba(240,138,60,.7);padding:0 var(--s5);min-height:48px;font-size:1.125rem;box-shadow:0 0 30px rgba(240,138,60,.18)}
 .order-action .btn-off{display:inline-flex;align-items:center;border-radius:2px;color:var(--rice);cursor:default}
 
 .journey{--k:calc(var(--p,1)*3);position:relative;height:300svh;margin-top:calc(var(--s5) * -1)}

@@ -4,16 +4,19 @@
    - .is-live: the WebGL sequence. Stage and text are both pinned inside one tall track and every beat is driven by scroll progress.
    - .is-calm: reduced motion, Save-Data, no WebGL2 or a failed performance check. Opacity-only crossfades between still plates, nothing moves. */
 
-:root{--focus:34% 50%}   /* the wok sits right of centre in the footage; this keeps as much of the dark left side in frame as the crop allows */
+:root{--focus:34% 50%;--shift:3.2vw}   /* the wok sits right of centre in the footage. --shift slides the picture right by that much (the right edge is cropped, the left edge fades into the kitchen colour), which gives the headline clear space beside the wok; breath.js reads it so the steam stays on the wok */
 /* ---------------------------------------------------------------- the breath: default (no JavaScript) layout */
 .breath{position:relative;background:var(--kitchen)}
 .stage{position:sticky;top:0;height:100vh;height:100svh;overflow:hidden;z-index:0;background:var(--kitchen)}
 .media{position:absolute;inset:0}
 .media picture,.poster,.flame{position:absolute;inset:0;width:100%;height:100%}
+.media picture,.flame{left:var(--shift)}
+.media picture .poster{left:0}
 .poster,.flame{object-fit:cover;object-position:var(--focus)}
 .flame{opacity:0}   /* the footage fades in when it starts; Pause removes it at once, so nothing is still moving after the press */
 .is-video .flame{opacity:1;transition:opacity 500ms var(--ease)}
 .dark{position:absolute;z-index:3;inset:0;pointer-events:none;background:
+  linear-gradient(90deg,var(--kitchen) 0,rgba(14,13,12,0) calc(var(--shift)*2.4)),   /* hides the seam where the slid picture starts */
   linear-gradient(90deg,rgba(14,13,12,.92) 0,rgba(14,13,12,.7) 26%,rgba(14,13,12,.22) 50%,rgba(14,13,12,0) 66%),
   linear-gradient(0deg,rgba(14,13,12,.78) 0,rgba(14,13,12,0) 28%),
   linear-gradient(180deg,rgba(14,13,12,.55) 0,rgba(14,13,12,0) 20%)}
@@ -36,9 +39,11 @@
 .eyebrow{margin:0 0 20px}
 h1,.word{margin:0;font:400 clamp(3.5rem,9.4vw,9.5rem)/.92 var(--serif);letter-spacing:-.018em;color:var(--rice);text-wrap:balance}
 h1 .ln{display:block}
-@media (min-width:960px){h1{font-size:clamp(3.5rem,7.2vw,8rem)}}   /* the headline stays on the dark left of the frame and off the food */
+@media (min-width:960px){h1{font-size:clamp(3.5rem,6vw,7rem)}}   /* the headline stays on the dark left of the frame and clear of the cookware: its first line ends about 5vw before the wok's rim */
 .word{font-size:clamp(3.25rem,6.6vw,7rem);letter-spacing:-.025em}
-.lede{margin:28px 0 0;max-width:30rem;font-size:1.25rem;line-height:1.55;color:var(--rice)}
+.lede{margin:28px 0 0;max-width:28rem;font-size:1.25rem;line-height:1.55;color:var(--rice);text-wrap:balance}
+.lede .nb{white-space:nowrap}
+.lede .ls{display:block;white-space:nowrap}   /* the closing sentence ("Tuesday to Sunday, from five.") is its own line; the sentence above it is balanced across the lines it needs, so nothing is left alone at the end */
 .copy{margin:22px 0 0;max-width:23rem;font-size:1.1875rem;line-height:1.5;color:var(--rice);text-shadow:0 1px 18px rgba(14,13,12,.7)}
 .dish-name{margin:20px 0 0;font:600 1rem/1.4 var(--sans);color:var(--rice-dim)}
 .dish-name .price{margin-left:.6em;color:var(--rice)}
@@ -102,7 +107,7 @@ html:not(.js) .beat-4{align-items:center}
 
 /* ---------------------------------------------------------------- phones: a different composition, not a scaled desktop */
 @media (max-aspect-ratio:1/1) and (max-width:959px){
-  :root{--focus:71.5% 62%}
+  :root{--focus:71.5% 62%;--shift:0px}
   .dark{background:
     linear-gradient(180deg,rgba(14,13,12,.94) 0,rgba(14,13,12,.78) 22%,rgba(14,13,12,.46) 46%,rgba(14,13,12,0) 66%),
     linear-gradient(0deg,rgba(14,13,12,.92) 0,rgba(14,13,12,.6) 18%,rgba(14,13,12,0) 38%)}

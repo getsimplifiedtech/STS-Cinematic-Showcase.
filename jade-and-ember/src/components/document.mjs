@@ -62,7 +62,8 @@ function footer(cfg, page) {
     <p class="foot-brand">${sealMark(cfg)}<span>${esc(client.brand.name)}</span> <span class="foot-desc">${esc(client.brand.descriptor)}</span></p>
     <nav class="foot-nav" aria-label="Footer"><ul>${links}</ul></nav>
     ${demo}
-    <p class="foot-meta">${showcase}<a href="${esc(site.credit.href)}">${esc(site.credit.label)}</a>${cfg.demo ? `<span>${esc(site.demo.stamp)}</span>` : ''}</p>
+    <p class="foot-meta">${showcase}<a href="${esc(site.credit.href)}">${esc(site.credit.label)}</a></p>${cfg.demo ? `
+    <!-- build: ${esc(site.demo.stamp)} (development record, not shown to visitors) -->` : ''}
   </div>
 </footer>`;
 }
