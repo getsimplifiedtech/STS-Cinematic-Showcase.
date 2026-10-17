@@ -392,7 +392,8 @@
         "jade-and-ember/engineering/engine-features.json",
         "jade-and-ember/engineering/project-owned/client-build.mjs",
         "jade-and-ember/engineering/project-owned/scenarios.mjs",
-        "jade-and-ember/engineering/project-owned/regression.mjs"
+        "jade-and-ember/engineering/project-owned/regression.mjs",
+        "jade-and-ember/engineering/project-owned/prepare-baseline.mjs"
       ],
       "target": "stays in Jade & Ember (as a project check registered through the manifest)",
       "external": [
@@ -2258,6 +2259,7 @@
           "jade-and-ember/engineering/tokens.json",
           "jade-and-ember/engineering/project-owned/client-build.mjs",
           "jade-and-ember/engineering/project-owned/regression.mjs",
+          "jade-and-ember/engineering/project-owned/prepare-baseline.mjs",
           "jade-and-ember/engineering/project-owned/scenarios.mjs",
           "jade-and-ember/engineering/lib/config-schema.mjs",
           "jade-and-ember/engineering/lib/schema.mjs",

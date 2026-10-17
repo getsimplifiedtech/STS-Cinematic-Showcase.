@@ -3,7 +3,7 @@
 import { esc } from '../lib/util.mjs';
 import { orderLink, pageHref } from './shared.mjs';
 
-export function ctaBand(cfg, { heading, text, tone = 'pine', id = '', secondary = null, art = null }) {
+export function ctaBand(cfg, { heading, text, tone = 'pine', id = '', art = null, secondary = null }) {
   return `<section class="cta-band cta-${esc(tone)}"${id ? ` id="${esc(id)}"` : ''} aria-labelledby="${esc(id || 'cta')}-title">${art ? `
     <figure class="cta-art" aria-hidden="true"><img src="${esc(art.src)}" alt="" width="${art.width}" height="${art.height}" loading="lazy" decoding="async" style="--pos:${esc(art.pos || '50% 50%')}"></figure>` : ''}
     <div class="wrap cta-grid">
