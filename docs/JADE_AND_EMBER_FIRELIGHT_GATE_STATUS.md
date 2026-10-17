@@ -87,6 +87,10 @@ What changed in the site: the Home headline is 6vw (was 7.2vw, cap 7rem) and the
 1. Approve a Firelight baseline (APR-JE-017 says the baseline never changes, so a new one needs a signed record). That turns the eight baseline-bound checks into meaningful ones. A baseline branch was not created: that would be freezing.
 2. The two framework follow-ups listed above (the snapshot is not edited here).
 
+## Update: delivered-site budget after the Visit Us photographs (owner decision, 2026-10-17)
+
+The three approved interior photographs for Visit Us (commit 1da3035) took the measured delivered-site total from within the v0.9 limit of 2,176,000 B to 2,307,074 B. The owner approved a Firelight-specific limit of **2,537,781 B** (the measured total plus 10 percent). It is recorded in `engineering/budgets-firelight.json` under `site`, and `engineering/project-owned/budgets-firelight.mjs` reads it. Unchanged: every page-specific limit, the Home script ceiling of 15,600 B gzip, the 68,000 B image limit, the 390 px limits (192,000 B and 11 requests), `engineering/budgets.json` (v0.9) and the v0.8 baseline. `check:budgets-firelight` is not one of the 45 checks, and none of the 45 was changed.
+
 ## What was fixed in the site, not in the checks
 
 - Reading order on Home: the four overlapping chapter panels are set aside for screen readers (script-added `aria-hidden`) and the same words are added as an ordered, visually hidden list, shown as ordinary text in forced colours.

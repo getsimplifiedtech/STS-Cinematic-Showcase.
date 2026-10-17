@@ -1,7 +1,16 @@
 {
-  "$comment": "Firelight budgets (APR-JE-052, Option A). Everything not named here keeps the v0.9 limit in budgets.json: Menu, Our Story, Visit Us and Order Online are held to exactly the v0.9 page limits (3,000 B gzip of script, 2 scripts, 255,000 B initial, 325,000 B full page, 4,096 B HTML, 192,000 B and 11 requests at 390 px on the throttled connection, 68,000 B per image, the Core Web Vitals limits). Only Home, and only the items listed under `home`, has its own limit, set from what The Breath measurably needs (a WebGL2 steam simulation in one script, the live dish at full resolution, two stylesheets, the footage). Each Home limit is the measured value plus about 10 percent headroom, rounded; `measured` records the measurement the limit came from, and a Home value more than regressionTolerancePercent above it fails even when it is under its limit. Run: node engineering/project-owned/budgets-firelight.mjs (add --static to skip the browser). The shared check:budgets is left exactly as it is; it measures against the frozen v0.8 baseline and cannot run on this branch (see docs/JADE_AND_EMBER_FIRELIGHT_GATE_STATUS.md).",
+  "$comment": "Firelight budgets (APR-JE-052, Option A). Everything not named here keeps the v0.9 limit in budgets.json: Menu, Our Story, Visit Us and Order Online are held to exactly the v0.9 page limits (3,000 B gzip of script, 2 scripts, 255,000 B initial, 325,000 B full page, 4,096 B HTML, 192,000 B and 11 requests at 390 px on the throttled connection, 68,000 B per image, the Core Web Vitals limits). Only Home, and only the items listed under `home`, has its own page limit; the delivered-site total has a Firelight limit under `site` (owner decision of 2026-10-17). Home's limits are set from what The Breath measurably needs (a WebGL2 steam simulation in one script, the live dish at full resolution, two stylesheets, the footage). Each Home limit is the measured value plus about 10 percent headroom, rounded; `measured` records the measurement the limit came from, and a Home value more than regressionTolerancePercent above it fails even when it is under its limit. Run: node engineering/project-owned/budgets-firelight.mjs (add --static to skip the browser). The shared check:budgets is left exactly as it is; it measures against the frozen v0.8 baseline and cannot run on this branch (see docs/JADE_AND_EMBER_FIRELIGHT_GATE_STATUS.md).",
   "approval": "APR-JE-052",
   "regressionTolerancePercent": 5,
+  "site": {
+    "limits": {
+      "deliveredBytes": 2537781
+    },
+    "approval": "Owner decision of 2026-10-17 (Photography Integration Budget Approval), on commit 1da3035",
+    "why": {
+      "deliveredBytes": "The v0.9 delivered-site total (2,176,000 B, the v0.8 total plus about 10 percent) was met before the Visit Us photographs. The three owner-approved interior photographs (four files: Shot A in a desktop and a phone crop, Shot B, Shot C) add about 235 KB, taking the measured total to 2,307,074 B. The Firelight limit is that measurement plus 10 percent, rounded down to a whole byte: 2,537,781 B. It applies to the delivered-site total only; every page-specific limit, the Home script ceiling of 15,600 B gzip, the 68,000 B image limit and the 390 px limits (192,000 B, 11 requests) are unchanged, and the shared budgets.json and the v0.8 baseline are untouched."
+    }
+  },
   "home": {
     "file": "index.html",
     "limits": {

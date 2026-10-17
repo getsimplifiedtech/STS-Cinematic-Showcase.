@@ -68,7 +68,7 @@ export async function checkBudgetsFirelight({ browser = true, update = false } =
     over('largest MP4', s.maxMp4Bytes, lim.maxMp4Bytes);
     over('font files', s.fontFiles, lim.fontFiles);
     over('font bytes', s.fontBytes, lim.fontBytes);
-    over('delivered site total', s.deliveredBytes, lim.deliveredBytes);
+    over('delivered site total', s.deliveredBytes, fl.site?.limits?.deliveredBytes ?? lim.deliveredBytes);   // Firelight's own total (budgets-firelight.json, site); the v0.9 total stays in budgets.json
     // images: 68,000 B each, except the documented Home exceptions
     const media = join(dir, 'media');
     for (const f of readdirSync(media).filter((n) => n.endsWith('.webp'))) over(`media/${f}`, statSync(join(media, f)).size, fl.home.imageExceptions[`media/${f}`] ?? lim.maxImageBytes);
