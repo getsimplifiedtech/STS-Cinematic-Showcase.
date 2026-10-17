@@ -3,7 +3,7 @@
 
 .visit-room{position:relative;isolation:isolate;min-height:max(100svh,720px);display:flex;align-items:center;
   padding-block:calc(var(--header-h) + var(--s8)) var(--s9);background:radial-gradient(45% 40% at 94% 0%,rgba(20,58,48,.6),transparent 70%),#0a0908}
-.room-photo{position:absolute;inset:0 0 0 auto;width:min(100%,1600px);z-index:-3;margin:0;clip-path:inset(0)}   /* capped in width so the photograph is never stretched past about 1.25x; clip-path, not overflow, crops the scroll drift without clipping content */
+.room-photo{position:absolute;inset:0 0 0 auto;width:min(100%,1600px);z-index:-3;margin:0;overflow:clip}   /* capped in width so the photograph is never stretched past about 1.25x; overflow:clip crops the scroll drift and, unlike scaling inside a clip-path, adds nothing to the page width */
 .room-photo img{width:100%;height:100%;object-fit:cover;object-position:56% 50%}
 .room-photo::after{content:"";position:absolute;inset:0;   /* the words sit on the dark side; the fire stays clear on the right */
   background:linear-gradient(90deg,rgba(10,9,8,.95),rgba(10,9,8,.8) 34%,rgba(10,9,8,.12) 64%,transparent 82%),linear-gradient(0deg,#0a0908,transparent 22%),linear-gradient(180deg,#0a0908,transparent 14%)}
@@ -91,12 +91,14 @@
   .visit-counter .pair-fig,.visit-materials .pair-fig{margin-inline:calc(var(--gutter) * -1)}
   .visit-counter .pair-fig img{aspect-ratio:4/5;object-fit:cover;max-height:78svh}
   .visit-counter .pair-fig figcaption,.visit-materials .pair-fig figcaption{padding-inline:var(--gutter)}
-  .visit-main .hours th{width:36%;white-space:normal}
-  .visit-main .hours td{white-space:nowrap;font-size:clamp(.875rem,4.3vw,1.25rem)}   /* a time never breaks across two lines on a phone; it steps down in size instead */
+  .visit-main{padding:var(--s5) var(--s4)}
+  .visit-main .hours th{width:auto;padding-right:var(--s3);font-size:.9375rem;white-space:nowrap}   /* a day range stays on one line down to 360 px; below that it may wrap */
+  .visit-main .hours td{white-space:nowrap;font-size:clamp(.875rem,4.1vw,1.25rem)}   /* a time never breaks across two lines on a phone; it steps down in size instead */
   .good-groups{grid-template-columns:1fr;gap:var(--s6)}
   .visit-room .pause{top:calc(var(--header-h) + 8px);right:var(--gutter);bottom:auto;width:44px;padding:0;justify-content:center}
   .visit-room .pause-txt{position:absolute;width:1px;height:1px;margin:-1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
 }
+@media (max-width:359px){.visit-main .hours th{white-space:normal}}
 /* scroll choreography: CSS only, no script. The photograph drifts slowly against the scroll; each pair's picture is drawn up from below and its words rise a little.
    Only where the browser supports scroll-driven animation, and only when motion is allowed; everywhere else the page simply rests in its finished state. */
 @supports (animation-timeline:view()){
