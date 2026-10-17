@@ -69,10 +69,11 @@ export async function checkBudgetsFirelight({ browser = true, update = false } =
     over('font files', s.fontFiles, lim.fontFiles);
     over('font bytes', s.fontBytes, lim.fontBytes);
     over('delivered site total', s.deliveredBytes, fl.site?.limits?.deliveredBytes ?? lim.deliveredBytes);   // Firelight's own total (budgets-firelight.json, site); the v0.9 total stays in budgets.json
-    // images: 68,000 B each, except the documented Home exceptions
+    // images: 68,000 B each, except the documented exceptions (Home's live dish; Visit Us's two larger hero sizes)
+    const imageExceptions = { ...fl.home.imageExceptions, ...fl.site?.imageExceptions };
     const media = join(dir, 'media');
-    for (const f of readdirSync(media).filter((n) => n.endsWith('.webp'))) over(`media/${f}`, statSync(join(media, f)).size, fl.home.imageExceptions[`media/${f}`] ?? lim.maxImageBytes);
-    for (const [f, max] of Object.entries(fl.home.imageExceptions)) notes.push(`image exception: ${f} may be up to ${max} B (Home only; see budgets-firelight.json)`);
+    for (const f of readdirSync(media).filter((n) => n.endsWith('.webp'))) over(`media/${f}`, statSync(join(media, f)).size, imageExceptions[`media/${f}`] ?? lim.maxImageBytes);
+    for (const [f, max] of Object.entries(imageExceptions)) notes.push(`image exception: ${f} may be up to ${max} B (${f in fl.home.imageExceptions ? 'Home' : 'Visit Us'} only; see budgets-firelight.json)`);
     notes.push(`static: ${Object.keys(s.pages).length} pages; Home script ${s.pages[homeFile].jsGzip} B gzip in ${s.pages[homeFile].scripts} scripts (limit ${fl.home.limits.jsGzip}); other pages' scripts at most ${Math.max(...Object.entries(s.pages).filter(([f]) => f !== homeFile).map(([, p]) => p.jsGzip))} B (limit ${lim.page.jsGzip}); delivered ${s.deliveredBytes} B`);
 
     let rt = null, home = null;

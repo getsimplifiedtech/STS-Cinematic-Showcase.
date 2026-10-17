@@ -1,9 +1,9 @@
 {
   "$comment": "Integrity record of the delivered site (every page, shared script and stylesheet, font and media file). Generated from a fresh build by engineering/tools/asset-manifest.mjs; check:assets fails when the built site differs from it, so every change to a delivered byte is a reviewed change to this file. SRI strings are for hosts or tools that want them; the pages carry none (SRI adds nothing for same-origin files and is unreliable over file://).",
   "algorithm": "sha256 (hex) and sha384 (SRI)",
-  "fileCount": 40,
-  "totalBytes": 2307330,
-  "treeSha256": "766b6563afa895f88bba92bf9952cc2251c6d768e712c798d7c7da4397d4ffba",
+  "fileCount": 42,
+  "totalBytes": 2644847,
+  "treeSha256": "7eb4acd1d9a91b55fcded37a56dacd3af9b84b761cf6dea71d9ee4f75216df52",
   "files": {
     "breath.js": {
       "bytes": 36024,
@@ -46,9 +46,9 @@
       "integrity": "sha384-GUHgpN44Aca3krKc3T/mPyqc4H1775m0ydw05xQN0y3pBlaz28Y2LQMwtVAWBcL+"
     },
     "media/PROVENANCE.md": {
-      "bytes": 4948,
-      "sha256": "fb0485614913ac2df9bcdfbc52026e5d5a2b3af98f4f71d183f12a30aa396d9e",
-      "integrity": "sha384-4s712RV7SFWzBP1825edNI6SaSDC9Fyg+wlf+zKL2v6eop2kzuLi3npGMkNApsoi"
+      "bytes": 5284,
+      "sha256": "676e73b56b1adabdf515867aedd79d4592394d1051a221f2d83485331f7a789f",
+      "integrity": "sha384-+YGJn9hPddbbDxTiCWsClOeWcoVmc04bWVKybd3gaF26viZr7VYN6+Z7RWl5dhxn"
     },
     "media/cloud-plate-m.webp": {
       "bytes": 5928,
@@ -130,6 +130,16 @@
       "sha256": "c899fd8ab977dc9d83296ffd6dd562aff3130581a275779de74021498a7068a6",
       "integrity": "sha384-KkESadPHGA+36JMT3gx49yk4oOlaXb9FasuHgwTQq8DXruvRk/kDlUpPnCyK9XRH"
     },
+    "media/visit-room-a-1920.webp": {
+      "bytes": 140076,
+      "sha256": "c9634ce439d3f853fd7bc35f6ffe83b2b115597e08a1db2a4be7e0e897cd7085",
+      "integrity": "sha384-5CsvsVN5+sCB/mJZX86sZv7ytuvNUuPQi0YZ4/h9+wETxte1HUHAIjzrC97dLZS7"
+    },
+    "media/visit-room-a-2560.webp": {
+      "bytes": 196944,
+      "sha256": "1fdc4a39c7d844a2d5128dc7c424d8d1035df27d009abe5669cf6515224e5222",
+      "integrity": "sha384-g2/ToE6RMa5YcLJ+pRy/Ccv1HyFbSillSYXPa/ifa/w09+O+D2Yl2w5T4E80pdCM"
+    },
     "media/visit-room-a-m.webp": {
       "bytes": 51302,
       "sha256": "91f4c046574ea2926f9bd1da61231c40fcc667a87cdedb61c9dcb9d235a9054d",
@@ -191,9 +201,9 @@
       "integrity": "sha384-NFe1/N7MAaLMW9jpCkkB+1Lfy+59rVGTds208afU2atpUSDWOB8pfL+m/Vr5J46R"
     },
     "visit-us.html": {
-      "bytes": 9236,
-      "sha256": "346bd34ff7990596dc7e009193c689b850e15e5117ac310d3d6c6e350ff35d7b",
-      "integrity": "sha384-6BDA2U7lnTYSFwwbPGZLvn41vv0hUOhCv3RUZT8aye/lRv5JzRMLuwem3IYeuVfj"
+      "bytes": 9397,
+      "sha256": "ad19047668ad8ef5be929fa98de492cb8032a97bff359abab6bbaeef78f85a1e",
+      "integrity": "sha384-0QDi36MOUYAg/4DX0ag2BSegFmZCtVkg59KGzeXe+dH6oengJ2ihD0Ofpdy+XO37"
     },
     "visit.css": {
       "bytes": 10061,

@@ -91,6 +91,12 @@ What changed in the site: the Home headline is 6vw (was 7.2vw, cap 7rem) and the
 
 The three approved interior photographs for Visit Us (commit 1da3035) took the measured delivered-site total from within the v0.9 limit of 2,176,000 B to 2,307,074 B. The owner approved a Firelight-specific limit of **2,537,781 B** (the measured total plus 10 percent). It is recorded in `engineering/budgets-firelight.json` under `site`, and `engineering/project-owned/budgets-firelight.mjs` reads it. Unchanged: every page-specific limit, the Home script ceiling of 15,600 B gzip, the 68,000 B image limit, the 390 px limits (192,000 B and 11 requests), `engineering/budgets.json` (v0.9) and the v0.8 baseline. `check:budgets-firelight` is not one of the 45 checks, and none of the 45 was changed.
 
+## Update: sharper desktop hero for Visit Us (owner decision, 2026-10-17)
+
+The opening photograph was visibly soft on wide and 2x screens because its only desktop file was 1280 px wide, resized from the 5056 px master to fit the 68,000 B image limit. Approved and done, with no new generation: two larger sizes of the same master, chosen by `srcset` (`<source>` inside `<picture>`): `media/visit-room-a-1920.webp` (140,076 B, q54) and `media/visit-room-a-2560.webp` (196,944 B, q50). The 1280 px file stays for 1x screens up to about 1300 px and as the fallback. Phones (up to 759 px) keep their own 720 px crop and never request the larger files (verified at 390, 430 and 759 px). Wide windows at 1x choose 1920 px; 2x screens at 1440 px and wider choose 2560 px. Layout is unchanged (same box, same aspect ratio, explicit width and height, no layout shift).
+
+Budgets: a narrowly scoped image exception for those two files only (142,000 B and 200,000 B), under `site.imageExceptions` in `engineering/budgets-firelight.json`; the 68,000 B limit still applies to every other image. The delivered-site total limit moves from 2,537,781 B to 2,777,089 B (measured 2,644,847 B plus 5 percent), because the two files add 337 KB. Every page limit (Visit full-page and 390 px limits included), the Home script ceiling of 15,600 B gzip, `budgets.json` (v0.9) and the 45 checks are unchanged.
+
 ## What was fixed in the site, not in the checks
 
 - Reading order on Home: the four overlapping chapter panels are set aside for screen readers (script-added `aria-hidden`) and the same words are added as an ordered, visually hidden list, shown as ordinary text in forced colours.

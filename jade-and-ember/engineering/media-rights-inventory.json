@@ -796,6 +796,74 @@
       ],
       "useNow": "Fictional Jade & Ember demonstration only, as adopted in docs/JADE_AND_EMBER_MEDIA_RIGHTS_POLICY.md (APR-JE-023). Public deployment of the demonstration is not approved.",
       "clientUse": "Not permitted. Replace with real photography or footage, or with media whose licence has been verified and recorded in a rights-verification approval."
+    },
+    {
+      "path": "media/visit-room-a-1920.webp",
+      "kind": "image",
+      "description": "1920x1288 WebP of the dining room (Shot A), a larger size of the Visit page opening photograph for wide and 2x screens",
+      "bytes": 140076,
+      "sha256": "c9634ce439d3f853fd7bc35f6ffe83b2b115597e08a1db2a4be7e0e897cd7085",
+      "origin": {
+        "type": "ai-generated",
+        "service": "Higgsfield (the owner's account): Nano Banana 2 interior still",
+        "generatedOn": "2026-10-17",
+        "recordedIn": "media/PROVENANCE.md",
+        "job": "f2236920-1890-4a96-a781-3376e93b3612",
+        "postProcessing": "resize the 5056x3392 master to 1920 px wide (Lanczos), WebP q54",
+        "derivedFrom": "media/visit-room-a.webp (the same master, so the same terms bear on this one)"
+      },
+      "rights": {
+        "status": "unverified",
+        "established": [
+          "The platform, model, job id, credits and date are recorded in media/PROVENANCE.md."
+        ],
+        "notEstablished": [
+          "Any licence or ownership of the output under the service and model terms.",
+          "Whether the connected paid account changes what may be done with the output.",
+          "Which terms govern an output made with a reference image from another generation.",
+          "Whether any attribution or AI-disclosure duty applies."
+        ]
+      },
+      "termsToVerify": [
+        "T-HIGGS-TOU",
+        "T-LEGAL"
+      ],
+      "useNow": "Fictional Jade & Ember demonstration only, as adopted in docs/JADE_AND_EMBER_MEDIA_RIGHTS_POLICY.md (APR-JE-023). Public deployment of the demonstration is not approved.",
+      "clientUse": "Not permitted. Replace with real photography or footage, or with media whose licence has been verified and recorded in a rights-verification approval."
+    },
+    {
+      "path": "media/visit-room-a-2560.webp",
+      "kind": "image",
+      "description": "2560x1717 WebP of the dining room (Shot A), a larger size of the Visit page opening photograph for wide and 2x screens",
+      "bytes": 196944,
+      "sha256": "1fdc4a39c7d844a2d5128dc7c424d8d1035df27d009abe5669cf6515224e5222",
+      "origin": {
+        "type": "ai-generated",
+        "service": "Higgsfield (the owner's account): Nano Banana 2 interior still",
+        "generatedOn": "2026-10-17",
+        "recordedIn": "media/PROVENANCE.md",
+        "job": "f2236920-1890-4a96-a781-3376e93b3612",
+        "postProcessing": "resize the 5056x3392 master to 2560 px wide (Lanczos), WebP q50",
+        "derivedFrom": "media/visit-room-a.webp (the same master, so the same terms bear on this one)"
+      },
+      "rights": {
+        "status": "unverified",
+        "established": [
+          "The platform, model, job id, credits and date are recorded in media/PROVENANCE.md."
+        ],
+        "notEstablished": [
+          "Any licence or ownership of the output under the service and model terms.",
+          "Whether the connected paid account changes what may be done with the output.",
+          "Which terms govern an output made with a reference image from another generation.",
+          "Whether any attribution or AI-disclosure duty applies."
+        ]
+      },
+      "termsToVerify": [
+        "T-HIGGS-TOU",
+        "T-LEGAL"
+      ],
+      "useNow": "Fictional Jade & Ember demonstration only, as adopted in docs/JADE_AND_EMBER_MEDIA_RIGHTS_POLICY.md (APR-JE-023). Public deployment of the demonstration is not approved.",
+      "clientUse": "Not permitted. Replace with real photography or footage, or with media whose licence has been verified and recorded in a rights-verification approval."
     }
   ]
 }

@@ -4,11 +4,16 @@
   "regressionTolerancePercent": 5,
   "site": {
     "limits": {
-      "deliveredBytes": 2537781
+      "deliveredBytes": 2777089
     },
-    "approval": "Owner decision of 2026-10-17 (Photography Integration Budget Approval), on commit 1da3035",
+    "imageExceptions": {
+      "media/visit-room-a-1920.webp": 142000,
+      "media/visit-room-a-2560.webp": 200000
+    },
+    "approval": "Owner decisions of 2026-10-17: Photography Integration Budget Approval (2,537,781 B, on commit 1da3035) and Final Media Pass Deferred (the sharper desktop hero, which raised it to 2,777,089 B)",
     "why": {
-      "deliveredBytes": "The v0.9 delivered-site total (2,176,000 B, the v0.8 total plus about 10 percent) was met before the Visit Us photographs. The three owner-approved interior photographs (four files: Shot A in a desktop and a phone crop, Shot B, Shot C) add about 235 KB, taking the measured total to 2,307,074 B. The Firelight limit is that measurement plus 10 percent, rounded down to a whole byte: 2,537,781 B. It applies to the delivered-site total only; every page-specific limit, the Home script ceiling of 15,600 B gzip, the 68,000 B image limit and the 390 px limits (192,000 B, 11 requests) are unchanged, and the shared budgets.json and the v0.8 baseline are untouched."
+      "imageExceptions": "The Visit Us opening photograph is delivered in three sizes of the same 5056 px master, chosen by srcset: 1280 px (within the 68,000 B image limit, used by phones' larger siblings and 1x screens up to about 1300 px), 1920 px and 2560 px. The 1280 px file alone was visibly soft on wide and 2x screens. Only the two larger files exceed 68,000 B; each limit is its measured size plus about 1 to 2 percent. Phones (up to 759 px) use their own 720 px crop and never request them. Owner decision of 2026-10-17 (Final Media Pass Deferred).",
+      "deliveredBytes": "Raised on 2026-10-17 from 2,537,781 B to 2,777,089 B for the two larger sizes of the Visit Us opening photograph (140,076 B and 196,944 B, from the existing master, no new generation): measured total 2,644,847 B plus 5 percent, rounded down to a whole byte. Earlier, the v0.9 delivered-site total (2,176,000 B, the v0.8 total plus about 10 percent) was met before the Visit Us photographs. The three owner-approved interior photographs (four files: Shot A in a desktop and a phone crop, Shot B, Shot C) add about 235 KB, taking the measured total to 2,307,074 B. The Firelight limit is that measurement plus 10 percent, rounded down to a whole byte: 2,537,781 B. It applies to the delivered-site total only; every page-specific limit, the Home script ceiling of 15,600 B gzip, the 68,000 B image limit and the 390 px limits (192,000 B, 11 requests) are unchanged, and the shared budgets.json and the v0.8 baseline are untouched."
     }
   },
   "home": {

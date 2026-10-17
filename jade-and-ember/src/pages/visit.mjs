@@ -9,7 +9,7 @@ import { ctaBand } from '../components/cta-band.mjs';
 // renderer (the shared copy schema has no field for them), as on Our story. Shot A opens the page; the counter and the materials follow as editorial pairs.
 // All three are AI-generated concept images of the same fictional room, and the captions say so.
 const ART = {
-  room: { src: 'media/visit-room-a.webp', width: 1280, height: 859, mobile: { src: 'media/visit-room-a-m.webp', width: 720, height: 900 },
+  room: { src: 'media/visit-room-a.webp', width: 1280, height: 859, srcset: [['media/visit-room-a.webp', 1280], ['media/visit-room-a-1920.webp', 1920], ['media/visit-room-a-2560.webp', 2560]], mobile: { src: 'media/visit-room-a-m.webp', width: 720, height: 900 },
     alt: 'The dining room from the door: charcoal concrete walls under a dark wood-slat ceiling, a jade-tile alcove of celadon bowls on the left, tables along both walls, and a walnut counter with stools before an open kitchen and a flaming wok.',
     caption: 'The room, from the door to the fire. Concept image, AI-generated.' },
   counter: { src: 'media/visit-counter-b.webp', width: 780, height: 968,
@@ -37,7 +37,7 @@ export default function visit(cfg) {
       </div>`;
   // The room: the page opens on Shot A, the dining room seen from the door, with the address and hours on a frosted panel beside it. A pool of candle-like light drifts
   // over the photograph; the photograph itself only drifts a little as the page scrolls (CSS only, and only when motion is allowed). Real, ordered DOM throughout; the
-  // light is the only thing JavaScript moves. The phone gets its own crop of the same photograph, and it is the only image that loads before the first scroll.
+  // light is the only thing JavaScript moves. The phone gets its own crop of the same photograph, and it is the only image that loads before the first scroll. Larger screens choose among three sizes of the same master (1280, 1920 and 2560 px wide), so a wide or 2x display is not stretching a small file.
   const a = ART.room;
   const pair = (id, a, cls) => `
   <section class="visit-pair ${cls}" aria-labelledby="${id}-h">
@@ -51,7 +51,7 @@ export default function visit(cfg) {
     </div>
   </section>`;
   const main = `  <section class="visit-room" aria-labelledby="visit-title">
-    <figure class="room-photo"><picture><source media="(max-width: 759px)" srcset="${esc(a.mobile.src)}" width="${a.mobile.width}" height="${a.mobile.height}"><img src="${esc(a.src)}" alt="${esc(a.alt)}" width="${a.width}" height="${a.height}" fetchpriority="high" decoding="async"></picture><figcaption>${esc(a.caption)}</figcaption></figure>
+    <figure class="room-photo"><picture><source media="(max-width: 759px)" srcset="${esc(a.mobile.src)}" width="${a.mobile.width}" height="${a.mobile.height}"><source srcset="${a.srcset.map(([f, w]) => `${esc(f)} ${w}w`).join(', ')}" sizes="(min-width: 1600px) 1600px, 100vw"><img src="${esc(a.src)}" alt="${esc(a.alt)}" width="${a.width}" height="${a.height}" fetchpriority="high" decoding="async"></picture><figcaption>${esc(a.caption)}</figcaption></figure>
     <div class="room-fx" aria-hidden="true"><div class="candle"></div></div>
     <div class="wrap room-grid">
       <div class="visit-head">
