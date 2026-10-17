@@ -45,11 +45,11 @@ export default function story(cfg) {
   </div>
 
   <section class="name" aria-labelledby="name-h">
-    <div class="wrap name-grid">
+    <div class="wrap"><div class="name-grid lq">
       <h2 id="name-h">${esc(s.name.heading)}</h2>
       <p class="name-line">${esc(s.name.line)}</p>
       <p class="name-note">${esc(s.name.note).replace(/[一-鿿]/g, (ch) => `<span lang="zh-Hans">${ch}</span>`)}</p>
-    </div>
+    </div></div>
   </section>
 
   ${ctaBand(cfg, { ...s.orderBand, tone: 'pine', id: 'order-band', art: { ...ART.wok, pos: '40% 86%' } })}`;

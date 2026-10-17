@@ -245,7 +245,9 @@
     },
     "order": {
       "module": "src/pages/order.mjs",
-      "scripts": []
+      "scripts": [
+        "order.js"
+      ]
     }
   }
 }

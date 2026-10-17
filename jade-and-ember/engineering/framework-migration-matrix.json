@@ -982,6 +982,7 @@
         "jade-and-ember/breath.js",
         "jade-and-ember/story.js",
         "jade-and-ember/visit.js",
+        "jade-and-ember/order.js",
         "jade-and-ember/home.css",
         "jade-and-ember/story.css",
         "jade-and-ember/menu.css",

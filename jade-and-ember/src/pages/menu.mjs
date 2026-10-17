@@ -24,6 +24,7 @@ export default function menu(cfg) {
         <p class="menu-note">${esc(m.note)}${cfg.demo ? ` ${esc(cfg.copy.demo.menuSample)}` : ''}</p>
       </div>
     </div>
+    <button class="pause" type="button" aria-pressed="false" data-lq hidden><span class="pause-ico" aria-hidden="true"></span><span class="pause-txt">Pause motion</span></button>
   </section>
 
   <figure class="menu-band"><img src="${esc(band.src)}" alt="${esc(band.alt)}" width="${band.width}" height="${band.height}" fetchpriority="high" decoding="async" style="--pos:${esc(band.pos)}"></figure>

@@ -6,7 +6,7 @@
   const room = document.querySelector('.visit-room'), pool = document.querySelector('.candle'), btn = document.querySelector('.pause');
   const conn = navigator.connection || {};
   if (matchMedia('(prefers-reduced-motion: reduce)').matches || conn.saveData || /(^|-)2g$/.test(conn.effectiveType || '')) return;
-  document.documentElement.classList.add('v-art');   // switches on the scroll choreography in visit.css, which therefore never runs for reduced motion, Save-Data or 2g
+  document.documentElement.classList.add('v-art', 'lit');   // v-art switches on the scroll choreography in visit.css, lit the ember on the panel (styles.css); neither runs for reduced motion, Save-Data or 2g
   if (!room || !pool) return;
   const T = [36,0,33,55,90,26,22,0,23,48,99,13,42,56,32,48,93,81,83,0,43,72,89,80,40,96,99,61,39,82,0,6,56,1,92,72,29,47,62,18,85,56,54,40,0,50,51,43];
   let raf = 0, seen = true, paused = false, v = 0.5, t0 = performance.now(), off = 0;
@@ -21,7 +21,7 @@
     raf = requestAnimationFrame(frame);
   };
   const run = () => { if (!raf && !paused && seen && !document.hidden) { t0 = performance.now(); raf = requestAnimationFrame(frame); } };
-  const set = () => { btn.setAttribute('aria-pressed', String(paused)); btn.querySelector('.pause-txt').textContent = paused ? 'Play motion' : 'Pause motion'; };
+  const set = () => { btn.setAttribute('aria-pressed', String(paused)); btn.querySelector('.pause-txt').textContent = paused ? 'Play motion' : 'Pause motion'; document.documentElement.classList.toggle('still', paused); };
 
   new IntersectionObserver((es) => { seen = es[0].isIntersecting; if (seen) run(); }).observe(room);
   document.addEventListener('visibilitychange', run);

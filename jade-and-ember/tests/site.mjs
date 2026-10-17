@@ -120,7 +120,7 @@ for (const pg of pages) {
     if (d.requests.length) p.push(`${pg.file}: external requests ${d.requests}`);
     if (d.errors.length) p.push(`${pg.file}: ${d.errors}`);
     if (pg.id !== 'home' && d.video) p.push(`${pg.file}: the footage belongs on Home only (video element: ${d.video})`);   // Home's own <video> is added by breath.js
-    const want = { home: ['site.js', 'breath.js'], menu: ['site.js', 'menu.js'], story: ['site.js', 'story.js'], visit: ['site.js', 'visit.js'] }[pg.id] || ['site.js'];
+    const want = { home: ['site.js', 'breath.js'], menu: ['site.js', 'menu.js'], order: ['site.js', 'order.js'], story: ['site.js', 'story.js'], visit: ['site.js', 'visit.js'] }[pg.id] || ['site.js'];
     if (JSON.stringify(d.scripts) !== JSON.stringify(want)) p.push(`${pg.file}: scripts ${d.scripts}, expected ${want}`);
   }
   report('robots matches config; no external requests; no errors; hero video and scripts only where they belong', p);
@@ -208,6 +208,17 @@ for (const pg of pages) {
   if (o.tel !== client.contact.phone.href) p.push('Order page phone link differs from config');
   if (o.photos) p.push(`Order: ${o.photos} picture(s) are neither decorative nor described`);
   if (o.placeholders) p.push('an unreplaced {platform} or {pickup} placeholder is showing');
+
+  // the ember-lacquer cards (.lq, styles.css): every Menu category, the two Order information cards, the Visit panel and the Story name card; the two pages whose only motion is
+  // the cards (Menu, Order) carry their own Pause button, which a page with other motion (Story, Visit) does not need
+  const cards = [['menu.html', '.cat', '.cats .lq'], ['order-online.html', '.info-pickup, .info-allergy', '.order-info .lq'], ['visit-us.html', '.visit-main', '.visit-main.lq'], ['our-story.html', '.name-grid', '.name-grid.lq']];
+  for (const [file, want, have] of cards) {
+    const c = await grab(file, ([w, h]) => ({ want: document.querySelectorAll(w).length, have: document.querySelectorAll(h).length, pauses: [...document.querySelectorAll('.pause[data-lq]')].map((b) => b.getAttribute('aria-pressed')) }), [want, have]);
+    if (!c.want || c.want !== c.have) p.push(`${file}: every card (${want}) should be an ember-lacquer card (.lq): ${c.have} of ${c.want}`);
+    const own = file === 'menu.html' || file === 'order-online.html';
+    if (own && (c.pauses.length !== 1 || c.pauses[0] !== 'false')) p.push(`${file}: the cards' ember needs exactly one Pause button, not pressed: ${JSON.stringify(c.pauses)}`);
+    if (!own && c.pauses.length) p.push(`${file}: has its own Pause control for the cards' ember; it should not carry a second one`);
+  }
   await ctx.close();
   report('Our story, Visit us and Order online: structure and content come from config', p);
 }

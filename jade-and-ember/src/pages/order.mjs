@@ -45,19 +45,20 @@ export default function order(cfg) {
 
   <section class="order-info" aria-label="Pickup, allergies and phone">
     <div class="wrap info-grid">
-      <div class="info-pickup">
+      <div class="info-pickup lq">
         <h2>${esc(o.pickup.heading)}</h2>
         <p>${esc(o.pickup.text)}</p>
         <p><a class="btn btn-ink" href="${esc(pageHref(cfg, o.pickup.link.page))}">${esc(o.pickup.link.label)}</a></p>
       </div>
-      <div class="info-allergy">
+      <div class="info-allergy lq">
         <h2>${esc(o.allergy.heading)}</h2>
         <p>${esc(copy.menu.note)}</p>
         <p class="info-call">${esc(o.phone.heading)} <a class="phone" href="${esc(client.contact.phone.href)}">${esc(client.contact.phone.display)}</a>${cfg.demo ? ' <span class="sample-inline">(sample number)</span>' : ''}</p>
       </div>
     </div>
+    <button class="pause" type="button" aria-pressed="false" data-lq hidden><span class="pause-ico" aria-hidden="true"></span><span class="pause-txt">Pause motion</span></button>
   </section>
 
   ${ownerNote(cfg)}`;
-  return { main, scripts: [], styles: ['order.css'] };
+  return { main, scripts: ['order.js'], styles: ['order.css'] };
 }

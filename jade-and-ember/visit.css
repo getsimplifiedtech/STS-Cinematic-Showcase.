@@ -19,11 +19,11 @@
 .visit-head h1{font-family:var(--serif);font-weight:400;font-size:clamp(2.75rem,5.4vw,4.75rem);line-height:1.02;letter-spacing:-.02em;text-wrap:balance}
 .visit-head .sample-flag{max-width:24rem;color:var(--celadon)}
 
-/* the frosted panel: the room behind it stays alive but quiet, so the text sits on a steady surface */
-.visit-main{grid-column:1/7;grid-row:2;margin-top:var(--s6);display:grid;gap:var(--s6);padding:clamp(var(--s5),3.2vw,var(--s7));
-  background:rgba(14,13,12,.86);border:1px solid rgba(239,231,216,.14);border-radius:2px;box-shadow:0 30px 80px rgba(0,0,0,.45)}
+/* the smoked-glass panel (the shared ember-lacquer card): the room behind it stays alive but quiet, so the text sits on a steady surface */
+.visit-main{grid-column:1/7;grid-row:2;margin-top:var(--s6);display:grid;gap:var(--s6);padding:clamp(var(--s5),3.2vw,var(--s7));border:1px solid transparent;
+  background:radial-gradient(85% 60% at 0% 0%,color-mix(in srgb,var(--lacquer) 55%,transparent),transparent 66%),radial-gradient(75% 55% at 0% 112%,color-mix(in srgb,var(--ember) 12%,transparent),transparent 72%),color-mix(in srgb,var(--kitchen) 90%,transparent)}
 @supports ((-webkit-backdrop-filter:blur(2px)) or (backdrop-filter:blur(2px))){
-  .visit-main{background:rgba(14,13,12,.5);-webkit-backdrop-filter:blur(18px) saturate(1.15);backdrop-filter:blur(18px) saturate(1.15)}
+  .visit-main{background:radial-gradient(85% 60% at 0% 0%,color-mix(in srgb,var(--lacquer) 48%,transparent),transparent 66%),radial-gradient(75% 55% at 0% 112%,color-mix(in srgb,var(--ember) 10%,transparent),transparent 72%),color-mix(in srgb,var(--kitchen) 56%,transparent);-webkit-backdrop-filter:blur(18px) saturate(1.15);backdrop-filter:blur(18px) saturate(1.15)}
 }
 .visit-where{display:grid;gap:var(--s3)}
 .visit-address{font-size:clamp(1.625rem,2.6vw,2.25rem)}
@@ -85,6 +85,7 @@
 @media (max-width:759px){
   .room-photo{aspect-ratio:4/5;max-height:74svh}
   .visit-pair{padding-block:var(--s7)}
+  .visit-materials{padding-top:calc(var(--s7) + var(--s5))}   /* a little more air above the second photograph, which also keeps it clear of the browser's early-load distance on a phone (the 11-request budget) */
   .pair-grid{display:flex;flex-direction:column;gap:var(--s5);align-items:stretch}
   .pair-body{max-width:none}
   .visit-counter .pair-body,.visit-materials .pair-body{padding-left:0}
@@ -105,13 +106,14 @@
     .v-art .room-photo img{animation:visit-drift linear both;animation-timeline:scroll(root block);animation-range:0 100svh}
     .v-art .pair-fig{animation:visit-draw linear both;animation-timeline:view();animation-range:entry 0% entry 70%}
     .v-art .pair-body{animation:visit-rise linear both;animation-timeline:view();animation-range:entry 10% entry 75%}
+    .v-art.still .room-photo img,.v-art.still .pair-fig,.v-art.still .pair-body{animation:none}   /* Pause motion also settles the scroll choreography at its finished state */
     @keyframes visit-drift{from{transform:scale(1.02) translate3d(0,0,0)}to{transform:scale(1.08) translate3d(0,4%,0)}}
     @keyframes visit-draw{from{clip-path:inset(14% 0 0 0);transform:translate3d(0,36px,0)}to{clip-path:inset(0);transform:none}}
     @keyframes visit-rise{from{opacity:.25;transform:translate3d(0,28px,0)}to{opacity:1;transform:none}}
   }
 }
 @media (prefers-reduced-motion:reduce){.visit-room .pause{display:none!important}.candle{will-change:auto}}
-@media (forced-colors:active){.room-photo::after,.candle{display:none}.room-photo img{opacity:1}.visit-main{border-color:CanvasText;background:Canvas}}
+@media (forced-colors:active){.room-photo::after,.candle{display:none}.room-photo img{opacity:1}}
 @media print{
   .room-photo,.candle,.visit-room .pause{display:none}
   .pair-fig{width:60%;break-inside:avoid}.pair-grid{display:block}

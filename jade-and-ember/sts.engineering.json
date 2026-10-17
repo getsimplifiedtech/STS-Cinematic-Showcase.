@@ -36,7 +36,8 @@
       "breath.js",
       "story.js",
       "menu.js",
-      "visit.js"
+      "visit.js",
+      "order.js"
     ],
     "assetFolders": [
       "fonts",

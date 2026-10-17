@@ -6,6 +6,7 @@
   const pin = document.querySelector('.story-pin'), cv = document.querySelector('.embers'), btn = document.querySelector('.pause');
   const conn = navigator.connection || {};
   if (!pin || !cv || matchMedia('(prefers-reduced-motion: reduce)').matches || conn.saveData || /(^|-)2g$/.test(conn.effectiveType || '')) return;
+  document.documentElement.classList.add('lit');   // starts the ember on the lacquer card (styles.css); not added for reduced motion, Save-Data or 2g
   const ctx = cv.getContext('2d'); if (!ctx) return;
   const small = matchMedia('(max-width: 759px)').matches, MAX = small ? 24 : 40;
   let w = 0, h = 0, dpr = 1, ps = [], last = 0, raf = 0, seen = true, paused = false;
@@ -30,7 +31,7 @@
     raf = requestAnimationFrame(frame);
   };
   const run = () => { if (!raf && !paused && seen && !document.hidden) { last = performance.now(); raf = requestAnimationFrame(frame); } };
-  const set = () => { if (btn) { btn.setAttribute('aria-pressed', String(paused)); btn.querySelector('.pause-txt').textContent = paused ? 'Play motion' : 'Pause motion'; } };
+  const set = () => { if (btn) { btn.setAttribute('aria-pressed', String(paused)); btn.querySelector('.pause-txt').textContent = paused ? 'Play motion' : 'Pause motion'; } document.documentElement.classList.toggle('still', paused); };
 
   size(); addEventListener('resize', size);
   new IntersectionObserver((es) => { seen = es[0].isIntersecting; if (seen) run(); else ctx.clearRect(0, 0, w, h); }).observe(pin);

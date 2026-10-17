@@ -50,14 +50,10 @@
 .steps p{color:#3d352c;font-size:1.0625rem;line-height:1.5}
 .steps a{display:inline-block;min-height:24px;line-height:24px;color:#8f3f0f;font-weight:600}
 
-.order-info{background:var(--kitchen);padding-block:var(--s7) var(--sec);border-top:1px solid #1b1917}
+.order-info{position:relative;background:var(--kitchen);padding-block:var(--s7) var(--sec);border-top:1px solid #1b1917}
 .info-grid{display:grid;grid-template-columns:repeat(12,minmax(0,1fr));column-gap:var(--s5);row-gap:var(--s7)}
-/* Pickup and Allergies are two ticket stubs: a dashed edge, a notch at each side, the warm light low on the left, so the page ends on the same object it began with. */
-.info-pickup,.info-allergy{position:relative;isolation:isolate;display:grid;gap:var(--s3);align-content:start;padding:var(--s6) var(--s6) calc(var(--s6) + 4px);border:1.5px dashed rgba(239,231,216,.24);border-radius:2px;
-  background:radial-gradient(70% 60% at 0% 110%,rgba(240,138,60,.12),transparent 70%)}
-.info-pickup::before,.info-pickup::after,.info-allergy::before,.info-allergy::after{content:"";position:absolute;top:var(--s6);width:20px;height:20px;border-radius:50%;background:var(--kitchen);border:1.5px dashed rgba(239,231,216,.24)}
-.info-pickup::before,.info-allergy::before{left:-11px;clip-path:inset(0 0 0 50%)}
-.info-pickup::after,.info-allergy::after{right:-11px;clip-path:inset(0 50% 0 0)}
+/* Pickup and Allergies are two lacquer cards (the shared ember-lacquer card, styles.css), the warm light low on the left, so the page ends on the same material it began with. */
+.info-pickup,.info-allergy{display:grid;gap:var(--s3);align-content:start;padding:var(--s6) var(--s6) calc(var(--s6) + 4px)}
 .info-pickup{grid-column:1/6;justify-items:start}
 .info-allergy{grid-column:7/13}
 .info-grid h2{font-size:clamp(1.5rem,2.4vw,2rem)}

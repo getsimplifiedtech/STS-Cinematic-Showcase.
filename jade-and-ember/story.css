@@ -47,10 +47,9 @@
 .chapter-wok .chapter-body{grid-column:1/6}
 .chapter-wok .chapter-fig{grid-column:6/13;margin-right:calc(var(--gutter) * -1)}
 
-/* The name: said in words, over a pine lacquer panel. */
-.name{position:relative;background:var(--pine);padding-block:var(--sec);border-top:1px solid var(--line)}
-.name::before{content:"";position:absolute;inset:0;background:radial-gradient(50% 70% at 82% 0%,rgba(194,227,210,.1),transparent 70%);pointer-events:none}
-.name-grid{position:relative;display:grid;grid-template-columns:repeat(12,minmax(0,1fr));column-gap:var(--s5);row-gap:var(--s5)}
+/* The name: said in words, on one lacquer card (the shared ember-lacquer card, styles.css) set into the dark. */
+.name{position:relative;background:var(--kitchen);padding-block:var(--s7) var(--sec)}
+.name-grid{display:grid;grid-template-columns:repeat(12,minmax(0,1fr));column-gap:var(--s5);row-gap:var(--s5);padding:clamp(var(--s6),6vw,var(--s9)) clamp(var(--s5),5vw,var(--s9))}
 .name-grid h2{grid-column:1/6}
 .name-line{grid-column:6/12;font-family:var(--serif);font-size:clamp(1.5rem,2.6vw,2.125rem);line-height:1.25}
 .name-note{grid-column:6/12;color:var(--rice-dim)}

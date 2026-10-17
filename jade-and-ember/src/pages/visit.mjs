@@ -58,7 +58,7 @@ export default function visit(cfg) {
         <h1 id="visit-title">${esc(v.h1)}</h1>
         ${cfg.demo ? `<p class="sample-flag">${esc(v.fictionalNote)}</p>` : ''}
       </div>
-      <section class="visit-main" aria-label="Address and opening hours">
+      <section class="visit-main lq" aria-label="Address and opening hours">
         <div class="visit-where">
           <address class="visit-address">${client.address.lines.map(esc).join('<br>')}</address>
           <p class="visit-contact"><a class="phone" href="${esc(client.contact.phone.href)}">${esc(client.contact.phone.display)}</a>${cfg.demo ? ' <span class="sample-inline">(sample number)</span>' : ''}${client.contact.email ? ` <a href="mailto:${esc(client.contact.email)}">${esc(client.contact.email)}</a>` : ''}</p>

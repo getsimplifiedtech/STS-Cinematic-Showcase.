@@ -116,6 +116,40 @@ address{font-family:var(--serif);font-size:clamp(1.5rem,2.4vw,2rem);line-height:
 .hours-compact dt{color:var(--rice-dim)}
 .hours-compact dd{margin:0;font-variant-numeric:tabular-nums}
 
+/* Ember lacquer: the card. A surface of smoked, jade-black lacquer with a fine inlaid edge (a hairline and one highlight where the top edge catches the light) and
+   depth inside it; a corner pair eased more than the other. Heat lives in the edge itself: one thread of ember (::before) travels the perimeter very slowly, and a wider
+   glow (::after) follows a moment behind it and lights the lacquer from within; now and then a corner flares. Both are the same inset shadow shown through a moving
+   conic mask, so there is no blur filter, no image and no script per frame. The thread is paused (parked low on the left, where the room's light comes from) unless
+   html has .lit (set in the page head: not for reduced motion, Save-Data or 2g), and stops when the visitor pauses motion (.still). --ep is the lap time, --ed the
+   offset, --fx/--fy the flaring corner: cards are staggered by position so no two glow alike. */
+@property --ea{syntax:"<angle>";inherits:false;initial-value:205deg}
+@property --ef{syntax:"<number>";inherits:false;initial-value:0}
+.lq{--lq-r:clamp(20px,2.2vw,30px);--ep:34s;--ed:0s;--fx:100%;--fy:0%;
+  position:relative;isolation:isolate;border-radius:var(--lq-r) calc(var(--lq-r) * .32) var(--lq-r) calc(var(--lq-r) * .32);
+  background:
+    radial-gradient(85% 60% at 0% 0%,color-mix(in srgb,var(--lacquer) 62%,transparent),transparent 66%),
+    radial-gradient(75% 55% at 0% 112%,color-mix(in srgb,var(--ember) 12%,transparent),transparent 72%),
+    linear-gradient(168deg,color-mix(in srgb,var(--pine) 58%,var(--kitchen)),color-mix(in srgb,var(--kitchen) 88%,var(--pine)));
+  box-shadow:inset 0 0 0 1px color-mix(in srgb,var(--line) 75%,transparent),inset 0 1px 0 color-mix(in srgb,var(--celadon) 32%,transparent),
+    inset 0 -70px 90px -60px color-mix(in srgb,black 60%,transparent),0 46px 70px -46px color-mix(in srgb,black 85%,transparent)}
+.lq::before,.lq::after{content:"";position:absolute;z-index:-1;inset:0;border-radius:inherit;pointer-events:none;--ea:205deg}
+.lq::before{box-shadow:inset 0 0 0 1.5px var(--ember-hi);opacity:.9;
+  -webkit-mask-image:conic-gradient(from var(--ea) at 50% 50%,transparent 0 282deg,color-mix(in srgb,black 24%,transparent) 318deg,color-mix(in srgb,black 66%,transparent) 342deg,black 355deg,transparent 360deg);
+  mask-image:conic-gradient(from var(--ea) at 50% 50%,transparent 0 282deg,color-mix(in srgb,black 24%,transparent) 318deg,color-mix(in srgb,black 66%,transparent) 342deg,black 355deg,transparent 360deg)}
+.lq::after{box-shadow:inset 0 0 18px 2px color-mix(in srgb,var(--ember) 60%,transparent),inset 0 0 56px -4px color-mix(in srgb,var(--ember) 20%,transparent);opacity:.85;
+  -webkit-mask-image:conic-gradient(from var(--ea) at 50% 50%,transparent 0 238deg,color-mix(in srgb,black 24%,transparent) 296deg,black 340deg,color-mix(in srgb,black 50%,transparent) 352deg,transparent 360deg),radial-gradient(circle 160px at var(--fx) var(--fy),color-mix(in srgb,black calc(var(--ef) * 100%),transparent),transparent);
+  mask-image:conic-gradient(from var(--ea) at 50% 50%,transparent 0 238deg,color-mix(in srgb,black 24%,transparent) 296deg,black 340deg,color-mix(in srgb,black 50%,transparent) 352deg,transparent 360deg),radial-gradient(circle 160px at var(--fx) var(--fy),color-mix(in srgb,black calc(var(--ef) * 100%),transparent),transparent)}
+.lq:nth-child(3n+2){--ep:41s;--ed:-19s;--fx:0%;--fy:100%}
+.lq:nth-child(3n){--ep:47s;--ed:-31s}
+.lit .lq::before{animation:lq-run var(--ep) linear var(--ed) infinite,lq-flick 7.3s ease-in-out var(--ed) infinite}
+.lit .lq::after{animation:lq-run var(--ep) linear calc(var(--ed) + 1.6s) infinite,lq-flare calc(var(--ep) * .56) ease-in-out var(--ed) infinite,lq-breath 11s ease-in-out var(--ed) infinite}
+.lit.still .lq::before,.lit.still .lq::after{animation-play-state:paused}
+/* one lap, unevenly: it hurries along the straights, leans on a corner, and nearly stops once before it goes on */
+@keyframes lq-run{0%{--ea:0deg;animation-timing-function:cubic-bezier(.3,.1,.4,1)}41%{--ea:176deg;animation-timing-function:ease-in-out}50%{--ea:196deg;animation-timing-function:cubic-bezier(.4,0,.2,1)}100%{--ea:360deg}}
+@keyframes lq-flick{0%,100%{opacity:.78}14%{opacity:1}23%{opacity:.6}38%{opacity:.95}57%{opacity:.68}71%{opacity:1}86%{opacity:.8}}
+@keyframes lq-breath{0%,100%{opacity:.62}50%{opacity:1}}
+@keyframes lq-flare{0%,60%,100%{--ef:0}68%{--ef:.85}72%{--ef:.4}79%{--ef:.7}90%{--ef:0}}
+
 /* Closing band: one heading, one sentence, one action. */
 .cta-band{position:relative;isolation:isolate;padding-block:min(var(--s10),max(var(--s9),calc(var(--sec) * .7)));background:var(--kitchen)}
 .cta-pine{background:var(--pine);border-top:1px solid var(--line)}
@@ -199,6 +233,7 @@ a:where(:not(.btn,.brand,.skip,.top-cta,.site-nav a,.jump a)):is(:hover,:focus-v
 }
 @media (forced-colors:active){
   .btn,.pause,.nav-toggle{border:1px solid ButtonText}
+  .lq{background:Canvas;box-shadow:none;border:1px solid CanvasText}.lq::before,.lq::after{display:none}
 }
 /* The menu prints as a plain black-on-white menu: no header, band, jump links or order band (the page's own print rules are in menu.css). */
 @media print{
@@ -206,6 +241,7 @@ a:where(:not(.btn,.brand,.skip,.top-cta,.site-nav a,.jump a)):is(:hover,:focus-v
   html{font-size:11pt}
   body{background:#fff;color:#111}
   .disclosure,.top,.skip,.cta-band,.foot-nav,.pause,.nav-toggle{display:none!important}
+  .lq{box-shadow:none}.lq::before,.lq::after{display:none}
   .foot{background:none;padding:0;margin-top:12pt;border-top:1px solid #999;padding-top:8pt}
   .foot,.foot-brand,.foot-desc{color:#333}
   .foot-grid{display:block}
