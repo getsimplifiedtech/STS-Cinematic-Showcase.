@@ -107,9 +107,9 @@ function layout() {
   shiftF = (poster.parentElement.offsetLeft || 0) / sw;   // the picture is slid right by --shift on wide screens (home.css)
   Object.assign(steam.L, LOOK[ph ? 'phone' : 'desk']);
   steam.L.src = [(u * rw - ox) / sw + shiftF, 1 - (v * rh - oy) / sh];
-  // the dish: the plate (72% of the photograph's width) is the centre of the frame, where the wok was; type sits above and below it, not beside it
+  // the dish: the plate (72% of the photograph's width) sits a little right of centre (54%), so the headline and its paragraph at the top left clear the plate's rim; type sits above and below it, not beside it
   const plateW = ph ? .96 * sw : Math.min(.62 * sw, 1.3 * sh), imgW = plateW / .72, imgH = imgW * 1610 / 2400;
-  const c = ph ? [.5, .40] : [.5, .53], ex = imgW / sw, ey = imgH / sh;
+  const c = ph ? [.5, .40] : [.54, .535], ex = imgW / sw, ey = imgH / sh;
   steam.L.dc = c; steam.L.shade = ph ? [0, 1] : [.55, .45];
   stage.style.setProperty('--ox', (steam.L.src[0] * 100).toFixed(2) + '%'); stage.style.setProperty('--oy', ((1 - steam.L.src[1]) * 100).toFixed(2) + '%');
   const a = sw / sh; steam.L.aspect = a;

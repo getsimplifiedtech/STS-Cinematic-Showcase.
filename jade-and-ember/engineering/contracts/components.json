@@ -117,7 +117,7 @@
       "arity": 1,
       "root": "section",
       "requires": [
-        "<section class=\"cat\"",
+        "<section class=\"cat cat-",
         "<h2 class=\"cat-title\"",
         "aria-labelledby=",
         "class=\"item\""

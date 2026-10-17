@@ -5,6 +5,7 @@
    - .is-calm: reduced motion, Save-Data, no WebGL2 or a failed performance check. Opacity-only crossfades between still plates, nothing moves. */
 
 :root{--focus:34% 50%;--shift:3.2vw}   /* the wok sits right of centre in the footage. --shift slides the picture right by that much (the right edge is cropped, the left edge fades into the kitchen colour), which gives the headline clear space beside the wok; breath.js reads it so the steam stays on the wok */
+@media (max-aspect-ratio:16/9) and (min-width:960px){:root{--shift:2.4vw}}   /* a 16:10 or squarer screen crops the footage's right edge more, so the wok's handle would be cut: slide it less there */
 /* ---------------------------------------------------------------- the breath: default (no JavaScript) layout */
 .breath{position:relative;background:var(--kitchen)}
 .stage{position:sticky;top:0;height:100vh;height:100svh;overflow:hidden;z-index:0;background:var(--kitchen)}
@@ -167,11 +168,16 @@ html:not(.js) .beat-4{align-items:center}
 .more{margin-top:var(--s9)}
 
 .story-teaser{position:relative;isolation:isolate;background:var(--pine);padding-block:var(--sec)}
-.story-teaser::before{content:"";position:absolute;z-index:-1;inset:0;background:radial-gradient(circle 29vw at 79% 0,rgba(194,227,210,.12),rgba(194,227,210,0));pointer-events:none}
+.story-teaser::before{content:"";position:absolute;z-index:-2;inset:0;background:radial-gradient(circle 29vw at 79% 0,rgba(194,227,210,.12),rgba(194,227,210,0)),radial-gradient(circle 34vw at 4% 118%,rgba(240,138,60,.14),rgba(240,138,60,0));pointer-events:none}
+/* the story in one picture: the name's two characters set huge and faint, the celadon bowls lit from the left in front of them (both are the Our story page's own pieces) */
+.teaser-art{position:absolute;z-index:-1;inset:0 0 0 44%;margin:0;pointer-events:none}
+.teaser-glyph{position:absolute;right:0;top:-4%;font:600 min(24vw,400px)/1 var(--seal);letter-spacing:.02em;white-space:nowrap;color:rgba(194,227,210,.085);user-select:none}
+.teaser-art img{position:absolute;right:0;top:50%;width:min(100%,860px);height:auto;transform:translateY(-50%);opacity:.8;
+  -webkit-mask-image:radial-gradient(closest-side at 58% 50%,#000 52%,transparent 100%);mask-image:radial-gradient(closest-side at 58% 50%,#000 52%,transparent 100%)}
 .teaser-grid{display:grid;grid-template-columns:repeat(12,minmax(0,1fr));column-gap:var(--s5)}
-.story-teaser .pull{grid-column:3/13}
-.teaser-text{grid-column:3/9;margin-top:var(--s6);color:var(--rice-dim);font-size:1.125rem;max-width:32rem}
-.teaser-link{grid-column:3/9;margin-top:var(--s4)}
+.story-teaser .pull{grid-column:1/8}
+.teaser-text{grid-column:1/7;margin-top:var(--s6);color:var(--rice-dim);font-size:1.125rem;max-width:32rem}
+.teaser-link{grid-column:1/7;margin-top:var(--s4)}
 .visit-strip{background:var(--kitchen);padding-block:var(--sec)}
 .strip-grid{display:grid;grid-template-columns:repeat(12,minmax(0,1fr));column-gap:var(--s5);row-gap:var(--s7)}
 .strip-grid h2{grid-column:1/-1}
@@ -180,6 +186,7 @@ html:not(.js) .beat-4{align-items:center}
 
 @media (max-width:1023px){
   .story-teaser .pull{grid-column:1/-1}.teaser-text,.teaser-link{grid-column:1/9}
+  .teaser-art{inset:0 0 0 30%;opacity:.55}
   .strip-where{grid-column:1/7}.hours-compact{grid-column:7/13}
   .dish-2 .dish-fig{grid-column:4/13}.dish-2 .dish-text{grid-column:1/4}
   .dish-3 .dish-fig{grid-column:1/10}.dish-3 .dish-text{grid-column:10/13}
@@ -193,6 +200,11 @@ html:not(.js) .beat-4{align-items:center}
   .more{margin-top:var(--s8)}
   .strip-where,.hours-compact{grid-column:1/-1}
   .teaser-text,.teaser-link{grid-column:1/-1}
+  .story-teaser{padding-block:0 var(--s9)}
+  .teaser-art{position:relative;inset:auto;opacity:1;height:62vw;margin:0 0 var(--s7);z-index:0}
+  .teaser-glyph{font-size:40vw;right:0;top:-6%}
+  .teaser-art img{right:0;width:100%}
+  .teaser-art::after{content:"";position:absolute;inset:auto 0 0;height:40%;background:linear-gradient(transparent,var(--pine))}
 }
 @media (prefers-reduced-motion:reduce){.dish-fig,.dish-text{opacity:1;transform:none}.dish-fig::after{display:none}}
 

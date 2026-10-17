@@ -70,6 +70,8 @@ p{text-wrap:pretty}
 .top{position:sticky;top:0;z-index:50;height:0}
 .top-in{position:absolute;inset:0 0 auto 0;display:flex;align-items:center;gap:var(--s5);flex-wrap:wrap;min-height:var(--header-h);padding:var(--s2) max(var(--gutter),env(safe-area-inset-right)) var(--s2) max(var(--gutter),env(safe-area-inset-left));isolation:isolate}
 .top-in::before{content:"";position:absolute;inset:0 0 -22px;z-index:-1;background:linear-gradient(rgba(14,13,12,.92),rgba(14,13,12,.72) 60%,rgba(14,13,12,0));pointer-events:none}
+/* Every page after Home reads its body under the header, so the band is solid there (body text never ghosts behind the links) and fades only over its last 22px. Home keeps the translucent scrim over the film. */
+html:not([data-page="home"]) .top-in::before{background:linear-gradient(var(--kitchen) calc(100% - 22px),transparent)}
 .top.is-open .top-in{background:var(--kitchen)}
 .brand{display:inline-flex;align-items:center;gap:var(--s3);text-decoration:none;margin-right:auto;min-height:44px}
 .brand-name{font-family:var(--serif);font-size:1.5rem;line-height:1;letter-spacing:.005em}
@@ -118,6 +120,15 @@ address{font-family:var(--serif);font-size:clamp(1.5rem,2.4vw,2rem);line-height:
 .cta-band{position:relative;isolation:isolate;padding-block:min(var(--s10),max(var(--s9),calc(var(--sec) * .7)));background:var(--kitchen)}
 .cta-pine{background:var(--pine);border-top:1px solid var(--line)}
 .cta-lacquer{background:var(--lacquer);border-top:1px solid var(--line)}
+/* A closing with its own picture: the page's subject at the right, lit from the left, dissolving into the lacquer. Decorative and lazy. */
+.cta-art{position:absolute;z-index:-1;inset:0 0 0 38%;margin:0;pointer-events:none;overflow:hidden}
+.cta-art img{width:100%;height:100%;object-fit:cover;object-position:var(--pos,50% 50%);opacity:.8;filter:brightness(.85) contrast(1.06);
+  -webkit-mask-image:linear-gradient(90deg,transparent,black 52%);mask-image:linear-gradient(90deg,transparent,black 52%)}
+/* a picture behind the closing: the button sits on a steadier surface */
+.cta-art + .cta-grid .btn{background:var(--kitchen);background:color-mix(in srgb,var(--kitchen) 80%,transparent)}
+/* Visit us closes on the kiln itself: soot lit from the lower left by a wide ember glow and a hairline of it along the top. */
+.cta-kiln{background:var(--kitchen);border-top:1px solid var(--line);border-top-color:color-mix(in srgb,var(--ember) 45%,transparent)}
+.cta-kiln::before{background:radial-gradient(circle 52vw at 12% 140%,color-mix(in srgb,var(--ember) 34%,transparent),transparent),radial-gradient(circle 30vw at 92% -20%,color-mix(in srgb,var(--lacquer) 80%,transparent),transparent)}
 .cta-band::before{content:"";position:absolute;z-index:-1;inset:0;background:radial-gradient(circle 31vw at 19% 125%,rgba(240,138,60,.2),rgba(240,138,60,0));pointer-events:none}   /* the glow's centre sits below the band; the box itself never leaves it, so the band needs no clipping */
 .cta-grid{display:grid;grid-template-columns:repeat(12,minmax(0,1fr));column-gap:var(--s5);row-gap:var(--s4);align-items:end}
 .cta-grid h2{grid-column:1/8}
@@ -146,9 +157,18 @@ address{font-family:var(--serif);font-size:clamp(1.5rem,2.4vw,2rem);line-height:
 .foot-meta{grid-column:1/-1;display:flex;flex-wrap:wrap;gap:var(--s1) var(--s5)}
 .foot a{color:var(--rice)}
 
+/* Text links answer the pointer and the keyboard alike: the underline steps off the text and thickens, and the colour trades places (rice goes ember, ember goes rice). Buttons, the brand and the navigation have their own responses. */
+a:where(:not(.btn,.brand,.skip,.top-cta,.site-nav a,.jump a)){transition:color var(--t) var(--ease),text-underline-offset var(--t) var(--ease),text-decoration-thickness var(--t) var(--ease)}
+a:where(:not(.btn,.brand,.skip,.top-cta,.site-nav a,.jump a)):is(:hover,:focus-visible){color:var(--ember-hi);text-underline-offset:.34em;text-decoration-thickness:2px}
+.good-link a:is(:hover,:focus-visible){color:var(--rice)}
+.steps a:is(:hover,:focus-visible){color:var(--kitchen)}
+@media (prefers-reduced-motion:reduce){a{transition:none!important}}
+
 /* Tablet */
 @media (max-width:1023px){
   .cta-grid h2,.cta-text{grid-column:1/-1}.cta-action{grid-column:1/-1;grid-row:auto;margin-top:var(--s3)}
+  .cta-art{inset:auto 0 0 0;height:60%}   /* narrow screens: the picture sits under the words and fades up into them */
+  .cta-art img{-webkit-mask-image:linear-gradient(transparent,black 70%);mask-image:linear-gradient(transparent,black 70%)}
   .foot-brand{grid-column:1/-1}.foot-nav{grid-column:1/5}.foot-disc{grid-column:5/13}
 }
 /* Phone */

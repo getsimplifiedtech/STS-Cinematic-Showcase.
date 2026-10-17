@@ -12,6 +12,8 @@ export default function menu(cfg) {
   const jump = cfg.menu.categories.map((k) => `<li><a href="#${esc(k.id)}">${esc(k.name)}</a></li>`).join('');
   const dots = (n) => `<span class="legend-dots" aria-hidden="true">${[1, 2, 3].map((i) => `<i class="${i <= n ? 'on' : ''}"></i>`).join('')}</span>`;
 
+  const bowl = cfg.signature[cfg.signature.length - 1].signature;   // the closing band shows the last signature plate: the Menu already carries it, so the page adds no file
+  let photos = 0;   // the panels that carry a photograph take turns: the photograph leads on the left, then the usual layout, then a banner across the top
   const main = `  <section class="menu-head" aria-labelledby="menu-title">
     <div class="wrap menu-head-grid">
       <p class="print-brand">${esc(cfg.client.brand.name)}. ${esc(cfg.client.brand.descriptor)}. ${cfg.client.address.lines.map(esc).join(', ')}.</p>
@@ -29,11 +31,11 @@ export default function menu(cfg) {
   <nav class="jump" aria-label="Menu categories"><div class="wrap"><ul>${jump}</ul></div></nav>
 
   <section class="menu-body" aria-label="${bodyLabel}">
-    <div class="wrap cats">${cfg.menu.categories.map(menuCategory).join('')}
+    <div class="wrap cats">${cfg.menu.categories.map((k) => menuCategory(k, k.items.some((it) => it.signature && it.signature.image) ? ['left', 'std', 'banner'][photos++ % 3] : 'list')).join('')}
     </div>
   </section>
 
-  ${ctaBand(cfg, { ...m.orderBand, tone: 'pine', id: 'order-band' })}`;
+  ${ctaBand(cfg, { ...m.orderBand, tone: 'pine', id: 'order-band', art: { src: bowl.image, width: bowl.width, height: bowl.height, pos: '50% 62%' } })}`;
 
   return { main, scripts: ['menu.js'], styles: ['menu.css'] };
 }

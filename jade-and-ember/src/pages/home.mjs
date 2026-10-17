@@ -88,6 +88,7 @@ export default function home(cfg) {
   </section>
 
   <section class="story-teaser" aria-labelledby="story-teaser-title">
+    <figure class="teaser-art" aria-hidden="true"><span class="teaser-glyph" lang="zh-Hans">${esc(copy.story.name.characters.join(''))}</span><img src="${esc(copy.story.image.src.replace(/\.webp$/, '-860.webp'))}" alt="" width="860" height="${Math.round(copy.story.image.height * 860 / copy.story.image.width)}" loading="lazy" decoding="async"></figure>
     <div class="wrap teaser-grid">
       <h2 id="story-teaser-title" class="pull">${esc(copy.story.h1)}</h2>
       <p class="teaser-text">${esc(c.storyTeaser.text)}</p>

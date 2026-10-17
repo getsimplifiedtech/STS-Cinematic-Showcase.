@@ -11,6 +11,7 @@ Everything here is AI-generated concept media for a fictional restaurant. None o
 | `hero-wok-v2-m.webp` | Phone poster, 810x1440 | A 9:16 crop of the same still at the focus the phone layout uses, WebP q60. No 9:16 video was generated. |
 | `dish-beef.webp` | Plated dish, 2400x1610 | Plated still, resized from 5056x3392, WebP q74. |
 | `dish-beef-1200.webp` | The same dish at 1200x805, for the Menu | `dish-beef.webp` resized (Lanczos), WebP q74. |
+| `story-jade-bowls-860.webp` | The celadon bowls at 860x543, for the Home teaser | `story-jade-bowls.webp` resized (Lanczos), WebP q76. |
 | `steam-plate.webp`, `steam-plate-m.webp`, `cloud-plate.webp`, `cloud-plate-m.webp` | Calm-mode stills (reduced motion, Save-Data, no WebGL2) | Rendered from the Breath's own steam solver over the new poster; no third-party code. |
 
 **Reference still (wok):** Nano Banana 2 (`nano_banana_2`), 4K, 16:9, three candidates, candidate 2 chosen by the owner. Job `1c7c8add-87cf-43ad-b739-3d46d5338ee4`, 5504x3072.

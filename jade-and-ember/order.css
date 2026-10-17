@@ -3,15 +3,21 @@
    reduced motion the stage is not pinned and the ticket is simply shown whole. */
 
 .order-track{position:relative;background:var(--kitchen)}
-.order-head{position:relative;isolation:isolate;padding-block:calc(var(--header-h) + var(--s8)) var(--s5)}
-.order-head::before{content:"";position:absolute;inset:0;z-index:-1;background:radial-gradient(50% 80% at 0% 100%,rgba(240,138,60,.13),transparent 70%),radial-gradient(40% 60% at 92% 0%,rgba(20,58,48,.6),transparent 70%)}
-.order-head-grid{display:grid;grid-template-columns:repeat(12,minmax(0,1fr));column-gap:var(--s5);row-gap:var(--s5)}
-.order-head h1{grid-column:1/11;font-family:var(--serif);font-weight:400;font-size:clamp(3rem,9vw,7.5rem);line-height:.98;letter-spacing:-.02em}
-.order-lede{grid-column:1/7;color:var(--rice-dim);font-size:1.25rem;max-width:28rem}
-/* the action stays under the header while the stage plays (the header's own Order button is hidden on a phone) */
-.order-action{position:sticky;top:calc(var(--header-h) + var(--s3));z-index:30;width:min(1200px,100% - 2*var(--gutter));margin:var(--s5) auto 0;display:flex}
-.order-action .btn,.order-action .btn-off{background:rgba(14,13,12,.97);border:1px solid rgba(240,138,60,.7);padding:0 var(--s5);min-height:48px;font-size:1.125rem;box-shadow:0 0 30px rgba(240,138,60,.18)}
+.order-head{position:relative;isolation:isolate;padding-block:calc(var(--header-h) + var(--s8)) var(--s9)}
+.order-head::before{content:"";position:absolute;inset:0;z-index:-1;background:radial-gradient(55% 80% at 0% 100%,rgba(240,138,60,.22),transparent 70%),radial-gradient(40% 60% at 92% 0%,rgba(20,58,48,.6),transparent 70%);-webkit-mask-image:linear-gradient(#000 62%,transparent);mask-image:linear-gradient(#000 62%,transparent)}
+.order-head-grid{display:grid;grid-template-columns:repeat(12,minmax(0,1fr));column-gap:var(--s5);row-gap:var(--s5);align-items:start;grid-template-rows:1fr auto auto auto 1fr}
+.order-head h1,.order-lede,.order-action{position:relative;z-index:1}
+.order-head h1{grid-column:1/8;grid-row:2;font-family:var(--serif);font-weight:400;font-size:clamp(3rem,7.2vw,6.25rem);line-height:.98;letter-spacing:-.02em}
+.order-lede{grid-column:1/6;grid-row:3;color:var(--rice-dim);font-size:1.25rem;max-width:28rem}
+.order-action{grid-column:1/6;grid-row:4;display:flex;margin-top:var(--s2)}
+.order-action .btn{padding:0 var(--s5);min-height:48px;font-size:1.125rem;box-shadow:0 0 30px rgba(240,138,60,.18)}
 .order-action .btn-off{display:inline-flex;align-items:center;border-radius:2px;color:var(--rice);cursor:default}
+/* the dish being ordered fills the right of the first screen: lit from the flame side, its edges dissolving into soot */
+.order-plate{grid-column:7/13;grid-row:1/6;align-self:center;margin:calc(var(--s7) * -1) calc(var(--gutter) * -.9) calc(var(--s6) * -1) calc(var(--s7) * -1)}
+.order-plate img{width:100%;aspect-ratio:5/4;object-fit:cover;object-position:50% 52%;
+  -webkit-mask-image:radial-gradient(closest-side at 50% 52%,#000 58%,transparent 100%);mask-image:radial-gradient(closest-side at 50% 52%,#000 58%,transparent 100%)}
+/* on a phone the header has no Order button, so the action is repeated under the ticket: it stays in the stage and leaves with it (it never crosses the heading) */
+.journey-action{display:none}
 
 .journey{--k:calc(var(--p,1)*3);position:relative;height:300svh;margin-top:calc(var(--s5) * -1)}
 .journey-pin{position:sticky;top:0;height:100svh;overflow:hidden;display:flex;align-items:center;isolation:isolate}
@@ -46,8 +52,14 @@
 
 .order-info{background:var(--kitchen);padding-block:var(--s7) var(--sec);border-top:1px solid #1b1917}
 .info-grid{display:grid;grid-template-columns:repeat(12,minmax(0,1fr));column-gap:var(--s5);row-gap:var(--s7)}
-.info-pickup{grid-column:1/6;display:grid;gap:var(--s3);align-content:start;justify-items:start}
-.info-allergy{grid-column:7/13;display:grid;gap:var(--s3);align-content:start}
+/* Pickup and Allergies are two ticket stubs: a dashed edge, a notch at each side, the warm light low on the left, so the page ends on the same object it began with. */
+.info-pickup,.info-allergy{position:relative;isolation:isolate;display:grid;gap:var(--s3);align-content:start;padding:var(--s6) var(--s6) calc(var(--s6) + 4px);border:1.5px dashed rgba(239,231,216,.24);border-radius:2px;
+  background:radial-gradient(70% 60% at 0% 110%,rgba(240,138,60,.12),transparent 70%)}
+.info-pickup::before,.info-pickup::after,.info-allergy::before,.info-allergy::after{content:"";position:absolute;top:var(--s6);width:20px;height:20px;border-radius:50%;background:var(--kitchen);border:1.5px dashed rgba(239,231,216,.24)}
+.info-pickup::before,.info-allergy::before{left:-11px;clip-path:inset(0 0 0 50%)}
+.info-pickup::after,.info-allergy::after{right:-11px;clip-path:inset(0 50% 0 0)}
+.info-pickup{grid-column:1/6;justify-items:start}
+.info-allergy{grid-column:7/13}
 .info-grid h2{font-size:clamp(1.5rem,2.4vw,2rem)}
 .info-grid p{color:var(--rice-dim);font-size:1.125rem;max-width:30rem}
 .info-call{margin-top:var(--s3)}
@@ -57,7 +69,10 @@
 .owner-body{grid-column:5/12;display:grid;gap:var(--s3);color:var(--rice-dim);font-size:1rem;max-width:36rem}
 
 @media (max-width:1023px){
-  .order-head h1,.order-lede{grid-column:1/-1}
+  .order-head-grid{grid-template-rows:none}
+  .order-head h1,.order-lede,.order-action{grid-column:1/-1}
+  .order-head h1{grid-row:1}.order-lede{grid-row:2}.order-action{grid-row:3}
+  .order-plate{grid-row:4;grid-column:1/-1;margin:0 calc(var(--gutter) * -.5)}
   .journey-grid h2,.ticket{grid-column:1/-1}
   .journey-grid{row-gap:var(--s5);align-items:start;padding-top:calc(var(--header-h) + var(--s9))}
   .info-pickup,.info-allergy,.note-title,.owner-body{grid-column:1/-1}
@@ -65,6 +80,8 @@
 @media (max-width:759px){
   .order-head{padding-block:calc(var(--header-h) + var(--s6)) var(--s4)}
   .journey{height:270svh}
+  .journey-action{display:flex;grid-column:1/-1;margin-top:var(--s3)}
+  .journey-action .btn,.journey-action .btn-off{min-height:48px;font-size:1.125rem;background:rgba(14,13,12,.9)}
   .journey-grid{padding-top:calc(var(--header-h) + 76px);row-gap:var(--s4)}
   .journey-grid h2{font-size:1.75rem}
   .ticket{padding:var(--s5) var(--s5) var(--s7)}

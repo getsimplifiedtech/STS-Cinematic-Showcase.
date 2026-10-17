@@ -2,7 +2,7 @@
    and the glyph dims into the headline. Everything is driven by --p (set by site.js on [data-p]); with no JavaScript or reduced motion --p is unset and each
    rule falls back to a finished, readable resting state. */
 
-.story-open{position:relative;height:240svh;background:var(--kitchen)}
+.story-open{position:relative;height:200svh;background:var(--kitchen)}
 .story-pin{position:sticky;top:0;height:100svh;display:grid;place-items:center;isolation:isolate}
 /* the light: one warm pool low on the left, one jade breath high on the right */
 .story-pin::before{content:"";position:absolute;inset:0;z-index:-2;background:
@@ -26,22 +26,26 @@
 .story-intro::before{content:"";position:absolute;inset:-12% -5%;z-index:-1;background:radial-gradient(closest-side,rgba(14,13,12,.82),rgba(14,13,12,0));pointer-events:none}
 .story-intro h1{font-family:var(--serif);font-weight:400;font-size:clamp(2.75rem,7.4vw,6.5rem);line-height:1.02;letter-spacing:-.02em;text-wrap:balance;max-width:14ch}
 
-/* Chapters: short, staggered, each rising out of the dark as it arrives. */
-.chapters{position:relative;padding-block:var(--s9) var(--s10)}
-.chapter{position:relative;padding-block:clamp(var(--s8),9vw,var(--s10))}
-.chapter-body{max-width:34rem;position:relative;z-index:1;
+/* Chapters: each is a pair, its words and one picture, alternating sides down the page and rising out of the dark as it arrives (--p is on the chapter, so the words
+   and the picture share one clock). The picture drifts a little slower than the words; at rest (no script, reduced motion) it simply sits. */
+.chapters{position:relative;padding-block:var(--s7) var(--s9)}
+.chapter{position:relative;display:grid;grid-template-columns:repeat(12,minmax(0,1fr));column-gap:var(--s5);align-items:center;padding-block:clamp(var(--s7),7vw,var(--s9))}
+.chapter-body{grid-column:1/6;grid-row:1;position:relative;z-index:1;
   opacity:clamp(0,calc(var(--p,.5)*5),1);transform:translateY(calc((1 - clamp(0,calc(var(--p,.5)*4),1))*32px))}
 .chapter-body h2{padding-top:var(--s4);margin-bottom:var(--s5);position:relative}
 .chapter-body h2::before{content:"";position:absolute;left:0;top:0;width:clamp(56px,calc(var(--p,.5)*180px),96px);height:1px;background:linear-gradient(90deg,var(--ember),transparent)}
 .chapter-body p{color:var(--rice);font-size:1.1875rem;line-height:1.65}
 .chapter-body p+p{margin-top:var(--s4);color:var(--rice-dim)}
-.chapter-room .chapter-body{margin-left:min(14%,160px)}
-.chapter-wok .chapter-body{margin-left:min(34%,420px)}
-
-/* The jade bowls: a quiet plate behind "the room", lit from the left, fading to soot at its edges. */
-.story-plate{position:absolute;z-index:0;top:50%;right:calc(-1*var(--gutter));width:min(62%,760px);transform:translateY(-50%);margin:0}
-.story-plate img{width:100%;height:auto;opacity:.5;-webkit-mask-image:radial-gradient(closest-side at 55% 50%,#000 55%,transparent 100%);mask-image:radial-gradient(closest-side at 55% 50%,#000 55%,transparent 100%)}
-.story-plate figcaption{margin-top:var(--s3);padding-right:var(--gutter);text-align:right;font-size:.9375rem;color:var(--rice-dim)}
+.chapter-fig{grid-column:7/13;grid-row:1;margin:0;position:relative;
+  opacity:clamp(0,calc(var(--p,.5)*4 - .2),1);transform:translateY(calc((.5 - var(--p,.5))*56px))}
+.chapter-fig img{width:100%;aspect-ratio:5/4;object-fit:cover;object-position:var(--pos,50% 50%);filter:brightness(.86) contrast(1.08);
+  -webkit-mask-image:radial-gradient(closest-side at 50% 50%,#000 62%,transparent 100%);mask-image:radial-gradient(closest-side at 50% 50%,#000 62%,transparent 100%)}
+.chapter-fig figcaption{margin-top:var(--s2);text-align:center;font-size:.9375rem;color:var(--rice-dim)}
+/* the room turns the pair around: the picture leads, bleeding off the left edge, and the words follow it */
+.chapter-room .chapter-body{grid-column:8/13}
+.chapter-room .chapter-fig{grid-column:1/8;margin-left:calc(var(--gutter) * -1)}
+.chapter-wok .chapter-body{grid-column:1/6}
+.chapter-wok .chapter-fig{grid-column:6/13;margin-right:calc(var(--gutter) * -1)}
 
 /* The name: said in words, over a pine lacquer panel. */
 .name{position:relative;background:var(--pine);padding-block:var(--sec);border-top:1px solid var(--line)}
@@ -54,13 +58,16 @@
 
 @media (max-width:1023px){
   .name-grid h2,.name-line,.name-note{grid-column:1/-1}
-  .chapter-room .chapter-body,.chapter-wok .chapter-body{margin-left:0}
-  .story-plate{position:relative;top:auto;right:auto;width:100%;transform:none;margin:0 0 var(--s6)}
-  .story-plate img{-webkit-mask-image:linear-gradient(#000 55%,transparent);mask-image:linear-gradient(#000 55%,transparent)}
-  .story-plate figcaption{text-align:left;padding:0}
+  .chapter{display:block}
+  .chapter-fig,.chapter-room .chapter-fig,.chapter-wok .chapter-fig{margin:var(--s6) calc(var(--gutter) * -1) 0}
+  .chapter-room .chapter-fig{margin-top:0;margin-bottom:var(--s6)}   /* the room's picture sits above its words, so the page alternates on a phone too */
+  .chapter-room{display:flex;flex-direction:column}
+  .chapter-room .chapter-fig{order:-1}
+  .chapter-fig img{aspect-ratio:3/2}
 }
 @media (max-width:759px){
-  .story-open{height:220svh}
+  .story-open{height:190svh}
+  .chapter-fig img{aspect-ratio:4/5;object-position:var(--focus-m,var(--pos,50% 50%))}
   .name-glyph{flex-direction:column;gap:0;font-size:min(58vw,33svh)}
   .story-pin .pause{top:calc(var(--header-h) + 8px);right:var(--gutter);bottom:auto;width:44px;padding:0;justify-content:center}
   .story-pin .pause-txt{position:absolute;width:1px;height:1px;margin:-1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
@@ -81,5 +88,5 @@ html:not(.js) .story-pin,
 @media print{
   .story-open{height:auto}.story-pin{position:static;height:auto;display:block;padding:var(--s6) 0}
   .name-glyph,.embers{display:none}.story-intro{opacity:1;transform:none;padding:0}.chapter-body{opacity:1;transform:none}
-  .story-plate{position:static;width:60%;transform:none}.name{background:none}.name-grid{display:block}
+  .chapter{display:block}.chapter-fig{width:60%;opacity:1;transform:none}.name{background:none}.name-grid{display:block}
 }

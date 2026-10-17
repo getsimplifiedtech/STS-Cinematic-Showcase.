@@ -119,8 +119,8 @@ for (const pg of pages) {
     if (!wantRobots && /noindex/.test(d.robots)) p.push(`${pg.file}: noindex present but config allows indexing`);
     if (d.requests.length) p.push(`${pg.file}: external requests ${d.requests}`);
     if (d.errors.length) p.push(`${pg.file}: ${d.errors}`);
-    if (d.video !== (pg.id === 'home')) p.push(`${pg.file}: the hero video belongs on Home only (video element: ${d.video})`);
-    const want = pg.id === 'home' ? ['site.js', 'hero.js'] : pg.id === 'menu' ? ['site.js', 'menu.js'] : ['site.js'];
+    if (pg.id !== 'home' && d.video) p.push(`${pg.file}: the footage belongs on Home only (video element: ${d.video})`);   // Home's own <video> is added by breath.js
+    const want = { home: ['site.js', 'breath.js'], menu: ['site.js', 'menu.js'], story: ['site.js', 'story.js'], visit: ['site.js', 'visit.js'] }[pg.id] || ['site.js'];
     if (JSON.stringify(d.scripts) !== JSON.stringify(want)) p.push(`${pg.file}: scripts ${d.scripts}, expected ${want}`);
   }
   report('robots matches config; no external requests; no errors; hero video and scripts only where they belong', p);
@@ -152,15 +152,15 @@ for (const pg of pages) {
 
   const s = await grab('our-story.html', () => ({
     h2: [...document.querySelectorAll('main h2')].map((h) => h.textContent.trim()),
-    seal: (() => { const e = document.querySelector('.seal-xl'); return e ? { hidden: e.getAttribute('aria-hidden'), lang: e.getAttribute('lang'), text: e.textContent } : null; })(),
-    img: (() => { const i = document.querySelector('.story-fig img'); return i ? { alt: i.alt.length, w: i.width, h: i.height } : null; })(),
+    seal: (() => { const e = document.querySelector('.name-glyph'); return e ? { hidden: e.getAttribute('aria-hidden'), lang: e.getAttribute('lang'), text: e.textContent } : null; })(),
+    img: (() => { const a = [...document.querySelectorAll('.chapter-fig img')]; return a.length ? { n: a.length, alt: Math.min(...a.map((i) => i.alt.length)), w: Math.min(...a.map((i) => i.getAttribute('width') | 0)), h: Math.min(...a.map((i) => i.getAttribute('height') | 0)) } : null; })(),
     note: document.querySelector('.name-note')?.textContent || '',
     numbered: document.querySelectorAll('main .step-no').length,
   }));
   const wantH2 = [...copy.story.chapters.map((c) => c.heading), copy.story.name.heading];
   if (JSON.stringify(s.h2.slice(0, wantH2.length)) !== JSON.stringify(wantH2)) p.push(`Our story headings should be the chapters then the name: ${s.h2}`);
   if (!s.seal || s.seal.hidden !== 'true' || s.seal.lang !== 'zh-Hans' || s.seal.text !== copy.story.name.characters.join('')) p.push(`the large seal should be aria-hidden, lang zh-Hans, and the two configured characters: ${JSON.stringify(s.seal)}`);
-  if (!s.img || s.img.alt < 10 || !s.img.w || !s.img.h) p.push(`story photograph needs alt text and dimensions: ${JSON.stringify(s.img)}`);
+  if (!s.img || s.img.n !== copy.story.chapters.length || s.img.alt < 10 || !s.img.w || !s.img.h) p.push(`every Our story picture needs alt text and dimensions: ${JSON.stringify(s.img)}`);
   if (!/jade/.test(s.note) || !/fire/.test(s.note)) p.push('the seal note should say what the characters mean');
   if (s.numbered) p.push('story chapters are headed, not numbered');
 
@@ -170,13 +170,13 @@ for (const pg of pages) {
     tel: document.querySelector('.visit-contact a.phone')?.getAttribute('href'),
     groups: [...document.querySelectorAll('.good-group h3')].map((h) => h.textContent.trim()),
     map: !!document.querySelector('a[target=_blank]'),
-    photos: document.querySelectorAll('main img').length,
+    photos: [...document.querySelectorAll('main img')].filter((i) => i.alt.length < 10 && !i.closest('[aria-hidden=true]')).length,   // a picture is either decorative (hidden with its figure) or has real alt text
   }));
   if (JSON.stringify(v.rows) !== JSON.stringify(client.hours.rows.map((r) => [r.days, r.time]))) p.push(`Visit hours differ from config: ${JSON.stringify(v.rows)}`);
   if (JSON.stringify(v.addr) !== JSON.stringify(client.address.lines)) p.push(`Visit address differs from config: ${JSON.stringify(v.addr)}`);
   if (v.tel !== client.contact.phone.href) p.push(`Visit phone link differs from config: ${v.tel}`);
   if (JSON.stringify(v.groups) !== JSON.stringify(copy.visit.goodToKnow.groups.map((g) => g.title))) p.push(`good-to-know groups differ from config: ${v.groups}`);
-  if (v.photos) p.push(`Visit is a type-only page, found ${v.photos} images`);
+  if (v.photos) p.push(`Visit: ${v.photos} picture(s) are neither decorative nor described`);
   if (!client.address.mapUrl && v.map) p.push('no "Get directions" link may appear while address.mapUrl is empty');
 
   const o = await grab('order-online.html', () => ({
@@ -187,7 +187,7 @@ for (const pg of pages) {
     owner: !!document.querySelector('.owner'),
     allergy: document.querySelector('.info-allergy p')?.textContent.trim(),
     tel: document.querySelector('.info-call a')?.getAttribute('href'),
-    photos: document.querySelectorAll('main img').length,
+    photos: [...document.querySelectorAll('main img')].filter((i) => i.alt.length < 10 && !i.closest('[aria-hidden=true]')).length,
     placeholders: /\{(platform|pickup)\}/.test(document.body.innerText),
   }));
   if (JSON.stringify(o.steps) !== JSON.stringify(copy.order.steps.map((x) => x.name))) p.push(`Order steps differ from config: ${o.steps}`);
@@ -198,7 +198,7 @@ for (const pg of pages) {
   }
   if (o.allergy !== JSON.parse(readFileSync(new URL('config/copy.json', root), 'utf8')).menu.note) p.push('the Order page allergy text must be the Menu note (one source)');
   if (o.tel !== client.contact.phone.href) p.push('Order page phone link differs from config');
-  if (o.photos) p.push(`Order is a type-only page, found ${o.photos} images`);
+  if (o.photos) p.push(`Order: ${o.photos} picture(s) are neither decorative nor described`);
   if (o.placeholders) p.push('an unreplaced {platform} or {pickup} placeholder is showing');
   await ctx.close();
   report('Our story, Visit us and Order online: structure and content come from config', p);

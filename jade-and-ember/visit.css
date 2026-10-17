@@ -2,7 +2,7 @@
    The light is one element moved with transform and opacity by visit.js; without JavaScript, or with reduced motion, it rests where it is here. */
 
 .visit-room{position:relative;isolation:isolate;min-height:max(100svh,720px);display:flex;align-items:center;
-  padding-block:calc(var(--header-h) + var(--s8)) var(--s9);background:#0a0908}
+  padding-block:calc(var(--header-h) + var(--s8)) var(--s9);background:radial-gradient(45% 40% at 94% 0%,rgba(20,58,48,.6),transparent 70%),#0a0908}
 .room-bg{position:absolute;inset:0 0 0 38%;z-index:-3;margin:0}
 .room-bg img{width:100%;height:100%;object-fit:cover;object-position:30% 50%;opacity:.42;
   -webkit-mask-image:linear-gradient(90deg,transparent,#000 40%);mask-image:linear-gradient(90deg,transparent,#000 40%)}
@@ -30,7 +30,7 @@
 .visit-main .hours{border-top:1px solid rgba(239,231,216,.14)}
 .visit-main .hours th,.visit-main .hours td{border-bottom:1px solid rgba(239,231,216,.08)}
 
-.good{background:var(--kitchen);padding-block:var(--sec);border-top:1px solid #1b1917}
+.good{background:var(--kitchen);padding-block:var(--s9) var(--s8);border-top:1px solid #1b1917}
 .good-grid{display:grid;grid-template-columns:repeat(12,minmax(0,1fr));column-gap:var(--s5);row-gap:var(--s7)}
 .good-grid h2{grid-column:1/4}
 .good-groups{grid-column:5/13;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:var(--s7) var(--s8)}

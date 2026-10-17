@@ -63,6 +63,30 @@ Result is unchanged: **35 of 45 pass, the same 10 fail** (8 baseline-bound, `che
 
 What changed in the site: the Home headline is 6vw (was 7.2vw, cap 7rem) and the footage is slid right by 3.2vw on wide screens, so the first line ends 6 to 8vw before the wok's rim at every desktop size from 1024 to 1920 px wide (measured). The hero paragraph's closing sentence is its own line and no paragraph width ends on a single word (15 widths from 320 to 1920 px checked). The footer no longer shows the development stamp ("Concept v0.8..."); it stays in the page source as a comment and in `config/site.json`, which `check:release` requires. Visit hours no longer break across lines on phones. A new case in `tests/site.mjs` fails if any page shows lab, prototype, staging or version wording. The lab label named in the review exists only in the retired lab prototype on its own branch, never in this build.
 
+## Update: Rounds 1 and 2 reconciliation (owner decision 5, 2026-10-17)
+
+**Result: 35 of 45 pass, the same 10 fail, none removed, skipped or weakened.** The Round 1 and 2 work briefly added three failures (`check:contracts`, `check:tokens`, `check:reflow`) and a schema regression; each was fixed in the site, not in the check (contracts string updated for the new menu section markup; the colour-literal count is back at its ratchet of 29 using existing tokens and `color-mix`; the teaser art stays inside its box with no `overflow:hidden`; the new page art lives in code, not in the shared copy schema). The project-owned Home budget also passes (`check:budgets-firelight`, static and runtime): the Home page weight grew with the teaser image, so the image was right-sized (860 px copy, 14 KB) rather than the recorded measurement being raised.
+
+### The ten, one by one
+
+| Check | Kind | What it protects | Why it fails | Status and next step |
+|---|---|---|---|---|
+| `check:delivery` | baseline-bound | the delivered file set equals the v0.8 preview package | Firelight adds and removes files by design | Cannot pass until the owner approves a new baseline. |
+| `check:security` | baseline-bound + environment | CSP and header probes; candidate equals v0.8 under the headers | the 60 v0.8 comparisons differ by design; Chromium software-GL notice "GPU stall due to ReadPixels" | CSP (0 violations), header and request checks pass. Needs a new baseline; notice needs a framework follow-up. |
+| `check:assets` | baseline-bound + tool limit | delivered files match recorded checksums | files differ from v0.8; hashed-copy tool rewrites only one stylesheet | Manifest check passes (36 files). Needs a new baseline and the tool follow-up. |
+| `check:budgets` | baseline-bound | page weights against the v0.8 export | the export has no `home.css` | Replaced for this branch by `check:budgets-firelight` (passes, static and runtime). |
+| `check:regression` | baseline-bound | candidate versus v0.8 text, structure, styles, pixels | stops on the missing `home.css` | Needs a new baseline. |
+| `check:selftest` | baseline-bound | Gate 1 mutation tests start from the v0.8 baseline | same missing file | Needs a new baseline. |
+| `check:selftest-gate2` | baseline-bound + generic fixture | 34 mutation cases | six `budgets` cases stop on the baseline; two generic cases name the old markup | 26 hold; the two markup cases are re-pointed in the project suite, where they pass. |
+| `check:selftest-je-markup` | baseline-bound | the project's own copy of the self-tests | the Gate 1 start-up and six `budgets` cases | Every case aimed at the Firelight markup passes. |
+| `check:ci` | environment | local framework action only in the listed repository | this clone's remote is lowercase `sts-cinematic-showcase.` | **Passes** when run as the real repository (`GITHUB_REPOSITORY=getsimplifiedtech/STS-Cinematic-Showcase.`), so the redesign is not the cause. |
+| `check:portability` | environment | serving conventions | Chromium software-GL notice on Home at phone width | Every serving convention passes; the notice is engine noise (no page code reads pixels back). |
+
+### What only the owner can unlock
+
+1. Approve a Firelight baseline (APR-JE-017 says the baseline never changes, so a new one needs a signed record). That turns the eight baseline-bound checks into meaningful ones. A baseline branch was not created: that would be freezing.
+2. The two framework follow-ups listed above (the snapshot is not edited here).
+
 ## What was fixed in the site, not in the checks
 
 - Reading order on Home: the four overlapping chapter panels are set aside for screen readers (script-added `aria-hidden`) and the same words are added as an ordered, visually hidden list, shown as ordinary text in forced colours.

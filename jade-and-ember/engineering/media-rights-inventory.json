@@ -444,6 +444,42 @@
       "clientUse": "Not permitted. Replace with real photography or footage, or with media whose licence has been verified and recorded in a rights-verification approval."
     },
     {
+      "path": "media/story-jade-bowls-860.webp",
+      "kind": "image",
+      "description": "860x543 WebP copy of the celadon bowls, for the Home teaser",
+      "bytes": 14294,
+      "sha256": "e47c2f895152559534c2e3589ec9ac92d450bf51fd53e57d293bb45e1573b3a1",
+      "origin": {
+        "type": "ai-generated",
+        "service": "Hugging Face Space mcp-tools/Z-Image-Turbo (model Z-Image-Turbo, 9 steps, shift 3), via the connected Hugging Face account, free tier",
+        "generatedOn": "2026-10-09",
+        "seed": "4404 (of 4404, 5505)",
+        "postProcessing": "resize to 860 px wide (Lanczos), WebP q76",
+        "recordedIn": "media/PROVENANCE.md",
+        "notStored": "the unselected candidates; the account and plan details of the session",
+        "derivedFrom": "media/story-jade-bowls.webp (so the terms for that image also bear on this one)"
+      },
+      "rights": {
+        "status": "unverified",
+        "established": [
+          "The generation service, model and date are recorded in media/PROVENANCE.md."
+        ],
+        "notEstablished": [
+          "Any licence or ownership of the output under the service and model terms.",
+          "Whether the free tier or the connected account changes what may be done with the output.",
+          "Whether any attribution or AI-disclosure duty applies."
+        ]
+      },
+      "termsToVerify": [
+        "T-HF-TOS",
+        "T-ZIMG-MODEL",
+        "T-ZIMG-SPACE",
+        "T-LEGAL"
+      ],
+      "useNow": "Fictional Jade & Ember demonstration only, as adopted in docs/JADE_AND_EMBER_MEDIA_RIGHTS_POLICY.md (APR-JE-023). Public deployment of the demonstration is not approved.",
+      "clientUse": "Not permitted. Replace with real photography or footage, or with media whose licence has been verified and recorded in a rights-verification approval."
+    },
+    {
       "path": "media/hero-wok-v2.mp4",
       "kind": "video",
       "description": "H.264 MP4, 1928x1072, 24 fps, 5.04 s, silent",

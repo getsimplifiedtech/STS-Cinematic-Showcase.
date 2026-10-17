@@ -44,6 +44,6 @@ export default function visit(cfg) {
     </div>
   </section>
 
-  ${ctaBand(cfg, { ...v.orderBand, tone: 'pine', id: 'order-band' })}`;
+  ${ctaBand(cfg, { ...v.orderBand, tone: 'kiln', id: 'order-band' })}`;
   return { main, scripts: ['visit.js'], styles: ['visit.css'] };
 }
