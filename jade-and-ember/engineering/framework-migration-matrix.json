@@ -933,6 +933,7 @@
         "jade-and-ember/engineering/baseline-firelight-provisional.json",
         "jade-and-ember/engineering/immutability-allowlist.json",
         "jade-and-ember/engineering/approved-style-differences.json",
+        "jade-and-ember/engineering/selftest-applicability.json",
         "jade-and-ember/engineering/findings.json",
         "jade-and-ember/engineering/assets.manifest.json",
         "jade-and-ember/engineering/tokens.json",

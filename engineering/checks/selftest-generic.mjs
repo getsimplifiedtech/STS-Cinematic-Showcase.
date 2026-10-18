@@ -177,6 +177,61 @@ const styles = async (baselineRoot, candidateRoot, normalizeHashedNames = false)
 // the fixture records no approved style differences (it has no baseline); the copy gets an empty list so that the harness can run
 const styleCase = (body) => withCopy((d) => { writeFileSync(join(d, 'engineering', 'approved-style-differences.json'), '{"entries": []}'); return inProject(d, STYLE_PRE + body); });
 
+// ---- the Pause check (condition-based settling). A copy of the fixture declares a Pause control, and its assembled index.html gets a long animation, a Pause button and a script; `script` is what
+// Pause does, `button` the control's markup, `css` extra rules. The case returns the Pause findings of checkMediaBrowser for that page.
+const PAUSE_SCRIPT_OK = "var b=document.querySelector('.pause');b.addEventListener('click',function(){var on=b.getAttribute('aria-pressed')!=='true';b.setAttribute('aria-pressed',String(on));document.documentElement.classList.toggle('still',on)});";
+const pauseCase = ({ script = PAUSE_SCRIPT_OK, button = '<button class="pause" type="button" aria-pressed="false"><span>Pause motion</span></button>', css = '' }, expectFn) => withCopy((d) => {
+  editManifest(d, (m) => { m.markup.selectors.pauseControl = '.pause'; });
+  return inProject(d, `
+const fs = await import('node:fs'); const path = await import('node:path');
+const { assembleCandidate } = await L('lib/site.mjs'); const { projectDir } = await L('lib/git.mjs'); const { checkMediaBrowser } = await L('checks/media.mjs');
+const site = assembleCandidate(projectDir, 'g-pause');
+const ctl = ${JSON.stringify(button)}, js = ${JSON.stringify(script)}, extra = ${JSON.stringify(css)};
+fs.appendFileSync(path.join(site, 'styles.css'), '@keyframes pz{to{transform:translateX(10px)}}.lit .pulse{animation:pz 8s linear infinite}@media (prefers-reduced-motion:reduce){.lit .pulse{animation:none}}.still .pulse{animation-play-state:paused;opacity:.5;transition:opacity 1.4s}' + extra);
+fs.writeFileSync(path.join(site, 'pause.js'), "var c=navigator.connection||{};if(!matchMedia('(prefers-reduced-motion:reduce)').matches&&!c.saveData&&!/2g/.test(c.effectiveType||''))document.documentElement.classList.add('lit');" + js);
+const f = path.join(site, 'index.html'); fs.writeFileSync(f, fs.readFileSync(f, 'utf8').replace('</body>', '<div class="pulse">moving</div>' + ctl + '<script src="pause.js"></script></body>'));
+const r = await checkMediaBrowser({ root: site, pages: ['index.html'] });
+const found = r.measured.filter((x) => /:pause-|motion/.test(x.key));
+fs.rmSync(site, { recursive: true, force: true });
+out((${expectFn.toString()})(found, r.measured));`);
+});
+
+// ---- the software-GL notice (E-SWGL-01): the classifier on its own, the evidence reader, and the security check on a site with a WebGL canvas
+const GL_NOTICE = '[.WebGL-0x3d8c00106c00]GL Driver Message (OpenGL, Performance, GL_CLOSE_PATH_NV, High): GPU stall due to ReadPixels';
+const GL_CHILD = `
+const { softwareGlNotice, renderingEvidence, SWGL_LIMIT } = await L('lib/engine-noise.mjs');
+const p = [];
+const DOC = 'http://127.0.0.1:9/index.html';
+const ok = { engine: 'chromium', type: 'warning', text: ${JSON.stringify(GL_NOTICE)}, evidence: { software: true, renderer: 'SwiftShader' }, seen: 0, location: { url: DOC, lineNumber: 0, columnNumber: 0 }, documents: new Set([DOC]) };
+const T = (what, over, want) => { const got = softwareGlNotice({ ...ok, ...over }); if (got !== want) p.push(what + ': classified ' + got + ', expected ' + want); };
+`;
+// a site with a WebGL canvas: gl.js is added to the assembled index.html; `extra` is more page script. The security check's console findings and notes come back.
+const glSite = (extra) => inProject(FIXTURE, `
+const fs = await import('node:fs'); const path = await import('node:path');
+const { assembleCandidate } = await L('lib/site.mjs'); const { projectDir } = await L('lib/git.mjs'); const { checkSecurity } = await L('checks/security.mjs');
+const site = assembleCandidate(projectDir, 'g-gl');
+fs.writeFileSync(path.join(site, 'gl.js'), 'var c=document.createElement("canvas");c.width=64;c.height=64;document.body.appendChild(c);var gl=c.getContext("webgl2");var n=0;(function f(){gl.clearColor((n++%60)/60,0.2,0.3,1);gl.clear(gl.COLOR_BUFFER_BIT);if(n<120)requestAnimationFrame(f)})();' + ${JSON.stringify(extra)});
+const f = path.join(site, 'index.html'); fs.writeFileSync(f, fs.readFileSync(f, 'utf8').replace('</body>', '<script src="gl.js"></script></body>'));
+const r = await checkSecurity({ root: site });
+fs.rmSync(site, { recursive: true, force: true });
+out([JSON.stringify({ console: r.problems.filter((x) => /console messages/.test(x)), other: r.problems.filter((x) => !/console messages/.test(x)), notes: r.notes.filter((x) => /E-SWGL-01|console message/.test(x)) })]);`);
+const glParse = (r) => { try { return JSON.parse(r[0]); } catch { return { console: [], other: ['unparsable result: ' + String(r[0]).slice(0, 200)], notes: [] }; } };
+
+// ---- project-aware applicability of generic gate-2 cases (owner decision of 2026-10-18). A copy of the fixture whose opening block no longer carries the .hero class (so the hero-text case's edit is
+// inert), optionally with a declaration (selftest-applicability.json) and the project's own same-named equivalent module. The reply is checkSelftestGate2({ only: <the case> }).
+const NA_CASE = 'forced-colors: hero text left on the photograph';
+const NA_OK_ENTRY = () => ({ case: NA_CASE, reason: 'This copy has no .hero-text, .hero h1 or .hero .eyebrow: its opening block is .lead-block, which its own same-named case in own-gate2.mjs forces onto the photograph.', approval: 'APR-QF-001', equivalent: { module: 'engineering/checks/own-gate2.mjs', export: 'own', case: NA_CASE } });
+const NA_EQ_OK = "export const own = async ({ only }) => ({ problems: [], notes: ['1 targeted negative tests run', 'caught: ' + only] });\n";
+const naRun = ({ rename = true, entries = null, equivalent = NA_EQ_OK, only = NA_CASE, budgets = null } = {}) => withCopy((d) => {
+  if (rename) editFile(d, 'src/render.mjs', (t) => t.replace('class="hero wrap"', 'class="lead-block wrap"'));
+  if (entries) writeFileSync(join(d, 'engineering', 'selftest-applicability.json'), JSON.stringify({ entries }, null, 1));
+  if (equivalent !== null) { mkdirSync(join(d, 'engineering', 'checks'), { recursive: true }); writeFileSync(join(d, 'engineering', 'checks', 'own-gate2.mjs'), equivalent); }
+  if (budgets) editJson(d, 'engineering/budgets.json', budgets);
+  const r = inProject(d, `const { checkSelftestGate2 } = await L('checks/selftest-gate2.mjs'); const r = await checkSelftestGate2({ only: ${JSON.stringify(only)} }); out([JSON.stringify(r)]);`);
+  try { return JSON.parse(r[0]); } catch { return { problems: ['unparsable: ' + String(r[0]).slice(0, 300)], notes: [] }; }
+});
+const JSTR = (o) => JSON.stringify(o);
+
 const cases = [
   ['identity: the fixture is a project of its own (its id, name and every record prefix are its own)', () => {
     const want = { id: 'quillfeather-letterpress', name: 'Quillfeather Letterpress', approvalIdPrefix: 'APR-QF', demonstrationIdPrefix: 'DEMO-QF', recordIdSuffix: 'QF' };
@@ -928,6 +983,89 @@ const swapped = tempDir('g-hashed2'); tmp.push(swapped); buildHashed(variant((t)
 const changed = await styles(A, swapped, true);
 if (!changed.length) p.push('a hashed copy that names another file was not reported even with the option');
 tmp.forEach((x) => fs.rmSync(x, { recursive: true, force: true })); out(p);`), null],
+  ['media Pause: motion that is still finishing a 1.4 s transition after the click is given the time to finish (the old fixed 500 ms wait reported it), and a correct Pause passes with the control reporting pressed', () => pauseCase({}, (found, all) => (found.length ? ['a correct Pause was reported: ' + found.map((x) => x.key + ' ' + x.detail).join(' | ')] : [])), null],
+  ['media Pause: motion that is NOT stopped by Pause is reported after the finite wait (persistent motion stays a failure)', () => pauseCase({ script: "var b=document.querySelector('.pause');b.addEventListener('click',function(){b.setAttribute('aria-pressed','true')});" }, (found) => found.some((x) => /pause-ineffective/.test(x.key) && /animation\(s\) running/.test(x.detail) && /\d{4} ms after the click/.test(x.detail)) ? [] : ['persistent motion after Pause was not reported: ' + JSON.stringify(found)]), null],
+  ['media Pause: a Pause control that stops the motion but does not report its state (aria-pressed stays "false") is reported', () => pauseCase({ script: "var b=document.querySelector('.pause');b.addEventListener('click',function(){document.documentElement.classList.toggle('still')});" }, (found) => found.some((x) => /pause-state/.test(x.key) && /aria-pressed="false"/.test(x.detail)) && !found.some((x) => /pause-ineffective/.test(x.key)) ? [] : ['an unreported Pause state was not reported as pause-state alone: ' + JSON.stringify(found)]), null],
+  ['media Pause: a Pause control with no aria-pressed at all is judged on the motion alone (not-pressed state is not invented)', () => pauseCase({ button: '<button class="pause" type="button"><span>Pause motion</span></button>', script: "var b=document.querySelector('.pause');b.addEventListener('click',function(){document.documentElement.classList.toggle('still')});" }, (found) => (found.length ? ['a stateless but working Pause was reported: ' + JSON.stringify(found)] : [])), null],
+  ['software-GL notice: the classifier knows the one exact Chromium notice and nothing else (other engines, types, texts, locations, missing or hardware evidence, and more than four all stay failures)', () => inProject(FIXTURE, GL_CHILD + `
+T('the exact notice with browser-level evidence', {}, true);
+T('the notice with the single suffix Chromium appends', { text: ok.text + ' (this message will no longer repeat)' }, true);
+T('Firefox', { engine: 'firefox' }, false); T('WebKit', { engine: 'webkit' }, false);
+T('an error instead of a warning', { type: 'error' }, false); T('a log message', { type: 'log' }, false);
+for (const [what, text] of [['another severity', ok.text.replace('High', 'Medium')], ['another operation', ok.text.replace('ReadPixels', 'DrawArrays')], ['another message type', ok.text.replace('Performance', 'Error')], ['another category', ok.text.replace('GL_CLOSE_PATH_NV', 'GL_INVALID_OPERATION')],
+  ['text before it', 'x ' + ok.text], ['text after it', ok.text + ' and more'], ['a different suffix', ok.text + ' (this message will repeat)'], ['no context id', ok.text.replace(/^[^ ]*GL Driver/, 'GL Driver')], ['a new line', ok.text + String.fromCharCode(10) + 'x'], ['an empty text', ''], ['a GL error', '[.WebGL-0x1]GL_INVALID_OPERATION: glDrawArrays: no valid program']]) T(what, { text }, false);
+T('no evidence', { evidence: null }, false); T('evidence that is not software', { evidence: { software: false, renderer: 'NVIDIA' } }, false); T('evidence that is only truthy', { evidence: { software: 'yes' } }, false);
+T('the fifth notice on a page', { seen: SWGL_LIMIT }, false); T('the fourth notice on a page', { seen: SWGL_LIMIT - 1 }, true);
+T('no location', { location: null }, false); T('a position inside a script (column 228)', { location: { url: DOC, lineNumber: 0, columnNumber: 228 } }, false); T('the line of the document script that was running (column 0)', { location: { url: DOC, lineNumber: 42, columnNumber: 0 } }, true);
+T('a script file as the source', { location: { url: 'http://127.0.0.1:9/gl.js', lineNumber: 0, columnNumber: 0 } }, false); T('no documents', { documents: null }, false);
+out(p);`), null],
+  ['software-GL notice: the rendering evidence names a software rasteriser only (SwiftShader, llvmpipe); a GPU, no WebGL, no debug extension, an odd value or an error give none', () => inProject(FIXTURE, `
+const { renderingEvidence } = await L('lib/engine-noise.mjs');
+const fake = (v, boom) => ({ newContext: async () => { if (boom) throw new Error('no context'); return { newPage: async () => ({ evaluate: async () => v }), close: async () => {} }; } });
+const p = [];
+for (const [what, v, boom, want] of [['SwiftShader', 'ANGLE (Google, Vulkan 1.3.0 (SwiftShader Device (Subzero) (0x0000C0DE)), SwiftShader driver)', false, true], ['llvmpipe', 'llvmpipe (LLVM 15.0.7, 256 bits)', false, true], ['an NVIDIA GPU', 'ANGLE (NVIDIA, NVIDIA GeForce RTX 3080 Direct3D11 vs_5_0 ps_5_0, D3D11)', false, false], ['an Apple GPU', 'Apple M2', false, false], ['no WebGL', null, false, false], ['an undefined result', undefined, false, false], ['a number', 7, false, false], ['a browser that cannot make a context', null, true, false]]) {
+  const e = await renderingEvidence(fake(v, boom)); if (e.software !== want) p.push(what + ': software ' + e.software + ', expected ' + want);
+}
+const b = fake('Apple M2'); await renderingEvidence(b); const again = await renderingEvidence(b); if (again.renderer !== 'Apple M2') p.push('the evidence is not kept for the browser');
+out(p);`), null],
+  ['software-GL notice: on a page with a WebGL canvas the security check counts the browser\'s notice (E-SWGL-01, with the renderer) and reports no console message', async () => { const r = glParse(glSite('')); const p = []; if (r.console.length) p.push('the known notice was still reported: ' + r.console[0].slice(0, 200)); if (!r.notes.some((x) => /4 known chromium software-GL notice\(s\) \(E-SWGL-01: WebGL renders on .*SwiftShader/.test(x))) p.push('the notice was not counted and reported: ' + JSON.stringify(r.notes)); return p; }, null],
+  ['software-GL notice: beside it, a page\'s own console.warn of the same text, an unrelated warning, an error and a WebGL error are each still reported', async () => { const p = []; const same = glParse(glSite('console.warn(' + JSON.stringify(GL_NOTICE) + ');')); if (!same.console.some((x) => /GL Driver Message/.test(x))) p.push('a console.warn written by the page in the notice\'s words was classified as the browser\'s notice');
+    const other = glParse(glSite('console.warn("an unrelated warning");')); if (!other.console.some((x) => /an unrelated warning/.test(x))) p.push('an unrelated warning was hidden');
+    const err = glParse(glSite('console.error("a real error");')); if (!err.console.some((x) => /a real error/.test(x))) p.push('an error was hidden');
+    const glerr = glParse(glSite('gl.useProgram(null);gl.drawArrays(gl.TRIANGLES,0,3);')); if (!glerr.console.some((x) => /INVALID_OPERATION|no valid shader program/i.test(x))) p.push('a WebGL error was hidden: ' + JSON.stringify(glerr.console).slice(0, 300));
+    return p; }, null],
+  ['software-GL notice: the portability walks count the same browser notice and report no console message for it, and still report a page\'s own warning', () => inProject(FIXTURE, `
+const fs = await import('node:fs'); const path = await import('node:path');
+const { assembleCandidate } = await L('lib/site.mjs'); const { projectDir } = await L('lib/git.mjs'); const { checkPortability } = await L('checks/portability.mjs');
+const p = [];
+const run = async (extra) => { const site = assembleCandidate(projectDir, 'g-glp');
+  fs.writeFileSync(path.join(site, 'gl.js'), 'var c=document.createElement("canvas");c.width=64;c.height=64;document.body.appendChild(c);var gl=c.getContext("webgl2");var n=0;(function f(){gl.clearColor((n++%60)/60,0.2,0.3,1);gl.clear(gl.COLOR_BUFFER_BIT);if(n<120)requestAnimationFrame(f)})();' + extra);
+  const f = path.join(site, 'index.html'); fs.writeFileSync(f, fs.readFileSync(f, 'utf8').replace('</body>', '<script src="gl.js"></script></body>'));
+  const r = await checkPortability({ root: site, adapters: false }); fs.rmSync(site, { recursive: true, force: true }); return r; };
+const clean = await run('');
+if (clean.problems.some((x) => /GL Driver|GPU stall/.test(x))) p.push('the known notice was reported by the portability walk: ' + clean.problems.find((x) => /GL Driver|GPU stall/.test(x)).slice(0, 200));
+if (!clean.notes.some((x) => /known chromium software-GL notice\\(s\\) \\(E-SWGL-01/.test(x))) p.push('the portability walk did not count the notice');
+const warned = await run('console.warn("a warning of the page\\'s own");');
+if (!warned.problems.some((x) => /a warning of the page/.test(x))) p.push('the portability walk hid a warning of the page\\'s own');
+out(p);`), null],
+  ['applicability: a declaration that meets every condition is honoured: the inert case is listed as justified not applicable (not as a pass), its project-owned equivalent ran and caught, and nothing fails', () => { const r = naRun({ entries: [NA_OK_ENTRY()] }); const p = []; if (r.problems.length) p.push('problems: ' + r.problems.join(' | ').slice(0, 300)); if (!r.notes.some((x) => x.startsWith('not applicable, justified (APR-QF-001): ' + NA_CASE) && /ran in this run and caught its defect/.test(x))) p.push('the justified N/A is not listed with its equivalent: ' + JSTR(r.notes).slice(0, 300)); if (r.notes.some((x) => x === 'caught: ' + NA_CASE)) p.push('the N/A case was also counted as caught'); if (!r.notes.some((x) => /^0 targeted negative tests run .*; 1 justified not applicable/.test(x))) p.push('the counts do not separate applicable runs from N/A: ' + JSTR(r.notes).slice(-300)); return p; }, null],
+  ['applicability: without a declaration the same inert case FAILS (nothing is not applicable by itself)', () => { const r = naRun({}); return r.problems.some((x) => x.startsWith(NA_CASE + ': the check reported nothing; the defect went undetected')) ? [] : ['an inert case with no declaration did not fail: ' + JSTR(r).slice(0, 300)]; }, null],
+  ['applicability: a declaration for a case whose selectors DO exist is refused and the case runs and passes on its own (a real failure cannot be reclassified)', () => { const r = naRun({ rename: false, entries: [NA_OK_ENTRY()] }); const p = []; if (!r.problems.some((x) => /selftest-applicability\.json \(.*\): .*exist.* on index\.html, so the case's edit is not inert/.test(x))) p.push('the declaration was not refused: ' + JSTR(r.problems).slice(0, 300)); if (!r.notes.includes('caught: ' + NA_CASE)) p.push('the case did not run: ' + JSTR(r.notes).slice(0, 300)); if (r.notes.some((x) => x.startsWith('not applicable, justified'))) p.push('it was listed as N/A'); return p; }, null],
+  ['applicability: a declaration whose project-owned equivalent reports a problem, catches nothing, throws, or is missing is refused, the reason is reported and the case still fails as undetected', () => { const p = []; for (const [what, equivalent, re] of [['reports a problem', "export const own = async () => ({ problems: ['it broke'], notes: [] });", /reported a problem: it broke/], ['catches nothing', "export const own = async () => ({ problems: [], notes: ['0 targeted negative tests run'] });", /did not run and catch its defect/], ['throws', "export const own = async () => { throw new Error('boom'); };", /could not be run: boom/], ['has no such export', "export const other = 1;", /no function "own" is exported/], ['returns the wrong shape', "export const own = async () => 7;", /did not return/]]) {
+    const r = naRun({ entries: [NA_OK_ENTRY()], equivalent }); if (!r.problems.some((x) => re.test(x))) p.push(what + ': ' + JSTR(r.problems).slice(0, 240)); if (!r.problems.some((x) => x.startsWith(NA_CASE + ': the check reported nothing'))) p.push(what + ': the case was not run after the refusal'); if (r.notes.some((x) => x.startsWith('not applicable, justified'))) p.push(what + ': it was honoured'); } return p; }, null],
+  ['applicability: every malformed declaration is rejected (unknown case, missing or short reason, reason that names none of the selectors, no approval, an approval that is not in the log, no equivalent, a module outside the project or in the framework, a different equivalent case name, unknown fields, a duplicate), and the generic fixture may declare nothing', () => inProject(FIXTURE, `
+const { applicabilityErrors } = await L('checks/selftest-gate2.mjs');
+const C = ${JSTR(NA_CASE)}; const eligible = new Map([[C, { selectors: ['.hero-text', '.hero h1', '.hero .eyebrow'] }]]);
+const root = ${JSTR(FIXTURE)};
+const good = ${JSTR(NA_OK_ENTRY())}; good.equivalent.module = 'engineering/tokens.json'.replace('tokens.json', 'checks/x.mjs');
+const ctx = { eligible, approvalIds: ['APR-QF-001'], projectRoot: root };
+const p = [];
+const errs = (rec, extra = {}) => applicabilityErrors(rec, { ...ctx, ...extra }).errors;
+const want = (what, rec, re, extra) => { const e = errs(rec, extra); if (!e.length) p.push(what + ': accepted'); else if (!re.test(e.join(' | '))) p.push(what + ': ' + e[0].slice(0, 120)); };
+const mod = (f) => { const e = JSON.parse(JSON.stringify(good)); f(e); return { entries: [e] }; };
+want('not an object', [], /must be an object/); want('no entries list', {}, /must be an object/); want('an unknown top-level field', { entries: [], extra: 1 }, /unknown field/);
+want('an entry that is not an object', { entries: ['x'] }, /must be an object/);
+want('an unknown case', mod((e) => { e.case = 'forced-colors: hero text left on the photograph '; }), /must name, exactly/);
+want('no reason', mod((e) => { delete e.reason; }), /"reason" is required/); want('a short reason', mod((e) => { e.reason = '.hero-text is absent'; }), /at least 40 characters/);
+want('a reason that names no selector', mod((e) => { e.reason = 'The markup of this project differs from the fixture in several ways that matter here.'; }), /must name at least one of the selectors/);
+want('no approval', mod((e) => { delete e.approval; }), /"approval" is required/); want('an approval not in the log', mod((e) => { e.approval = 'APR-QF-999'; }), /not in the approvals log/);
+want('no equivalent', mod((e) => { delete e.equivalent; }), /"equivalent" is required/);
+want('an absolute module', mod((e) => { e.equivalent.module = '/etc/own.mjs'; }), /relative \.mjs path/); want('a module with ..', mod((e) => { e.equivalent.module = '../x.mjs'; }), /relative \.mjs path/);
+want('a module outside engineering', mod((e) => { e.equivalent.module = 'src/render.mjs'; }), /project's own engineering folder/);
+want('a module of the framework', mod((e) => { e.equivalent.module = 'engineering/checks/selftest-gate2.mjs'; }), /(framework|does not exist)/);
+want('a module that does not exist', mod((e) => { e.equivalent.module = 'engineering/checks/nowhere.mjs'; }), /does not exist/);
+want('a different equivalent case', mod((e) => { e.equivalent.case = 'keyboard: a positive tabindex'; }), /same name/); want('no export', mod((e) => { delete e.equivalent.export; }), /export is required/);
+want('an unknown field on the entry', mod((e) => { e.note = 'x'; }), /unknown field/); want('an unknown field on the equivalent', mod((e) => { e.equivalent.x = 1; }), /unknown field/);
+{ const d = JSON.parse(JSON.stringify(good)); want('a duplicate', { entries: [d, JSON.parse(JSON.stringify(d))] }, /declared twice|exist/); }
+want('the generic fixture itself', { entries: [] }, /reference/, { reference: true });
+out(p);`), null],
+  ['applicability: on the generic fixture the three cases the owner named run as before and are caught (hero text, the menu button, the blocked main thread), with no N/A', () => { const p = []; for (const [name, caughtRe] of [[NA_CASE, /^caught: forced-colors: hero text left on the photograph$/], ['forced-colors: the menu button draws nothing', /^caught: forced-colors: the menu button draws nothing$/], ['budgets: the main thread blocked at load', /^caught: budgets: the main thread blocked at load$/]]) {
+    const r = inProject(FIXTURE, `const { checkSelftestGate2 } = await L('checks/selftest-gate2.mjs'); const r = await checkSelftestGate2({ only: ${JSTR(name)} }); out([JSON.stringify(r)]);`); let j; try { j = JSON.parse(r[0]); } catch { p.push(name + ': ' + String(r[0]).slice(0, 200)); continue; }
+    if (j.problems.length) p.push(name + ': ' + j.problems[0].slice(0, 200)); if (!j.notes.some((x) => caughtRe.test(x))) p.push(name + ': not caught: ' + JSTR(j.notes).slice(0, 200)); if (j.notes.some((x) => /not applicable/.test(x))) p.push(name + ': listed as N/A'); } return p; }, null],
+  ['budgets (blocked main thread): where an approved exception raises a page\'s blocking limit, the case runs on a page that keeps the shared limit and still catches the stall; if no page keeps it, the case fails instead of passing quietly', () => { const p = []; const BL = 'budgets: the main thread blocked at load';
+    const ex = (pages) => (b) => { b.exceptions = { pages: Object.fromEntries(pages.map((f) => [f, { approval: 'APR-QF-001', reason: 'a test exception for the blocking-time limit of this page', limits: { blockingMs: 9000 } }])) }; };
+    const one = naRun({ rename: false, only: BL, equivalent: null, budgets: ex(['index.html']) }); if (one.problems.length || !one.notes.includes('caught: ' + BL)) p.push('with Home excepted the stall was not caught on another page: ' + JSTR(one).slice(0, 300));
+    const all = naRun({ rename: false, only: BL, equivalent: null, budgets: ex(['index.html', 'services.html', 'contact.html']) }); if (!all.problems.some((x) => x.startsWith(BL + ': '))) p.push('with every page excepted the case did not fail: ' + JSTR(all).slice(0, 300)); return p; }, null],
 ];
 
 export const CASES = cases.length;

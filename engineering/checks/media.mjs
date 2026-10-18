@@ -147,6 +147,21 @@ export function checkMediaStatic(root, cfgRoot = projectDir) {
 }
 
 // reduced motion and friends, in the browser
+// After Pause is activated, wait for the motion to stop and report what is left. A transition or an animation that is already finishing is given time to finish, but only a finite time:
+// the wait ends as soon as nothing runs and no video plays, and at `timeoutMs` at the latest, so motion that persists is still reported (it is what 2.2.2 is about). `pressed` is the
+// control's own aria-pressed (null when it has none), so the control's state is checked as well as the cessation of the motion.
+export async function settlePause(page, pauseSelector, { timeoutMs = 5000, intervalMs = 100 } = {}) {
+  const read = () => page.evaluate((sel) => {
+    const running = document.getAnimations().filter((a) => a.playState === 'running');
+    const el = sel ? document.querySelector(sel) : null;
+    return { running: running.length, playing: [...document.querySelectorAll('video')].some((v) => !v.paused), pressed: el ? el.getAttribute('aria-pressed') : null, names: [...new Set(running.map((a) => a.animationName || a.transitionProperty || a.constructor.name))].slice(0, 4).join(', ') };
+  }, pauseSelector);
+  const t0 = Date.now();
+  let st = await read();
+  while ((st.running || st.playing) && Date.now() - t0 < timeoutMs) { await page.waitForTimeout(intervalMs); st = await read(); }
+  return { ...st, stopped: !st.running && !st.playing, waitedMs: Date.now() - t0 };
+}
+
 export async function checkMediaBrowser({ root = null, browserName = 'chromium', pages: only = null } = {}) {
   const measured = [];
   let checks = 0;
@@ -192,9 +207,10 @@ export async function checkMediaBrowser({ root = null, browserName = 'chromium',
         if (vp.width < 960 && r.media.length) bad('video-too-narrow', `a video was requested at ${vp.width} px; it is for 960 px and wider only`);
         if ((r.state.long || r.state.playingVideo) && !r.state.pauseVisible) bad('no-pause', 'something moves for more than 5 seconds and there is no visible Pause control (2.2.2)');
         if ((r.state.long || r.state.playingVideo) && r.state.pauseVisible) {
-          await r.page.click(selector('pauseControl')); await r.page.waitForTimeout(500);
-          const after = await r.page.evaluate(() => ({ running: document.getAnimations().filter((a) => a.playState === 'running').length, playing: [...document.querySelectorAll('video')].some((v) => !v.paused) }));
-          if (after.running || after.playing) bad('pause-ineffective', `Pause leaves ${after.running} animation(s) running and video ${after.playing ? 'playing' : 'stopped'}`);
+          await r.page.click(selector('pauseControl'));
+          const after = await settlePause(r.page, selector('pauseControl'));
+          if (!after.stopped) bad('pause-ineffective', `Pause leaves ${after.running} animation(s) running and video ${after.playing ? 'playing' : 'stopped'} ${after.waitedMs} ms after the click${after.names ? ` (${after.names})` : ''}`);
+          if (after.pressed !== null && after.pressed !== 'true') bad('pause-state', `the Pause control reports aria-pressed="${after.pressed}" after it was activated`);
         }
         if (r.state.vids.length && file !== 'index.html') bad('video-off-home', 'a video element appears on a page other than Home');
         await r.ctx.close();

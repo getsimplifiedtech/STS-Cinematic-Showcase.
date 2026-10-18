@@ -1,0 +1,14 @@
+{
+  "entries": [
+    {
+      "case": "forced-colors: hero text left on the photograph",
+      "reason": "The generic case appends forced-colors CSS for .hero-text, .hero h1 and .hero .eyebrow, which Firelight does not have: its hero text is .beat-0 h1, .beat-0 .eyebrow and .beat-0 .lede. The project-owned case of the same name in engineering/checks/je-selftest-gate2.mjs forces exactly those elements onto the photograph and must catch the defect in the same run.",
+      "approval": "APR-JE-054",
+      "equivalent": {
+        "module": "engineering/checks/je-selftest-gate2.mjs",
+        "export": "checkSelftestGate2",
+        "case": "forced-colors: hero text left on the photograph"
+      }
+    }
+  ]
+}

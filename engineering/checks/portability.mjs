@@ -15,7 +15,7 @@
 // Supported URL conventions: .html file URLs, extension-less file URLs, directory URLs with a trailing slash. Not supported (documented): pretty URLs
 // WITH a trailing slash (/menu/), because the pages use plain relative links.
 // Over file:// Chromium reports a CORS error for the two font preloads (the fonts still load from the stylesheet): known finding F-G3-01.
-import { engineNoise } from '../lib/engine-noise.mjs';
+import { SWGL_ID, engineNoise, renderingEvidence, softwareGlNotice } from '../lib/engine-noise.mjs';
 import { cpSync, mkdirSync, readFileSync, rmSync, writeFileSync, readdirSync, lstatSync } from 'node:fs';
 import { join } from 'node:path';
 import { pathToFileURL } from 'node:url';
@@ -59,19 +59,21 @@ async function walkSite(args) {
 }
 async function walkSiteInner({ browser, dir, label, start, prefixCheck, video = 'expect', clean = false }) {
   const problems = [];
-  let fontNoise = 0, loadsSeen = 0, fontsFailed = 0, corsBlocked = 0, preloadMedia = 0;
+  let fontNoise = 0, loadsSeen = 0, fontsFailed = 0, corsBlocked = 0, preloadMedia = 0, glNotices = 0;
   const engine = browser.browserType().name();
+  const glEvidence = await renderingEvidence(browser);
   const pages = pagesOf(dir).filter((f) => f !== '404.html');   // the not-found page is no part of the navigation
   const bad = (m) => problems.push(`${label}: ${m}`);
   for (const mobile of [false, true]) {
     const ctx = await browser.newContext({ viewport: mobile ? { width: 390, height: 844 } : { width: 1440, height: 900 }, isMobile: mobile, hasTouch: mobile, reducedMotion: 'no-preference' });
     ctx.setDefaultTimeout(8000);   // a broken page must fail fast, not stall the walk
     const page = await ctx.newPage();
-    const failed = [], errors = [];
-    const handle = (kind, text) => { if (engineNoise(engine, text)) preloadMedia++; else if (start.startsWith('file:') && FONT_PRELOAD_NOISE.test(text)) fontNoise++; else if (start.startsWith('file:') && FILE_CORS_BLOCK.test(text)) corsBlocked++; else errors.push(`${kind}: ${text.slice(0, 140)}`); };
+    const failed = [], errors = []; let glSeen = 0;
+    const docs = new Set(); page.on('framenavigated', (f) => docs.add(f.url()));
+    const handle = (kind, text, location = null) => { if (engineNoise(engine, text)) preloadMedia++; else if (softwareGlNotice({ engine, type: kind, text, evidence: glEvidence, seen: glSeen, location, documents: docs })) { glSeen++; glNotices++; } else if (start.startsWith('file:') && FONT_PRELOAD_NOISE.test(text)) fontNoise++; else if (start.startsWith('file:') && FILE_CORS_BLOCK.test(text)) corsBlocked++; else errors.push(`${kind}: ${text.slice(0, 140)}`); };
     page.on('load', () => { loadsSeen++; });
     page.on('pageerror', (e) => handle('pageerror', e.message));
-    page.on('console', (m) => { if (['error', 'warning'].includes(m.type())) handle(m.type(), m.text()); });
+    page.on('console', (m) => { if (['error', 'warning'].includes(m.type())) handle(m.type(), m.text(), m.location()); });
     page.on('requestfailed', (r) => { if (!(start.startsWith('file:') && /fonts\//.test(r.url())) && !/ERR_ABORTED/.test(r.failure()?.errorText || '')) failed.push(`${r.url().split('/').slice(-2).join('/')} ${r.failure()?.errorText}`); });
     page.on('response', (r) => { if (r.status() >= 400) failed.push(`${r.status()} ${r.url()}`); });
     page.on('request', (r) => { if (prefixCheck && !r.url().startsWith(prefixCheck) && r.url() !== prefixCheck.replace(/\/$/, '') && !r.url().startsWith('data:')) failed.push(`request outside the site folder: ${r.url()}`); });
@@ -118,7 +120,7 @@ async function walkSiteInner({ browser, dir, label, start, prefixCheck, video = 
     errors.forEach((m) => bad(`${tag('')} ${m}`));
     await ctx.close();
   }
-  return { problems, fontNoise, fontsFailed, corsBlocked, preloadMedia, preloadPerLoad: loadsSeen ? Math.ceil(preloadMedia / loadsSeen) : 0, perLoad: loadsSeen ? Math.ceil(fontNoise / loadsSeen) : 0 };
+  return { problems, glNotices, glRenderer: glEvidence.renderer, fontNoise, fontsFailed, corsBlocked, preloadMedia, preloadPerLoad: loadsSeen ? Math.ceil(preloadMedia / loadsSeen) : 0, perLoad: loadsSeen ? Math.ceil(fontNoise / loadsSeen) : 0 };
 }
 
 export async function checkPortability({ root = null, browserName = 'chromium', adapters = true } = {}) {
@@ -129,6 +131,8 @@ export async function checkPortability({ root = null, browserName = 'chromium', 
     const s = checkPortabilityStatic({ root: dir });
     const problems = [...s.problems], notes = [...s.notes];
     const measured = []; let preloadPerLoad = 0;
+    const gl = { n: 0, renderer: null };   // the known software-GL notices (E-SWGL-01) seen across the walks
+    const took = (r) => { gl.n += r.glNotices || 0; gl.renderer ??= r.glRenderer ?? null; return r; };
     const { browser } = await launchBrowser(browserName);
     try {
       // folder: ZIP, extract to a hostile path, open index.html directly
@@ -138,7 +142,7 @@ export async function checkPortability({ root = null, browserName = 'chromium', 
       mkdirSync(hostile, { recursive: true });
       const names = unzipTo(zip, hostile);
       if (names.length !== listFiles(dir).length) problems.push(`the ZIP held ${names.length} files, the folder ${listFiles(dir).length}`);
-      const f = await walkSite({ browser, dir: hostile, label: 'extracted ZIP over file://', start: pathToFileURL(join(hostile, 'index.html')).href, video: 'expect' });
+      const f = took(await walkSite({ browser, dir: hostile, label: 'extracted ZIP over file://', start: pathToFileURL(join(hostile, 'index.html')).href, video: 'expect' }));
       problems.push(...f.problems); preloadPerLoad = Math.max(preloadPerLoad, f.preloadPerLoad || 0);
       if (f.fontNoise) measured.push({ key: 'portability:file://:font-preload-cors', detail: `over file:// Chromium logs up to ${f.perLoad} message(s) per page load about the two font preloads (CORS from origin "null"); the fonts load from the stylesheet and nothing changes on screen`, value: f.perLoad });
       if (f.fontsFailed) measured.push({ key: 'portability:file://:fonts-not-loaded', detail: `over file:// ${browserName} did not load ${f.fontsFailed} web-font declaration(s) across the walk (${f.corsBlocked} refusals "Origin null is not allowed by Access-Control-Allow-Origin"): the text falls back to the metric-matched fallback fonts; over http the same fonts load`, value: f.fontsFailed });
@@ -151,7 +155,7 @@ export async function checkPortability({ root = null, browserName = 'chromium', 
       ];
       for (const [label, opt, startOf, sub] of scenarios) {
         const sv = serveSite(dir, opt);
-        const r = await walkSite({ browser, dir, label, start: startOf(sv.base), prefixCheck: sub ? sv.base : sv.origin + '/', video: opt.ranges === false ? 'either' : 'expect' });
+        const r = took(await walkSite({ browser, dir, label, start: startOf(sv.base), prefixCheck: sub ? sv.base : sv.origin + '/', video: opt.ranges === false ? 'either' : 'expect' }));
         problems.push(...r.problems); preloadPerLoad = Math.max(preloadPerLoad, r.preloadPerLoad || 0); sv.close();
       }
       // the same delivered folder, staged by each hosting adapter and served by that adapter's simulation profile (G6-4): Cloudflare Pages (clean URLs and the .html redirect, the
@@ -165,7 +169,7 @@ export async function checkPortability({ root = null, browserName = 'chromium', 
           renderBundle(adapterId, { siteDir: delivered, outDir: bundle, urlStyle: 'clean' });
           const prof = profileOf(bundle), site = join(bundle, readManifest(bundle).siteRoot);
           const sv2 = serveSite(site, { profile: prof, plainHttp: true });   // the walk is plain http on a loopback address: the HTTPS-only headers are tested in check:hosting, not here (WebKit would upgrade every request to https)
-          const r = await walkSite({ browser, dir: site, label: `${adapterId} bundle (simulation profile)`, start: sv2.base, prefixCheck: sv2.origin + '/', video: prof.ranges ? 'expect' : 'either', clean: true });
+          const r = took(await walkSite({ browser, dir: site, label: `${adapterId} bundle (simulation profile)`, start: sv2.base, prefixCheck: sv2.origin + '/', video: prof.ranges ? 'expect' : 'either', clean: true }));
           problems.push(...r.problems); preloadPerLoad = Math.max(preloadPerLoad, r.preloadPerLoad || 0); sv2.close();
         }
       }
@@ -187,6 +191,7 @@ export async function checkPortability({ root = null, browserName = 'chromium', 
     } finally { await browser.close(); }
     if (adapters) notes.push('the same delivered folder, staged by the Cloudflare Pages and Vercel adapters and served by each adapter\'s simulation profile (clean URLs and the .html redirect, the generated header rules applied, Range answered as that host documents): every page walked on desktop and phone with real clicks, no failed request, no error (a simulation of documented behaviour, not the live service)');
     notes.push(`serving conventions walked with real clicks on every page, desktop and phone menu, brand and footer links, Back and Forward: extracted ZIP over file:// (path with spaces, &, em dash, #, brackets), domain root, /clients/acme/${project.id}/, the directory URL without a trailing slash (host redirect), extension-less URLs, a server without Range support, query strings and fragments`);
+    if (gl.n) notes.push(`${gl.n} known ${browserName} software-GL notice(s) (${SWGL_ID}: WebGL renders on ${gl.renderer}; the pages make no readback call; counted, not hidden), no other console message beyond the findings above`);
     if (preloadPerLoad) measured.push({ key: 'portability:preload-media-warning', detail: `${browserName} writes ${preloadPerLoad} console warning(s) per load of the Home page, "Preload of .../media/hero-wok*.webp was ignored due to unknown as or type values, or non-matching media attribute": the Home page has one media-qualified hero preload per art direction and only one can match; the one that matches is used`, value: preloadPerLoad });
     const r = reconcile('portability', measured);
     return { problems: [...problems, ...r.problems], notes: [...notes, ...r.notes] };
