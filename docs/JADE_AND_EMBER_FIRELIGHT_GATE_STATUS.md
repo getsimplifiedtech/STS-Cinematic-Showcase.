@@ -133,9 +133,9 @@ Authorized: a narrowly scoped reconciliation of the eight baseline-bound checks.
 - Self-test expectations that named the old design were updated, with the same protections: the Pause label mutant now edits `breath.js`, the blocking-time mutant replaces the 41-byte inline script instead of adding a second one, and the blocked-video scenario no longer waits for a class Firelight does not add.
 
 **Result.** Run on this tree: 38 of 45 pass (delivery, selftest and, with the exact repository identity, ci now pass). Seven fail:
-- security and portability: only Chromium's software-GL "GPU stall" console notice. Environmental; not waived.
+- security and portability: Chromium's software-GL "GPU stall due to ReadPixels" console notice (environmental; not waived). Security also shows the same server-port difference in computed image URLs as regression (3 style comparisons), which framework edit 3 removes.
 - regression: source, text, structure, pixels and behaviour show 0 differences. The styles layer shows 7 differences, all on Home, all the test server's port number inside computed `background-image` URLs (baseline and candidate are served on different ports); a scratch copy with the framework edit that removes the origin shows 0. It also fails here because this sandbox runs Node 22 and the harness needs Node 24.8 or later. (An earlier note in this section and in the status report said all six layers were clean; that was true only of the scratch copy with the framework edit.)
-- assets and budgets: need three framework edits (hashed copy with several stylesheets, per-page budget limits, hash-name-neutral style comparison). Tested in a scratch copy: both pass.
+- assets and budgets: need the framework edits (hashed copy with several stylesheets, per-page budget limits, hash-name-neutral style comparison). Without the first, the hashed copy of the site loses the five per-page stylesheets, so the whole browser comparison fails. Tested in a scratch copy: both pass.
 - selftest-gate2: three generic test cases assume the old hero markup and message names.
 - selftest-je-markup: the stale Firelight expectations are corrected (see the second part below); one case remains, blocked on the same server-port difference in the styles layer.
 
