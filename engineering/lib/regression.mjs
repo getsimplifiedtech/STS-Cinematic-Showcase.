@@ -27,10 +27,17 @@ import { approvedStyleDifference, loadApprovedStyleDifferences } from './approve
 const require = createRequire(import.meta.url);
 
 // Runs inside the page: one entry per element with a hash of every computed property plus its rounded geometry.
-export const stylesSnapshot = () => {
+// opts.normalizeHashedNames (check:assets only): the baseline is compared with a content-hashed copy, whose file names differ by design, so a computed url() ends in the final name with its
+// `.<8 hex>` removed. Every other comparison keeps file names exactly as they are.
+export const stylesSnapshot = (opts) => {
   const hash = (str) => { let h1 = 0xdeadbeef, h2 = 0x41c6ce57; for (let i = 0; i < str.length; i++) { const c = str.charCodeAt(i); h1 = Math.imul(h1 ^ c, 2654435761); h2 = Math.imul(h2 ^ c, 1597334677); } h1 = Math.imul(h1 ^ (h1 >>> 16), 2246822507) ^ Math.imul(h2 ^ (h2 >>> 13), 3266489909); h2 = Math.imul(h2 ^ (h2 >>> 16), 2246822507) ^ Math.imul(h1 ^ (h1 >>> 13), 3266489909); return (4294967296 * (2097151 & h2) + (h1 >>> 0)).toString(36); };
   // Sorted by name: the order in which the browser lists custom properties varies from page to page.
-  const props = (cs) => { const a = []; for (let i = 0; i < cs.length; i++) a.push(`${cs[i]}:${cs.getPropertyValue(cs[i])};`); return a.sort().join(''); };
+  // A computed url() (a CSS background-image, or a custom property holding one) carries the address of the server that served the page, and the baseline and the candidate are served by two
+  // servers on two ports. Only that one thing is removed: a url() that starts with this page's own origin loses the origin and keeps its path, query and fragment. Another origin, a
+  // different path or a different file is left alone, so it still differs. (The same rule is in stylesDetail, which runs in the page too and cannot share code with this function.)
+  const origin = location.origin, stripHash = !!(opts && opts.normalizeHashedNames);
+  const norm = (v) => (v.indexOf('url(') < 0 ? v : v.replace(/url\(\s*(["']?)([^"')]+)\1\s*\)/g, (m, q, u) => { let t = u; if (origin !== 'null' && t.startsWith(origin + '/')) t = t.slice(origin.length); if (stripHash) t = t.replace(/\.[0-9a-f]{8}(\.[A-Za-z0-9]+)(?=[?#]|$)/, '$1'); return t === u ? m : `url(${q}${t}${q})`; }));
+  const props = (cs) => { const a = []; for (let i = 0; i < cs.length; i++) a.push(`${cs[i]}:${norm(cs.getPropertyValue(cs[i]))};`); return a.sort().join(''); };
   const out = [];
   [document.documentElement, ...document.body.querySelectorAll('*')].forEach((el, i) => {
     const r = el.getBoundingClientRect();
@@ -42,11 +49,15 @@ export const stylesSnapshot = () => {
   });
   return out;
 };
-export const stylesDetail = (wanted) => {
+export const stylesDetail = (arg) => {
+  const wanted = Array.isArray(arg) ? arg : arg.wanted;
+  // the same url() rule as stylesSnapshot
+  const origin = location.origin, stripHash = !Array.isArray(arg) && !!arg.normalizeHashedNames;
+  const norm = (v) => (v.indexOf('url(') < 0 ? v : v.replace(/url\(\s*(["']?)([^"')]+)\1\s*\)/g, (m, q, u) => { let t = u; if (origin !== 'null' && t.startsWith(origin + '/')) t = t.slice(origin.length); if (stripHash) t = t.replace(/\.[0-9a-f]{8}(\.[A-Za-z0-9]+)(?=[?#]|$)/, '$1'); return t === u ? m : `url(${q}${t}${q})`; }));
   const out = {};
   [document.documentElement, ...document.body.querySelectorAll('*')].forEach((el, i) => {
     if (!wanted.includes(i)) return;
-    const cs = getComputedStyle(el), o = {}; for (let k = 0; k < cs.length; k++) o[cs[k]] = cs.getPropertyValue(cs[k]);
+    const cs = getComputedStyle(el), o = {}; for (let k = 0; k < cs.length; k++) o[cs[k]] = norm(cs.getPropertyValue(cs[k]));
     o['[tag]'] = el.tagName.toLowerCase(); o['[inHoursTable]'] = String(!!el.closest('table.hours'));
     const r = el.getBoundingClientRect(); o['[geometry]'] = [r.left + scrollX, r.top + scrollY, r.width, r.height].map((n) => Math.round(n * 100) / 100).join(',');
     out[i] = o;
@@ -70,7 +81,7 @@ export const settle = async (page) => {
 
 // candidateHeaders: fn(pathname, type) -> headers; serves the candidate with them (for example the security headers) while the baseline is served plain.
 // subset (self-tests only): { pages: [files], viewports: [names], scenarios: RegExp, states: false } narrows a run so a mutation can be checked in seconds.
-export async function runRegression({ baselineRoot, candidateRoot, browserName = 'chromium', reportDir, strictEnv = false, log = console.log, only = null, subset = {}, candidateHeaders = null }) {
+export async function runRegression({ baselineRoot, candidateRoot, browserName = 'chromium', reportDir, strictEnv = false, log = console.log, only = null, subset = {}, candidateHeaders = null, normalizeHashedNames = false }) {
   const env = environment();
   const approvedStyles = loadApprovedStyleDifferences();
   const layers = {};
@@ -147,7 +158,7 @@ export async function runRegression({ baselineRoot, candidateRoot, browserName =
         }
         if (want('styles')) {
           const L = layer('styles'); L.checked++;
-          const [sb1, sc1] = await Promise.all([b, c].map((p) => p.evaluate(stylesSnapshot)));
+          const [sb1, sc1] = await Promise.all([b, c].map((p) => p.evaluate(stylesSnapshot, { normalizeHashedNames })));
           if (sb1.length !== sc1.length) L.problems.push(`${name}: ${sb1.length} elements in the baseline, ${sc1.length} in the candidate`);
           else {
             const bad = sb1.map((e, i) => (e[1] !== sc1[i][1] ? i : -1)).filter((i) => i >= 0);
@@ -155,7 +166,7 @@ export async function runRegression({ baselineRoot, candidateRoot, browserName =
               // a few differing elements are inspected one by one so that an APPROVED difference (approved-style-differences.json: engine, element,
               // properties) is accepted and reported; anything else, or any difference in position or size, is a problem
               const look = bad.length <= 60 ? bad : bad.slice(0, 3);
-              const [db, dc] = await Promise.all([b, c].map((p) => p.evaluate(stylesDetail, look)));
+              const [db, dc] = await Promise.all([b, c].map((p) => p.evaluate(stylesDetail, { wanted: look, normalizeHashedNames })));
               const unapproved = [], approved = new Map();
               for (const i of bad) {
                 const id = look.includes(i) && bad.length <= 60 ? approvedStyleDifference(approvedStyles, browserName, db[i], dc[i]) : null;

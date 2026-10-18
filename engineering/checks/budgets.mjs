@@ -17,6 +17,7 @@ import { assembleCandidate, deliveredPagesOf, pagesOf, SHARED } from '../lib/sit
 import { rmSync } from 'node:fs';
 import { dirname } from 'node:path';
 import { record } from '../lib/project-records.mjs';
+import { approvalsText, parseApprovals } from '../lib/approvals.mjs';
 
 const textual = /\.(html|css|js|json|svg|txt|md)$/;
 const sizeOf = (p) => { const b = readFileSync(p); return textual.test(p) ? gzipSync(b, { level: 9 }).length : b.length; };   // text as it would be compressed in transit
@@ -49,6 +50,7 @@ export function measureStatic(root) {
   return {
     pages,
     deliveredBytes: Object.values(sizes).reduce((s, n) => s + n, 0),
+    imageSizes: Object.fromEntries(files.filter((f) => /\.webp$/.test(f)).map((f) => [f, sizes[f]])),
     maxImageBytes: Math.max(...by(/\.webp$/)), maxWebmBytes: Math.max(...by(/\.webm$/)), maxMp4Bytes: Math.max(...by(/\.mp4$/)),
     fontBytes: by(/\.woff2$/).reduce((s, n) => s + n, 0), fontFiles: by(/\.woff2$/).length,
     cssGzip: sizeOf(join(root, stylesheet)), scriptsGzipTotal: SHARED.filter((f) => f.endsWith('.js')).reduce((s, f) => s + sizeOf(join(root, f)), 0),
@@ -99,8 +101,54 @@ export async function measureRuntime(root, browserName, only = null) {
   return out;
 }
 
-export async function checkBudgets({ root = null, browser = true, browserName = 'chromium', update = false, pages = null } = {}) {
-  const b = record('budgets.json');
+// ---- approved exceptions -------------------------------------------------------------------------------------------------------------------------------------------------------
+// budgets.json may carry an optional `exceptions` object, for a project whose owner has approved a page or an image that needs more than the shared limit:
+//   "exceptions": { "pages":  { "<page file>":  { "approval": "<id in the approvals log>", "reason": "<why>", "limits": { "<limit>": <number> } } },
+//                   "images": { "<media file>": { "approval": "<id in the approvals log>", "reason": "<why>", "bytes": <number> } } }
+// A project without it is held to the shared limits exactly as before. An exception is accepted only when it is complete and authorised: a page that is delivered, only the named limits,
+// positive whole numbers, an approval id that exists in the project's approvals log and a reason. Anything else is reported and NO exception is applied while the object is invalid (the
+// shared limits then decide, so a bad entry can only make the check stricter, never looser). An exception changes only the page or the image it names and only the limits it lists.
+export const PAGE_EXCEPTION_STATIC = ['htmlGzip', 'initialGzip', 'fullGzip', 'jsGzip', 'inlineJsBytes', 'scripts'];
+export const PAGE_EXCEPTION_RUNTIME = ['requests', 'transferBytes', 'blockingMs'];
+const isObj = (v) => v !== null && typeof v === 'object' && !Array.isArray(v);
+const isCount = (v) => typeof v === 'number' && Number.isInteger(v) && v > 0;
+export function validateBudgetExceptions(exceptions, { pages, files, approvalIds }) {
+  if (exceptions === undefined) return [];
+  if (!isObj(exceptions)) return ['budgets.json: "exceptions" must be an object with "pages" and/or "images"'];
+  const errors = [];
+  const known = (e, allowed, where) => { for (const k of Object.keys(e)) if (!allowed.includes(k)) errors.push(`${where}: unknown field "${k}"`); };
+  const authorised = (e, where) => {
+    if (typeof e.approval !== 'string' || !e.approval.trim()) errors.push(`${where}: "approval" is required (the id of the owner's decision in the approvals log)`);
+    else if (!approvalIds.includes(e.approval.trim())) errors.push(`${where}: approval "${e.approval}" is not in the approvals log, so the exception is not authorised`);
+    if (typeof e.reason !== 'string' || !e.reason.trim()) errors.push(`${where}: "reason" is required`);
+  };
+  known(exceptions, ['pages', 'images'], 'budgets.json exceptions');
+  for (const [group, entries] of [['pages', exceptions.pages], ['images', exceptions.images]]) {
+    if (entries === undefined) continue;
+    if (!isObj(entries)) { errors.push(`budgets.json exceptions.${group} must be an object keyed by file`); continue; }
+    for (const [file, e] of Object.entries(entries)) {
+      const where = `exception for ${group === 'pages' ? 'page' : 'image'} ${file}`;
+      if (group === 'pages' ? !pages.includes(file) : !files.includes(file)) errors.push(`${where}: ${group === 'pages' ? 'not a delivered page' : 'not a delivered image'}`);
+      if (!isObj(e)) { errors.push(`${where}: must be an object`); continue; }
+      authorised(e, where);
+      if (group === 'pages') {
+        known(e, ['approval', 'reason', 'limits'], where);
+        if (!isObj(e.limits) || !Object.keys(e.limits).length) errors.push(`${where}: "limits" must name at least one limit`);
+        else for (const [k, v] of Object.entries(e.limits)) {
+          if (![...PAGE_EXCEPTION_STATIC, ...PAGE_EXCEPTION_RUNTIME].includes(k)) errors.push(`${where}: "${k}" is not a limit that may have an exception`);
+          else if (!isCount(v)) errors.push(`${where}: ${k} must be a positive whole number (got ${JSON.stringify(v)})`);
+        }
+      } else {
+        known(e, ['approval', 'reason', 'bytes'], where);
+        if (!isCount(e.bytes)) errors.push(`${where}: "bytes" must be a positive whole number (got ${JSON.stringify(e.bytes)})`);
+      }
+    }
+  }
+  return errors;
+}
+
+export async function checkBudgets({ root = null, browser = true, browserName = 'chromium', update = false, pages = null, budgets = null, approvalIds = null } = {}) {   // budgets and approvalIds: self-tests only
+  const b = budgets || record('budgets.json');
   const problems = [], notes = [];
   const own = !root;
   const dir = root || assembleCandidate(undefined, 'budgets');
@@ -110,18 +158,37 @@ export async function checkBudgets({ root = null, browser = true, browserName = 
     const lim = b.limits, reg = 1 + b.regressionTolerancePercent / 100;
     const over = (what, value, limit) => { if (value > limit) problems.push(`${what}: ${value} exceeds the budget of ${limit}`); };
     const drift = (what, value, was) => { if (was !== undefined && value > was * reg) problems.push(`${what}: ${value} is more than ${b.regressionTolerancePercent}% above the ${baselineLabel} measurement of ${was}`); };
+    // approved exceptions: validated first; while they are invalid none applies
+    let E = {};
+    if (b.exceptions !== undefined) {
+      let ids = approvalIds;
+      if (!ids) { try { ids = parseApprovals(approvalsText()).map((r) => r.id); } catch (e) { ids = []; problems.push(`budgets.json exceptions cannot be authorised: the approvals log could not be read (${e.message.split('\n')[0]})`); } }
+      const bad = validateBudgetExceptions(b.exceptions, { pages: Object.keys(s.pages), files: Object.keys(s.imageSizes), approvalIds: ids });
+      bad.forEach((e) => problems.push(e));
+      if (!bad.length) {
+        E = b.exceptions;
+        const parts = [...Object.entries(E.pages ?? {}).map(([f, e]) => `${f} (${e.approval}): ${Object.entries(e.limits).map(([k, v]) => `${k} ${v}`).join(', ')}`), ...Object.entries(E.images ?? {}).map(([f, e]) => `${f} (${e.approval}): ${e.bytes} B`)];
+        notes.push(`approved exceptions in force: ${parts.join('; ')}`);
+      }
+    }
+    const pageLim = (file) => ({ ...lim.page, ...(E.pages?.[file]?.limits ?? {}) });
+    const runLim = (file) => ({ requests: lim.requests, transferBytes: lim.transferBytes, blockingMs: lim.webVitals.blockingMs, ...Object.fromEntries(Object.entries(E.pages?.[file]?.limits ?? {}).filter(([k]) => PAGE_EXCEPTION_RUNTIME.includes(k))) });
     for (const [file, p] of Object.entries(s.pages)) {
-      over(`${file} HTML (gzip)`, p.htmlGzip, lim.page.htmlGzip);
-      over(`${file} initial transfer (gzip)`, p.initialGzip, lim.page.initialGzip);
-      over(`${file} full page weight, no video (gzip)`, p.fullGzip, lim.page.fullGzip);
-      over(`${file} scripts (gzip)`, p.jsGzip, lim.page.jsGzip);
-      over(`${file} inline script bytes`, p.inlineJsBytes, lim.page.inlineJsBytes);
-      over(`${file} scripts requested`, p.scripts, lim.page.scripts);
+      const L = pageLim(file);
+      over(`${file} HTML (gzip)`, p.htmlGzip, L.htmlGzip);
+      over(`${file} initial transfer (gzip)`, p.initialGzip, L.initialGzip);
+      over(`${file} full page weight, no video (gzip)`, p.fullGzip, L.fullGzip);
+      over(`${file} scripts (gzip)`, p.jsGzip, L.jsGzip);
+      over(`${file} inline script bytes`, p.inlineJsBytes, L.inlineJsBytes);
+      over(`${file} scripts requested`, p.scripts, L.scripts);
       const was = b.measured?.static?.pages?.[file];
       for (const k of ['htmlGzip', 'initialGzip', 'fullGzip', 'jsGzip']) drift(`${file} ${k}`, p[k], was?.[k]);
     }
     over('stylesheet (gzip)', s.cssGzip, lim.cssGzip);
-    over('largest image', s.maxImageBytes, lim.maxImageBytes);
+    // every image is held to the shared limit unless the owner approved a limit for that one file; the message for the shared limit is unchanged
+    const regularImages = Object.entries(s.imageSizes).filter(([f]) => !E.images?.[f]).map(([, n]) => n);
+    over('largest image', regularImages.length ? Math.max(...regularImages) : 0, lim.maxImageBytes);
+    for (const [f, e] of Object.entries(E.images ?? {})) over(`image ${f} (approved exception ${e.approval})`, s.imageSizes[f], e.bytes);
     over('largest WebM', s.maxWebmBytes, lim.maxWebmBytes);
     over('largest MP4', s.maxMp4Bytes, lim.maxMp4Bytes);
     over('font files', s.fontFiles, lim.fontFiles);
@@ -146,10 +213,11 @@ export async function checkBudgets({ root = null, browser = true, browserName = 
       for (const [file, m] of Object.entries(rt)) {
         over(`${file} LCP (ms, throttled mobile)`, m.lcpMs, v.lcpMs);
         over(`${file} CLS`, m.cls, v.cls);
-        over(`${file} blocking time (ms)`, m.blockingMs, v.blockingMs);
+        const R = runLim(file);
+        over(`${file} blocking time (ms)`, m.blockingMs, R.blockingMs);
         over(`${file} interaction handler time (ms)`, m.interactionMs, v.interactionMs);
-        over(`${file} requests`, m.requests, lim.requests);
-        over(`${file} transfer at 390 px (bytes)`, m.transferBytes, lim.transferBytes);
+        over(`${file} requests`, m.requests, R.requests);
+        over(`${file} transfer at 390 px (bytes)`, m.transferBytes, R.transferBytes);
         const was = b.measured?.runtime?.[file];
         drift(`${file} transfer at 390 px`, m.transferBytes, was?.transferBytes);
         drift(`${file} requests`, m.requests, was?.requests);

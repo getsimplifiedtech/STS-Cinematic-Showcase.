@@ -34,6 +34,9 @@ function rewrite(text, map, base, kind) {
     .replace(/(\s(?:srcset|imagesrcset)=")([^"]+)(")/g, (m, a, v, c) => `${a}${v.split(',').map((part) => { const [u, ...rest] = part.trim().split(/\s+/); return [/^(data:|https?:)/.test(u) ? u : fix(u), ...rest].join(' '); }).join(', ')}${c}`);
 }
 
+// The main stylesheet first, then any other .css file among the shared files, in manifest order.
+export const stylesheetsOf = () => [stylesheet, ...SHARED.filter((f) => f.endsWith('.css') && f !== stylesheet)];
+
 // Returns { map: oldPath -> newPath, files }. Throws if a script names an asset (it could not be rewritten safely).
 export function buildHashed(srcRoot, outRoot) {
   const map = {};
@@ -45,8 +48,12 @@ export function buildHashed(srcRoot, outRoot) {
     if (/['"`][^'"`]*(?:media\/|fonts\/|\.(?:webp|webm|mp4|woff2))['"`]|['"`](?:media|fonts)\//.test(text.replace(/\/\*[\s\S]*?\*\//g, '').replace(/\/\/.*$/gm, ''))) throw new Error(`${js} names an asset file; it cannot be hashed safely`);
     map[js] = hashName(js, Buffer.from(text)); put(map[js], text);
   }
-  const css = rewrite(readFileSync(join(srcRoot, stylesheet), 'utf8'), map, '', 'css');
-  map[stylesheet] = hashName(stylesheet, Buffer.from(css)); put(map[stylesheet], css);
+  // the main stylesheet and every other stylesheet the project delivers (a page's own, listed in delivery.sharedFiles) are rewritten and renamed the same way: url() references first (the
+  // assets are already in the map), then the name from the rewritten bytes. A project with one stylesheet runs the loop once, exactly as before.
+  for (const sheet of stylesheetsOf()) {
+    const css = rewrite(readFileSync(join(srcRoot, sheet), 'utf8'), map, '', 'css');
+    map[sheet] = hashName(sheet, Buffer.from(css)); put(map[sheet], css);
+  }
   for (const page of deliveredPagesOf(srcRoot)) put(page, rewrite(readFileSync(join(srcRoot, page), 'utf8'), map, '', 'html'));
   return { map, files: Object.keys(map).length + deliveredPagesOf(srcRoot).length };
 }

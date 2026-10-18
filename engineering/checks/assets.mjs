@@ -10,7 +10,7 @@
 import { cpSync, existsSync, mkdirSync, readFileSync, rmSync } from 'node:fs';
 import { dirname, join, posix } from 'node:path';
 import { assembleCandidate, loadAllowlist, pagesOf, SHARED } from '../lib/site.mjs';
-import { buildHashed, buildManifest, sha256hex, treeHash } from '../lib/hashed.mjs';
+import { buildHashed, buildManifest, sha256hex, stylesheetsOf, treeHash } from '../lib/hashed.mjs';
 import { runRegression } from '../lib/regression.mjs';
 import { baselineRecord, engDir, exportBaseline, isMain, listFiles, projectDir, readJson, repoRoot, tempDir } from '../lib/git.mjs';
 import { baselineLabel, project, stylesheet } from '../lib/project.mjs';
@@ -81,14 +81,18 @@ export async function checkAssets({ root = null, browser = true, browserName = '
     for (const f of SHARED.filter((x) => x.endsWith('.js'))) if (!readFileSync(join(dir, f)).equals(readFileSync(join(h1, built.map[f])))) problems.push(`${f}: script bytes changed by hashing`);
     problems.push(...refsResolve(h1).map((p) => `hashed build: ${p}`));
     const stale = (text, names) => names.filter((old) => new RegExp(`(?<![\\w.-])${old.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}(?![\\w.])`).test(text));
-    const css = readFileSync(join(h1, built.map[stylesheet]), 'utf8');
     for (const f of pagesOf(h1)) for (const old of stale(readFileSync(join(h1, f), 'utf8'), Object.keys(built.map).filter((k) => !/\.(md|txt)$/.test(k)))) problems.push(`hashed build: ${f} still refers to ${old}`);
-    for (const old of stale(css, Object.keys(built.map).filter((k) => /^(fonts|media)\//.test(k) && !/\.(md|txt)$/.test(k)))) problems.push(`hashed build: the stylesheet still refers to ${old}`);
+    for (const sheet of stylesheetsOf()) {
+      const css = readFileSync(join(h1, built.map[sheet]), 'utf8');
+      for (const old of stale(css, Object.keys(built.map).filter((k) => /^(fonts|media)\//.test(k) && !/\.(md|txt)$/.test(k)))) problems.push(`hashed build: ${sheet} still refers to ${old}`);
+    }
+    // every stylesheet a delivered page links must be one the build hashed: a page that links a stylesheet missing from delivery.sharedFiles would lose it in the hashed copy
+    for (const f of pagesOf(dir)) for (const m of readFileSync(join(dir, f), 'utf8').matchAll(/<link\b[^>]*\brel="stylesheet"[^>]*\bhref="([^"]+)"/g)) if (!/^(https?:|\/\/|data:)/.test(m[1]) && !built.map[posix.normalize(m[1])]) problems.push(`hashed build: ${f} links the stylesheet ${m[1]}, which is not a delivered shared file, so the hashed copy would lose it`);
     for (const f of pagesOf(dir)) if (!existsSync(join(h1, f))) problems.push(`hashed build lost ${f}`);
     notes.push(`hashed copy: ${Object.keys(built.map).length} files renamed name.<8 hex>.ext, all references rewritten and resolving, assets byte-identical, two builds identical`);
     if (browser && project.baseline) {
       const base = exportBaseline('assets-base'); cleanup.push(dirname(base));
-      const sum = await runRegression({ baselineRoot: base, candidateRoot: h1, reportDir: join(engDir, '.reports', 'assets'), only: ['text', 'structure', 'styles', 'pixels', 'behaviour'], subset: { viewports: ['desktop-1440', 'tablet-820', 'mobile-390'], states: false, scenarios: /^hero: desktop|^hero: reduced|file:\/\/|^requests/ }, browserName });
+      const sum = await runRegression({ baselineRoot: base, candidateRoot: h1, reportDir: join(engDir, '.reports', 'assets'), only: ['text', 'structure', 'styles', 'pixels', 'behaviour'], subset: { viewports: ['desktop-1440', 'tablet-820', 'mobile-390'], states: false, scenarios: /^hero: desktop|^hero: reduced|file:\/\/|^requests/ }, browserName, normalizeHashedNames: true });
       let compared = 0;
       for (const [layer, L] of Object.entries(sum.layers)) { compared += L.checked; L.problems.forEach((x) => problems.push(`hashed copy, ${layer}: ${x}`)); }
       notes.push(`hashed copy in the browser equals ${baselineLabel}: ${compared} comparisons (text, accessibility tree, computed styles, screenshots at 1440, 820, 390 px; hero video, reduced motion, requests, and every page opened from the folder over file://), 0 differences`);

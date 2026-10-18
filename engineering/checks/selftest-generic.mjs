@@ -135,6 +135,48 @@ const editRecord = (out, f) => { const p = join(out, SNAPSHOT_RECORD); const r =
 const snapCase = (damage, { against = false } = {}) => withSnapshot((c) => { damage(c); const v = verifyRepo(c.out, verifyOpts); const r = [...v.problems]; if (against && v.record) r.push(...verifyAgainst(v.record, c.src).problems); return r; });
 
 // [name, () => problems[], expected regex | null (must find nothing)]
+// ---- shared set-up of the framework compatibility cases (hashed copy, budget exceptions, style comparison)
+// A child process bound to the project in `dir`; the candidate site is built into a throw-away folder that the case removes.
+const COMPAT_PRE = `
+const fs = await import('node:fs'); const path = await import('node:path');
+const { assembleCandidate } = await L('lib/site.mjs'); const { projectDir, tempDir } = await L('lib/git.mjs');
+const { buildHashed, buildManifest, stylesheetsOf, treeHash } = await L('lib/hashed.mjs'); const { refsResolve, checkAssets } = await L('checks/assets.mjs');
+const p = []; const tmp = [];
+const site = assembleCandidate(projectDir, 'g-compat'); tmp.push(site);
+`;
+// a copy of the fixture whose project also delivers a second stylesheet, extra.css, that index.html links and that names a media file
+const multiCopy = (body) => withCopy((d) => {
+  editManifest(d, (m) => { m.delivery.sharedFiles.push('extra.css'); });
+  writeFileSync(join(d, 'extra.css'), '.extra-bg{background-image:url(media/press-hero.webp)}\n');
+  return inProject(d, COMPAT_PRE + `
+const idx = path.join(site, 'index.html'); fs.writeFileSync(idx, fs.readFileSync(idx, 'utf8').replace('<link rel="stylesheet" href="styles.css">', '<link rel="stylesheet" href="styles.css"><link rel="stylesheet" href="extra.css">'));
+fs.writeFileSync(path.join(projectDir, 'engineering', 'assets.manifest.json'), JSON.stringify(buildManifest(site)));
+` + body);
+});
+const BUDGET_PRE = `
+const fs = await import('node:fs'); const path = await import('node:path');
+const { assembleCandidate } = await L('lib/site.mjs'); const { projectDir, tempDir } = await L('lib/git.mjs'); const { checkBudgets } = await L('checks/budgets.mjs'); const { record } = await L('lib/project-records.mjs');
+const p = []; const tmp = []; const site = assembleCandidate(projectDir, 'g-budget'); tmp.push(site);
+const base = JSON.parse(JSON.stringify(record('budgets.json'))); const ids = ['APR-QF-001', 'APR-QF-002'];
+`;
+// two copies of the fixture site, A and A2 (two servers, two ports), both with a CSS image and a custom property holding a url(); variant() builds a copy of A with its stylesheet edited
+const STYLE_PRE = `
+const fs = await import('node:fs'); const path = await import('node:path');
+const { assembleCandidate } = await L('lib/site.mjs'); const { projectDir, tempDir } = await L('lib/git.mjs'); const { buildHashed } = await L('lib/hashed.mjs'); const { runRegression } = await L('lib/regression.mjs');
+const p = []; const tmp = [];
+const withImage = (dir) => { const f = path.join(dir, 'styles.css'); fs.appendFileSync(f, '\\n:root{--plate:url(media/press-hero.webp)}\\nh1{background-image:url(media/press-hero.webp)}\\n'); return dir; };
+const make = () => { const d = withImage(assembleCandidate(projectDir, 'g-style')); tmp.push(d); return d; };
+const A = make(), A2 = make();
+const variant = (edit) => { const d = make(); const f = path.join(d, 'styles.css'); fs.writeFileSync(f, edit(fs.readFileSync(f, 'utf8'))); return d; };
+const styles = async (baselineRoot, candidateRoot, normalizeHashedNames = false) => {
+  const reportDir = tempDir('g-style-report'); tmp.push(reportDir);
+  const s = await runRegression({ baselineRoot, candidateRoot, reportDir, only: ['styles'], subset: { pages: ['index.html'], viewports: ['desktop-1440'], states: false, scenarios: /^$/ }, normalizeHashedNames, log: () => {} });
+  return s.layers.styles ? s.layers.styles.problems : ['the styles layer did not run'];
+};
+`;
+// the fixture records no approved style differences (it has no baseline); the copy gets an empty list so that the harness can run
+const styleCase = (body) => withCopy((d) => { writeFileSync(join(d, 'engineering', 'approved-style-differences.json'), '{"entries": []}'); return inProject(d, STYLE_PRE + body); });
+
 const cases = [
   ['identity: the fixture is a project of its own (its id, name and every record prefix are its own)', () => {
     const want = { id: 'quillfeather-letterpress', name: 'Quillfeather Letterpress', approvalIdPrefix: 'APR-QF', demonstrationIdPrefix: 'DEMO-QF', recordIdSuffix: 'QF' };
@@ -760,6 +802,132 @@ for (const id of ['cloudflare-pages', 'vercel', 'static']) {
 }
 rmSync(site, { recursive: true, force: true });
 out(p);`), null],
+  // ---- framework compatibility corrections (owner approval, 2026-10-18): the hashed copy of a project with several stylesheets, per-page and per-image budget exceptions that must be approved, and
+  // the style comparison that ignores the test server's own address and nothing else. Each group shows the protections that were there before still catching what they caught.
+  ['hashed copy: a project with ONE stylesheet (the fixture) is built exactly as before: one sheet, every file renamed by its content, every reference resolving, two builds identical', () => inProject(FIXTURE, COMPAT_PRE + `
+const h = tempDir('g-h1'), h2 = tempDir('g-h2'); tmp.push(h, h2);
+const built = buildHashed(site, h); buildHashed(site, h2);
+if (stylesheetsOf().length !== 1 || stylesheetsOf()[0] !== 'styles.css') p.push('the fixture should have exactly the one stylesheet styles.css, got ' + stylesheetsOf().join(','));
+if (treeHash(h) !== treeHash(h2)) p.push('two hashed builds differ');
+for (const [o, n] of Object.entries(built.map)) { if (!fs.existsSync(path.join(h, n))) p.push(o + ' was not written as ' + n); if (!/[.][0-9a-f]{8}[.]/.test(n)) p.push(n + ' does not carry a content hash'); }
+p.push(...refsResolve(h));
+const r = await checkAssets({ root: site, browser: false }); p.push(...r.problems);
+tmp.forEach((x) => fs.rmSync(x, { recursive: true, force: true })); out(p);`), null],
+  ['hashed copy: a project with TWO stylesheets keeps both: each is rewritten and renamed by its content, its url() references follow the renamed media, nothing is left pointing at an old name, two builds are identical', () => multiCopy(`
+const h = tempDir('g-h1'), h2 = tempDir('g-h2'); tmp.push(h, h2);
+const built = buildHashed(site, h); buildHashed(site, h2);
+if (treeHash(h) !== treeHash(h2)) p.push('two hashed builds differ');
+for (const sheet of ['styles.css', 'extra.css']) { const n = built.map[sheet]; if (!n || !fs.existsSync(path.join(h, n))) p.push(sheet + ' was lost in the hashed copy'); else if (!/[.][0-9a-f]{8}[.]css$/.test(n)) p.push(sheet + ' was not renamed by its content: ' + n); }
+const extra = built.map['extra.css'] ? fs.readFileSync(path.join(h, built.map['extra.css']), 'utf8') : '';
+if (extra.includes('media/press-hero.webp') || !extra.includes(built.map['media/press-hero.webp'])) p.push('extra.css still names the plain media file instead of the hashed one: ' + extra.slice(0, 120));
+if (!fs.readFileSync(path.join(h, 'index.html'), 'utf8').includes(built.map['extra.css'])) p.push('index.html does not link the hashed extra.css');
+p.push(...refsResolve(h));
+const r = await checkAssets({ root: site, browser: false }); p.push(...r.problems);
+tmp.forEach((x) => fs.rmSync(x, { recursive: true, force: true })); out(p);`), null],
+  ['hashed copy: a page that links a stylesheet which is not a delivered shared file is reported (the hashed copy would lose it)', () => multiCopy(`
+fs.writeFileSync(path.join(site, 'orphan.css'), 'body{margin:0}');
+const idx2 = path.join(site, 'index.html'); fs.writeFileSync(idx2, fs.readFileSync(idx2, 'utf8').replace('href="extra.css">', 'href="extra.css"><link rel="stylesheet" href="orphan.css">'));
+const r = await checkAssets({ root: site, browser: false }); out(r.problems); tmp.forEach((x) => fs.rmSync(x, { recursive: true, force: true }));`), /orphan\.css, which is not a delivered shared file/],
+  ['hashed copy: a second stylesheet altered after the manifest was recorded, an unexpected media file, and a missing second stylesheet are each still reported', () => multiCopy(`
+const bad = [];
+const alter = path.join(site, 'extra.css'); fs.appendFileSync(alter, '.x{color:red}');
+bad.push(...(await checkAssets({ root: site, browser: false })).problems.map((x) => 'altered: ' + x));
+fs.writeFileSync(alter, '.extra-bg{background-image:url(media/press-hero.webp)}\\n');
+fs.writeFileSync(path.join(site, 'media', 'unexpected.webp'), fs.readFileSync(path.join(site, 'media', 'press-hero.webp')));
+bad.push(...(await checkAssets({ root: site, browser: false })).problems.map((x) => 'unexpected: ' + x));
+fs.rmSync(path.join(site, 'media', 'unexpected.webp')); fs.rmSync(alter);
+try { bad.push(...(await checkAssets({ root: site, browser: false })).problems.map((x) => 'missing: ' + x)); } catch (e) { bad.push('missing: the check stopped on the missing file: ' + e.code); }
+const need = ['altered: ', 'unexpected: ', 'missing: ']; const miss = need.filter((k) => !bad.some((x) => x.startsWith(k)));
+tmp.forEach((x) => fs.rmSync(x, { recursive: true, force: true })); out(miss.map((k) => 'nothing was reported for the ' + k.replace(': ', '') + ' case'));`), null],
+  ['budgets: a project with no exceptions is held to the shared limits exactly as before (the fixture passes; the shared limits still catch an oversized page and image)', () => inProject(FIXTURE, BUDGET_PRE + `
+const none = await checkBudgets({ root: site, browser: false, budgets: base, approvalIds: ids }); p.push(...none.problems);
+const tight = JSON.parse(JSON.stringify(base)); tight.limits.page.htmlGzip = 10; tight.limits.maxImageBytes = 1000;
+const r = await checkBudgets({ root: site, browser: false, budgets: tight, approvalIds: ids });
+for (const f of ['index.html', 'services.html', 'contact.html']) if (!r.problems.some((x) => x.startsWith(f + ' HTML'))) p.push(f + ' was not held to the shared HTML limit');
+if (!r.problems.some((x) => x.startsWith('largest image'))) p.push('the shared image limit did not apply');
+tmp.forEach((x) => fs.rmSync(x, { recursive: true, force: true })); out(p);`), null],
+  ['budgets: an approved page exception changes only the page and the limit it names; the other pages keep the shared limit; a page above its own exception still fails', () => inProject(FIXTURE, BUDGET_PRE + `
+const tight = JSON.parse(JSON.stringify(base)); tight.limits.page.htmlGzip = 10;
+tight.exceptions = { pages: { 'index.html': { approval: 'APR-QF-001', reason: 'a test exception', limits: { htmlGzip: 100000 } } } };
+let r = await checkBudgets({ root: site, browser: false, budgets: tight, approvalIds: ids });
+if (r.problems.some((x) => x.startsWith('index.html HTML'))) p.push('the approved exception did not apply to its own page');
+for (const f of ['services.html', 'contact.html']) if (!r.problems.some((x) => x.startsWith(f + ' HTML'))) p.push('the exception was extended to ' + f);
+if (!r.notes.some((x) => x.startsWith('approved exceptions in force: index.html (APR-QF-001)'))) p.push('the exception in force is not listed in the notes');
+tight.exceptions.pages['index.html'].limits.htmlGzip = 5;
+r = await checkBudgets({ root: site, browser: false, budgets: tight, approvalIds: ids });
+if (!r.problems.some((x) => x.startsWith('index.html HTML (gzip): ') && x.endsWith('exceeds the budget of 5'))) p.push('a page above its own exception was not reported');
+const other = JSON.parse(JSON.stringify(base)); other.limits.page.jsGzip = 1; other.exceptions = { pages: { 'index.html': { approval: 'APR-QF-001', reason: 'only the HTML limit', limits: { htmlGzip: 100000 } } } };
+r = await checkBudgets({ root: site, browser: false, budgets: other, approvalIds: ids });
+if (!r.problems.some((x) => x.startsWith('index.html scripts (gzip)'))) p.push('an exception for one limit loosened another limit of the same page');
+tmp.forEach((x) => fs.rmSync(x, { recursive: true, force: true })); out(p);`), null],
+  ['budgets: an approved image exception covers only the file it names and only up to its own limit; every other image keeps the shared limit', () => inProject(FIXTURE, BUDGET_PRE + `
+const big = Buffer.alloc(90000, 7);
+fs.appendFileSync(path.join(site, 'media', 'press-hero.webp'), big); fs.appendFileSync(path.join(site, 'media', 'type-drawer.webp'), big);
+const lim = JSON.parse(JSON.stringify(base)); lim.limits.maxImageBytes = 80000; lim.limits.deliveredBytes = 100000000;
+let r = await checkBudgets({ root: site, browser: false, budgets: lim, approvalIds: ids });
+if (!r.problems.some((x) => x.startsWith('largest image'))) p.push('without an exception the oversized images were not reported');
+lim.exceptions = { images: { 'media/press-hero.webp': { approval: 'APR-QF-001', reason: 'a test exception', bytes: 120000 } } };
+r = await checkBudgets({ root: site, browser: false, budgets: lim, approvalIds: ids });
+if (!r.problems.some((x) => x.startsWith('largest image'))) p.push('the exception for press-hero.webp was extended to the other image');
+if (r.problems.some((x) => x.includes('press-hero.webp'))) p.push('the excepted image was reported although it is within its own limit');
+lim.exceptions.images['media/press-hero.webp'].bytes = 50000;
+r = await checkBudgets({ root: site, browser: false, budgets: lim, approvalIds: ids });
+if (!r.problems.some((x) => x.startsWith('image media/press-hero.webp (approved exception APR-QF-001): ') && x.endsWith('exceeds the budget of 50000'))) p.push('an image above its own exception was not reported');
+tmp.forEach((x) => fs.rmSync(x, { recursive: true, force: true })); out(p);`), null],
+  ['budgets: a missing, malformed or unauthorised exception is rejected: no approval, an approval that is not in the log, no reason, an unknown page, an unknown or non-numeric or non-positive limit, an unknown field, a missing image, no bytes', () => inProject(FIXTURE, `
+const { validateBudgetExceptions } = await L('checks/budgets.mjs');
+const ctx = { pages: ['index.html', 'services.html'], files: ['media/a.webp'], approvalIds: ['APR-QF-001'] };
+const ok = (limits) => ({ pages: { 'index.html': { approval: 'APR-QF-001', reason: 'why', limits } } });
+const p = [];
+const must = (what, ex, re) => { const e = validateBudgetExceptions(ex, ctx); if (!e.length) p.push(what + ': accepted'); else if (!re.test(e.join(' | '))) p.push(what + ': reported ' + e[0].slice(0, 100)); };
+if (validateBudgetExceptions(undefined, ctx).length) p.push('no exceptions must be accepted');
+if (validateBudgetExceptions(ok({ htmlGzip: 4400, requests: 14, blockingMs: 9000 }), ctx).length) p.push('a complete, authorised exception was refused');
+if (validateBudgetExceptions({ images: { 'media/a.webp': { approval: 'APR-QF-001', reason: 'why', bytes: 142000 } } }, ctx).length) p.push('a complete, authorised image exception was refused');
+must('exceptions is not an object', [], /must be an object/); must('exceptions is a string', 'x', /must be an object/);
+must('no approval', { pages: { 'index.html': { reason: 'why', limits: { htmlGzip: 1 } } } }, /approval.*required/);
+must('an approval that is not in the log', { pages: { 'index.html': { approval: 'APR-QF-999', reason: 'why', limits: { htmlGzip: 1 } } } }, /not in the approvals log/);
+must('no reason', { pages: { 'index.html': { approval: 'APR-QF-001', limits: { htmlGzip: 1 } } } }, /reason.*required/);
+must('a page that is not delivered', { pages: { 'other.html': { approval: 'APR-QF-001', reason: 'why', limits: { htmlGzip: 1 } } } }, /not a delivered page/);
+must('a limit that may not have an exception', ok({ cssGzip: 1 }), /not a limit that may have an exception/);
+must('a limit that is not a number', ok({ htmlGzip: '4400' }), /positive whole number/);
+must('a limit that is zero', ok({ htmlGzip: 0 }), /positive whole number/);
+must('a negative limit', ok({ htmlGzip: -5 }), /positive whole number/);
+must('a fractional limit', ok({ htmlGzip: 1.5 }), /positive whole number/);
+must('no limits', ok({}), /at least one limit/);
+must('an unknown field on a page entry', { pages: { 'index.html': { approval: 'APR-QF-001', reason: 'why', limits: { htmlGzip: 1 }, extra: 1 } } }, /unknown field/);
+must('an unknown group', { page: {} }, /unknown field/);
+must('an image that is not delivered', { images: { 'media/missing.webp': { approval: 'APR-QF-001', reason: 'why', bytes: 1 } } }, /not a delivered image/);
+must('an image without bytes', { images: { 'media/a.webp': { approval: 'APR-QF-001', reason: 'why' } } }, /bytes.*positive whole number/);
+out(p);`), null],
+  ['budgets: while the exceptions are invalid NONE applies: the shared limits decide and the invalid entry is reported (a bad entry can only make the check stricter)', () => inProject(FIXTURE, BUDGET_PRE + `
+const lim = JSON.parse(JSON.stringify(base)); lim.limits.page.htmlGzip = 10;
+lim.exceptions = { pages: { 'index.html': { approval: 'APR-QF-999', reason: 'not in the log', limits: { htmlGzip: 100000 } } } };
+const r = await checkBudgets({ root: site, browser: false, budgets: lim, approvalIds: ids });
+if (!r.problems.some((x) => /not in the approvals log/.test(x))) p.push('the unauthorised exception was not reported');
+if (!r.problems.some((x) => x.startsWith('index.html HTML'))) p.push('an unauthorised exception was applied');
+tmp.forEach((x) => fs.rmSync(x, { recursive: true, force: true })); out(p);`), null],
+  ['regression: the test server\'s own address inside a computed url() no longer makes a style difference, a changed path, another origin, a different file, a changed custom property and a changed colour still do', () => styleCase(`
+const none = await styles(A, A2);
+if (none.length) p.push('the same site on two servers differs only by address and was reported: ' + none[0].slice(0, 160));
+const path2 = await styles(A, variant((t) => t.replace('background-image:url(media/press-hero.webp)', 'background-image:url(media/type-drawer.webp)')));
+if (!path2.length) p.push('a computed background-image that names another file was not reported');
+const other = await styles(A, variant((t) => t.replace('background-image:url(media/press-hero.webp)', 'background-image:url(http://example.com/media/press-hero.webp)')));
+if (!other.length) p.push('a computed background-image on another origin was not reported');
+const prop = await styles(A, variant((t) => t.replace('--plate:url(media/press-hero.webp)', '--plate:url(media/type-drawer.webp)')));
+if (!prop.length) p.push('a custom property naming another file was not reported');
+const colour = await styles(A, variant((t) => t + 'body{color:#123456}'));
+if (!colour.length) p.push('a changed colour was not reported');
+tmp.forEach((x) => fs.rmSync(x, { recursive: true, force: true })); out(p);`), null],
+  ['regression: the content hash in a hashed copy\'s file names is ignored only when check:assets asks for it, and only in the final name of a computed url(); a changed file is still reported', () => styleCase(`
+const H = tempDir('g-hashed'); tmp.push(H); buildHashed(A, H);
+const strict = await styles(A, H);
+if (!strict.length) p.push('without the option the hashed names should differ (the comparison must stay strict by default)');
+const lenient = await styles(A, H, true);
+if (lenient.length) p.push('with the option the hashed copy still differs only by its hashed names: ' + lenient[0].slice(0, 160));
+const swapped = tempDir('g-hashed2'); tmp.push(swapped); buildHashed(variant((t) => t.replace('background-image:url(media/press-hero.webp)', 'background-image:url(media/type-drawer.webp)')), swapped);
+const changed = await styles(A, swapped, true);
+if (!changed.length) p.push('a hashed copy that names another file was not reported even with the option');
+tmp.forEach((x) => fs.rmSync(x, { recursive: true, force: true })); out(p);`), null],
 ];
 
 export const CASES = cases.length;

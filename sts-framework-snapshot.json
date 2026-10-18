@@ -2,8 +2,8 @@
  "schema": "sts/framework-snapshot@1",
  "framework": {
   "repository": "getsimplifiedtech/sts-web-design-framework",
-  "commit": "23fafcd0365ef01aa2460cbb6a31beef8519f802",
-  "tree": "c7fc653907236d11840548f9213685f16a2a7a5e"
+  "commit": "579a0dccff45e5efa75fbe41b565cdfd6b91a315",
+  "tree": "e988e39d550f8e4a0c936b46a4a93bd48cda5b8a"
  },
  "profile": {
   "path": "engineering/ci/snapshot-profile.json",
@@ -17,10 +17,10 @@
  "protected": {
   "engineering/lib/authenticity.mjs": "0b57bc9888707192ecd544c45929836895776075c6817758c3fdce09b93a7eef"
  },
- "snapshotTree": "a7ac4a6f4cb6050bcd7fc6b81d62cc3565a5c482",
+ "snapshotTree": "d4fd0b90138efc7c760b9cff062e215bad627e88",
  "totals": {
   "files": 249,
-  "bytes": 2297963,
+  "bytes": 2326000,
   "excluded": 39
  },
  "files": [
@@ -281,9 +281,9 @@
   {
    "path": "engineering/checks/assets.mjs",
    "mode": "100644",
-   "blob": "c4f31d485361f37303ba239310ffc8d5985008fa",
-   "sha256": "b4025c99788bd53f980955cec6bd3811a0fb9b8b641756eb6c08ae3f9643c744",
-   "bytes": 9549
+   "blob": "7e880a9ca1c08c7bdbbb25444681dbb07d4c9ad9",
+   "sha256": "98ba90317c229a391d912c74aa66d4e6fc74c07e45510da3f7057c854500815b",
+   "bytes": 10176
   },
   {
    "path": "engineering/checks/authority.mjs",
@@ -302,9 +302,9 @@
   {
    "path": "engineering/checks/budgets.mjs",
    "mode": "100644",
-   "blob": "a49e0f1e5966ff4773fbb935fb308eb3f5701516",
-   "sha256": "3cf9cb1ccfef44bdea2d90cac526d26d3ae77fbf93ba25570744b5b9239e57b9",
-   "bytes": 14890
+   "blob": "98b3faded06f1b66394b275dbf63a3389ad8a204",
+   "sha256": "7e609de306b3471447b3da518812dfdcc5c699677c8e163bcbe33fd0606c677f",
+   "bytes": 20903
   },
   {
    "path": "engineering/checks/ci.mjs",
@@ -555,9 +555,9 @@
   {
    "path": "engineering/checks/selftest-generic.mjs",
    "mode": "100644",
-   "blob": "c92947228aa91465f34636a1b96e82acb90551b3",
-   "sha256": "1d54c3a54c94044604ae574a6434da885700880bdd67cc241ab9dc3f93a57767",
-   "bytes": 96694,
+   "blob": "e3347c2a5dbe5065e3e83a2654332535a3fa1a2c",
+   "sha256": "4a106dae9a90a9e85863a6ea0cf744ca05db2419c74fc835cb01f70d8e767e7f",
+   "bytes": 115644,
    "class": "devtool"
   },
   {
@@ -1272,9 +1272,9 @@
   {
    "path": "engineering/lib/hashed.mjs",
    "mode": "100644",
-   "blob": "8c04d4735dd2df5717cac714c2a34e8907caf38f",
-   "sha256": "d83bd8f401e3b0aa96569f88275159c04f95c903161e766f0215660a34c1461b",
-   "bytes": 4393
+   "blob": "08934b3298e121b47dac3dc1beb3bdf9e72a08e3",
+   "sha256": "f8eff4d83660c3554ddbc5be4de66e57a0f7605d8543ce5559c6f6148d5e0d5a",
+   "bytes": 4969
   },
   {
    "path": "engineering/lib/hosts.mjs",
@@ -1378,9 +1378,9 @@
   {
    "path": "engineering/lib/regression.mjs",
    "mode": "100644",
-   "blob": "983ebf4529c1527db9a268c52faa29324cbb358a",
-   "sha256": "98b2b51613ab557b4be7931bad8c811dd6c3f947dac738bda6be8402e2c3ffbb",
-   "bytes": 14873
+   "blob": "352696c5fd30189547b4e57a60f2398cfa19337d",
+   "sha256": "79af697823bd72ab04c8fc5226d8a26bbb2ec45cb1f00876ca6a3de1f9f40c05",
+   "bytes": 16744
   },
   {
    "path": "engineering/lib/release-cases.mjs",
