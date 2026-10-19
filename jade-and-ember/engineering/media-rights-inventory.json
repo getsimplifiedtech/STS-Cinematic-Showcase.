@@ -71,6 +71,30 @@
       "url": null,
       "establishes": "Whether rights exist in the generated outputs under the law that applies to the owner, whether the platform terms can and do assign or license what rights exist, and whether showing the demonstration publicly (a portfolio and promotional use) is permitted by the terms above. This repository cannot answer it and does not guess.",
       "status": "not-reviewed"
+    },
+    {
+      "id": "T-FLUX-KONTEXT",
+      "party": "Black Forest Labs (model authors)",
+      "title": "FLUX.1 Kontext [dev] model card and licence",
+      "url": "https://huggingface.co/black-forest-labs/FLUX.1-Kontext-dev",
+      "establishes": "The licence of the model that drew two of the people in Shot A (the older woman at the counter and the man at the side table) and what it says about use of its outputs, including commercial use, in the version in force on 2026-10-19. Not read; nothing is claimed from memory.",
+      "status": "not-reviewed"
+    },
+    {
+      "id": "T-SAM3",
+      "party": "Meta (model authors)",
+      "title": "SAM 3 model card and licence",
+      "url": "https://huggingface.co/facebook/sam3",
+      "establishes": "The licence of the segmentation model that cut those two people out of their drawings, and whether it places any condition on images made with its masks, in the version in force on 2026-10-19. Not read; nothing is claimed from memory.",
+      "status": "not-reviewed"
+    },
+    {
+      "id": "T-FLUX-SPACE",
+      "party": "Hugging Face Space owners (mcp-tools, prithivMLmods)",
+      "title": "Spaces mcp-tools/FLUX.1-Kontext-Dev and prithivMLmods/SAM3-Demo: README, licence and any usage notice",
+      "url": "https://huggingface.co/spaces/mcp-tools/FLUX.1-Kontext-Dev",
+      "establishes": "Whether the two Spaces add any condition to what they return, and which checkpoint each actually ran. Not read.",
+      "status": "not-reviewed"
     }
   ],
   "assets": [
@@ -667,31 +691,36 @@
     {
       "path": "media/visit-room-a.webp",
       "kind": "image",
-      "description": "1280x859 WebP of the dining room (Shot A), for the Visit page",
-      "bytes": 66828,
-      "sha256": "7495081277014c568dbcc883c08ff5363cadb74c6ef5141e4f5c77146654e3e8",
+      "description": "1280x859 WebP of the dining room with five people (Shot A), for the Visit page",
+      "bytes": 67560,
+      "sha256": "7a0274f015edac4236bb845d3cae54547238e5b681a106ec0d691c58f1e61c96",
       "origin": {
         "type": "ai-generated",
-        "service": "Higgsfield (the owner's account): Nano Banana 2 interior still",
-        "generatedOn": "2026-10-17",
+        "service": "Higgsfield (the owner's account): Nano Banana 2 interior still, with people composited from Higgsfield and from Hugging Face Spaces (free tier)",
+        "generatedOn": "2026-10-19",
         "recordedIn": "media/PROVENANCE.md",
-        "job": "Shot A (Candidate 2), master 5056x3392, job f2236920-1890-4a96-a781-3376e93b3612, Nano Banana 2 at 4K, 3 credits",
-        "postProcessing": "resize to 1280 px wide (Lanczos), WebP q46"
+        "job": "Room: Shot A (Candidate 2), master 5056x3392, job f2236920-1890-4a96-a781-3376e93b3612, 3 credits. People: see postProcessing. Total people passes 18 credits (39 of the 45 ceiling spent).",
+        "postProcessing": "room master generated 2026-10-17; resize the composite to 1280 px wide (Lanczos), WebP q46; people: Five people were added on 2026-10-18 and 2026-10-19, each composited onto the approved master with its own mask and no other pixel changed (checked: 0 pixels differ outside the people masks, the flame box is identical): the couple at the counter (Higgsfield Nano Banana 2, guided pass on a crop of the master, job b83df313, 3 credits), the cook (Higgsfield Nano Banana 2, Shot A candidate 1, job 6fbf40f4, 3 credits), the older woman at the counter's end and the man at the side table (Hugging Face Spaces mcp-tools/FLUX.1-Kontext-Dev with prithivMLmods/SAM3-Demo, free tier, seed 23 for both, 0 credits). Passes not used: 678cbaed, 91fcf39f, 16a35d83, f53b916f (3 credits each)."
       },
       "rights": {
         "status": "unverified",
         "established": [
-          "The platform, model, job id, credits and date are recorded in media/PROVENANCE.md."
+          "The platform, model, job ids, credits and dates are recorded in media/PROVENANCE.md.",
+          "The people were composited only onto the approved master; the numeric check is recorded in media/PROVENANCE.md."
         ],
         "notEstablished": [
           "Any licence or ownership of the output under the service and model terms.",
-          "Whether the connected paid account changes what may be done with the output.",
-          "Which terms govern an output made with a reference image from another generation.",
-          "Whether any attribution or AI-disclosure duty applies."
+          "Whether the connected paid account or the free tier changes what may be done with the output.",
+          "Which terms govern an output made with a reference image from another generation, or with a segmentation mask from another model.",
+          "Whether any attribution or AI-disclosure duty applies, or any duty about the likeness of AI-generated people."
         ]
       },
       "termsToVerify": [
         "T-HIGGS-TOU",
+        "T-HF-TOS",
+        "T-FLUX-KONTEXT",
+        "T-SAM3",
+        "T-FLUX-SPACE",
         "T-LEGAL"
       ],
       "useNow": "Fictional Jade & Ember demonstration only, as adopted in docs/JADE_AND_EMBER_MEDIA_RIGHTS_POLICY.md (APR-JE-023). Public deployment of the demonstration is not approved.",
@@ -700,32 +729,37 @@
     {
       "path": "media/visit-room-a-m.webp",
       "kind": "image",
-      "description": "720x900 WebP phone crop of Shot A, for the Visit page",
-      "bytes": 51302,
-      "sha256": "91f4c046574ea2926f9bd1da61231c40fcc667a87cdedb61c9dcb9d235a9054d",
+      "description": "720x900 WebP phone crop of Shot A with five people, for the Visit page",
+      "bytes": 51066,
+      "sha256": "75ece04ae3a207bbcc8bf53e65c15aed342d4cd278734471f9c4e04b1bbfbffa",
       "origin": {
         "type": "ai-generated",
-        "service": "Higgsfield (the owner's account): Nano Banana 2 interior still",
-        "generatedOn": "2026-10-17",
+        "service": "Higgsfield (the owner's account): Nano Banana 2 interior still, with people composited from Higgsfield and from Hugging Face Spaces (free tier)",
+        "generatedOn": "2026-10-19",
         "recordedIn": "media/PROVENANCE.md",
-        "job": "Shot A (Candidate 2), master 5056x3392, job f2236920-1890-4a96-a781-3376e93b3612",
-        "postProcessing": "4:5 crop of the master (x 1400 to 4114, full height), resize to 720 px wide (Lanczos), WebP q56",
+        "job": "f2236920-1890-4a96-a781-3376e93b3612 (room master); people as for media/visit-room-a.webp",
+        "postProcessing": "room master generated 2026-10-17; 4:5 crop of the composite (x 1580 to 4294, full height), resize to 720 px wide (Lanczos), WebP q55; people: Five people were added on 2026-10-18 and 2026-10-19, each composited onto the approved master with its own mask and no other pixel changed (checked: 0 pixels differ outside the people masks, the flame box is identical): the couple at the counter (Higgsfield Nano Banana 2, guided pass on a crop of the master, job b83df313, 3 credits), the cook (Higgsfield Nano Banana 2, Shot A candidate 1, job 6fbf40f4, 3 credits), the older woman at the counter's end and the man at the side table (Hugging Face Spaces mcp-tools/FLUX.1-Kontext-Dev with prithivMLmods/SAM3-Demo, free tier, seed 23 for both, 0 credits). Passes not used: 678cbaed, 91fcf39f, 16a35d83, f53b916f (3 credits each).",
         "derivedFrom": "media/visit-room-a.webp (the same source image, so the same terms bear on this one)"
       },
       "rights": {
         "status": "unverified",
         "established": [
-          "The platform, model, job id, credits and date are recorded in media/PROVENANCE.md."
+          "The platform, model, job ids, credits and dates are recorded in media/PROVENANCE.md.",
+          "The people were composited only onto the approved master; the numeric check is recorded in media/PROVENANCE.md."
         ],
         "notEstablished": [
           "Any licence or ownership of the output under the service and model terms.",
-          "Whether the connected paid account changes what may be done with the output.",
-          "Which terms govern an output made with a reference image from another generation.",
-          "Whether any attribution or AI-disclosure duty applies."
+          "Whether the connected paid account or the free tier changes what may be done with the output.",
+          "Which terms govern an output made with a reference image from another generation, or with a segmentation mask from another model.",
+          "Whether any attribution or AI-disclosure duty applies, or any duty about the likeness of AI-generated people."
         ]
       },
       "termsToVerify": [
         "T-HIGGS-TOU",
+        "T-HF-TOS",
+        "T-FLUX-KONTEXT",
+        "T-SAM3",
+        "T-FLUX-SPACE",
         "T-LEGAL"
       ],
       "useNow": "Fictional Jade & Ember demonstration only, as adopted in docs/JADE_AND_EMBER_MEDIA_RIGHTS_POLICY.md (APR-JE-023). Public deployment of the demonstration is not approved.",
@@ -800,32 +834,37 @@
     {
       "path": "media/visit-room-a-1920.webp",
       "kind": "image",
-      "description": "1920x1288 WebP of the dining room (Shot A), a larger size of the Visit page opening photograph for wide and 2x screens",
-      "bytes": 140076,
-      "sha256": "c9634ce439d3f853fd7bc35f6ffe83b2b115597e08a1db2a4be7e0e897cd7085",
+      "description": "1920x1288 WebP of the dining room with five people (Shot A), a larger size of the Visit page opening photograph",
+      "bytes": 140928,
+      "sha256": "d4969690fe79b3b76cfeb03b4dd2e635ecda4d988e1a089e76859c1116bd720d",
       "origin": {
         "type": "ai-generated",
-        "service": "Higgsfield (the owner's account): Nano Banana 2 interior still",
-        "generatedOn": "2026-10-17",
+        "service": "Higgsfield (the owner's account): Nano Banana 2 interior still, with people composited from Higgsfield and from Hugging Face Spaces (free tier)",
+        "generatedOn": "2026-10-19",
         "recordedIn": "media/PROVENANCE.md",
-        "job": "f2236920-1890-4a96-a781-3376e93b3612",
-        "postProcessing": "resize the 5056x3392 master to 1920 px wide (Lanczos), WebP q54",
+        "job": "f2236920-1890-4a96-a781-3376e93b3612 (room master); people as for media/visit-room-a.webp",
+        "postProcessing": "room master generated 2026-10-17; resize the composite to 1920 px wide (Lanczos), WebP q55; people: Five people were added on 2026-10-18 and 2026-10-19, each composited onto the approved master with its own mask and no other pixel changed (checked: 0 pixels differ outside the people masks, the flame box is identical): the couple at the counter (Higgsfield Nano Banana 2, guided pass on a crop of the master, job b83df313, 3 credits), the cook (Higgsfield Nano Banana 2, Shot A candidate 1, job 6fbf40f4, 3 credits), the older woman at the counter's end and the man at the side table (Hugging Face Spaces mcp-tools/FLUX.1-Kontext-Dev with prithivMLmods/SAM3-Demo, free tier, seed 23 for both, 0 credits). Passes not used: 678cbaed, 91fcf39f, 16a35d83, f53b916f (3 credits each).",
         "derivedFrom": "media/visit-room-a.webp (the same master, so the same terms bear on this one)"
       },
       "rights": {
         "status": "unverified",
         "established": [
-          "The platform, model, job id, credits and date are recorded in media/PROVENANCE.md."
+          "The platform, model, job ids, credits and dates are recorded in media/PROVENANCE.md.",
+          "The people were composited only onto the approved master; the numeric check is recorded in media/PROVENANCE.md."
         ],
         "notEstablished": [
           "Any licence or ownership of the output under the service and model terms.",
-          "Whether the connected paid account changes what may be done with the output.",
-          "Which terms govern an output made with a reference image from another generation.",
-          "Whether any attribution or AI-disclosure duty applies."
+          "Whether the connected paid account or the free tier changes what may be done with the output.",
+          "Which terms govern an output made with a reference image from another generation, or with a segmentation mask from another model.",
+          "Whether any attribution or AI-disclosure duty applies, or any duty about the likeness of AI-generated people."
         ]
       },
       "termsToVerify": [
         "T-HIGGS-TOU",
+        "T-HF-TOS",
+        "T-FLUX-KONTEXT",
+        "T-SAM3",
+        "T-FLUX-SPACE",
         "T-LEGAL"
       ],
       "useNow": "Fictional Jade & Ember demonstration only, as adopted in docs/JADE_AND_EMBER_MEDIA_RIGHTS_POLICY.md (APR-JE-023). Public deployment of the demonstration is not approved.",
@@ -834,32 +873,37 @@
     {
       "path": "media/visit-room-a-2560.webp",
       "kind": "image",
-      "description": "2560x1717 WebP of the dining room (Shot A), a larger size of the Visit page opening photograph for wide and 2x screens",
-      "bytes": 196944,
-      "sha256": "1fdc4a39c7d844a2d5128dc7c424d8d1035df27d009abe5669cf6515224e5222",
+      "description": "2560x1717 WebP of the dining room with five people (Shot A), a larger size of the Visit page opening photograph for wide and 2x screens",
+      "bytes": 198142,
+      "sha256": "a431d5930a38b9099a260e59d5b41193b54474b79d0aee4beff6fd49023a0ef6",
       "origin": {
         "type": "ai-generated",
-        "service": "Higgsfield (the owner's account): Nano Banana 2 interior still",
-        "generatedOn": "2026-10-17",
+        "service": "Higgsfield (the owner's account): Nano Banana 2 interior still, with people composited from Higgsfield and from Hugging Face Spaces (free tier)",
+        "generatedOn": "2026-10-19",
         "recordedIn": "media/PROVENANCE.md",
-        "job": "f2236920-1890-4a96-a781-3376e93b3612",
-        "postProcessing": "resize the 5056x3392 master to 2560 px wide (Lanczos), WebP q50",
+        "job": "f2236920-1890-4a96-a781-3376e93b3612 (room master); people as for media/visit-room-a.webp",
+        "postProcessing": "room master generated 2026-10-17; resize the composite to 2560 px wide (Lanczos), WebP q49; people: Five people were added on 2026-10-18 and 2026-10-19, each composited onto the approved master with its own mask and no other pixel changed (checked: 0 pixels differ outside the people masks, the flame box is identical): the couple at the counter (Higgsfield Nano Banana 2, guided pass on a crop of the master, job b83df313, 3 credits), the cook (Higgsfield Nano Banana 2, Shot A candidate 1, job 6fbf40f4, 3 credits), the older woman at the counter's end and the man at the side table (Hugging Face Spaces mcp-tools/FLUX.1-Kontext-Dev with prithivMLmods/SAM3-Demo, free tier, seed 23 for both, 0 credits). Passes not used: 678cbaed, 91fcf39f, 16a35d83, f53b916f (3 credits each).",
         "derivedFrom": "media/visit-room-a.webp (the same master, so the same terms bear on this one)"
       },
       "rights": {
         "status": "unverified",
         "established": [
-          "The platform, model, job id, credits and date are recorded in media/PROVENANCE.md."
+          "The platform, model, job ids, credits and dates are recorded in media/PROVENANCE.md.",
+          "The people were composited only onto the approved master; the numeric check is recorded in media/PROVENANCE.md."
         ],
         "notEstablished": [
           "Any licence or ownership of the output under the service and model terms.",
-          "Whether the connected paid account changes what may be done with the output.",
-          "Which terms govern an output made with a reference image from another generation.",
-          "Whether any attribution or AI-disclosure duty applies."
+          "Whether the connected paid account or the free tier changes what may be done with the output.",
+          "Which terms govern an output made with a reference image from another generation, or with a segmentation mask from another model.",
+          "Whether any attribution or AI-disclosure duty applies, or any duty about the likeness of AI-generated people."
         ]
       },
       "termsToVerify": [
         "T-HIGGS-TOU",
+        "T-HF-TOS",
+        "T-FLUX-KONTEXT",
+        "T-SAM3",
+        "T-FLUX-SPACE",
         "T-LEGAL"
       ],
       "useNow": "Fictional Jade & Ember demonstration only, as adopted in docs/JADE_AND_EMBER_MEDIA_RIGHTS_POLICY.md (APR-JE-023). Public deployment of the demonstration is not approved.",

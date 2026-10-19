@@ -11,9 +11,9 @@ Everything here is AI-generated concept media for a fictional restaurant. None o
 | `hero-wok-v2-m.webp` | Phone poster, 810x1440 | A 9:16 crop of the same still at the focus the phone layout uses, WebP q60. No 9:16 video was generated. |
 | `dish-beef.webp` | Plated dish, 2400x1610 | Plated still, resized from 5056x3392, WebP q74. |
 | `dish-beef-1200.webp` | The same dish at 1200x805, for the Menu | `dish-beef.webp` resized (Lanczos), WebP q74. |
-| `visit-room-a.webp` | Visit page opening photograph, 1280x859 | Higgsfield (owner's account) Nano Banana 2 at 4K, Shot A Candidate 2 (owner-approved master, 5056x3392), job `f2236920-1890-4a96-a781-3376e93b3612`, 3 credits, 2026-10-17. Resized (Lanczos), WebP q46. |
-| `visit-room-a-m.webp` | The phone crop of the same photograph, 720x900 | A 4:5 crop of Shot A (x 1400 to 4114, full height), resized, WebP q56. |
-| `visit-room-a-1920.webp`, `visit-room-a-2560.webp` | Larger sizes of the Visit opening photograph (1920x1288 and 2560x1717), chosen with `srcset` by wide and 2x screens | The same Shot A master (5056x3392, job `f2236920-1890-4a96-a781-3376e93b3612`), resized directly from the master (Lanczos), WebP q54 and q50. No new generation. |
+| `visit-room-a.webp` | Visit page opening photograph, 1280x859, with five people | Higgsfield (owner's account) Nano Banana 2 at 4K, Shot A Candidate 2 (owner-approved master, 5056x3392), job `f2236920-1890-4a96-a781-3376e93b3612`, 3 credits, 2026-10-17, with five AI-generated people composited on 2026-10-18 and 2026-10-19 (see below). Resized (Lanczos), WebP q46. |
+| `visit-room-a-m.webp` | The phone crop of the same photograph, 720x900 | A 4:5 crop of the Shot A composite (x 1580 to 4294, full height), resized, WebP q55. |
+| `visit-room-a-1920.webp`, `visit-room-a-2560.webp` | Larger sizes of the Visit opening photograph (1920x1288 and 2560x1717), chosen with `srcset` by wide and 2x screens | The same Shot A composite (5056x3392), resized directly (Lanczos), WebP q55 and q49. |
 | `visit-counter-b.webp` | The wok counter from a stool, 780x968 | Nano Banana 2 at 4K, Shot B image 1 (owner-approved), job `ecae65c4-09a8-448b-9abd-e8e1d2ecca76`, 3 credits, Shot A as the image reference. Resized from 3712x4608, WebP q66. |
 | `visit-materials-c.webp` | The jade wall and niche, 1200x805 | Nano Banana 2 at 4K, Shot C image 2 (owner-approved; image 4 of the five in the review gallery), job `2b7e3a9d-8eaf-4a34-92d9-a16b102313b4`, 3 credits, Shot A as the image reference. Resized from 5056x3392, WebP q66. |
 | `story-jade-bowls-860.webp` | The celadon bowls at 860x543, for the Home teaser | `story-jade-bowls.webp` resized (Lanczos), WebP q76. |
@@ -35,3 +35,16 @@ Everything here is AI-generated concept media for a fictional restaurant. None o
 | `dish-dandan.webp` 1200×800 | 9902 (of 8801, 8802, 9901, 9902) | 1472×1104 | 4 | crop, grade, WebP q76 |
 
 Prompts, grade and known defects for these three are unchanged from v0.9 (dishes: studio-style prompts naming the dish and the vessel, plain dark slate, soft warm light from the left, nothing else on the table; one split-tone grade for all).
+
+## Shot A people (2026-10-18 and 2026-10-19)
+
+The Visit opening photograph shows five AI-generated people. Each was made separately, cut out and composited onto the approved Shot A master (job `f2236920`); the room itself was never regenerated. Verified numerically on the final composite: 0 pixels differ from the master outside the people masks, and the wok-flame box is identical. The room is therefore the approved master; the people are new.
+
+| Person | Where | Made with | Credits |
+| --- | --- | --- | --- |
+| Cook (young man, black jacket, denim apron, tossing the wok) | Open kitchen | Higgsfield Nano Banana 2, Shot A candidate 1, job `6fbf40f4`, cut out and composited | 3 |
+| Couple (woman in rust cardigan, man in indigo jacket) | Counter stools at the left | Higgsfield Nano Banana 2, guided pass on a crop of the master with flat placeholder figures at true scale, job `b83df313` | 3 |
+| Older woman (silver hair, glasses, olive cardigan, cream scarf, teacup) | Stool at the counter's right end | Hugging Face Space `mcp-tools/FLUX.1-Kontext-Dev` (seed 23) on a crop of the master with a placeholder figure, cut out with Space `prithivMLmods/SAM3-Demo` | 0 (free tier, connected account) |
+| Man in his early 50s (salt-and-pepper hair, reading glasses, brown corduroy overshirt, beer) | Far-left side table | The same two Spaces, same method, seed 23 | 0 |
+
+Passes made and not used (3 credits each): `678cbaed`, `91fcf39f`, `16a35d83`, `f53b916f`. Credits spent on Shot A people: 18 (39 of the 45 ceiling spent in all). Not stored: the intermediate crops, placeholder drawings, raw candidates and masks (kept in the Higgsfield sandbox and the working folder, not in the repository).

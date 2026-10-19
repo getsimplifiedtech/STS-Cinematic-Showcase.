@@ -10,8 +10,8 @@ import { ctaBand } from '../components/cta-band.mjs';
 // All three are AI-generated concept images of the same fictional room, and the captions say so.
 const ART = {
   room: { src: 'media/visit-room-a.webp', width: 1280, height: 859, srcset: [['media/visit-room-a.webp', 1280], ['media/visit-room-a-1920.webp', 1920], ['media/visit-room-a-2560.webp', 2560]], mobile: { src: 'media/visit-room-a-m.webp', width: 720, height: 900 },
-    alt: 'The dining room from the door: charcoal concrete walls under a dark wood-slat ceiling, a jade-tile alcove of celadon bowls on the left, tables along both walls, and a walnut counter with stools before an open kitchen and a flaming wok.',
-    caption: 'The room, from the door to the fire. Concept image, AI-generated.' },
+    alt: 'The dining room from the door: concrete walls, a wood-slat ceiling and a jade-tile alcove of bowls. A man in a brown overshirt has a beer at a side table; a couple talk at the walnut counter, an older woman is at its end, a cook tosses a flaming wok.',
+    caption: 'The room, from the door to the fire. Concept image; the room and the people are AI-generated.' },
   counter: { src: 'media/visit-counter-b.webp', width: 780, height: 968,
     alt: 'Looking along the curved walnut counter from a stool: three celadon bowls and chopsticks set out, leather-seated stools in a row, and the wok flaring orange in the open kitchen beyond.',
     caption: 'The wok counter. Concept image, AI-generated.',
