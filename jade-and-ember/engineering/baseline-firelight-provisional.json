@@ -1,19 +1,19 @@
 {
-  "$comment": "PROVISIONAL reference for the Firelight redesign (owner authorization 2026-10-17, Contrast Acceptance and Framework Reconciliation). Not a frozen baseline: see baselines/jade-and-ember-firelight-provisional-1/BASELINE.md. The frozen v0.8 record (baseline.json, baselines/jade-and-ember-v0.8) is unchanged. Moving this reference to a later commit is a reviewed change; freezing Firelight is a separate owner decision.",
-  "version": "provisional-1",
-  "branch": "reference/jade-and-ember-firelight-provisional-1",
-  "commit": "e264589215c8a251644aaee432a95ec42a0d83c4",
-  "repositoryTree": "27eba22d7d3e0c99001c4071913941debbf21f1c",
-  "projectTree": "1699f2d50b5cf67a3baa5d7a06b3dbfc60272a0b",
+  "$comment": "PROVISIONAL reference for the Firelight redesign, moved to the approved Firelight commit 1f66df2 (owner decisions of 2026-10-19: Photography Acceptance and Final Reference Reconciliation). Not a frozen baseline: see baselines/jade-and-ember-firelight-provisional-2/BASELINE.md. The earlier provisional-1 record (baselines/jade-and-ember-firelight-provisional-1, branch reference/jade-and-ember-firelight-provisional-1 at e264589) is kept as history and is unchanged. The frozen v0.8 record (baseline.json, baselines/jade-and-ember-v0.8) is unchanged. Moving this reference to a later commit is a reviewed change; freezing Firelight is a separate owner decision.",
+  "version": "provisional-2",
+  "branch": "reference/jade-and-ember-firelight-provisional-2",
+  "commit": "1f66df2ebffa824322e65e8894b18d9cf322bd64",
+  "repositoryTree": "161d58b26f6eef8d1f5f9c981ea2ddd22f85cd76",
+  "projectTree": "bcb76c6e1b04eec32be93291d947db1f462584a1",
   "projectPath": "jade-and-ember",
-  "recordsDir": "baselines/jade-and-ember-firelight-provisional-1",
+  "recordsDir": "baselines/jade-and-ember-firelight-provisional-2",
   "sourceTreeChecksums": {
     "file": "SHA256SUMS.source-tree.txt",
-    "files": 352
+    "files": 354
   },
   "previewPackage": {
-    "file": "jade-and-ember-provisional-1-preview.zip",
-    "sha256": "9f5e96d7cc16b9face2f83eee155a6aab772baf3672b5b38bbabd3d4396e408f",
-    "bytes": 2527708
+    "file": "jade-and-ember-provisional-2-preview.zip",
+    "sha256": "4fbd821d66604f7006a97051cd3c084a78a5e861a022454a3ee355ddd69af7a5",
+    "bytes": 2534088
   }
 }
