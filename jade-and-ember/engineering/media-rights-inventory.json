@@ -95,6 +95,14 @@
       "url": "https://huggingface.co/spaces/mcp-tools/FLUX.1-Kontext-Dev",
       "establishes": "Whether the two Spaces add any condition to what they return, and which checkpoint each actually ran. Not read.",
       "status": "not-reviewed"
+    },
+    {
+      "id": "T-GEMINI-API",
+      "party": "Google",
+      "title": "Gemini API Additional Terms of Service and the Generative AI Prohibited Use Policy, in force on 2026-10-19",
+      "url": "https://ai.google.dev/gemini-api/terms",
+      "establishes": "Ownership of, and the right to use commercially or to hand to a client, images returned by the Gemini API model gemini-3.1-flash-image (Nano Banana 2) on the connected account and billing tier, which are not known. Not read; nothing is claimed from memory.",
+      "status": "not-reviewed"
     }
   ],
   "assets": [
@@ -768,21 +776,22 @@
     {
       "path": "media/visit-counter-b.webp",
       "kind": "image",
-      "description": "780x968 WebP of the wok counter (Shot B, image 1), for the Visit page",
-      "bytes": 50834,
-      "sha256": "20f633445a784f1ab9e73464e88b954867ea1985010ff21952235bf601ddefd8",
+      "description": "780x968 WebP of the wok counter with two people (Shot B), for the Visit page",
+      "bytes": 52970,
+      "sha256": "1628d548b47025abeb9aaf47f873fc48935392e6ddd5bcf816610a7d020be2e0",
       "origin": {
         "type": "ai-generated",
-        "service": "Higgsfield (the owner's account): Nano Banana 2 interior still",
-        "generatedOn": "2026-10-17",
+        "service": "Higgsfield (the owner's account): Nano Banana 2 interior still, with two people rendered by the Google Gemini API (gemini-3.1-flash-image, Nano Banana 2) and composited",
+        "generatedOn": "2026-10-19",
         "recordedIn": "media/PROVENANCE.md",
-        "job": "Shot B image 1, job ecae65c4-09a8-448b-9abd-e8e1d2ecca76, Nano Banana 2 at 4K, 3 credits, Shot A (Candidate 2) as the image reference",
-        "postProcessing": "resize 3712x4608 to 780 px wide (Lanczos), WebP q66"
+        "job": "Room: Shot B image 1, job ecae65c4-09a8-448b-9abd-e8e1d2ecca76, Nano Banana 2 at 4K, 3 credits, Shot A (Candidate 2) as the image reference. People: two Gemini API calls (gemini-3.1-flash-image, 4K, 4:5, about 2,520 image output tokens each; the first render was rejected, the second kept). 0 Higgsfield credits; the Gemini cost is unverified.",
+        "postProcessing": "room master generated 2026-10-17; resize 3712x4608 to 780 px wide (Lanczos), WebP q66; people: two people (a woman at the far end of the counter with a glass of red wine, and the Shot A cook plating at the pass, rendered with a crop of the Shot A final as the reference image) were rendered on a 1000x1250 crop of the master with flat placeholders, cut out by the difference from the master crop, colour-fitted (per-channel linear fit on the background) and composited with a dilated mask; checked: 0 pixels differ outside the dilated people masks in the 1000x1250 crop and in the 780 px frame the changes (2.46 % of the frame) lie wholly inside the paste box, the wok-flame area is identical."
       },
       "rights": {
         "status": "unverified",
         "established": [
-          "The platform, model, job id, credits and date are recorded in media/PROVENANCE.md."
+          "The platform, model, job id, credits and date are recorded in media/PROVENANCE.md.",
+          "The people were composited only onto the approved master; the check is recorded in media/PROVENANCE.md."
         ],
         "notEstablished": [
           "Any licence or ownership of the output under the service and model terms.",
@@ -793,6 +802,7 @@
       },
       "termsToVerify": [
         "T-HIGGS-TOU",
+        "T-GEMINI-API",
         "T-LEGAL"
       ],
       "useNow": "Fictional Jade & Ember demonstration only, as adopted in docs/JADE_AND_EMBER_MEDIA_RIGHTS_POLICY.md (APR-JE-023). Public deployment of the demonstration is not approved.",
